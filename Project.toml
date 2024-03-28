@@ -1,0 +1,7 @@
+name = "SparseConnectivityTracer"
+uuid = "9f842d2f-2579-4b1d-911e-f412cf18a3f5"
+authors = ["Adrian Hill <gh@adrianhill.de>"]
+version = "1.0.0-DEV"
+
+[compat]
+julia = "1.6"
