@@ -16,5 +16,6 @@ scalar_operations = (
     :acot, :acoth,
     :exp, :expm1, :exp10,
     :frexp, :ldexp,
+    :abs, :abs2, :sqrt
 )
 #! format: on

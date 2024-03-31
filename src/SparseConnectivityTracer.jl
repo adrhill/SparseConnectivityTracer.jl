@@ -1,25 +1,40 @@
 module SparseConnectivityTracer
+import Random: rand, AbstractRNG, SamplerType
+
+include("scalar_ops.jl")
 
 # Input connectivity tracer
 struct Tracer <: Number
     inputs::Set{UInt64} # indices of connected, enumerated inputs
 end
 
-Tracer(i::Integer) = Tracer(Set{UInt64}(i))
-Tracer(a::Tracer, b::Tracer) = Tracer(a.inputs ∪ b.inputs)
+Tracer() = Tracer(Set{UInt64}())
+Tracer(a::Tracer, b::Tracer) = Tracer(union(a.inputs, b.inputs))
 
-# Enumerate inputs
-inputtrace(x) = inputtrace(x, 1)
-inputtrace(::Number, i) = Tracer(i)
-function inputtrace(x::AbstractArray, i)
-    indices = (i - 1) .+ reshape(1:length(x), size(x))
-    return Tracer.(indices)
+# Get input indices as sorted Int array
+inputs(t::Tracer) = sort(Int.(keys(t.inputs.dict)))
+
+# Pretty printing
+function Base.show(io::IO, t::Tracer)
+    return Base.show_delim_array(io, inputs(t), "Tracer(", ',', ')', true)
 end
 
-include("ops.jl")
+# Enumerate inputs
+tracer(index::Integer) = Tracer(Set{UInt64}(index)) # lower-case convenience constructor
+
+trace(x) = trace(x, 1)
+trace(::Number, i) = tracer(i)
+function trace(x::AbstractArray, i)
+    indices = (i - 1) .+ reshape(1:length(x), size(x))
+    return tracer.(indices)
+end
+
+istracer(x) = false
+istracer(x::Tracer) = true
+istracer(x::AbstractArray{Tracer}) = true
 
 # Extent core operators
-for fn in (:+, :-, :*, :/, :^)
+for fn in (:+, :-, :*, :/)
     @eval Base.$fn(a::Tracer, b::Tracer) = Tracer(a, b)
     for T in (:Number,)
         @eval Base.$fn(t::Tracer, ::$T) = t
@@ -63,6 +78,7 @@ function connectivity(f, x)
     return C
 end
 
+export Tracer, trace, inputs
 export connectivity
 
 end
