@@ -45,7 +45,6 @@ using NNlib
 
         @test connectivity(identity, rand()) == BitMatrix([1;;])
         @test connectivity(Returns(1), 1) == BitMatrix([0;;])
-
     end
     @testset "Dry-run" begin # dev tests used to find missing operators
         x = rand(4, 4, 2, 1) # WHCN
