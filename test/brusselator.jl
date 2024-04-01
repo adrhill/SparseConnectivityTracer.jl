@@ -17,4 +17,4 @@ function brusselator_2d_loop(du, u, p, t)
         A*u[i,j,1] - u[i,j,1]^2*u[i,j,2]
     end
 end
-#! format: one
+#! format: on
