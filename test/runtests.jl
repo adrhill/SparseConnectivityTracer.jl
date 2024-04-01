@@ -30,21 +30,21 @@ using NNlib
         # Matrix multiplication
         A = rand(1, 3)
         yt = only(A * xt)
-        @test inputs(yt) == [1, 2, 3]
+        @test sortedinputs(yt) == [1, 2, 3]
 
         @test connectivity(x -> only(A * x), x) == BitMatrix([1 1 1])
 
         # Custom functions
         f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])]
         yt = f(xt)
-        @test inputs(yt[1]) == [1]
-        @test inputs(yt[2]) == [1, 2]
-        @test inputs(yt[3]) == [3]
+        @test sortedinputs(yt[1]) == [1]
+        @test sortedinputs(yt[2]) == [1, 2]
+        @test sortedinputs(yt[3]) == [3]
 
-        @test connectivity(f, x) == BitMatrix([1 0 0; 1 1 0; 0 0 1])
+        @test connectivity(f, x) ≈ [1 0 0; 1 1 0; 0 0 1]
 
-        @test connectivity(identity, rand()) == BitMatrix([1;;])
-        @test connectivity(Returns(1), 1) == BitMatrix([0;;])
+        @test connectivity(identity, rand()) ≈ [1;;]
+        @test connectivity(Returns(1), 1) ≈ [0;;]
     end
     @testset "Dry-run" begin # dev tests used to find missing operators
         x = rand(3, 3, 2, 1) # WHCN

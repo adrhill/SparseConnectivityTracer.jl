@@ -51,4 +51,4 @@ for fn in scalar_operations
 end
 
 ## Random numbers
-rand(::AbstractRNG, ::SamplerType{Tracer}) = Tracer()
+rand(::AbstractRNG, ::SamplerType{Tracer}) = tracer()

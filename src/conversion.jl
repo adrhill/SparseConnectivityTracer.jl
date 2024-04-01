@@ -1,16 +1,16 @@
 ## Type conversions
-Base.convert(::Type{Tracer}, x::Number)   = Tracer()
-Base.convert(::Type{Tracer}, t::Tracer)   = t
-Base.convert(::Type{<:Number}, t::Tracer) = t
-
 Base.promote_rule(::Type{Tracer}, ::Type{N}) where {N<:Number} = Tracer
 Base.promote_rule(::Type{N}, ::Type{Tracer}) where {N<:Number} = Tracer
 
+Base.convert(::Type{Tracer}, x::Number)   = tracer()
+Base.convert(::Type{Tracer}, t::Tracer)   = t
+Base.convert(::Type{<:Number}, t::Tracer) = t
+
 ## Array constructors
-Base.zero(::Tracer)       = Tracer()
-Base.zero(::Type{Tracer}) = Tracer()
-Base.one(::Tracer)        = Tracer()
-Base.one(::Type{Tracer})  = Tracer()
+Base.zero(::Tracer)       = tracer()
+Base.zero(::Type{Tracer}) = tracer()
+Base.one(::Tracer)        = tracer()
+Base.one(::Type{Tracer})  = tracer()
 
 Base.similar(a::Array{Tracer,1})                               = zeros(Tracer, size(a, 1))
 Base.similar(a::Array{Tracer,2})                               = zeros(Tracer, size(a, 1), size(a, 2))
