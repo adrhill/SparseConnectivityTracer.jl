@@ -1,18 +1,20 @@
 ## Enumerate inputs
-trace(x) = trace(x, 1)
-trace(::Number, i) = tracer(i)
-function trace(x::AbstractArray, i)
+trace_input(x) = trace_input(x, 1)
+trace_input(::Number, i) = tracer(i)
+function trace_input(x::AbstractArray, i)
     indices = (i - 1) .+ reshape(1:length(x), size(x))
     return tracer.(indices)
 end
 
-istracer(x) = false
-istracer(x::Tracer) = true
-istracer(x::AbstractArray{Tracer}) = true
-
 ## Construct connectivity matrix
+"""
+    connectivity(f, x)
+
+Enumerates inputs `x` and primal outputs `y=f(x)` and returns sparse connectivity matrix `C` of size `(m, n)`
+where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
+"""
 function connectivity(f::Function, x)
-    xt = trace(x)
+    xt = trace_input(x)
     yt = f(xt)
     return _connectivity(xt, yt)
 end

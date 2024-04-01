@@ -1,4 +1,5 @@
 using SparseConnectivityTracer
+using SparseConnectivityTracer: trace_input
 using Test
 using JuliaFormatter
 using Aqua
@@ -27,7 +28,7 @@ using NNlib
 
     @testset "Connectivity" begin
         x = rand(3)
-        xt = trace(x)
+        xt = trace_input(x)
 
         # Matrix multiplication
         A = rand(1, 3)
