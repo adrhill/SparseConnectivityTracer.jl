@@ -47,7 +47,7 @@ using NNlib
         @test connectivity(f, x) ≈ [1 0 0; 1 1 0; 0 0 1]
 
         @test connectivity(identity, rand()) ≈ [1;;]
-        @test connectivity(Returns(1), 1) ≈ [0;;]
+        @test connectivity(x -> 1, 1) ≈ [0;;]
     end
     @testset "Dry-run" begin # dev tests used to find missing operators
         x = rand(3, 3, 2, 1) # WHCN
