@@ -7,7 +7,9 @@ include("conversion.jl")
 include("operators.jl")
 include("connectivity.jl")
 
-export Tracer, tracer, inputs, sortedinputs
+export Tracer, tracer
+export trace_input
+export inputs, sortedinputs
 export connectivity
 
 end # module

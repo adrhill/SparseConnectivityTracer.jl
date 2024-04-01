@@ -1,4 +1,29 @@
 ## Enumerate inputs
+
+"""
+    trace_input(x)
+
+Enumerates input indices and constructs [`Tracer`](@ref)s.
+
+## Example
+```julia-repl
+julia> x = rand(3);
+
+julia> f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])];
+
+julia> xt = trace_input(x)
+3-element Vector{Tracer}:
+ Tracer(1,)
+ Tracer(2,)
+ Tracer(3,)
+
+julia> yt = f(xt)
+3-element Vector{Tracer}:
+   Tracer(1,)
+ Tracer(1, 2)
+   Tracer(3,)
+```
+"""
 trace_input(x) = trace_input(x, 1)
 trace_input(::Number, i) = tracer(i)
 function trace_input(x::AbstractArray, i)
@@ -12,6 +37,19 @@ end
 
 Enumerates inputs `x` and primal outputs `y=f(x)` and returns sparse connectivity matrix `C` of size `(m, n)`
 where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
+
+## Example
+```julia-repl
+julia> x = rand(3);
+
+julia> f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])];
+
+julia> connectivity(f, x)
+3×3 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 4 stored entries:
+ 1  ⋅  ⋅
+ 1  1  ⋅
+ ⋅  ⋅  1
+```
 """
 function connectivity(f::Function, x)
     xt = trace_input(x)

@@ -10,18 +10,20 @@ Documentation for [SparseConnectivityTracer](https://github.com/adrhill/SparseCo
 ```
 
 ## API reference
-SparseConnectivityTracer works by pushing a `Number` type called [`Tracer`](@ref) through generic functions:
-```@docs
-Tracer
-tracer
-```
-
-The resulting connectivity matrix can be extracted using [`connectivity`](@ref): 
+### Interface
 ```@docs
 connectivity
 ```
 
-or manually from individual [`Tracer`](@ref) outputs:
+### Internals
+SparseConnectivityTracer works by pushing a `Number` type called [`Tracer`](@ref) through generic functions:
+```@docs
+Tracer
+tracer
+trace_input
+```
+
+The following utilities can be used to extract input indices from [`Tracer`](@ref)s:
 ```@docs
 inputs
 sortedinputs
