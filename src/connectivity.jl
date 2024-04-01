@@ -57,6 +57,19 @@ function connectivity(f::Function, x)
     return _connectivity(xt, yt)
 end
 
+"""
+    connectivity(f!, y, x)
+
+Enumerates inputs `x` and primal outputs `y` after `f!(y, x)` and returns sparse connectivity matrix `C` of size `(m, n)`
+where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
+"""
+function connectivity(f!::Function, y, x)
+    xt = trace_input(x)
+    yt = similar(y, Tracer)
+    f!(yt, xt)
+    return _connectivity(xt, yt)
+end
+
 _connectivity(xt::Tracer, yt::Number) = _connectivity([xt], [yt])
 _connectivity(xt::Tracer, yt::AbstractArray{Number}) = _connectivity([xt], yt)
 _connectivity(xt::AbstractArray{Tracer}, yt::Number) = _connectivity(xt, [yt])

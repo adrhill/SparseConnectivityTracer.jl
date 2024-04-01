@@ -9,9 +9,10 @@ using JET
 
 using LinearAlgebra
 using Random
+using Symbolics: Symbolics
 using NNlib
 
-@testset "SparseConnectivityTracer.jl" begin
+@testset verbose = true "SparseConnectivityTracer.jl" begin
     @testset "Code formatting" begin
         @test JuliaFormatter.format(
             SparseConnectivityTracer; verbose=false, overwrite=false
@@ -70,14 +71,14 @@ using NNlib
             p = (A, B, alpha, xyd, dx, N)
 
             u = rand(dims...)
-            du = similar(u, Tracer)
-            function f(u)
-                brusselator_2d_loop(du, u, p, nothing)
-                return du
-            end
+            du = similar(u)
+            f!(du, u) = brusselator_2d_loop(du, u, p, nothing)
 
-            C = connectivity(f, u)
+            C = connectivity(f!, du, u)
             @test_reference "references/connectivity/Brusselator.txt" BitMatrix(C)
+
+            C_ref = Symbolics.jacobian_sparsity(f!, du, u)
+            @test C == C_ref
         end
     end
 end
