@@ -1,6 +1,8 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer: trace_input
+
 using Test
+using ReferenceTests
 using JuliaFormatter
 using Aqua
 using JET
@@ -35,7 +37,7 @@ using NNlib
         yt = only(A * xt)
         @test sortedinputs(yt) == [1, 2, 3]
 
-        @test connectivity(x -> only(A * x), x) == BitMatrix([1 1 1])
+        @test connectivity(x -> only(A * x), x) ≈ [1 1 1]
 
         # Custom functions
         f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])]
@@ -49,9 +51,12 @@ using NNlib
         @test connectivity(identity, rand()) ≈ [1;;]
         @test connectivity(Returns(1), 1) ≈ [0;;]
     end
-    @testset "Dry-run" begin # dev tests used to find missing operators
-        x = rand(3, 3, 2, 1) # WHCN
-        w = rand(2, 2, 2, 1) # Conv((2, 2), 2 => 1)
-        connectivity(x -> NNlib.conv(x, w), x)
+    @testset "Real-world tests" begin
+        @testset "NNlib" begin
+            x = rand(3, 3, 2, 1) # WHCN
+            w = rand(2, 2, 2, 1) # Conv((2, 2), 2 => 1)
+            C = connectivity(x -> NNlib.conv(x, w), x)
+            @test_reference "references/connectivity/NNlib/conv.txt" BitMatrix(C)
+        end
     end
 end
