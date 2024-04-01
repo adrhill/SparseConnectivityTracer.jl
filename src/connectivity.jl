@@ -1,4 +1,4 @@
-# Enumerate inputs
+## Enumerate inputs
 trace(x) = trace(x, 1)
 trace(::Number, i) = tracer(i)
 function trace(x::AbstractArray, i)
@@ -10,7 +10,7 @@ istracer(x) = false
 istracer(x::Tracer) = true
 istracer(x::AbstractArray{Tracer}) = true
 
-# Construct connectivity matrix
+## Construct connectivity matrix
 function connectivity(f::Function, x)
     xt = trace(x)
     yt = f(xt)

@@ -47,7 +47,7 @@ using NNlib
         @test connectivity(Returns(1), 1) == BitMatrix([0;;])
     end
     @testset "Dry-run" begin # dev tests used to find missing operators
-        x = rand(4, 4, 2, 1) # WHCN
+        x = rand(3, 3, 2, 1) # WHCN
         w = rand(2, 2, 2, 1) # Conv((2, 2), 2 => 1)
         connectivity(x -> NNlib.conv(x, w), x)
     end
