@@ -16,7 +16,9 @@ using NNlib
     end
     @testset "Aqua.jl tests" begin
         Aqua.test_all(
-            SparseConnectivityTracer; ambiguities=false, deps_compat=(ignore=[:Random],)
+            SparseConnectivityTracer;
+            ambiguities=false,
+            deps_compat=(ignore=[:Random, :SparseArrays],),
         )
     end
     @testset "JET tests" begin

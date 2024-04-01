@@ -1,5 +1,6 @@
 module SparseConnectivityTracer
 import Random: rand, AbstractRNG, SamplerType
+import SparseArrays: sparse
 
 struct Tracer <: Number
     inputs::Set{UInt64} # indices of connected, enumerated inputs
