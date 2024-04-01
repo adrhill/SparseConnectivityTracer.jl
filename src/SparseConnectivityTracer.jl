@@ -1,5 +1,13 @@
 module SparseConnectivityTracer
+import Random: rand, AbstractRNG, SamplerType
+import SparseArrays: sparse
 
-# Write your package code here.
+include("tracer.jl")
+include("conversion.jl")
+include("operators.jl")
+include("connectivity.jl")
 
-end
+export Tracer, tracer, inputs, sortedinputs
+export connectivity
+
+end # module
