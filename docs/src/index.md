@@ -10,7 +10,7 @@ Documentation for [SparseConnectivityTracer](https://github.com/adrhill/SparseCo
 ```
 
 ## API reference
-SparseConnectivityTracer works by pushing a number type called [`Tracer`](@ref) through generic functions:
+SparseConnectivityTracer works by pushing a `Number` type called [`Tracer`](@ref) through generic functions:
 ```@docs
 Tracer
 tracer
@@ -20,6 +20,7 @@ The resulting connectivity matrix can be extracted using [`connectivity`](@ref):
 ```@docs
 connectivity
 ```
+
 or manually from individual [`Tracer`](@ref) outputs:
 ```@docs
 inputs
