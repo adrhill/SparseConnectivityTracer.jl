@@ -58,5 +58,26 @@ using NNlib
             C = connectivity(x -> NNlib.conv(x, w), x)
             @test_reference "references/connectivity/NNlib/conv.txt" BitMatrix(C)
         end
+        @testset "Brusselator" begin
+            include("brusselator.jl")
+            N = 6
+            dims = (N, N, 2)
+            A = 1.0
+            B = 1.0
+            alpha = 1.0
+            xyd = fill(1.0, N)
+            dx = 1.0
+            p = (A, B, alpha, xyd, dx, N)
+
+            u = rand(dims...)
+            du = similar(u, Tracer)
+            function f(u)
+                brusselator_2d_loop(du, u, p, nothing)
+                return du
+            end
+
+            C = connectivity(f, u)
+            @test_reference "references/connectivity/Brusselator.txt" BitMatrix(C)
+        end
     end
 end
