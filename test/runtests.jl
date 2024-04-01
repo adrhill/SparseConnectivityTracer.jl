@@ -13,6 +13,13 @@ using Random
 using Symbolics: Symbolics
 using NNlib
 
+DocMeta.setdocmeta!(
+    SparseConnectivityTracer,
+    :DocTestSetup,
+    :(using SparseConnectivityTracer);
+    recursive=true,
+)
+
 @testset verbose = true "SparseConnectivityTracer.jl" begin
     @testset "Code formatting" begin
         @test JuliaFormatter.format(
