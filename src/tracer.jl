@@ -60,13 +60,13 @@ end
 # When this happens, we create a new empty tracer with no input connectivity.
 Tracer(::Number)  = tracer()
 Tracer(t::Tracer) = t
-# We therefore exclusively use the lower-case `trace` for convenience constructors
+# We therefore exclusively use the lower-case `tracer` for convenience constructors
 
 """
-    trace(index)
-    trace(indices)
+    tracer(index)
+    tracer(indices)
 
-Convenience constructor for [`Trace`](@ref) from input indices.
+Convenience constructor for [`Tracer`](@ref) from input indices.
 """
 tracer() = Tracer(Set{UInt64}())
 tracer(a::Tracer, b::Tracer) = Tracer(union(a.inputs, b.inputs))
