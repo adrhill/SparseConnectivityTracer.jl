@@ -8,7 +8,7 @@ For a higher-level interface, refer to [`connectivity`](@ref).
 
 ## Examples
 By enumerating inputs with tracers, we can keep track of input connectivities:
-```julia-repl
+```jldoctest
 julia> xt = [tracer(1), tracer(2), tracer(3)]
 3-element Vector{Tracer}:
  Tracer(1,)
@@ -20,13 +20,13 @@ julia> f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])];
 julia> yt = f(xt)
 3-element Vector{Tracer}:
    Tracer(1,)
-   Tracer(1, 2)
+ Tracer(1, 2)
    Tracer(3,)
 ```
 
-This works via operator-overloading, which either keep input connectivities constant, 
+This works by overloading operators to either keep input connectivities constant, 
 compute unions or set connectivities to zero:
-```julia-repl
+```jldoctest Tracer
 julia> x = tracer(1, 2, 3)
 Tracer(1, 2, 3)
 
@@ -53,7 +53,7 @@ Tracer(1, 2, 3, 5)
 ```
 
 [`Tracer`](@ref) also supports random number generation and pre-allocations:
-```
+```jldoctest Tracer
 julia> M = rand(Tracer, 3, 2)
 3×2 Matrix{Tracer}:
  Tracer()  Tracer()
@@ -106,7 +106,7 @@ Return raw `UInt64` input indices of a [`Tracer`](@ref).
 See also [`sortedinputs`](@ref).
 
 ## Example
-```julia-repl
+```jldoctest
 julia> t = tracer(1, 2, 4)
 Tracer(1, 2, 4)
 
@@ -127,7 +127,7 @@ Return sorted input indices of a [`Tracer`](@ref).
 See also [`inputs`](@ref).
 
 ## Example
-```julia
+```jldoctest
 julia> t = tracer(1, 2, 4)
 Tracer(1, 2, 4)
 

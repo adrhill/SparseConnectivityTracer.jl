@@ -6,6 +6,7 @@ using ReferenceTests
 using JuliaFormatter
 using Aqua
 using JET
+using Documenter
 
 using LinearAlgebra
 using Random
@@ -80,5 +81,8 @@ using NNlib
             C_ref = Symbolics.jacobian_sparsity(f!, du, u)
             @test C == C_ref
         end
+    end
+    @testset "Doctests" begin
+        Documenter.doctest(SparseConnectivityTracer)
     end
 end
