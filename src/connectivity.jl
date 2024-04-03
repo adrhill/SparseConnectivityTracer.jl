@@ -6,7 +6,7 @@
 Enumerates input indices and constructs [`Tracer`](@ref)s.
 
 ## Example
-```julia-repl
+```jldoctest
 julia> x = rand(3);
 
 julia> f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])];
@@ -39,7 +39,7 @@ Enumerates inputs `x` and primal outputs `y=f(x)` and returns sparse connectivit
 where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
 
 ## Example
-```julia-repl
+```jldoctest
 julia> x = rand(3);
 
 julia> f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])];

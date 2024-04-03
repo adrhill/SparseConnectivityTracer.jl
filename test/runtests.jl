@@ -6,11 +6,19 @@ using ReferenceTests
 using JuliaFormatter
 using Aqua
 using JET
+using Documenter
 
 using LinearAlgebra
 using Random
 using Symbolics: Symbolics
 using NNlib
+
+DocMeta.setdocmeta!(
+    SparseConnectivityTracer,
+    :DocTestSetup,
+    :(using SparseConnectivityTracer);
+    recursive=true,
+)
 
 @testset verbose = true "SparseConnectivityTracer.jl" begin
     @testset "Code formatting" begin
@@ -80,5 +88,8 @@ using NNlib
             C_ref = Symbolics.jacobian_sparsity(f!, du, u)
             @test C == C_ref
         end
+    end
+    @testset "Doctests" begin
+        Documenter.doctest(SparseConnectivityTracer)
     end
 end
