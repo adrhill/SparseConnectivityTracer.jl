@@ -6,15 +6,15 @@ Base.big(::Type{Tracer})   = Tracer
 Base.widen(::Type{Tracer}) = Tracer
 Base.widen(t::Tracer)      = t
 
-Base.convert(::Type{Tracer}, x::Number)   = tracer()
+Base.convert(::Type{Tracer}, x::Number)   = EMPTY_TRACER
 Base.convert(::Type{Tracer}, t::Tracer)   = t
 Base.convert(::Type{<:Number}, t::Tracer) = t
 
 ## Array constructors
-Base.zero(::Tracer)       = tracer()
-Base.zero(::Type{Tracer}) = tracer()
-Base.one(::Tracer)        = tracer()
-Base.one(::Type{Tracer})  = tracer()
+Base.zero(::Tracer)       = EMPTY_TRACER
+Base.zero(::Type{Tracer}) = EMPTY_TRACER
+Base.one(::Tracer)        = EMPTY_TRACER
+Base.one(::Type{Tracer})  = EMPTY_TRACER
 
 Base.similar(a::Array{Tracer,1})                               = zeros(Tracer, size(a, 1))
 Base.similar(a::Array{Tracer,2})                               = zeros(Tracer, size(a, 1), size(a, 2))

@@ -35,13 +35,12 @@ ops_1_to_1 = (
     # exponentials
     :exp, :exp2, :exp10, :expm1, 
     :log, :log2, :log10, :log1p, 
-    :abs, :abs2, 
     # roots
     :sqrt, :cbrt,
     # absolute values
     :abs, :abs2,
     # rounding
-    :floor, :ceil, :trunc,
+    :round, :floor, :ceil, :trunc,
     # other
     :inv, :signbit, :hypot, :sign, :mod2pi
 )
@@ -65,13 +64,13 @@ for fn in ops_1_to_2
 end
 
 for fn in ops_2_to_1
-    @eval Base.$fn(a::Tracer, b::Tracer) = tracer(a, b)
+    @eval Base.$fn(a::Tracer, b::Tracer) = uniontracer(a, b)
     @eval Base.$fn(t::Tracer, ::Number) = t
     @eval Base.$fn(::Number, t::Tracer) = t
 end
 
 # Extra types required for exponent
-Base.:^(a::Tracer, b::Tracer) = tracer(a, b)
+Base.:^(a::Tracer, b::Tracer) = uniontracer(a, b)
 for T in (:Real, :Integer, :Rational)
     @eval Base.:^(t::Tracer, ::$T) = t
     @eval Base.:^(::$T, t::Tracer) = t
@@ -81,11 +80,11 @@ Base.:^(::Irrational{:ℯ}, t::Tracer) = t
 
 ## Precision operators create empty Tracer
 for fn in (:eps, :nextfloat, :floatmin, :floatmax, :maxintfloat, :typemax)
-    @eval Base.$fn(::Tracer) = tracer()
+    @eval Base.$fn(::Tracer) = EMPTY_TRACER
 end
 
 ## Rounding
 Base.round(t::Tracer, ::RoundingMode; kwargs...) = t
 
 ## Random numbers
-rand(::AbstractRNG, ::SamplerType{Tracer}) = tracer()
+rand(::AbstractRNG, ::SamplerType{Tracer}) = EMPTY_TRACER

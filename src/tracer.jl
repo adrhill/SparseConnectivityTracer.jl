@@ -77,13 +77,16 @@ struct Tracer <: Number
     inputs::Set{UInt64} # indices of connected, enumerated inputs
 end
 
+const EMPTY_TRACER = Tracer(Set{UInt64}())
+
 # We have to be careful when defining constructors:
 # Generic code expecting "regular" numbers `x` will sometimes convert them 
 # by calling `T(x)` (instead of `convert(T, x)`), where `T` can be `Tracer`.
 # When this happens, we create a new empty tracer with no input connectivity.
-Tracer(::Number)  = tracer()
+Tracer(::Number)  = EMPTY_TRACER
 Tracer(t::Tracer) = t
-# We therefore exclusively use the lower-case `tracer` for convenience constructors
+
+uniontracer(a::Tracer, b::Tracer) = Tracer(union(a.inputs, b.inputs))
 
 """
     tracer(index)
@@ -91,10 +94,7 @@ Tracer(t::Tracer) = t
 
 Convenience constructor for [`Tracer`](@ref) from input indices.
 """
-tracer() = Tracer(Set{UInt64}())
-tracer(a::Tracer, b::Tracer) = Tracer(union(a.inputs, b.inputs))
-
-tracer(index::Integer)                      = Tracer(Set{UInt64}(index))
+tracer(index::Integer) = Tracer(Set{UInt64}(index))
 tracer(inds::NTuple{N,<:Integer}) where {N} = Tracer(Set{UInt64}(inds))
 tracer(inds...)                             = tracer(inds)
 
