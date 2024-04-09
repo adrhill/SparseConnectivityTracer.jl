@@ -1,13 +1,13 @@
 ## Extent Base operators
 for fn in (:+, :-, :*, :/)
-    @eval Base.$fn(a::Tracer, b::Tracer) = tracer(a, b)
+    @eval Base.$fn(a::Tracer, b::Tracer) = uniontracer(a, b)
     for T in (:Number,)
         @eval Base.$fn(t::Tracer, ::$T) = t
         @eval Base.$fn(::$T, t::Tracer) = t
     end
 end
 
-Base.:^(a::Tracer, b::Tracer) = tracer(a, b)
+Base.:^(a::Tracer, b::Tracer) = uniontracer(a, b)
 for T in (:Number, :Integer, :Rational)
     @eval Base.:^(t::Tracer, ::$T) = t
     @eval Base.:^(::$T, t::Tracer) = t
@@ -17,7 +17,7 @@ Base.:^(::Irrational{:ℯ}, t::Tracer) = t
 
 ## Two-argument functions
 for fn in (:div, :fld, :cld)
-    @eval Base.$fn(a::Tracer, b::Tracer) = tracer(a, b)
+    @eval Base.$fn(a::Tracer, b::Tracer) = uniontracer(a, b)
     @eval Base.$fn(t::Tracer, ::Number) = t
     @eval Base.$fn(::Number, t::Tracer) = t
 end
@@ -50,4 +50,4 @@ for fn in scalar_operations
 end
 
 ## Random numbers
-rand(::AbstractRNG, ::SamplerType{Tracer}) = tracer()
+rand(::AbstractRNG, ::SamplerType{Tracer}) = EMPTY_TRACER
