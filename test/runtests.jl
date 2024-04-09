@@ -89,6 +89,9 @@ DocMeta.setdocmeta!(
             @test C == C_ref
         end
     end
+    @testset "SparseDiffTools integration" begin
+        include("sparsedifftools.jl")
+    end
     @testset "Doctests" begin
         Documenter.doctest(SparseConnectivityTracer)
     end
