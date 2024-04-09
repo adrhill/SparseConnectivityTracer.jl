@@ -8,7 +8,7 @@ For a higher-level interface, refer to [`connectivity`](@ref).
 
 ## Examples
 By enumerating inputs with tracers, we can keep track of input connectivities:
-```julia-repl
+```jldoctest
 julia> xt = [tracer(1), tracer(2), tracer(3)]
 3-element Vector{Tracer}:
  Tracer(1,)
@@ -20,13 +20,13 @@ julia> f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])];
 julia> yt = f(xt)
 3-element Vector{Tracer}:
    Tracer(1,)
-   Tracer(1, 2)
+ Tracer(1, 2)
    Tracer(3,)
 ```
 
-This works via operator-overloading, which either keep input connectivities constant, 
+This works by overloading operators to either keep input connectivities constant, 
 compute unions or set connectivities to zero:
-```julia-repl
+```jldoctest Tracer
 julia> x = tracer(1, 2, 3)
 Tracer(1, 2, 3)
 
@@ -53,7 +53,7 @@ Tracer(1, 2, 3, 5)
 ```
 
 [`Tracer`](@ref) also supports random number generation and pre-allocations:
-```
+```jldoctest Tracer
 julia> M = rand(Tracer, 3, 2)
 3×2 Matrix{Tracer}:
  Tracer()  Tracer()
@@ -77,13 +77,16 @@ struct Tracer <: Number
     inputs::Set{UInt64} # indices of connected, enumerated inputs
 end
 
+const EMPTY_TRACER = Tracer(Set{UInt64}())
+
 # We have to be careful when defining constructors:
 # Generic code expecting "regular" numbers `x` will sometimes convert them 
 # by calling `T(x)` (instead of `convert(T, x)`), where `T` can be `Tracer`.
 # When this happens, we create a new empty tracer with no input connectivity.
-Tracer(::Number)  = tracer()
+Tracer(::Number)  = EMPTY_TRACER
 Tracer(t::Tracer) = t
-# We therefore exclusively use the lower-case `tracer` for convenience constructors
+
+uniontracer(a::Tracer, b::Tracer) = Tracer(union(a.inputs, b.inputs))
 
 """
     tracer(index)
@@ -91,10 +94,7 @@ Tracer(t::Tracer) = t
 
 Convenience constructor for [`Tracer`](@ref) from input indices.
 """
-tracer() = Tracer(Set{UInt64}())
-tracer(a::Tracer, b::Tracer) = Tracer(union(a.inputs, b.inputs))
-
-tracer(index::Integer)                      = Tracer(Set{UInt64}(index))
+tracer(index::Integer) = Tracer(Set{UInt64}(index))
 tracer(inds::NTuple{N,<:Integer}) where {N} = Tracer(Set{UInt64}(inds))
 tracer(inds...)                             = tracer(inds)
 
@@ -106,7 +106,7 @@ Return raw `UInt64` input indices of a [`Tracer`](@ref).
 See also [`sortedinputs`](@ref).
 
 ## Example
-```julia-repl
+```jldoctest
 julia> t = tracer(1, 2, 4)
 Tracer(1, 2, 4)
 
@@ -127,7 +127,7 @@ Return sorted input indices of a [`Tracer`](@ref).
 See also [`inputs`](@ref).
 
 ## Example
-```julia
+```jldoctest
 julia> t = tracer(1, 2, 4)
 Tracer(1, 2, 4)
 

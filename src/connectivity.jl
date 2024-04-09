@@ -6,7 +6,7 @@
 Enumerates input indices and constructs [`Tracer`](@ref)s.
 
 ## Example
-```julia-repl
+```jldoctest
 julia> x = rand(3);
 
 julia> f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])];
@@ -39,7 +39,7 @@ Enumerates inputs `x` and primal outputs `y=f(x)` and returns sparse connectivit
 where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
 
 ## Example
-```julia-repl
+```jldoctest
 julia> x = rand(3);
 
 julia> f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])];
@@ -54,6 +54,19 @@ julia> connectivity(f, x)
 function connectivity(f::Function, x)
     xt = trace_input(x)
     yt = f(xt)
+    return _connectivity(xt, yt)
+end
+
+"""
+    connectivity(f!, y, x)
+
+Enumerates inputs `x` and primal outputs `y` after `f!(y, x)` and returns sparse connectivity matrix `C` of size `(m, n)`
+where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
+"""
+function connectivity(f!::Function, y, x)
+    xt = trace_input(x)
+    yt = similar(y, Tracer)
+    f!(yt, xt)
     return _connectivity(xt, yt)
 end
 

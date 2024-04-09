@@ -6,10 +6,10 @@ CurrentModule = SparseConnectivityTracer
 
 Documentation for [SparseConnectivityTracer](https://github.com/adrhill/SparseConnectivityTracer.jl).
 
+## API reference
 ```@index
 ```
 
-## API reference
 ### Interface
 ```@docs
 connectivity
