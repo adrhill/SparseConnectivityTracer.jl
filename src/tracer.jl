@@ -103,7 +103,6 @@ tracer(inds...)                             = tracer(inds)
     inputs(tracer)
 
 Return raw `UInt64` input indices of a [`Tracer`](@ref).
-See also [`sortedinputs`](@ref).
 
 ## Example
 ```jldoctest
