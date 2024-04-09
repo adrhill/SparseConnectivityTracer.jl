@@ -96,19 +96,3 @@ function connectivity_sparsematrixcsc(
     end
     return sparse(I, J, V, m, n)
 end
-
-function connectivity_bitmatrix(xt::AbstractArray{Tracer}, yt::AbstractArray{<:Number})
-    # Construct connectivity matrix of size (ouput_dim, input_dim)
-    n, m = length(xt), length(yt)
-    C = BitArray(undef, m, n)
-    for i in axes(C, 1)
-        if yt[i] isa Tracer
-            for j in axes(C, 2)
-                C[i, j] = j ∈ yt[i].inputs
-            end
-        else
-            C[i, :] .= 0
-        end
-    end
-    return C
-end

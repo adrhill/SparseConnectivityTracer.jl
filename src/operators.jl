@@ -7,6 +7,8 @@ ops_2_to_1 = (
     :div, :fld, :cld, 
     # modulo
     :mod, :rem,
+    # trigonometric functions
+    :atan, :atand,
     # exponentials
     :ldexp, 
     # sign
@@ -83,7 +85,7 @@ for fn in (:eps, :nextfloat, :floatmin, :floatmax, :maxintfloat, :typemax)
     @eval Base.$fn(::Tracer) = EMPTY_TRACER
 end
 
-## Rounding
+## Rounding with RoundingMode
 Base.round(t::Tracer, ::RoundingMode; kwargs...) = t
 
 ## Random numbers
