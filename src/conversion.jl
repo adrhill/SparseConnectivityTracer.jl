@@ -2,6 +2,10 @@
 Base.promote_rule(::Type{Tracer}, ::Type{N}) where {N<:Number} = Tracer
 Base.promote_rule(::Type{N}, ::Type{Tracer}) where {N<:Number} = Tracer
 
+Base.big(::Type{Tracer})   = Tracer
+Base.widen(::Type{Tracer}) = Tracer
+Base.widen(t::Tracer)      = t
+
 Base.convert(::Type{Tracer}, x::Number)   = tracer()
 Base.convert(::Type{Tracer}, t::Tracer)   = t
 Base.convert(::Type{<:Number}, t::Tracer) = t
