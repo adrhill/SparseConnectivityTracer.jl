@@ -79,15 +79,14 @@ end
 
 const EMPTY_TRACER = Tracer(Set{UInt64}())
 
-emptytracer() = EMPTY_TRACER
-uniontracer(a::Tracer, b::Tracer) = Tracer(union(a.inputs, b.inputs))
-
 # We have to be careful when defining constructors:
 # Generic code expecting "regular" numbers `x` will sometimes convert them 
 # by calling `T(x)` (instead of `convert(T, x)`), where `T` can be `Tracer`.
 # When this happens, we create a new empty tracer with no input connectivity.
-Tracer(::Number)  = emptytracer()
+Tracer(::Number)  = EMPTY_TRACER
 Tracer(t::Tracer) = t
+
+uniontracer(a::Tracer, b::Tracer) = Tracer(union(a.inputs, b.inputs))
 
 """
     tracer(index)
