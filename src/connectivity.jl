@@ -25,10 +25,10 @@ julia> yt = f(xt)
 ```
 """
 trace_input(x) = trace_input(x, 1)
-trace_input(::Number, i) = traceindex(i)
+trace_input(::Number, i) = trace(i)
 function trace_input(x::AbstractArray, i)
     indices = (i - 1) .+ reshape(1:length(x), size(x))
-    return traceindex.(indices)
+    return trace.(indices)
 end
 
 ## Construct connectivity matrix
