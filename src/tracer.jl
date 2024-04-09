@@ -74,10 +74,10 @@ julia> M * [x, y]
 ```
 """
 struct Tracer <: Number
-    inputs::Set{UInt64} # indices of connected, enumerated inputs
+    inputs::BitSet # indices of connected, enumerated inputs
 end
 
-const EMPTY_TRACER = Tracer(Set{UInt64}())
+const EMPTY_TRACER = Tracer(BitSet())
 
 # We have to be careful when defining constructors:
 # Generic code expecting "regular" numbers `x` will sometimes convert them 
@@ -94,8 +94,8 @@ uniontracer(a::Tracer, b::Tracer) = Tracer(union(a.inputs, b.inputs))
 
 Convenience constructor for [`Tracer`](@ref) from input indices.
 """
-tracer(index::Integer) = Tracer(Set{UInt64}(index))
-tracer(inds::NTuple{N,<:Integer}) where {N} = Tracer(Set{UInt64}(inds))
+tracer(index::Integer) = Tracer(BitSet(index))
+tracer(inds::NTuple{N,<:Integer}) where {N} = Tracer(BitSet(inds))
 tracer(inds...)                             = tracer(inds)
 
 # Utilities for accessing input indices
@@ -111,42 +111,14 @@ julia> t = tracer(1, 2, 4)
 Tracer(1, 2, 4)
 
 julia> inputs(t)
-3-element Vector{UInt64}:
- 0x0000000000000004
- 0x0000000000000002
- 0x0000000000000001
-```
-"""
-inputs(t::Tracer) = collect(keys(t.inputs.dict))
-
-"""
-    sortedinputs(tracer)
-    sortedinputs([T=Int], tracer)
-
-Return sorted input indices of a [`Tracer`](@ref).
-See also [`inputs`](@ref).
-
-## Example
-```jldoctest
-julia> t = tracer(1, 2, 4)
-Tracer(1, 2, 4)
-
-julia> sortedinputs(t)
 3-element Vector{Int64}:
  1
  2
  4
-
-julia> sortedinputs(UInt8, t)
-3-element Vector{UInt8}:
- 0x01
- 0x02
- 0x04
 ```
 """
-sortedinputs(t::Tracer) = sortedinputs(Int, t)
-sortedinputs(T::Type, t::Tracer) = convert.(T, sort!(inputs(t)))
+inputs(t::Tracer) = collect(t.inputs)
 
 function Base.show(io::IO, t::Tracer)
-    return Base.show_delim_array(io, sortedinputs(Int, t), "Tracer(", ',', ')', true)
+    return Base.show_delim_array(io, inputs(t), "Tracer(", ',', ')', true)
 end

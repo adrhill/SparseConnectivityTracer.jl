@@ -26,5 +26,4 @@ trace_input
 The following utilities can be used to extract input indices from [`Tracer`](@ref)s:
 ```@docs
 inputs
-sortedinputs
 ```
