@@ -3,13 +3,13 @@
 
 Number type keeping track of input indices of previous computations.
 
-See also the convenience constructor [`trace`](@ref).
+See also the convenience constructor [`tracer`](@ref).
 For a higher-level interface, refer to [`connectivity`](@ref).
 
 ## Examples
 By enumerating inputs with tracers, we can keep track of input connectivities:
 ```jldoctest
-julia> xt = [trace(1), trace(2), trace(3)]
+julia> xt = [tracer(1), tracer(2), tracer(3)]
 3-element Vector{Tracer}:
  Tracer(1,)
  Tracer(2,)
@@ -27,7 +27,7 @@ julia> yt = f(xt)
 This works by overloading operators to either keep input connectivities constant, 
 compute unions or set connectivities to zero:
 ```jldoctest Tracer
-julia> x = trace(1, 2, 3)
+julia> x = tracer(1, 2, 3)
 Tracer(1, 2, 3)
 
 julia> sin(x)  # Most operators don't modify input connectivities.
@@ -42,7 +42,7 @@ Tracer()
 julia> 0 * x   # ...and doesn't look at input values.
 Tracer(1, 2, 3)
 
-julia> y = trace(3, 5)
+julia> y = tracer(3, 5)
 Tracer(3, 5)
 
 julia> x + y   # Operations on two Tracers construct union sets
@@ -90,14 +90,14 @@ Tracer(::Number)  = emptytracer()
 Tracer(t::Tracer) = t
 
 """
-    trace(index)
-    trace(indices)
+    tracer(index)
+    tracer(indices)
 
 Convenience constructor for [`Tracer`](@ref) from input indices.
 """
-trace(index::Integer) = Tracer(Set{UInt64}(index))
-trace(inds::NTuple{N,<:Integer}) where {N} = Tracer(Set{UInt64}(inds))
-trace(inds...)                             = trace(inds)
+tracer(index::Integer) = Tracer(Set{UInt64}(index))
+tracer(inds::NTuple{N,<:Integer}) where {N} = Tracer(Set{UInt64}(inds))
+tracer(inds...)                             = tracer(inds)
 
 # Utilities for accessing input indices
 """
@@ -108,7 +108,7 @@ See also [`sortedinputs`](@ref).
 
 ## Example
 ```jldoctest
-julia> t = trace(1, 2, 4)
+julia> t = tracer(1, 2, 4)
 Tracer(1, 2, 4)
 
 julia> inputs(t)
@@ -121,15 +121,15 @@ julia> inputs(t)
 inputs(t::Tracer) = collect(keys(t.inputs.dict))
 
 """
-    sortedinputs(trace)
-    sortedinputs([T=Int], trace)
+    sortedinputs(tracer)
+    sortedinputs([T=Int], tracer)
 
 Return sorted input indices of a [`Tracer`](@ref).
 See also [`inputs`](@ref).
 
 ## Example
 ```jldoctest
-julia> t = trace(1, 2, 4)
+julia> t = tracer(1, 2, 4)
 Tracer(1, 2, 4)
 
 julia> sortedinputs(t)

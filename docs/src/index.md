@@ -19,7 +19,7 @@ connectivity
 SparseConnectivityTracer works by pushing a `Number` type called [`Tracer`](@ref) through generic functions:
 ```@docs
 Tracer
-trace
+tracer
 trace_input
 ```
 

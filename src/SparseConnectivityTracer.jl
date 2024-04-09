@@ -8,7 +8,7 @@ include("operators.jl")
 include("connectivity.jl")
 
 export Tracer
-export trace, trace_input
+export tracer, trace_input
 export inputs, sortedinputs
 export connectivity
 
