@@ -35,13 +35,12 @@ ops_1_to_1 = (
     # exponentials
     :exp, :exp2, :exp10, :expm1, 
     :log, :log2, :log10, :log1p, 
-    :abs, :abs2, 
     # roots
     :sqrt, :cbrt,
     # absolute values
     :abs, :abs2,
     # rounding
-    :floor, :ceil, :trunc,
+    :round, :floor, :ceil, :trunc,
     # other
     :inv, :signbit, :hypot, :sign, :mod2pi
 )
