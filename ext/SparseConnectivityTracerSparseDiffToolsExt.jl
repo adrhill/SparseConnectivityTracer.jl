@@ -1,0 +1,6 @@
+module SparseConnectivityTracerSparseDiffToolsExt
+
+using SparseConnectivityTracer
+using SparseDiffTools: SparseDiffTools
+
+end
