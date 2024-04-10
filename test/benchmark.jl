@@ -1,6 +1,7 @@
 using BenchmarkTools
 using SparseConnectivityTracer
 using Symbolics: Symbolics
+using NNlib: conv
 
 include("brusselator.jl")
 
@@ -24,8 +25,29 @@ function benchmark_brusselator(N::Integer, method=:tracer)
     end
 end
 
-benchmark_brusselator(6, :tracer)
-benchmark_brusselator(6, :symbolics)
+function benchmark_conv(method=:tracer)
+    x = rand(28, 28, 3, 1) # WHCN image 
+    w = rand(5, 5, 3, 16)  # corresponds to Conv((5, 5), 3 => 16)
+    f(x) = conv(x, w)
 
-benchmark_brusselator(24, :tracer)
-benchmark_brusselator(24, :symbolics)
+    if method == :tracer
+        return @benchmark connectivity($f, $x)
+    elseif method == :symbolics
+        return @benchmark Symbolics.jacobian_sparsity($f, $x)
+    end
+end
+
+## Run Brusselator benchmarks
+for N in (6, 24)
+    for method in (:tracer, :symbolics)
+        @info "Benchmarking Brusselator of size $N with $method..."
+        b = benchmark_brusselator(N, method)
+        display(b)
+    end
+end
+
+## Run conv benchmarks
+@info "Benchmarking NNlib.conv with tracer..."
+# Symbolics fails on this example
+b = benchmark_conv(:tracer)
+display(b)

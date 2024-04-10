@@ -9,7 +9,7 @@ include("connectivity.jl")
 
 export Tracer
 export tracer, trace_input
-export inputs, sortedinputs
+export inputs
 export connectivity
 
 end # module
