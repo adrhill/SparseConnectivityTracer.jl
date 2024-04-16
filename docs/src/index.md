@@ -13,6 +13,7 @@ Documentation for [SparseConnectivityTracer](https://github.com/adrhill/SparseCo
 ### Interface
 ```@docs
 connectivity
+TracerSparsityDetector
 ```
 
 ### Internals
