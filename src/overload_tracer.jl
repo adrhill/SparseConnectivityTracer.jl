@@ -1,5 +1,9 @@
-for fn in ops_1_to_1
+for fn in union(ops_1_to_1_s, ops_1_to_1_f)
     @eval Base.$fn(t::Tracer) = t
+end
+
+for fn in ops_1_to_1_z
+    @eval Base.$fn(::Tracer) = EMPTY_TRACER
 end
 
 for fn in ops_1_to_2
@@ -20,11 +24,6 @@ for T in (:Real, :Integer, :Rational)
 end
 Base.:^(t::Tracer, ::Irrational{:ℯ}) = t
 Base.:^(::Irrational{:ℯ}, t::Tracer) = t
-
-## Precision operators create empty Tracer
-for fn in (:eps, :nextfloat, :floatmin, :floatmax, :maxintfloat, :typemax)
-    @eval Base.$fn(::Tracer) = EMPTY_TRACER
-end
 
 ## Rounding
 Base.round(t::Tracer, ::RoundingMode; kwargs...) = t

@@ -11,9 +11,7 @@ Base.convert(::Type{Tracer}, t::Tracer)   = t
 Base.convert(::Type{<:Number}, t::Tracer) = t
 
 ## Array constructors
-Base.zero(::Tracer)       = EMPTY_TRACER
 Base.zero(::Type{Tracer}) = EMPTY_TRACER
-Base.one(::Tracer)        = EMPTY_TRACER
 Base.one(::Type{Tracer})  = EMPTY_TRACER
 
 Base.similar(a::Array{Tracer,1})                               = zeros(Tracer, size(a, 1))
