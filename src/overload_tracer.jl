@@ -1,8 +1,8 @@
-for fn in union(ops_1_to_1_s, ops_1_to_1_f)
+for fn in union(ops_1_to_1_s, ops_1_to_1_f, ops_1_to_1_z)
     @eval Base.$fn(t::Tracer) = t
 end
 
-for fn in ops_1_to_1_z
+for fn in ops_1_to_1_const
     @eval Base.$fn(::Tracer) = EMPTY_TRACER
 end
 

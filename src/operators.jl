@@ -62,7 +62,13 @@ ops_1_to_1_z = (
     :round, :floor, :ceil, :trunc,
     # other
     :sign,
-    # constants
+)
+
+# Functions returning constant output
+# that only depends on the input type.
+# For the purpose of operator overloading,
+# these are kept separate from ops_1_to_1_z.
+ops_1_to_1_const = (
     :zero, :one,
     :eps, :floatmin, :floatmax, :maxintfloat, :typemax
 )
@@ -71,6 +77,7 @@ ops_1_to_1 = union(
     ops_1_to_1_s, 
     ops_1_to_1_f, 
     ops_1_to_1_z,
+    ops_1_to_1_const,
 )
 
 ##==================================#
