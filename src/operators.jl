@@ -48,9 +48,7 @@ ops_1_to_1_s = (
 # ∂²f/∂x² == 0
 ops_1_to_1_f = (
     :+, :-,
-    # absolute values
     :abs,
-    # other
     :mod2pi, :prevfloat, :nextfloat,
 )
 
@@ -58,9 +56,7 @@ ops_1_to_1_f = (
 # ∂f/∂x   == 0
 # ∂²f/∂x² == 0
 ops_1_to_1_z = (
-    # rounding
     :round, :floor, :ceil, :trunc,
-    # other
     :sign,
 )
 
@@ -126,7 +122,6 @@ ops_2_to_1_sfz = ()
 # ∂²f/∂x∂y != 0
 ops_2_to_1_fsc = (
     :/, 
-    # exponentials
     :ldexp, 
 )
 
@@ -188,7 +183,9 @@ ops_2_to_1_fzz = ()
 # ∂f/∂y    != 0
 # ∂²f/∂y²  == 0
 # ∂²f/∂x∂y == 0
-ops_2_to_1_zfz = ()
+ops_2_to_1_zfz = (
+    :rem,
+)
 
 # ops_2_to_1_zfz: 
 # ∂f/∂x    == 0
@@ -199,9 +196,7 @@ ops_2_to_1_zfz = ()
 ops_2_to_1_zzz = (
     # division
     :div, :fld, :fld1, :cld, 
-    # modulo and friends
-    :mod, :rem,
-    # sign
+    :mod,
     :copysign, :flipsign,
 )
 
@@ -241,7 +236,6 @@ ops_2_to_1 = union(
 # ∂f₂/∂x   != 0
 # ∂²f₂/∂x² != 0
 ops_1_to_2_ss = (
-    # trigonometric
     :sincos,
     :sincosd,
     :sincospi,
