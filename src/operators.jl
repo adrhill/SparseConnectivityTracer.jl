@@ -17,7 +17,6 @@
 # ∂²f/∂x² != 0
 ops_1_to_1_s = (
     # trigonometric functions
-    :deg2rad, :rad2deg,
     :cos, :cosd, :cosh, :cospi, :cosc, 
     :sin, :sind, :sinh, :sinpi, :sinc, 
     :tan, :tand, :tanh,
@@ -40,7 +39,7 @@ ops_1_to_1_s = (
     # absolute values
     :abs2,
     # other
-    :inv, :hypot,
+    :inv,
 )
 
 # ops_1_to_1_f:
@@ -48,7 +47,8 @@ ops_1_to_1_s = (
 # ∂²f/∂x² == 0
 ops_1_to_1_f = (
     :+, :-,
-    :abs,
+    :abs, :hypot,
+    :deg2rad, :rad2deg,
     :mod2pi, :prevfloat, :nextfloat,
 )
 
