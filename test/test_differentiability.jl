@@ -1,4 +1,3 @@
-using ForwardDiff: derivative, gradient, hessian
 using SparseConnectivityTracer:
     ops_1_to_1,
     ops_1_to_1_s,
@@ -30,17 +29,19 @@ using SparseConnectivityTracer:
     ops_1_to_2_zf,
     ops_1_to_2_zz
 using Test
+using ForwardDiff: derivative, gradient, hessian
+
+second_derivative(f, x) = derivative(_x -> derivative(f, _x), x)
 
 DEFAULT_ATOL = 1e-8
 isapproxzero(x; atol=DEFAULT_ATOL) = abs(x) <= atol
 
 random_input(f) = rand()
 random_input(::Union{typeof(acosh),typeof(acoth),typeof(acsc),typeof(asec)}) = 1 + rand()
+random_input(::typeof(sincosd)) = 180 * rand()
 
 random_first_input(f) = random_input(f)
 random_second_input(f) = random_input(f)
-
-second_derivative(f, x) = derivative(_x -> derivative(f, _x), x)
 
 sym2fn(op::Symbol) = @eval Base.$op
 
@@ -136,7 +137,6 @@ function classify_2_to_1(f, x, y; atol)
     return (first_arg, second_arg, cross)
 end
 
-classify_2_to_1(op::Symbol; kwargs...) = classify_2_to_1(sym2fn(op); kwargs...)
 function classify_2_to_1(op::Symbol; atol=1e-5, trials=100)
     f = sym2fn(op)
     try
@@ -186,23 +186,24 @@ end;
 function classify_1_to_2(f, x; atol)
     d1 = derivative(f, x)
     d2 = second_derivative(f, x)
+
     ∂f₁∂x = d1[1]
     ∂f₂∂x = d1[2]
     ∂²f₁∂x² = d2[1]
     ∂²f₂∂x² = d2[2]
 
     first_out = differentiability(∂f₁∂x, ∂²f₁∂x²; atol)
-    first_out == error_order && @warn "Weird behavior w.r.t. first output" f x ∂f₁∂x ∂²f₁∂x²
-    first_out = differentiability(∂f₂∂x, ∂²f₂∂x²; atol)
-    first_out == error_order &&
-        @warn "Weird behavior w.r.t. second output" f x ∂f₂∂x ∂²f₂∂x²
-    return (first_arg, second_arg)
+    first_out == error_order && @warn "Weird behavior w.r.t. 1st output" f x ∂f₁∂x ∂²f₁∂x²
+    second_out = differentiability(∂f₂∂x, ∂²f₂∂x²; atol)
+    first_out == error_order && @warn "Weird behavior w.r.t. 2nd output" f x ∂f₂∂x ∂²f₂∂x²
+    return (first_out, second_out)
 end
 
 function classify_1_to_2(op::Symbol; atol=1e-5, trials=100)
     f = sym2fn(op)
+    f_array(x) = [f(x)...]
     try
-        return maximum(classify_1_to_1(f, random_input(f); atol) for _ in 1:trials)
+        return maximum(classify_1_to_2(f_array, random_input(f); atol) for _ in 1:trials)
     catch e
         @warn "Classification of 1-to-2 operator `$op` failed" e
         return (error_order, error_order)

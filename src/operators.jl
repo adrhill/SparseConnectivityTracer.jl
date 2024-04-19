@@ -66,7 +66,9 @@ ops_1_to_1_z = (
 # these are kept separate from ops_1_to_1_z.
 ops_1_to_1_const = (
     :zero, :one,
-    :eps, :floatmin, :floatmax, :maxintfloat, :typemax
+    :eps, 
+    :typemax,
+    # :floatmin, :floatmax, :maxintfloat, 
 )
 
 ops_1_to_1 = union(
