@@ -1,6 +1,9 @@
 using SparseConnectivityTracer
 using Documenter
 
+# Create index.md from README
+cp(joinpath(@__DIR__, "..", "README.md"), joinpath(@__DIR__, "src", "index.md"); force=true)
+
 DocMeta.setdocmeta!(
     SparseConnectivityTracer,
     :DocTestSetup,
@@ -17,7 +20,7 @@ makedocs(;
         edit_link = "main",
         assets    = String[],
     ),
-    pages=["Home" => "index.md"],
+    pages=["Home" => "index.md", "API Reference" => "api.md"],
 )
 
 deploydocs(; repo="github.com/adrhill/SparseConnectivityTracer.jl", devbranch="main")
