@@ -40,14 +40,17 @@ function classify_1_to_1(f, x; atol)
         return (zero_order,)
     elseif abs(d1) > atol && abs(d2) <= atol
         return (first_order,)
-    elseif abs(d1) > atol && abs(d2) > atol
+    elseif abs(d2) > atol
         return (second_order,)
+    else
+        @warn "Weird behavior" f x d1 d2
+        return (no_order,)
     end
 end
 
-function classify_1_to_1(f; atol=1e-5)
+function classify_1_to_1(f; atol=1e-5, trials=100)
     try
-        return classify_1_to_1(f, random_input(f); atol)
+        return maximum(classify_1_to_1(f, random_input(f); atol) for _ in 1:trials)
     catch e
         @warn "Classification failed" e
         return (no_order,)
@@ -74,27 +77,39 @@ function classify_2_to_1(f, x, y; atol)
         zero_order
     elseif abs(g[1]) > atol && abs(H[1, 1]) <= atol
         first_order
-    elseif abs(g[1]) > atol && abs(H[1, 1]) > atol
+    elseif abs(H[1, 1]) > atol
         second_order
+    else
+        @warn "Weird behavior" f x g H
+        no_order
     end
     second_arg = if abs(g[2]) <= atol && abs(H[2, 2]) <= atol
         zero_order
     elseif abs(g[2]) > atol && abs(H[2, 2]) <= atol
         first_order
-    elseif abs(g[2]) > atol && abs(H[2, 2]) > atol
+    elseif abs(H[2, 2]) > atol
         second_order
+    else
+        @warn "Weird behavior" f x g H
+        no_order
     end
     cross = if abs(H[1, 2]) <= atol
         zero_order
-    else
+    elseif abs(H[1, 2]) > atol
         second_order
+    else
+        @warn "Weird behavior" f x g H
+        no_order
     end
     return (first_arg, second_arg, cross)
 end
 
-function classify_2_to_1(f; atol=1e-5)
+function classify_2_to_1(f; atol=1e-5, trials=100)
     try
-        return classify_2_to_1(f, random_first_input(f), random_second_input(f); atol)
+        return maximum(
+            classify_2_to_1(f, random_first_input(f), random_second_input(f); atol) for
+            _ in 1:trials
+        )
     catch e
         @warn "Classification failed" e
         return (no_order, no_order, no_order)
@@ -123,22 +138,28 @@ function classify_1_to_2(f, x; atol)
         zero_order
     elseif abs(d1[1]) > atol && abs(d2[1]) <= atol
         first_order
-    elseif abs(d1[1]) > atol && abs(d2[1]) > atol
+    elseif abs(d2[1]) > atol
         second_order
+    else
+        @warn "Weird behavior" f x d1 d2
+        no_order
     end
     second_arg = if abs(d1[2]) <= atol && abs(d2[2]) <= atol
         zero_order
     elseif abs(d1[2]) > atol && abs(d2[2]) <= atol
         first_order
-    elseif abs(d1[2]) > atol && abs(d2[2]) > atol
+    elseif abs(d2[2]) > atol
         second_order
+    else
+        @warn "Weird behavior" f x d1 d2
+        no_order
     end
     return (first_arg, second_arg)
 end
 
-function classify_1_to_2(f; atol=1e-5)
+function classify_1_to_2(f; atol=1e-5, trials=100)
     try
-        return classify_1_to_1(f, random_input(f); atol)
+        return maximum(classify_1_to_1(f, random_input(f); atol) for _ in 1:trials)
     catch e
         @warn "Classification failed" e
         return (no_order, no_order)
