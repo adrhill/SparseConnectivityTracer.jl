@@ -36,8 +36,8 @@ DocMeta.setdocmeta!(
     @testset "JET tests" begin
         JET.test_package(SparseConnectivityTracer; target_defined_modules=true)
     end
-    @testset verbose = true "Order classification" begin
-        include("order.jl")
+    @testset verbose = true "Classification of operators by diff'ability" begin
+        include("test_differentiability.jl")
     end
     @testset "Connectivity" begin
         x = rand(3)
