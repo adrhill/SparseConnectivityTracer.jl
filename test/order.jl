@@ -2,6 +2,12 @@ using ForwardDiff: derivative, gradient, hessian
 using SparseConnectivityTracer
 using Test
 
+random_input(f) = rand()
+random_first_input(f) = random_input(f)
+random_second_input(f) = random_input(f)
+
+random_input(::Union{typeof(acosh),typeof(acoth),typeof(acsc),typeof(asec)}) = 1 + rand()
+
 @enum Order zero_order = 0 first_order = 1 second_order = 2 no_order = 1000
 
 function parse_order(c::Char)
@@ -41,14 +47,10 @@ end
 
 function classify_1_to_1(f; atol=1e-5)
     try
-        return classify_1_to_1(f, rand(); atol)
+        return classify_1_to_1(f, random_input(f); atol)
     catch e
-        try
-            return classify_1_to_1(f, 1 + rand(); atol)
-        catch e
-            @warn "Classification failed" e
-            return (no_order,)
-        end
+        @warn "Classification failed" e
+        return (no_order,)
     end
 end
 
@@ -92,7 +94,7 @@ end
 
 function classify_2_to_1(f; atol=1e-5)
     try
-        return classify_2_to_1(f, rand(), rand(); atol)
+        return classify_2_to_1(f, random_first_input(f), random_second_input(f); atol)
     catch e
         @warn "Classification failed" e
         return (no_order, no_order, no_order)
@@ -136,7 +138,7 @@ end
 
 function classify_1_to_2(f; atol=1e-5)
     try
-        return classify_1_to_1(f, rand(); atol)
+        return classify_1_to_1(f, random_input(f); atol)
     catch e
         @warn "Classification failed" e
         return (no_order, no_order)

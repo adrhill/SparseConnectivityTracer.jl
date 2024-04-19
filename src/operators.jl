@@ -122,7 +122,7 @@ ops_2_to_1_sfz = ()
 # ∂²f/∂x∂y != 0
 ops_2_to_1_fsc = (
     :/, 
-    :ldexp, 
+    # :ldexp,  # TODO: removed for now
 )
 
 # ops_2_to_1_fsz: 
@@ -274,7 +274,7 @@ ops_1_to_2_ff = ()
 # ∂f₂/∂x   == 0
 # ∂²f₂/∂x² == 0
 ops_1_to_2_fz = (
-    :frexp,
+    # :frexp,  # TODO: removed for now
 )
 
 # ops_1_to_2_zs: 
