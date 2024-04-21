@@ -4,4 +4,4 @@ Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 SparseConnectivityTracer = "9f842d2f-2579-4b1d-911e-f412cf18a3f5"
 
 [compat]
-ADTypes = "1.0"
+ADTypes = "1"
