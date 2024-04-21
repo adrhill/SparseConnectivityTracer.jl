@@ -30,7 +30,8 @@ DocMeta.setdocmeta!(
         Aqua.test_all(
             SparseConnectivityTracer;
             ambiguities=false,
-            deps_compat=(ignore=[:Random, :SparseArrays],),
+            deps_compat=(ignore=[:Random, :SparseArrays], check_extras=false),
+            persistent_tasks=false,
         )
     end
     @testset "JET tests" begin
@@ -91,8 +92,8 @@ DocMeta.setdocmeta!(
             @test C == C_ref
         end
     end
-    @testset "SparseDiffTools integration" begin
-        include("sparsedifftools.jl")
+    @testset "ADTypes integration" begin
+        include("adtypes.jl")
     end
     @testset "Doctests" begin
         Documenter.doctest(SparseConnectivityTracer)

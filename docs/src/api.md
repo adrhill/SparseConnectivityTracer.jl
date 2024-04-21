@@ -11,6 +11,7 @@ CollapsedDocStrings = true
 ## Interface
 ```@docs
 connectivity
+TracerSparsityDetector
 ```
 
 ## Internals

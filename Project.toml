@@ -4,15 +4,11 @@ authors = ["Adrian Hill <gh@adrianhill.de>"]
 version = "0.1.0"
 
 [deps]
+ADTypes = "47edcb42-4c32-4615-8424-f2b9edc5f35b"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
-[weakdeps]
-SparseDiffTools = "47a9eef4-7e08-11e9-0b38-333d64bd3804"
-
-[extensions]
-SparseConnectivityTracerSparseDiffToolsExt = "SparseDiffTools"
-
 [compat]
-SparseDiffTools = "2.17"
+ADTypes = "1"
+SparseArrays = "1"
 julia = "1.6"
