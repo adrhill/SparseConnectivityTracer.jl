@@ -1,25 +1,22 @@
 ## Operator definitions
 
-#! format: off
-ops_2_to_1 = (
-    :+, :-, :*, :/, 
-    # division
-    :div, :fld, :cld, 
-    # modulo
-    :mod, :rem,
-    # trigonometric functions
-    :atan, :atand,
-    # exponentials
-    :ldexp, 
-    # sign
-    :copysign, :flipsign,
-    # other
-    :hypot,
-)
+# We use a system of letters to categorize operators:
+#   z: first- and second-order derivatives (FOD, SOD) are zero
+#   f: FOD ∂f/∂x is non-zero, SOD ∂²f/∂x² is zero 
+#   s: FOD ∂f/∂x is non-zero, SOD ∂²f/∂x² is non-zero
+#   c: Cross-derivative ∂²f/∂x∂y is non-zero
 
-ops_1_to_1 = (
+#! format: off
+
+##=================================#
+# Operators for functions f: ℝ → ℝ #
+#==================================#
+
+# ops_1_to_1_s: 
+# ∂f/∂x   != 0
+# ∂²f/∂x² != 0
+ops_1_to_1_s = (
     # trigonometric functions
-    :deg2rad, :rad2deg,
     :cos, :cosd, :cosh, :cospi, :cosc, 
     :sin, :sind, :sinh, :sinpi, :sinc, 
     :tan, :tand, :tanh,
@@ -40,53 +37,278 @@ ops_1_to_1 = (
     # roots
     :sqrt, :cbrt,
     # absolute values
-    :abs, :abs2,
-    # rounding
-    :round, :floor, :ceil, :trunc,
+    :abs2,
     # other
-    :inv, :signbit, :hypot, :sign, :mod2pi
+    :inv,
 )
 
-ops_1_to_2 = (
-    # trigonometric
+# ops_1_to_1_f:
+# ∂f/∂x   != 0
+# ∂²f/∂x² == 0
+ops_1_to_1_f = (
+    :+, :-,
+    :abs, :hypot,
+    :deg2rad, :rad2deg,
+    :mod2pi, :prevfloat, :nextfloat,
+)
+
+# ops_1_to_1_z:
+# ∂f/∂x   == 0
+# ∂²f/∂x² == 0
+ops_1_to_1_z = (
+    :round, :floor, :ceil, :trunc,
+    :sign,
+)
+
+# Functions returning constant output
+# that only depends on the input type.
+# For the purpose of operator overloading,
+# these are kept separate from ops_1_to_1_z.
+ops_1_to_1_const = (
+    :zero, :one,
+    :eps, 
+    :typemax,
+    # :floatmin, :floatmax, :maxintfloat, 
+)
+
+ops_1_to_1 = union(
+    ops_1_to_1_s, 
+    ops_1_to_1_f, 
+    ops_1_to_1_z,
+    ops_1_to_1_const,
+)
+
+##==================================#
+# Operators for functions f: ℝ² → ℝ #
+#===================================#
+
+# ops_2_to_1_ssc: 
+# ∂f/∂x    != 0
+# ∂²f/∂x²  != 0
+# ∂f/∂y    != 0
+# ∂²f/∂y²  != 0
+# ∂²f/∂x∂y != 0
+ops_2_to_1_ssc = (
+    :hypot,
+)
+
+# ops_2_to_1_ssz: 
+# ∂f/∂x    != 0
+# ∂²f/∂x²  != 0
+# ∂f/∂y    != 0
+# ∂²f/∂y²  != 0
+# ∂²f/∂x∂y == 0
+ops_2_to_1_ssz = ()
+
+# ops_2_to_1_sfc: 
+# ∂f/∂x    != 0
+# ∂²f/∂x²  != 0
+# ∂f/∂y    != 0
+# ∂²f/∂y²  == 0
+# ∂²f/∂x∂y != 0
+ops_2_to_1_sfc = ()
+
+# ops_2_to_1_sfz: 
+# ∂f/∂x    != 0
+# ∂²f/∂x²  != 0
+# ∂f/∂y    != 0
+# ∂²f/∂y²  == 0
+# ∂²f/∂x∂y == 0
+ops_2_to_1_sfz = ()
+
+# ops_2_to_1_fsc: 
+# ∂f/∂x    != 0
+# ∂²f/∂x²  == 0
+# ∂f/∂y    != 0
+# ∂²f/∂y²  != 0
+# ∂²f/∂x∂y != 0
+ops_2_to_1_fsc = (
+    :/, 
+    # :ldexp,  # TODO: removed for now
+)
+
+# ops_2_to_1_fsz: 
+# ∂f/∂x    != 0
+# ∂²f/∂x²  == 0
+# ∂f/∂y    != 0
+# ∂²f/∂y²  != 0
+# ∂²f/∂x∂y == 0
+ops_2_to_1_fsz = ()
+
+# ops_2_to_1_ffc: 
+# ∂f/∂x    != 0
+# ∂²f/∂x²  == 0
+# ∂f/∂y    != 0
+# ∂²f/∂y²  == 0
+# ∂²f/∂x∂y != 0
+ops_2_to_1_ffc = (
+    :*, 
+)
+
+# ops_2_to_1_ffz: 
+# ∂f/∂x    != 0
+# ∂²f/∂x²  == 0
+# ∂f/∂y    != 0
+# ∂²f/∂y²  == 0
+# ∂²f/∂x∂y == 0
+ops_2_to_1_ffz = (
+    :+, :-,
+    :mod, :rem,
+)
+
+# ops_2_to_1_szz: 
+# ∂f/∂x    != 0
+# ∂²f/∂x²  != 0
+# ∂f/∂y    == 0
+# ∂²f/∂y²  == 0
+# ∂²f/∂x∂y == 0
+ops_2_to_1_szz = ()
+
+# ops_2_to_1_zsz: 
+# ∂f/∂x    == 0
+# ∂²f/∂x²  == 0
+# ∂f/∂y    != 0
+# ∂²f/∂y²  != 0
+# ∂²f/∂x∂y == 0
+ops_2_to_1_zsz = ()
+
+# ops_2_to_1_fzz: 
+# ∂f/∂x    != 0
+# ∂²f/∂x²  == 0
+# ∂f/∂y    == 0
+# ∂²f/∂y²  == 0
+# ∂²f/∂x∂y == 0
+ops_2_to_1_fzz = (
+    :copysign, :flipsign,
+)
+
+# ops_2_to_1_zfz: 
+# ∂f/∂x    == 0
+# ∂²f/∂x²  == 0
+# ∂f/∂y    != 0
+# ∂²f/∂y²  == 0
+# ∂²f/∂x∂y == 0
+ops_2_to_1_zfz = ()
+
+# ops_2_to_1_zfz: 
+# ∂f/∂x    == 0
+# ∂²f/∂x²  == 0
+# ∂f/∂y    == 0
+# ∂²f/∂y²  == 0
+# ∂²f/∂x∂y == 0
+ops_2_to_1_zzz = (
+    # division
+    :div, :fld, :fld1, :cld, 
+)
+
+ops_2_to_1 = union(
+    # Including second-order only
+    ops_2_to_1_ssc,
+    ops_2_to_1_ssz,
+
+    # Including second- and first-order
+    ops_2_to_1_sfc,
+    ops_2_to_1_sfz,
+    
+    ops_2_to_1_fsc,
+    ops_2_to_1_fsz,
+    
+    # Including first-order only
+    ops_2_to_1_ffc,
+    ops_2_to_1_ffz,
+
+    # Including zero-order
+    ops_2_to_1_szz,
+    ops_2_to_1_zsz,
+
+    ops_2_to_1_fzz,
+    ops_2_to_1_zfz,
+
+    ops_2_to_1_zzz,   
+)
+
+##==================================#
+# Operators for functions f: ℝ → ℝ² #
+#===================================#
+
+# ops_1_to_2_ss: 
+# ∂f₁/∂x   != 0
+# ∂²f₁/∂x² != 0
+# ∂f₂/∂x   != 0
+# ∂²f₂/∂x² != 0
+ops_1_to_2_ss = (
     :sincos,
     :sincosd,
     :sincospi,
-    # exponentials
-    :frexp,
+)
+
+# ops_1_to_2_sf: 
+# ∂f₁/∂x   != 0
+# ∂²f₁/∂x² != 0
+# ∂f₂/∂x   != 0
+# ∂²f₂/∂x² == 0
+ops_1_to_2_sf = ()
+
+# ops_1_to_2_sz: 
+# ∂f₁/∂x   != 0
+# ∂²f₁/∂x² != 0
+# ∂f₂/∂x   == 0
+# ∂²f₂/∂x² == 0
+ops_1_to_2_sz = ()
+
+# ops_1_to_2_fs: 
+# ∂f₁/∂x   != 0
+# ∂²f₁/∂x² == 0
+# ∂f₂/∂x   != 0
+# ∂²f₂/∂x² != 0
+ops_1_to_2_fs = ()
+
+# ops_1_to_2_ff: 
+# ∂f₁/∂x   != 0
+# ∂²f₁/∂x² == 0
+# ∂f₂/∂x   != 0
+# ∂²f₂/∂x² == 0
+ops_1_to_2_ff = ()
+
+# ops_1_to_2_fz: 
+# ∂f₁/∂x   != 0
+# ∂²f₁/∂x² == 0
+# ∂f₂/∂x   == 0
+# ∂²f₂/∂x² == 0
+ops_1_to_2_fz = (
+    # :frexp,  # TODO: removed for now
+)
+
+# ops_1_to_2_zs: 
+# ∂f₁/∂x   == 0
+# ∂²f₁/∂x² == 0
+# ∂f₂/∂x   != 0
+# ∂²f₂/∂x² != 0
+ops_1_to_2_zs = ()
+
+# ops_1_to_2_zf: 
+# ∂f₁/∂x   == 0
+# ∂²f₁/∂x² == 0
+# ∂f₂/∂x   != 0
+# ∂²f₂/∂x² == 0
+ops_1_to_2_zf = ()
+
+# ops_1_to_2_zz: 
+# ∂f₁/∂x   == 0
+# ∂²f₁/∂x² == 0
+# ∂f₂/∂x   == 0
+# ∂²f₂/∂x² == 0
+ops_1_to_2_zz = ()
+
+ops_1_to_2 = union(
+    ops_1_to_2_ss,
+    ops_1_to_2_sf,
+    ops_1_to_2_fs,
+    ops_1_to_2_ff,
+    ops_1_to_2_sz,
+    ops_1_to_2_zs,
+    ops_1_to_2_fz,
+    ops_1_to_2_zf,
+    ops_1_to_2_zz,   
 )
 #! format: on
-
-for fn in ops_1_to_1
-    @eval Base.$fn(t::Tracer) = t
-end
-
-for fn in ops_1_to_2
-    @eval Base.$fn(t::Tracer) = (t, t)
-end
-
-for fn in ops_2_to_1
-    @eval Base.$fn(a::Tracer, b::Tracer) = uniontracer(a, b)
-    @eval Base.$fn(t::Tracer, ::Number) = t
-    @eval Base.$fn(::Number, t::Tracer) = t
-end
-
-# Extra types required for exponent
-Base.:^(a::Tracer, b::Tracer) = uniontracer(a, b)
-for T in (:Real, :Integer, :Rational)
-    @eval Base.:^(t::Tracer, ::$T) = t
-    @eval Base.:^(::$T, t::Tracer) = t
-end
-Base.:^(t::Tracer, ::Irrational{:ℯ}) = t
-Base.:^(::Irrational{:ℯ}, t::Tracer) = t
-
-## Precision operators create empty Tracer
-for fn in (:eps, :nextfloat, :floatmin, :floatmax, :maxintfloat, :typemax)
-    @eval Base.$fn(::Tracer) = EMPTY_TRACER
-end
-
-## Rounding with RoundingMode
-Base.round(t::Tracer, ::RoundingMode; kwargs...) = t
-
-## Random numbers
-rand(::AbstractRNG, ::SamplerType{Tracer}) = EMPTY_TRACER

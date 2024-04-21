@@ -51,7 +51,7 @@ julia> connectivity(f, x)
  ⋅  ⋅  1
 ```
 """
-function connectivity(f::Function, x)
+function connectivity(f, x)
     xt = trace_input(x)
     yt = f(xt)
     return _connectivity(xt, yt)
@@ -63,7 +63,7 @@ end
 Enumerates inputs `x` and primal outputs `y` after `f!(y, x)` and returns sparse connectivity matrix `C` of size `(m, n)`
 where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
 """
-function connectivity(f!::Function, y, x)
+function connectivity(f!, y, x)
     xt = trace_input(x)
     yt = similar(y, Tracer)
     f!(yt, xt)

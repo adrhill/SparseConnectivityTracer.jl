@@ -7,6 +7,7 @@ import SparseArrays: sparse
 include("tracer.jl")
 include("conversion.jl")
 include("operators.jl")
+include("overload_tracer.jl")
 include("connectivity.jl")
 include("adtypes.jl")
 
