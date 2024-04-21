@@ -9,35 +9,6 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
-ADTypes = "1.0"
+ADTypes = "1"
+SparseArrays = "1"
 julia = "1.6"
-
-[extras]
-ADTypes = "47edcb42-4c32-4615-8424-f2b9edc5f35b"
-Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
-Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
-JET = "c3a54625-cd67-489e-a8e7-0a5a0ff4e31b"
-JuliaFormatter = "98e50ef6-434e-11e9-1051-2b60c6c9e899"
-LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-NNlib = "872c559c-99b0-510c-b3b7-b6c96a88d5cd"
-Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-ReferenceTests = "324d217c-45ce-50fc-942e-d289b448e8cf"
-SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
-Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-
-[targets]
-test = [
-    "ADTypes",
-    "Aqua",
-    "Documenter",
-    "JET",
-    "JuliaFormatter",
-    "LinearAlgebra",
-    "NNlib",
-    "Random",
-    "ReferenceTests",
-    "SparseArrays",
-    "Symbolics",
-    "Test",
-]
