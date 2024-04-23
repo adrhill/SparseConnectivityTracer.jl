@@ -6,11 +6,13 @@ Number type keeping track of input indices of previous computations with non-zer
 See also the convenience constructor [`jacobiantracer`](@ref).
 For a higher-level interface, refer to [`connectivity`](@ref).
 """
-struct JacobianTracer <: Number
+struct JacobianTracer <: AbstractTracer
     inputs::BitSet # indices of connected, enumerated inputs
 end
 
-const EMPTY_JACOBIAN_TRACER = JacobianTracer(BitSet())
+const EMPTY_JACOBIAN_TRACER   = JacobianTracer(BitSet())
+empty(::Type{JacobianTracer}) = EMPTY_CONNECTIVITY_TRACER
+empty(::JacobianTracer)       = EMPTY_CONNECTIVITY_TRACER
 
 # We have to be careful when defining constructors:
 # Generic code expecting "regular" numbers `x` will sometimes convert them 
