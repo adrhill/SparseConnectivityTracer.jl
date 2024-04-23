@@ -98,7 +98,7 @@ empty(::Type{ConnectivityTracer}) = EMPTY_CONNECTIVITY_TRACER
     tracer(ConnectivityTracer, index)
     tracer(ConnectivityTracer, indices)
 
-Convenience constructor for [`JacobianTracer`](@ref) [`ConnectivityTracerTracer`](@ref) from input indices.
+Convenience constructor for [`JacobianTracer`](@ref) [`ConnectivityTracer`](@ref) from input indices.
 """
 tracer(::Type{JacobianTracer}, index::Integer) = JacobianTracer(BitSet(index))
 tracer(::Type{ConnectivityTracer}, index::Integer) = ConnectivityTracer(BitSet(index))

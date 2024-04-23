@@ -25,7 +25,7 @@ julia> x = rand(3);
 
 julia> f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])];
 
-julia> pattern(f, x)
+julia> pattern(f, JacobianTracer, x)
 3×3 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 4 stored entries:
  1  ⋅  ⋅
  1  1  ⋅
@@ -40,37 +40,32 @@ julia> x = rand(28, 28, 3, 1);
 
 julia> layer = Conv((3, 3), 3 => 8);
 
-julia> pattern(layer, x)
+julia> pattern(layer, JacobianTracer, x)
 5408×2352 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 146016 stored entries:
-⎡⠙⢶⣄⠀⠀⠀⠈⠻⣦⡀⠀⠀⠀⠘⢷⣄⠀⠀⠀⠀⠀⎤
-⎢⠀⠀⠙⢷⣄⠀⠀⠀⠈⠻⣦⡀⠀⠀⠀⠙⢷⣄⠀⠀⠀⎥
-⎢⠀⠀⠀⠀⠙⢷⣄⠀⠀⠀⠈⠻⣦⡀⠀⠀⠀⠉⠳⣦⡀⎥
-⎢⠙⢷⣄⠀⠀⠀⠉⠻⣦⡀⠀⠀⠈⠙⢷⣄⠀⠀⠀⠈⠁⎥
-⎢⠀⠀⠙⢷⣄⠀⠀⠀⠈⠻⣦⡀⠀⠀⠀⠉⠳⣦⡀⠀⠀⎥
-⎢⠀⠀⠀⠀⠙⢷⣄⠀⠀⠀⠈⠻⣦⡀⠀⠀⠀⠈⠻⣦⡀⎥
-⎢⠙⢷⣄⠀⠀⠀⠉⠻⣦⡀⠀⠀⠈⠙⠷⣤⡀⠀⠀⠈⠁⎥
-⎢⠀⠀⠙⢷⣄⠀⠀⠀⠈⠻⣦⡀⠀⠀⠀⠈⠻⣦⡀⠀⠀⎥
-⎢⠀⠀⠀⠀⠙⢷⣄⠀⠀⠀⠈⠻⢦⣄⠀⠀⠀⠈⠻⣦⡀⎥
-⎢⠙⢷⣄⠀⠀⠀⠉⠻⣦⡀⠀⠀⠀⠉⠻⣦⡀⠀⠀⠈⠁⎥
-⎢⠀⠀⠙⢷⣄⠀⠀⠀⠈⠻⢦⣀⠀⠀⠀⠈⠻⣦⡀⠀⠀⎥
-⎢⠀⠀⠀⠀⠙⢷⣄⠀⠀⠀⠀⠙⢷⣄⠀⠀⠀⠈⠻⣦⡀⎥
-⎢⠙⢷⣄⠀⠀⠀⠈⠻⣦⡀⠀⠀⠀⠈⠻⣦⡀⠀⠀⠀⠀⎥
-⎢⠀⠀⠙⢷⣄⠀⠀⠀⠈⠙⢶⣄⠀⠀⠀⠈⠻⣦⡀⠀⠀⎥
-⎢⣀⠀⠀⠀⠙⢷⣄⡀⠀⠀⠀⠙⢷⣄⡀⠀⠀⠈⠻⣦⡀⎥
-⎢⠙⢷⣄⠀⠀⠀⠈⠛⢶⣄⠀⠀⠀⠈⠻⣦⡀⠀⠀⠀⠀⎥
-⎢⠀⠀⠙⢷⣄⠀⠀⠀⠀⠙⢷⣄⠀⠀⠀⠈⠻⣦⡀⠀⠀⎥
-⎢⣀⠀⠀⠀⠙⠳⣦⣀⠀⠀⠀⠙⢷⣄⡀⠀⠀⠈⠻⣦⡀⎥
-⎢⠙⢷⣄⠀⠀⠀⠀⠙⢷⣄⠀⠀⠀⠈⠻⣦⡀⠀⠀⠀⠀⎥
-⎢⠀⠀⠙⠷⣄⡀⠀⠀⠀⠙⢷⣄⠀⠀⠀⠈⠻⣦⡀⠀⠀⎥
-⎢⣀⠀⠀⠀⠈⠻⣦⣀⠀⠀⠀⠙⢷⣄⡀⠀⠀⠈⠻⣦⡀⎥
-⎢⠙⠷⣄⡀⠀⠀⠀⠙⢷⣄⠀⠀⠀⠈⠻⣦⡀⠀⠀⠀⠀⎥
-⎢⠀⠀⠈⠻⣦⡀⠀⠀⠀⠙⢷⣄⠀⠀⠀⠈⠻⣦⡀⠀⠀⎥
-⎣⠀⠀⠀⠀⠈⠻⣦⠀⠀⠀⠀⠙⢷⣄⠀⠀⠀⠈⠻⢦⡀⎦
+⎡⠙⢦⡀⠀⠀⠘⢷⣄⠀⠀⠈⠻⣦⡀⠀⠀⠀⎤
+⎢⠀⠀⠙⢷⣄⠀⠀⠙⠷⣄⠀⠀⠈⠻⣦⡀⠀⎥
+⎢⢶⣄⠀⠀⠙⠳⣦⡀⠀⠈⠳⢦⡀⠀⠈⠛⠂⎥
+⎢⠀⠙⢷⣄⠀⠀⠈⠻⣦⡀⠀⠀⠙⢦⣄⠀⠀⎥
+⎢⣀⡀⠀⠉⠳⣄⡀⠀⠈⠻⣦⣀⠀⠀⠙⢷⡄⎥
+⎢⠈⠻⣦⡀⠀⠈⠛⢦⡀⠀⠀⠙⢷⣄⠀⠀⠀⎥
+⎢⠀⠀⠈⠻⣦⡀⠀⠀⠙⢷⣄⠀⠀⠙⠷⣄⠀⎥
+⎢⠻⣦⡀⠀⠈⠙⢷⣄⠀⠀⠉⠻⣦⡀⠀⠈⠁⎥
+⎢⠀⠀⠙⢦⣀⠀⠀⠙⢷⣄⠀⠀⠈⠻⣦⡀⠀⎥
+⎢⢤⣄⠀⠀⠙⠳⣄⡀⠀⠉⠳⣤⡀⠀⠈⠛⠂⎥
+⎢⠀⠙⢷⣄⠀⠀⠈⠻⣦⡀⠀⠈⠙⢦⡀⠀⠀⎥
+⎢⣀⠀⠀⠙⢷⣄⡀⠀⠈⠻⣦⣀⠀⠀⠙⢷⡄⎥
+⎢⠈⠳⣦⡀⠀⠈⠻⣦⡀⠀⠀⠙⢷⣄⠀⠀⠀⎥
+⎢⠀⠀⠈⠻⣦⡀⠀⠀⠙⢦⣄⠀⠀⠙⢷⣄⠀⎥
+⎢⠻⣦⡀⠀⠈⠙⢷⣄⠀⠀⠉⠳⣄⡀⠀⠉⠁⎥
+⎢⠀⠈⠛⢦⡀⠀⠀⠙⢷⣄⠀⠀⠈⠻⣦⡀⠀⎥
+⎢⢤⣄⠀⠀⠙⠶⣄⠀⠀⠙⠷⣤⡀⠀⠈⠻⠆⎥
+⎢⠀⠙⢷⣄⠀⠀⠈⠳⣦⡀⠀⠈⠻⣦⡀⠀⠀⎥
+⎣⠀⠀⠀⠙⢷⣄⠀⠀⠈⠻⣦⠀⠀⠀⠙⢦⡀⎦
 ```
 
-SparseConnectivityTracer enumerates inputs `x` and primal outputs `y = f(x)` and returns a sparse matrix `C` of size `(m, n)`, where `C[i, j]` is `true` if the compute graph connects the `j`-th entry in `x` to the `i`-th entry in `y`.
+SparseConnectivityTracer enumerates inputs `x` and primal outputs `y = f(x)` and returns a sparse matrix `C` of size $m \times n$, where `C[i, j]` is `true` if the compute graph connects the $j$-th entry in `x` to the $i$-th entry in `y`.
 
-For more detailled examples, take a look at the [API reference](https://adrianhill.de/SparseConnectivityTracer.jl/dev/api).
+For more detailled examples, take a look at the [documentation](https://adrianhill.de/SparseConnectivityTracer.jl/dev).
 
 ## Related packages
 * [SparseDiffTools.jl](https://github.com/JuliaDiff/SparseDiffTools.jl): automatic sparsity detection via Symbolics.jl and Cassette.jl
