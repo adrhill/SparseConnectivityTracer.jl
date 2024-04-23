@@ -31,11 +31,12 @@ function trace_input(x::AbstractArray, i)
     return tracer.(indices)
 end
 
-## Construct connectivity matrix
+## Construct sparsity pattern matrix
 """
-    connectivity(f, x)
+    pattern(f, JacobianTracer, x)
+    pattern(f, ConnectivityTracer, x)
 
-Enumerates inputs `x` and primal outputs `y=f(x)` and returns sparse connectivity matrix `C` of size `(m, n)`
+Enumerates inputs `x` and primal outputs `y=f(x)` and returns sparse matrix `C` of size `(m, n)`
 where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
 
 ## Example
@@ -44,43 +45,44 @@ julia> x = rand(3);
 
 julia> f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])];
 
-julia> connectivity(f, x)
+julia> pattern(f, x)
 3×3 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 4 stored entries:
  1  ⋅  ⋅
  1  1  ⋅
  ⋅  ⋅  1
 ```
 """
-function connectivity(f, x)
+function pattern(f, x)
     xt = trace_input(x)
     yt = f(xt)
-    return _connectivity(xt, yt)
+    return _pattern(xt, yt)
 end
 
 """
-    connectivity(f!, y, x)
+    pattern(f!, JacobianTracer, y, x)
+    pattern(f!, ConnectivityTracer, y, x)
 
-Enumerates inputs `x` and primal outputs `y` after `f!(y, x)` and returns sparse connectivity matrix `C` of size `(m, n)`
+Enumerates inputs `x` and primal outputs `y` after `f!(y, x)` and returns sparse matrix `C` of size `(m, n)`
 where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
 """
-function connectivity(f!, y, x)
+function pattern(f!, y, x)
     xt = trace_input(x)
     yt = similar(y, ConnectivityTracer)
     f!(yt, xt)
-    return _connectivity(xt, yt)
+    return _pattern(xt, yt)
 end
 
-_connectivity(xt::ConnectivityTracer, yt::Number) = _connectivity([xt], [yt])
-_connectivity(xt::ConnectivityTracer, yt::AbstractArray{Number}) = _connectivity([xt], yt)
-_connectivity(xt::AbstractArray{ConnectivityTracer}, yt::Number) = _connectivity(xt, [yt])
-function _connectivity(xt::AbstractArray{ConnectivityTracer}, yt::AbstractArray{<:Number})
-    return connectivity_sparsematrixcsc(xt, yt)
+_pattern(xt::ConnectivityTracer, yt::Number) = _pattern([xt], [yt])
+_pattern(xt::ConnectivityTracer, yt::AbstractArray{Number}) = _pattern([xt], yt)
+_pattern(xt::AbstractArray{ConnectivityTracer}, yt::Number) = _pattern(xt, [yt])
+function _pattern(xt::AbstractArray{ConnectivityTracer}, yt::AbstractArray{<:Number})
+    return pattern_sparsematrixcsc(xt, yt)
 end
 
-function connectivity_sparsematrixcsc(
+function pattern_sparsematrixcsc(
     xt::AbstractArray{ConnectivityTracer}, yt::AbstractArray{<:Number}
 )
-    # Construct connectivity matrix of size (ouput_dim, input_dim)
+    # Construct matrix of size (ouput_dim, input_dim)
     n, m = length(xt), length(yt)
     I = UInt64[]
     J = UInt64[]

@@ -18,11 +18,11 @@ julia> ADTypes.jacobian_sparsity(diff, rand(4), TracerSparsityDetector())
 struct TracerSparsityDetector <: ADTypes.AbstractSparsityDetector end
 
 function ADTypes.jacobian_sparsity(f, x, ::TracerSparsityDetector)
-    return connectivity(f, x)
+    return pattern(f, x)
 end
 
 function ADTypes.jacobian_sparsity(f!, y, x, ::TracerSparsityDetector)
-    return connectivity(f!, y, x)
+    return pattern(f!, y, x)
 end
 
 function ADTypes.hessian_sparsity(f, x, ::TracerSparsityDetector)

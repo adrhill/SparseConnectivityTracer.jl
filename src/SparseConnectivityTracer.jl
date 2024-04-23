@@ -11,13 +11,13 @@ include("conversion.jl")
 include("operators.jl")
 include("overload_connectivity.jl")
 include("overload_jacobian.jl")
-include("connectivity.jl")
+include("pattern.jl")
 include("adtypes.jl")
 
 export JacobianTracer, ConnectivityTracer
 export tracer, trace_input
 export inputs
-export connectivity
+export pattern
 export TracerSparsityDetector
 
 end # module

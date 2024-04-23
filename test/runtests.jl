@@ -49,7 +49,7 @@ DocMeta.setdocmeta!(
         yt = only(A * xt)
         @test inputs(yt) == [1, 2, 3]
 
-        @test connectivity(x -> only(A * x), x) ≈ [1 1 1]
+        @test pattern(x -> only(A * x), x) ≈ [1 1 1]
 
         # Custom functions
         f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])]
@@ -58,17 +58,17 @@ DocMeta.setdocmeta!(
         @test inputs(yt[2]) == [1, 2]
         @test inputs(yt[3]) == [3]
 
-        @test connectivity(f, x) ≈ [1 0 0; 1 1 0; 0 0 1]
+        @test pattern(f, x) ≈ [1 0 0; 1 1 0; 0 0 1]
 
-        @test connectivity(identity, rand()) ≈ [1;;]
-        @test connectivity(Returns(1), 1) ≈ [0;;]
+        @test pattern(identity, rand()) ≈ [1;;]
+        @test pattern(Returns(1), 1) ≈ [0;;]
     end
     @testset "Real-world tests" begin
         @testset "NNlib" begin
             x = rand(3, 3, 2, 1) # WHCN
             w = rand(2, 2, 2, 1) # Conv((2, 2), 2 => 1)
-            C = connectivity(x -> NNlib.conv(x, w), x)
-            @test_reference "references/connectivity/NNlib/conv.txt" BitMatrix(C)
+            C = pattern(x -> NNlib.conv(x, w), x)
+            @test_reference "references/pattern/NNlib/conv.txt" BitMatrix(C)
         end
         @testset "Brusselator" begin
             include("brusselator.jl")
@@ -85,8 +85,8 @@ DocMeta.setdocmeta!(
             du = similar(u)
             f!(du, u) = brusselator_2d_loop(du, u, p, nothing)
 
-            C = connectivity(f!, du, u)
-            @test_reference "references/connectivity/Brusselator.txt" BitMatrix(C)
+            C = pattern(f!, du, u)
+            @test_reference "references/pattern/Brusselator.txt" BitMatrix(C)
 
             C_ref = Symbolics.jacobian_sparsity(f!, du, u)
             @test C == C_ref

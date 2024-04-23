@@ -19,7 +19,7 @@ function benchmark_brusselator(N::Integer, method=:tracer)
     f!(du, u) = brusselator_2d_loop(du, u, p, nothing)
 
     if method == :tracer
-        return @benchmark connectivity($f!, $du, $u)
+        return @benchmark pattern($f!, $du, $u)
     elseif method == :symbolics
         return @benchmark Symbolics.jacobian_sparsity($f!, $du, $u)
     end
@@ -31,7 +31,7 @@ function benchmark_conv(method=:tracer)
     f(x) = conv(x, w)
 
     if method == :tracer
-        return @benchmark connectivity($f, $x)
+        return @benchmark pattern($f, $x)
     elseif method == :symbolics
         return @benchmark Symbolics.jacobian_sparsity($f, $x)
     end

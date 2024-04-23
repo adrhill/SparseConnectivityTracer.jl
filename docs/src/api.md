@@ -10,7 +10,7 @@ CollapsedDocStrings = true
 
 ## Interface
 ```@docs
-connectivity
+pattern
 TracerSparsityDetector
 ```
 
