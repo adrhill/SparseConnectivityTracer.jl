@@ -4,6 +4,8 @@ using ADTypes: ADTypes
 import Random: rand, AbstractRNG, SamplerType
 import SparseArrays: sparse
 
+abstract type AbstractTracer <: Number end
+
 include("tracer_connectivity.jl")
 include("conversion.jl")
 include("operators.jl")
