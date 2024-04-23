@@ -8,8 +8,7 @@
 
 Fast sparsity detection via operator-overloading.
 
-Will soon include Jacobian sparsity detection ([#19](https://github.com/adrhill/SparseConnectivityTracer.jl/issues/19))
-and Hessian sparsity detection ([#20](https://github.com/adrhill/SparseConnectivityTracer.jl/issues/20)).
+Will soon include Hessian sparsity detection ([#20](https://github.com/adrhill/SparseConnectivityTracer.jl/issues/20)).
 
 ## Installation 
 To install this package, open the Julia REPL and run 
