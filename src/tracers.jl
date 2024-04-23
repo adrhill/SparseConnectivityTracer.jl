@@ -36,7 +36,7 @@ ConnectivityTracer(t::ConnectivityTracer) = t
 
 Number type keeping track of input indices of previous computations with non-zero derivatives.
 
-See also the convenience constructor [`jacobiantracer`](@ref).
+See also the convenience constructor [`tracer`](@ref).
 For a higher-level interface, refer to [`pattern`](@ref).
 """
 struct JacobianTracer <: AbstractTracer
