@@ -18,13 +18,14 @@ julia> ADTypes.jacobian_sparsity(diff, rand(4), TracerSparsityDetector())
 struct TracerSparsityDetector <: ADTypes.AbstractSparsityDetector end
 
 function ADTypes.jacobian_sparsity(f, x, ::TracerSparsityDetector)
-    return pattern(f, x)
+    return pattern(f, JacobianTracer, x)
 end
 
 function ADTypes.jacobian_sparsity(f!, y, x, ::TracerSparsityDetector)
-    return pattern(f!, y, x)
+    return pattern(f!, JacobianTracer, y, x)
 end
 
 function ADTypes.hessian_sparsity(f, x, ::TracerSparsityDetector)
+    # TODO: return pattern(f, HessianTracer, x)
     return error("Hessian sparsity is not yet implemented for `TracerSparsityDetector`.")
 end

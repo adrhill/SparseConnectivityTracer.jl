@@ -68,7 +68,7 @@ julia> pattern(layer, x)
 ⎣⠀⠀⠀⠀⠈⠻⣦⠀⠀⠀⠀⠙⢷⣄⠀⠀⠀⠈⠻⢦⡀⎦
 ```
 
-SparseConnectivityTracer enumerates inputs `x` and primal outputs `y=f(x)` and returns a sparse matrix `C` of size $m \times n$, where `C[i, j]` is `true` if the compute graph connects the $j$-th entry in `x` to the $i$-th entry in `y`.
+SparseConnectivityTracer enumerates inputs `x` and primal outputs `y = f(x)` and returns a sparse matrix `C` of size `(m, n)`, where `C[i, j]` is `true` if the compute graph connects the `j`-th entry in `x` to the `i`-th entry in `y`.
 
 For more detailled examples, take a look at the [API reference](https://adrianhill.de/SparseConnectivityTracer.jl/dev/api).
 
