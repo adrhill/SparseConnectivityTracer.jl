@@ -4,10 +4,10 @@ using ADTypes: ADTypes
 import Random: rand, AbstractRNG, SamplerType
 import SparseArrays: sparse
 
-include("tracer.jl")
+include("tracer_connectivity.jl")
 include("conversion.jl")
 include("operators.jl")
-include("overload_tracer.jl")
+include("overload_connectivity.jl")
 include("connectivity.jl")
 include("adtypes.jl")
 
