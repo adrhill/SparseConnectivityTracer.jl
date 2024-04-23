@@ -4,17 +4,20 @@ using ADTypes: ADTypes
 import Random: rand, AbstractRNG, SamplerType
 import SparseArrays: sparse
 
-include("tracer.jl")
+abstract type AbstractTracer <: Number end
+
+include("tracers.jl")
 include("conversion.jl")
 include("operators.jl")
-include("overload_tracer.jl")
-include("connectivity.jl")
+include("overload_connectivity.jl")
+include("overload_jacobian.jl")
+include("pattern.jl")
 include("adtypes.jl")
 
-export Tracer
+export JacobianTracer, ConnectivityTracer
 export tracer, trace_input
 export inputs
-export connectivity
+export pattern
 export TracerSparsityDetector
 
 end # module

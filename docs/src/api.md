@@ -10,19 +10,26 @@ CollapsedDocStrings = true
 
 ## Interface
 ```@docs
-connectivity
+pattern
 TracerSparsityDetector
 ```
 
 ## Internals
-SparseConnectivityTracer works by pushing a `Number` type called [`Tracer`](@ref) through generic functions:
+SparseConnectivityTracer works by pushing `Number` types called tracers through generic functions.
+Currently, two tracer types are provided:
+
 ```@docs
-Tracer
+JacobianTracer
+ConnectivityTracer
+```
+
+Utilities to create tracers:
+```@docs
 tracer
 trace_input
 ```
 
-The following utilities can be used to extract input indices from [`Tracer`](@ref)s:
+Utility to extract input indices from tracers:
 ```@docs
 inputs
 ```

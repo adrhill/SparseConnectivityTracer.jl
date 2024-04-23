@@ -37,19 +37,22 @@ DocMeta.setdocmeta!(
     @testset "JET tests" begin
         JET.test_package(SparseConnectivityTracer; target_defined_modules=true)
     end
-    @testset verbose = true "Classification of operators by diff'ability" begin
+    @testset "Doctests" begin
+        Documenter.doctest(SparseConnectivityTracer)
+    end
+    @testset "Classification of operators by diff'ability" begin
         include("test_differentiability.jl")
     end
     @testset "Connectivity" begin
         x = rand(3)
-        xt = trace_input(x)
+        xt = trace_input(ConnectivityTracer, x)
 
         # Matrix multiplication
         A = rand(1, 3)
         yt = only(A * xt)
         @test inputs(yt) == [1, 2, 3]
 
-        @test connectivity(x -> only(A * x), x) ≈ [1 1 1]
+        @test pattern(x -> only(A * x), ConnectivityTracer, x) ≈ [1 1 1]
 
         # Custom functions
         f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])]
@@ -58,17 +61,29 @@ DocMeta.setdocmeta!(
         @test inputs(yt[2]) == [1, 2]
         @test inputs(yt[3]) == [3]
 
-        @test connectivity(f, x) ≈ [1 0 0; 1 1 0; 0 0 1]
+        @test pattern(f, ConnectivityTracer, x) ≈ [1 0 0; 1 1 0; 0 0 1]
+        @test pattern(f, JacobianTracer, x) ≈ [1 0 0; 1 1 0; 0 0 1]
 
-        @test connectivity(identity, rand()) ≈ [1;;]
-        @test connectivity(Returns(1), 1) ≈ [0;;]
+        @test pattern(identity, ConnectivityTracer, rand()) ≈ [1;;]
+        @test pattern(identity, JacobianTracer, rand()) ≈ [1;;]
+        @test pattern(Returns(1), ConnectivityTracer, 1) ≈ [0;;]
+        @test pattern(Returns(1), JacobianTracer, 1) ≈ [0;;]
+
+        # Test JacobianTracer on functions with zero derivatives
+        x = rand(2)
+        g(x) = [x[1] * x[2], ceil(x[1] * x[2]), x[1] * round(x[2])]
+        @test pattern(g, ConnectivityTracer, x) ≈ [1 1; 1 1; 1 1]
+        @test pattern(g, JacobianTracer, x) ≈ [1 1; 0 0; 1 0]
     end
     @testset "Real-world tests" begin
         @testset "NNlib" begin
             x = rand(3, 3, 2, 1) # WHCN
             w = rand(2, 2, 2, 1) # Conv((2, 2), 2 => 1)
-            C = connectivity(x -> NNlib.conv(x, w), x)
-            @test_reference "references/connectivity/NNlib/conv.txt" BitMatrix(C)
+            C = pattern(x -> NNlib.conv(x, w), ConnectivityTracer, x)
+            @test_reference "references/pattern/connectivity/NNlib/conv.txt" BitMatrix(C)
+            J = pattern(x -> NNlib.conv(x, w), JacobianTracer, x)
+            @test_reference "references/pattern/jacobian/NNlib/conv.txt" BitMatrix(J)
+            @test C == J
         end
         @testset "Brusselator" begin
             include("brusselator.jl")
@@ -85,8 +100,11 @@ DocMeta.setdocmeta!(
             du = similar(u)
             f!(du, u) = brusselator_2d_loop(du, u, p, nothing)
 
-            C = connectivity(f!, du, u)
-            @test_reference "references/connectivity/Brusselator.txt" BitMatrix(C)
+            C = pattern(f!, du, ConnectivityTracer, u)
+            @test_reference "references/pattern/connectivity/Brusselator.txt" BitMatrix(C)
+            J = pattern(f!, du, JacobianTracer, u)
+            @test_reference "references/pattern/jacobian/Brusselator.txt" BitMatrix(J)
+            @test C == J
 
             C_ref = Symbolics.jacobian_sparsity(f!, du, u)
             @test C == C_ref
@@ -94,8 +112,5 @@ DocMeta.setdocmeta!(
     end
     @testset "ADTypes integration" begin
         include("adtypes.jl")
-    end
-    @testset "Doctests" begin
-        Documenter.doctest(SparseConnectivityTracer)
     end
 end
