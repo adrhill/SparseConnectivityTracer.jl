@@ -19,12 +19,8 @@ SparseConnectivityTracer works by pushing `Number` types called tracers (e.g. [`
 
 ```@docs
 JacobianTracer
-jacobiantracer
-```
-
-```@docs
 ConnectivityTracer
-connectivitytracer
+tracer
 trace_input
 ```
 
