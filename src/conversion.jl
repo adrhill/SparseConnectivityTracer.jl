@@ -1,23 +1,25 @@
 ## Type conversions
-Base.promote_rule(::Type{T}, ::Type{N}) where {N<:Number,T<:AbstractTracer} = T
-Base.promote_rule(::Type{N}, ::Type{T}) where {N<:Number,T<:AbstractTracer} = T
+for T in (:JacobianTracer, :ConnectivityTracer)
+    @eval Base.promote_rule(::Type{$T}, ::Type{N}) where {N<:Number} = $T
+    @eval Base.promote_rule(::Type{N}, ::Type{$T}) where {N<:Number} = $T
 
-Base.big(::Type{T}) where {T<:AbstractTracer}   = T
-Base.widen(::Type{T}) where {T<:AbstractTracer} = T
-Base.widen(t::AbstractTracer)                   = t
+    @eval Base.big(::Type{$T})   = $T
+    @eval Base.widen(::Type{$T}) = $T
+    @eval Base.widen(t::$T)      = t
 
-Base.convert(::Type{T}, x::Number) where {T<:AbstractTracer} = empty(T)
-Base.convert(::Type{T}, t::T) where {T<:AbstractTracer} = t
-Base.convert(::Type{<:Number}, t::AbstractTracer) = t
+    @eval Base.convert(::Type{$T}, x::Number) = empty($T)
+    @eval Base.convert(::Type{$T}, t::$T) = t
+    @eval Base.convert(::Type{<:Number}, t::$T) = t
 
-## Array constructors
-Base.zero(::Type{T}) where {T<:AbstractTracer} = empty(T)
-Base.one(::Type{T}) where {T<:AbstractTracer}  = empty(T)
+    ## Array constructors
+    @eval Base.zero(::Type{$T}) = empty($T)
+    @eval Base.one(::Type{$T})  = empty($T)
 
-Base.similar(a::Array{T,1}) where {T<:AbstractTracer}                       = zeros(T, size(a, 1))
-Base.similar(a::Array{T,2}) where {T<:AbstractTracer}                       = zeros(T, size(a, 1), size(a, 2))
-Base.similar(a::Array{A,1}, ::Type{T}) where {A,T<:AbstractTracer}          = zeros(T, size(a, 1))
-Base.similar(a::Array{A,2}, ::Type{T}) where {A,T<:AbstractTracer}          = zeros(T, size(a, 1), size(a, 2))
-Base.similar(::Array{T}, m::Int) where {T<:AbstractTracer}                  = zeros(T, m)
-Base.similar(::Array, ::Type{T}, dims::Dims{N}) where {N,T<:AbstractTracer} = zeros(T, dims)
-Base.similar(::Array{T}, dims::Dims{N}) where {N,T<:AbstractTracer}         = zeros(T, dims)
+    @eval Base.similar(a::Array{$T,1})                               = zeros($T, size(a, 1))
+    @eval Base.similar(a::Array{$T,2})                               = zeros($T, size(a, 1), size(a, 2))
+    @eval Base.similar(a::Array{A,1}, ::Type{$T}) where {A}          = zeros($T, size(a, 1))
+    @eval Base.similar(a::Array{A,2}, ::Type{$T}) where {A}          = zeros($T, size(a, 1), size(a, 2))
+    @eval Base.similar(::Array{$T}, m::Int)                          = zeros($T, m)
+    @eval Base.similar(::Array, ::Type{$T}, dims::Dims{N}) where {N} = zeros($T, dims)
+    @eval Base.similar(::Array{$T}, dims::Dims{N}) where {N}         = zeros($T, dims)
+end
