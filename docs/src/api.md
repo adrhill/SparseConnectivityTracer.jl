@@ -15,14 +15,14 @@ TracerSparsityDetector
 ```
 
 ## Internals
-SparseConnectivityTracer works by pushing a `Number` type called [`Tracer`](@ref) through generic functions:
+SparseConnectivityTracer works by pushing a `Number` type called [`ConnectivityTracer`](@ref) through generic functions:
 ```@docs
-Tracer
+ConnectivityTracer
 tracer
 trace_input
 ```
 
-The following utilities can be used to extract input indices from [`Tracer`](@ref)s:
+The following utilities can be used to extract input indices from [`ConnectivityTracer`](@ref)s:
 ```@docs
 inputs
 ```

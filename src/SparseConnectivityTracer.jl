@@ -13,8 +13,8 @@ include("overload_connectivity.jl")
 include("connectivity.jl")
 include("adtypes.jl")
 
-export Tracer
-export tracer, trace_input
+export ConnectivityTracer, connectivitytracer
+export trace_input
 export inputs
 export connectivity
 export TracerSparsityDetector
