@@ -22,7 +22,7 @@ function ADTypes.jacobian_sparsity(f, x, ::TracerSparsityDetector)
 end
 
 function ADTypes.jacobian_sparsity(f!, y, x, ::TracerSparsityDetector)
-    return pattern(f!, JacobianTracer, y, x)
+    return pattern(f!, y, JacobianTracer, x)
 end
 
 function ADTypes.hessian_sparsity(f, x, ::TracerSparsityDetector)
