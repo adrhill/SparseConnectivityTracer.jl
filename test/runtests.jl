@@ -88,7 +88,7 @@ DocMeta.setdocmeta!(
             du = similar(u)
             f!(du, u) = brusselator_2d_loop(du, u, p, nothing)
 
-            C = pattern(f!, ConnectivityTracer, du, u)
+            C = pattern(f!, du, ConnectivityTracer, u)
             @test_reference "references/pattern/Brusselator.txt" BitMatrix(C)
 
             C_ref = Symbolics.jacobian_sparsity(f!, du, u)

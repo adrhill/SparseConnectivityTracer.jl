@@ -65,16 +65,16 @@ function pattern(f, ::Type{T}, x) where {T<:AbstractTracer}
 end
 
 """
-    pattern(f!, JacobianTracer, y, x)
+    pattern(f!, y, JacobianTracer, x)
 
 Computes the sparsity pattern of the Jacobian of `f!(y, x)`.
 
-    pattern(f!, ConnectivityTracer, y, x)
+    pattern(f!, y, ConnectivityTracer, x)
 
 Enumerates inputs `x` and primal outputs `y` after `f!(y, x)` and returns sparse matrix `C` of size `(m, n)`
 where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
 """
-function pattern(f!, ::Type{T}, y, x) where {T<:AbstractTracer}
+function pattern(f!, y, ::Type{T}, x) where {T<:AbstractTracer}
     xt = trace_input(T, x)
     yt = similar(y, T)
     f!(yt, xt)
