@@ -1,5 +1,5 @@
 ## Type conversions
-for T in (:JacobianTracer, :ConnectivityTracer)
+for T in (:JacobianTracer, :ConnectivityTracer, :HessianTracer)
     @eval Base.promote_rule(::Type{$T}, ::Type{N}) where {N<:Number} = $T
     @eval Base.promote_rule(::Type{N}, ::Type{$T}) where {N<:Number} = $T
 
