@@ -47,6 +47,7 @@ ops_1_to_1_s = (
 # ∂²f/∂x² == 0
 ops_1_to_1_f = (
     :+, :-,
+    :identity,
     :abs, :hypot,
     :deg2rad, :rad2deg,
     :mod2pi, :prevfloat, :nextfloat,
@@ -67,8 +68,8 @@ ops_1_to_1_z = (
 ops_1_to_1_const = (
     :zero, :one,
     :eps, 
-    :typemax,
-    # :floatmin, :floatmax, :maxintfloat, 
+    :typemin, :typemax,
+    :floatmin, :floatmax, :maxintfloat, 
 )
 
 ops_1_to_1 = union(
@@ -89,7 +90,7 @@ ops_1_to_1 = union(
 # ∂²f/∂y²  != 0
 # ∂²f/∂x∂y != 0
 ops_2_to_1_ssc = (
-    :hypot,
+    :^, :hypot
 )
 
 # ops_2_to_1_ssz: 

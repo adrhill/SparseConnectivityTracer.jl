@@ -17,7 +17,6 @@ for fn in ops_2_to_1
 end
 
 # Extra types required for exponent
-Base.:^(a::ConnectivityTracer, b::ConnectivityTracer) = uniontracer(a, b)
 for T in (:Real, :Integer, :Rational)
     @eval Base.:^(t::ConnectivityTracer, ::$T) = t
     @eval Base.:^(::$T, t::ConnectivityTracer) = t
