@@ -14,6 +14,19 @@ julia> ADTypes.jacobian_sparsity(diff, rand(4), TracerSparsityDetector())
  ⋅  1  1  ⋅
  ⋅  ⋅  1  1
 ```
+
+```jldoctest
+julia> using ADTypes, SparseConnectivityTracer
+
+julia> f(x) = x[1] + x[2]*x[3] + 1/x[4];
+
+julia> ADTypes.hessian_sparsity(f, rand(4), TracerSparsityDetector())
+4×4 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 3 stored entries:
+ ⋅  ⋅  ⋅  ⋅
+ ⋅  ⋅  1  ⋅
+ ⋅  1  ⋅  ⋅
+ ⋅  ⋅  ⋅  1
+```
 """
 struct TracerSparsityDetector <: ADTypes.AbstractSparsityDetector end
 
