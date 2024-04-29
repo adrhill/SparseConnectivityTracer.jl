@@ -53,7 +53,6 @@ for fn in ops_1_to_2_zz
 end
 
 # Extra types required for exponent
-Base.:^(a::JacobianTracer, b::JacobianTracer) = uniontracer(a, b)
 for T in (:Real, :Integer, :Rational)
     @eval Base.:^(t::JacobianTracer, ::$T) = t
     @eval Base.:^(::$T, t::JacobianTracer) = t

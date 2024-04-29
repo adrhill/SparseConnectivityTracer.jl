@@ -43,7 +43,7 @@ DocMeta.setdocmeta!(
     @testset "Classification of operators by diff'ability" begin
         include("test_differentiability.jl")
     end
-    @testset "Connectivity" begin
+    @testset "First order" begin
         x = rand(3)
         xt = trace_input(ConnectivityTracer, x)
 
@@ -74,6 +74,34 @@ DocMeta.setdocmeta!(
         g(x) = [x[1] * x[2], ceil(x[1] * x[2]), x[1] * round(x[2])]
         @test pattern(g, ConnectivityTracer, x) ≈ [1 1; 1 1; 1 1]
         @test pattern(g, JacobianTracer, x) ≈ [1 1; 0 0; 1 0]
+    end
+    @testset "Second order" begin
+        @test pattern(identity, HessianTracer, rand()) ≈ [0;;]
+        @test pattern(sqrt, HessianTracer, rand()) ≈ [1;;]
+
+        @test pattern(x -> 1 * x, HessianTracer, rand()) ≈ [0;;]
+        @test pattern(x -> x * 1, HessianTracer, rand()) ≈ [0;;]
+
+        x = rand(5)
+        f(x) = x[1] + x[2] * x[3] + 1 / x[4] + 1 * x[5]
+        H = pattern(f, HessianTracer, x)
+        @test H ≈ [
+            0 0 0 0 0
+            0 0 1 0 0
+            0 1 0 0 0
+            0 0 0 1 0
+            0 0 0 0 0
+        ]
+
+        g(x) = f(x) + x[2]^x[5]
+        H = pattern(g, HessianTracer, x)
+        @test H ≈ [
+            0 0 0 0 0
+            0 1 1 0 1
+            0 1 0 0 0
+            0 0 0 1 0
+            0 1 0 0 1
+        ]
     end
     @testset "Real-world tests" begin
         @testset "NNlib" begin

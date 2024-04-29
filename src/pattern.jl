@@ -36,16 +36,22 @@ end
 
 ## Construct sparsity pattern matrix
 """
-    pattern(f, JacobianTracer, x)
-
-Computes the sparsity pattern of the Jacobian of `y = f(x)`.
-
     pattern(f, ConnectivityTracer, x)
 
 Enumerates inputs `x` and primal outputs `y = f(x)` and returns sparse matrix `C` of size `(m, n)`
 where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
 
-## Example
+    pattern(f, JacobianTracer, x)
+
+Computes the sparsity pattern of the Jacobian of `y = f(x)`.
+
+    pattern(f, HessianTracer, x)
+
+Computes the sparsity pattern of the Hessian of a scalar function `y = f(x)`.
+
+## Examples
+### First order
+
 ```jldoctest
 julia> x = rand(3);
 
@@ -56,6 +62,32 @@ julia> pattern(f, ConnectivityTracer, x)
  1  ⋅  ⋅
  1  1  ⋅
  ⋅  ⋅  1
+```
+
+### Second order
+
+```jldoctest
+julia> x = rand(5);
+
+julia> f(x) = x[1] + x[2]*x[3] + 1/x[4] + 1*x[5];
+
+julia> pattern(f, HessianTracer, x)
+5×5 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 3 stored entries:
+ ⋅  ⋅  ⋅  ⋅  ⋅
+ ⋅  ⋅  1  ⋅  ⋅
+ ⋅  1  ⋅  ⋅  ⋅
+ ⋅  ⋅  ⋅  1  ⋅
+ ⋅  ⋅  ⋅  ⋅  ⋅
+
+julia> g(x) = f(x) + x[2]^x[5];
+
+julia> pattern(g, HessianTracer, x)
+5×5 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 7 stored entries:
+ ⋅  ⋅  ⋅  ⋅  ⋅
+ ⋅  1  1  ⋅  1
+ ⋅  1  ⋅  ⋅  ⋅
+ ⋅  ⋅  ⋅  1  ⋅
+ ⋅  1  ⋅  ⋅  1
 ```
 """
 function pattern(f, ::Type{T}, x) where {T<:AbstractTracer}
@@ -89,15 +121,15 @@ function _pattern(xt::AbstractArray{<:AbstractTracer}, yt::AbstractArray{<:Numbe
 end
 
 function _pattern_to_sparsemat(
-    xt::AbstractArray{<:AbstractTracer}, yt::AbstractArray{<:Number}
-)
+    xt::AbstractArray{T}, yt::AbstractArray{<:Number}
+) where {T<:AbstractTracer}
     # Construct matrix of size (ouput_dim, input_dim)
     n, m = length(xt), length(yt)
-    I = UInt64[]
-    J = UInt64[]
-    V = Bool[]
+    I = UInt64[] # row indices
+    J = UInt64[] # column indices
+    V = Bool[]   # values
     for (i, y) in enumerate(yt)
-        if y isa AbstractTracer
+        if y isa T
             for j in inputs(y)
                 push!(I, i)
                 push!(J, j)
@@ -106,4 +138,27 @@ function _pattern_to_sparsemat(
         end
     end
     return sparse(I, J, V, m, n)
+end
+
+function _pattern_to_sparsemat(
+    xt::AbstractArray{HessianTracer}, yt::AbstractArray{HessianTracer}
+)
+    length(yt) != 1 && error("pattern(f, HessianTracer, x) expects scalar output y=f(x).")
+    y = only(yt)
+
+    # Allocate Hessian matrix
+    n = length(xt)
+    I = UInt64[] # row indices
+    J = UInt64[] # column indices
+    V = Bool[]   # values
+
+    for i in keys(y.inputs)
+        for j in y.inputs[i]
+            push!(I, i)
+            push!(J, j)
+            push!(V, true)
+        end
+    end
+    H = sparse(I, J, V, n, n)
+    return H
 end

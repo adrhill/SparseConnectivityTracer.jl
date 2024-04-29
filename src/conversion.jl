@@ -1,5 +1,5 @@
 ## Type conversions
-for T in (:JacobianTracer, :ConnectivityTracer)
+for T in (:JacobianTracer, :ConnectivityTracer, :HessianTracer)
     @eval Base.promote_rule(::Type{$T}, ::Type{N}) where {N<:Number} = $T
     @eval Base.promote_rule(::Type{N}, ::Type{$T}) where {N<:Number} = $T
 
@@ -11,10 +11,13 @@ for T in (:JacobianTracer, :ConnectivityTracer)
     @eval Base.convert(::Type{$T}, t::$T) = t
     @eval Base.convert(::Type{<:Number}, t::$T) = t
 
-    ## Array constructors
-    @eval Base.zero(::Type{$T}) = empty($T)
-    @eval Base.one(::Type{$T})  = empty($T)
+    ## Constants
+    @eval Base.zero(::Type{$T})    = empty($T)
+    @eval Base.one(::Type{$T})     = empty($T)
+    @eval Base.typemin(::Type{$T}) = empty($T)
+    @eval Base.typemax(::Type{$T}) = empty($T)
 
+    ## Array constructors
     @eval Base.similar(a::Array{$T,1})                               = zeros($T, size(a, 1))
     @eval Base.similar(a::Array{$T,2})                               = zeros($T, size(a, 1), size(a, 2))
     @eval Base.similar(a::Array{A,1}, ::Type{$T}) where {A}          = zeros($T, size(a, 1))

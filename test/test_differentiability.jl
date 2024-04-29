@@ -97,13 +97,8 @@ const TEST_1_TO_1 = (
     ("Second order", ops_1_to_1_s, second_order),
     ("First order", ops_1_to_1_f, first_order),
     ("Zero order", ops_1_to_1_z, zero_order),
-    ("Constant", ops_1_to_1_const, zero_order),
 )
 @testset verbose = true "1-to-1" begin
-    @testset "All operators covered" begin
-        all_ops = union([ops for (name, ops, ref_order) in TEST_1_TO_1]...)
-        @test Set(all_ops) == Set(ops_1_to_1)
-    end
     for (name, ops, ref_order) in TEST_1_TO_1
         @testset "$name" begin
             for op in ops

@@ -19,8 +19,9 @@ SparseConnectivityTracer works by pushing `Number` types called tracers through 
 Currently, two tracer types are provided:
 
 ```@docs
-JacobianTracer
 ConnectivityTracer
+JacobianTracer
+HessianTracer
 ```
 
 Utilities to create tracers:
