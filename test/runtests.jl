@@ -83,7 +83,7 @@ DocMeta.setdocmeta!(
         @test pattern(x -> x * 1, HessianTracer, rand()) ≈ [0;;]
 
         x = rand(5)
-        f(x) = x[1] + x[2] * x[3] + 1 / x[4]
+        f(x) = x[1] + x[2] * x[3] + 1 / x[4] + 1 * x[5]
         H = pattern(f, HessianTracer, x)
         @test H ≈ [
             0 0 0 0 0
@@ -93,7 +93,7 @@ DocMeta.setdocmeta!(
             0 0 0 0 0
         ]
 
-        g(x) = x[1] + x[2] * x[3] + 1 / x[4] + x[2]^x[5]
+        g(x) = f(x) + x[2]^x[5]
         H = pattern(g, HessianTracer, x)
         @test H ≈ [
             0 0 0 0 0
