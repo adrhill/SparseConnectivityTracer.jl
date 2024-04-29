@@ -79,6 +79,9 @@ DocMeta.setdocmeta!(
         @test pattern(identity, HessianTracer, rand()) ≈ [0;;]
         @test pattern(sqrt, HessianTracer, rand()) ≈ [1;;]
 
+        @test pattern(x -> 1 * x, HessianTracer, rand()) ≈ [0;;]
+        @test pattern(x -> x * 1, HessianTracer, rand()) ≈ [0;;]
+
         x = rand(5)
         f(x) = x[1] + x[2] * x[3] + 1 / x[4]
         H = pattern(f, HessianTracer, x)

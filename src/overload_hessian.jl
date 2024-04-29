@@ -56,7 +56,7 @@ for fn in ops_2_to_1_fsc
         b = promote_order(b)
         return distributive_merge(a, b)
     end
-    @eval Base.$fn(t::HessianTracer, ::Number) = promote_order(t)
+    @eval Base.$fn(t::HessianTracer, ::Number) = t
     @eval Base.$fn(::Number, t::HessianTracer) = promote_order(t)
 end
 
@@ -72,14 +72,14 @@ end
 # Including first-order only
 for fn in ops_2_to_1_ffc
     @eval Base.$fn(a::HessianTracer, b::HessianTracer) = distributive_merge(a, b)
-    @eval Base.$fn(t::HessianTracer, ::Number) = promote_order(t)
-    @eval Base.$fn(::Number, t::HessianTracer) = promote_order(t)
+    @eval Base.$fn(t::HessianTracer, ::Number) = t
+    @eval Base.$fn(::Number, t::HessianTracer) = t
 end
 
 for fn in ops_2_to_1_ffz
     @eval Base.$fn(a::HessianTracer, b::HessianTracer) = additive_merge(a, b)
-    @eval Base.$fn(t::HessianTracer, ::Number) = promote_order(t)
-    @eval Base.$fn(::Number, t::HessianTracer) = promote_order(t)
+    @eval Base.$fn(t::HessianTracer, ::Number) = t
+    @eval Base.$fn(::Number, t::HessianTracer) = t
 end
 
 # Including zero-order
