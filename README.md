@@ -10,11 +10,16 @@ Fast Jacobian and Hessian sparsity detection via operator-overloading.
 
 ## Installation 
 To install this package, open the Julia REPL and run 
+
 ```julia-repl
 julia> ]add SparseConnectivityTracer
 ```
 
 ## Examples
+### Jacobian
+
+For functions `y = f(x)` and `f!(y, x)`, the sparsity pattern of the Jacobian of $f$ can be obtained
+by computing a single forward-pass through `f`:
 
 ```julia-repl
 julia> using SparseConnectivityTracer
@@ -61,7 +66,34 @@ julia> pattern(layer, JacobianTracer, x)
 ⎣⠀⠀⠀⠙⢷⣄⠀⠀⠈⠻⣦⠀⠀⠀⠙⢦⡀⎦
 ```
 
-SparseConnectivityTracer enumerates inputs `x` and primal outputs `y = f(x)` and returns a sparse matrix `C` of size $m \times n$, where `C[i, j]` is `true` if the compute graph connects the $j$-th entry in `x` to the $i$-th entry in `y`.
+### Hessian
+
+For scalar functions `y = f(x)`, the sparsity pattern of the Hessian of $f$ can be obtained
+by computing a single forward-pass through `f`:
+
+```julia-repl
+julia> x = rand(5);
+
+julia> f(x) = x[1] + x[2]*x[3] + 1/x[4] + 1*x[5];
+
+julia> pattern(f, HessianTracer, x)
+5×5 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 3 stored entries:
+ ⋅  ⋅  ⋅  ⋅  ⋅
+ ⋅  ⋅  1  ⋅  ⋅
+ ⋅  1  ⋅  ⋅  ⋅
+ ⋅  ⋅  ⋅  1  ⋅
+ ⋅  ⋅  ⋅  ⋅  ⋅
+
+julia> g(x) = f(x) + x[2]^x[5];
+
+julia> pattern(g, HessianTracer, x)
+5×5 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 7 stored entries:
+ ⋅  ⋅  ⋅  ⋅  ⋅
+ ⋅  1  1  ⋅  1
+ ⋅  1  ⋅  ⋅  ⋅
+ ⋅  ⋅  ⋅  1  ⋅
+ ⋅  1  ⋅  ⋅  1
+```
 
 For more detailled examples, take a look at the [documentation](https://adrianhill.de/SparseConnectivityTracer.jl/dev).
 
