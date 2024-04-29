@@ -76,6 +76,8 @@ DocMeta.setdocmeta!(
         @test pattern(g, JacobianTracer, x) ≈ [1 1; 0 0; 1 0]
 
         # Code coverage
+        @test pattern(x -> [sincos(x)...], ConnectivityTracer, 1) ≈ [1; 1]
+        @test pattern(x -> [sincos(x)...], JacobianTracer, 1) ≈ [1; 1]
         @test pattern(typemax, ConnectivityTracer, 1) ≈ [0;;]
         @test pattern(typemax, JacobianTracer, 1) ≈ [0;;]
         @test pattern(x -> x^(2//3), ConnectivityTracer, 1) ≈ [1;;]
@@ -91,6 +93,16 @@ DocMeta.setdocmeta!(
 
         @test rand(ConnectivityTracer) == empty(ConnectivityTracer)
         @test rand(JacobianTracer) == empty(JacobianTracer)
+
+        t = tracer(ConnectivityTracer, 1, 2, 3)
+        @test ConnectivityTracer(t) == t
+        @test empty(t) == empty(ConnectivityTracer)
+        @test ConnectivityTracer(1) == empty(ConnectivityTracer)
+
+        t = tracer(JacobianTracer, 1, 2, 3)
+        @test JacobianTracer(t) == t
+        @test empty(t) == empty(JacobianTracer)
+        @test JacobianTracer(1) == empty(JacobianTracer)
 
         # Base.show
         @test_reference "references/show/ConnectivityTracer.txt" repr(
@@ -118,6 +130,11 @@ DocMeta.setdocmeta!(
         @test pattern(x -> round(x, RoundNearestTiesUp), HessianTracer, 1) ≈ [0;;]
 
         @test rand(HessianTracer) == empty(HessianTracer)
+
+        t = tracer(HessianTracer, 1, 2, 3)
+        @test HessianTracer(t) == t
+        @test empty(t) == empty(HessianTracer)
+        @test HessianTracer(1) == empty(HessianTracer)
 
         x = rand(4)
 
@@ -182,7 +199,7 @@ DocMeta.setdocmeta!(
             0 0 0 0 0
         ]
 
-        bar(x) = f(x) + x[2]^x[5]
+        bar(x) = foo(x) + x[2]^x[5]
         H = pattern(bar, HessianTracer, x)
         @test H ≈ [
             0 0 0 0 0

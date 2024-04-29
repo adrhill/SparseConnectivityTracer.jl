@@ -124,7 +124,7 @@ function pattern(f!, y, ::Type{T}, x) where {T<:AbstractTracer}
 end
 
 _pattern(xt::AbstractTracer, yt::Number) = _pattern([xt], [yt])
-_pattern(xt::AbstractTracer, yt::AbstractArray{Number}) = _pattern([xt], yt)
+_pattern(xt::AbstractTracer, yt::AbstractArray{<:Number}) = _pattern([xt], yt)
 _pattern(xt::AbstractArray{<:AbstractTracer}, yt::Number) = _pattern(xt, [yt])
 function _pattern(xt::AbstractArray{<:AbstractTracer}, yt::AbstractArray{<:Number})
     return _pattern_to_sparsemat(xt, yt)
