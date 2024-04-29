@@ -6,9 +6,7 @@
 [![Coverage](https://codecov.io/gh/adrhill/SparseConnectivityTracer.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/adrhill/SparseConnectivityTracer.jl)
 [![Aqua](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
-Fast sparsity detection via operator-overloading.
-
-Will soon include Hessian sparsity detection ([#20](https://github.com/adrhill/SparseConnectivityTracer.jl/issues/20)).
+Fast Jacobian and Hessian sparsity detection via operator-overloading.
 
 ## Installation 
 To install this package, open the Julia REPL and run 
