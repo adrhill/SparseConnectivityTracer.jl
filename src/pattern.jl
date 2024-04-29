@@ -12,19 +12,29 @@ Supports [`JacobianTracer`](@ref) and [`ConnectivityTracer`](@ref).
 ```jldoctest
 julia> x = rand(3);
 
-julia> f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])];
-
-julia> xt = trace_input(ConnectivityTracer, x)
+julia> trace_input(ConnectivityTracer, x)
 3-element Vector{ConnectivityTracer}:
  ConnectivityTracer(1,)
  ConnectivityTracer(2,)
  ConnectivityTracer(3,)
 
-julia> yt = f(xt)
-3-element Vector{ConnectivityTracer}:
-   ConnectivityTracer(1,)
- ConnectivityTracer(1, 2)
-   ConnectivityTracer(3,)
+julia> trace_input(JacobianTracer, x)
+3-element Vector{JacobianTracer}:
+ JacobianTracer(1,)
+ JacobianTracer(2,)
+ JacobianTracer(3,)
+
+julia> trace_input(HessianTracer, x)
+3-element Vector{HessianTracer}:
+ HessianTracer(
+  1 => (),
+)
+ HessianTracer(
+  2 => (),
+)
+ HessianTracer(
+  3 => (),
+)
 ```
 """
 trace_input(::Type{T}, x) where {T<:AbstractTracer} = trace_input(T, x, 1)
@@ -114,7 +124,7 @@ function pattern(f!, y, ::Type{T}, x) where {T<:AbstractTracer}
 end
 
 _pattern(xt::AbstractTracer, yt::Number) = _pattern([xt], [yt])
-_pattern(xt::AbstractTracer, yt::AbstractArray{Number}) = _pattern([xt], yt)
+_pattern(xt::AbstractTracer, yt::AbstractArray{<:Number}) = _pattern([xt], yt)
 _pattern(xt::AbstractArray{<:AbstractTracer}, yt::Number) = _pattern(xt, [yt])
 function _pattern(xt::AbstractArray{<:AbstractTracer}, yt::AbstractArray{<:Number})
     return _pattern_to_sparsemat(xt, yt)

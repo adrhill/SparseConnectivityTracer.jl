@@ -88,7 +88,7 @@ function Base.show(io::IO, t::HessianTracer)
         Base.show_delim_array(io, collect(t.inputs[key]), "(", ',', ')', true)
         println(io, ",")
     end
-    return println(io, ")")
+    return print(io, ")")
 end
 
 const EMPTY_HESSIAN_TRACER   = HessianTracer(HessianDict())
