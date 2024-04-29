@@ -89,15 +89,15 @@ function _pattern(xt::AbstractArray{<:AbstractTracer}, yt::AbstractArray{<:Numbe
 end
 
 function _pattern_to_sparsemat(
-    xt::AbstractArray{<:AbstractTracer}, yt::AbstractArray{<:Number}
-)
+    xt::AbstractArray{T}, yt::AbstractArray{<:Number}
+) where {T<:AbstractTracer}
     # Construct matrix of size (ouput_dim, input_dim)
     n, m = length(xt), length(yt)
-    I = UInt64[]
-    J = UInt64[]
-    V = Bool[]
+    I = UInt64[] # row indices
+    J = UInt64[] # column indices
+    V = Bool[]   # values
     for (i, y) in enumerate(yt)
-        if y isa AbstractTracer
+        if y isa T
             for j in inputs(y)
                 push!(I, i)
                 push!(J, j)
@@ -106,4 +106,27 @@ function _pattern_to_sparsemat(
         end
     end
     return sparse(I, J, V, m, n)
+end
+
+function _pattern_to_sparsemat(
+    xt::AbstractArray{HessianTracer}, yt::AbstractArray{HessianTracer}
+)
+    length(yt) != 1 && error("pattern(f, HessianTracer, x) expects scalar output y=f(x).")
+    y = only(yt)
+
+    # Allocate Hessian matrix
+    n = length(xt)
+    I = UInt64[] # row indices
+    J = UInt64[] # column indices
+    V = Bool[]   # values
+
+    for i in keys(y.inputs)
+        for j in y.inputs[i]
+            push!(I, i)
+            push!(J, j)
+            push!(V, true)
+        end
+    end
+    H = sparse(I, J, V, n, n)
+    return H
 end
