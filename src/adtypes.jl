@@ -26,6 +26,5 @@ function ADTypes.jacobian_sparsity(f!, y, x, ::TracerSparsityDetector)
 end
 
 function ADTypes.hessian_sparsity(f, x, ::TracerSparsityDetector)
-    # TODO: return pattern(f, HessianTracer, x)
-    return error("Hessian sparsity is not yet implemented for `TracerSparsityDetector`.")
+    return pattern(f, HessianTracer, x)
 end
