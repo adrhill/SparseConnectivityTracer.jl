@@ -156,6 +156,42 @@ DocMeta.setdocmeta!(
             0 0 0 0
         ]
 
+        f(x) = (x[1] * x[2]) * (x[3] * x[4])
+        H = pattern(f, HessianTracer, x)
+        @test H ≈ [
+            0 1 1 1
+            1 0 1 1
+            1 1 0 1
+            1 1 1 0
+        ]
+
+        f(x) = (x[1] + x[2]) * (x[3] + x[4])
+        H = pattern(f, HessianTracer, x)
+        @test H ≈ [
+            0 0 1 1
+            0 0 1 1
+            1 1 0 0
+            1 1 0 0
+        ]
+
+        f(x) = (x[1] + x[2] + x[3] + x[4])^2
+        H = pattern(f, HessianTracer, x)
+        @test H ≈ [
+            1 1 1 1
+            1 1 1 1
+            1 1 1 1
+            1 1 1 1
+        ]
+
+        f(x) = 1 / (x[1] + x[2] + x[3] + x[4])
+        H = pattern(f, HessianTracer, x)
+        @test H ≈ [
+            1 1 1 1
+            1 1 1 1
+            1 1 1 1
+            1 1 1 1
+        ]
+
         f(x) = (x[1] - x[2]) + (x[3] - 1) + (1 - x[4])
         H = pattern(f, HessianTracer, x)
         @test H ≈ [
@@ -187,6 +223,16 @@ DocMeta.setdocmeta!(
         f(x) = sum(sincosd(x))
         H = pattern(f, HessianTracer, x)
         @test H ≈ [1;;]
+
+        x = rand(4)
+        f(x) = sum(diff(x) .^ 3)
+        H = pattern(f, HessianTracer, x)
+        @test H ≈ [
+            1 1 0 0
+            1 1 1 0
+            0 1 1 1
+            0 0 1 1
+        ]
 
         x = rand(5)
         foo(x) = x[1] + x[2] * x[3] + 1 / x[4] + 1 * x[5]

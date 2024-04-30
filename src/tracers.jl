@@ -101,8 +101,9 @@ HessianTracer(t::HessianTracer) = t
 # Turn first-order interactions into second-order interactions
 function promote_order(t::HessianTracer)
     d = deepcopy(t.inputs)
-    for k in keys(d)
-        union!(d[k], k)
+    ks = keys(d)
+    for v in values(d)
+        union!(v, ks)
     end
     return HessianTracer(d)
 end
