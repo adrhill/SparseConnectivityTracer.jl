@@ -198,7 +198,6 @@ DocMeta.setdocmeta!(
                 ]
 
                 H = pattern(x -> copysign(x[1] * x[2], x[3] * x[4]), HT, rand(4))
-                @show H
                 @test H ≈ [
                     0 1 0 0
                     1 0 0 0
@@ -254,27 +253,15 @@ DocMeta.setdocmeta!(
         end
     end
     @testset "Real-world tests" begin
+        include("brusselator.jl")
+
         for S in (BitSet, Set{UInt64})
             @testset "Set type $S" begin
                 CT = ConnectivityTracer{S}
                 JT = JacobianTracer{S}
                 HT = HessianTracer{S}
 
-                @testset "NNlib" begin
-                    x = rand(3, 3, 2, 1) # WHCN
-                    w = rand(2, 2, 2, 1) # Conv((2, 2), 2 => 1)
-                    C = pattern(x -> NNlib.conv(x, w), CT, x)
-                    @test_reference "references/pattern/connectivity/NNlib/conv.txt" BitMatrix(
-                        C
-                    )
-                    J = pattern(x -> NNlib.conv(x, w), JT, x)
-                    @test_reference "references/pattern/jacobian/NNlib/conv.txt" BitMatrix(
-                        J
-                    )
-                    @test C == J
-                end
                 @testset "Brusselator" begin
-                    include("brusselator.jl")
                     N = 6
                     dims = (N, N, 2)
                     A = 1.0
@@ -300,6 +287,19 @@ DocMeta.setdocmeta!(
 
                     C_ref = Symbolics.jacobian_sparsity(f!, du, u)
                     @test C == C_ref
+                end
+                @testset "NNlib" begin
+                    x = rand(3, 3, 2, 1) # WHCN
+                    w = rand(2, 2, 2, 1) # Conv((2, 2), 2 => 1)
+                    C = pattern(x -> NNlib.conv(x, w), CT, x)
+                    @test_reference "references/pattern/connectivity/NNlib/conv.txt" BitMatrix(
+                        C
+                    )
+                    J = pattern(x -> NNlib.conv(x, w), JT, x)
+                    @test_reference "references/pattern/jacobian/NNlib/conv.txt" BitMatrix(
+                        J
+                    )
+                    @test C == J
                 end
             end
         end
