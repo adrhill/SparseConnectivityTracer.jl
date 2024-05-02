@@ -19,6 +19,7 @@ export JacobianTracer, ConnectivityTracer, HessianTracer
 export tracer, trace_input
 export inputs
 export pattern
+export connectivity_pattern, jacobian_pattern, hessian_pattern
 export TracerSparsityDetector
 
 end # module
