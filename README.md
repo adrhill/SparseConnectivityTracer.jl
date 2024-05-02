@@ -31,7 +31,7 @@ julia> x = rand(3);
 
 julia> f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])];
 
-julia> pattern(f, JacobianTracer{BitSet}, x)
+julia> jacobian_pattern(f, x)
 3×3 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 4 stored entries:
  1  ⋅  ⋅
  1  1  ⋅
@@ -46,7 +46,7 @@ julia> x = rand(28, 28, 3, 1);
 
 julia> layer = Conv((3, 3), 3 => 8);
 
-julia> pattern(layer, JacobianTracer{BitSet}, x)
+julia> jacobian_pattern(layer, x)
 5408×2352 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 146016 stored entries:
 ⎡⠙⢦⡀⠀⠀⠘⢷⣄⠀⠀⠈⠻⣦⡀⠀⠀⠀⎤
 ⎢⠀⠀⠙⢷⣄⠀⠀⠙⠷⣄⠀⠀⠈⠻⣦⡀⠀⎥
@@ -69,6 +69,9 @@ julia> pattern(layer, JacobianTracer{BitSet}, x)
 ⎣⠀⠀⠀⠙⢷⣄⠀⠀⠈⠻⣦⠀⠀⠀⠙⢦⡀⎦
 ```
 
+The type of index set `T<:AbstractSet{<:Integer}` that is internally used to keep track of connectivity can be specified via `jacobian_pattern(f, x, T)`, defaulting to `BitSet`. 
+For high-dimensional functions, `Set{UInt64}` can be more efficient .
+
 ### Hessian
 
 For scalar functions `y = f(x)`, the sparsity pattern of the Hessian of $f$ can be obtained
@@ -79,7 +82,7 @@ julia> x = rand(5);
 
 julia> f(x) = x[1] + x[2]*x[3] + 1/x[4] + 1*x[5];
 
-julia> pattern(f, HessianTracer{BitSet}, x)
+julia> hessian_pattern(f, x)
 5×5 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 3 stored entries:
  ⋅  ⋅  ⋅  ⋅  ⋅
  ⋅  ⋅  1  ⋅  ⋅
@@ -89,7 +92,7 @@ julia> pattern(f, HessianTracer{BitSet}, x)
 
 julia> g(x) = f(x) + x[2]^x[5];
 
-julia> pattern(g, HessianTracer{BitSet}, x)
+julia> hessian_pattern(g, x)
 5×5 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 7 stored entries:
  ⋅  ⋅  ⋅  ⋅  ⋅
  ⋅  1  1  ⋅  1

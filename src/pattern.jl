@@ -1,5 +1,6 @@
-## Enumerate inputs
+const DEFAULT_SET_TYPE = BitSet
 
+## Enumerate inputs
 """
     trace_input(T, x)
     trace_input(T, x)
@@ -7,35 +8,6 @@
 
 Enumerates input indices and constructs the specified type `T` of tracer.
 Supports [`ConnectivityTracer`](@ref), [`JacobianTracer`](@ref) and [`HessianTracer`](@ref).
-
-## Example
-```jldoctest
-julia> x = rand(3);
-
-julia> trace_input(ConnectivityTracer{BitSet}, x)
-3-element Vector{ConnectivityTracer{BitSet}}:
- ConnectivityTracer{BitSet}(1,)
- ConnectivityTracer{BitSet}(2,)
- ConnectivityTracer{BitSet}(3,)
-
-julia> trace_input(JacobianTracer{BitSet}, x)
-3-element Vector{JacobianTracer{BitSet}}:
- JacobianTracer{BitSet}(1,)
- JacobianTracer{BitSet}(2,)
- JacobianTracer{BitSet}(3,)
-
-julia> trace_input(HessianTracer{BitSet}, x)
-3-element Vector{HessianTracer{BitSet}}:
- HessianTracer{BitSet}(
-  1 => (),
-)
- HessianTracer{BitSet}(
-  2 => (),
-)
- HessianTracer{BitSet}(
-  3 => (),
-)
-```
 """
 trace_input(::Type{T}, x) where {T<:AbstractTracer} = trace_input(T, x, 1)
 trace_input(::Type{T}, ::Number, i) where {T<:AbstractTracer} = tracer(T, i)
@@ -47,9 +19,12 @@ end
 ## Construct sparsity pattern matrix
 """
     connectivity_pattern(f, x)
+    connectivity_pattern(f, x, T)
 
 Enumerates inputs `x` and primal outputs `y = f(x)` and returns sparse matrix `C` of size `(m, n)`
 where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
+
+The type of index set `T<:AbstractSet{<:Integer}` can be specified as an optional argument and defaults to `BitSet`.
 
 ## Example
 
@@ -65,16 +40,24 @@ julia> connectivity_pattern(f, x)
  ⋅  ⋅  1
 ```
 """
-connectivity_pattern(f, x) = pattern(f, ConnectivityTracer, x)
+connectivity_pattern(f, x, settype::Type{S}=DEFAULT_SET_TYPE) where {S<:AbstractIndexSet} =
+    pattern(f, ConnectivityTracer{S}, x)
 
 """
-    connectivity_pattern(f!, y, ConnectivityTracer, x)
+    connectivity_pattern(f!, y, x)
 
 Enumerates inputs `x` and primal outputs `y` after `f!(y, x)` and returns sparse matrix `C` of size `(m, n)`
 where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
 
+The type of index set `T<:AbstractSet{<:Integer}` can be specified as an optional argument and defaults to `BitSet`.
+
+
 """
-connectivity_pattern(f!, y, x) = pattern(f!, y, ConnectivityTracer, x)
+function connectivity_pattern(
+    f!, y, x, ::Type{S}=DEFAULT_SET_TYPE
+) where {S<:AbstractIndexSet}
+    return pattern(f!, y, ConnectivityTracer{S}, x)
+end
 
 """
     jacobian_pattern(f, x)
@@ -95,19 +78,26 @@ julia> jacobian_pattern(f, x)
  ⋅  ⋅  ⋅
 ```
 """
-jacobian_pattern(f, x) = pattern(f, JacobianTracer, x)
+function jacobian_pattern(f, x, ::Type{S}=DEFAULT_SET_TYPE) where {S<:AbstractIndexSet}
+    return pattern(f, JacobianTracer{S}, x)
+end
 
 """
-    pattern(f!, y, JacobianTracer, x)
+    jacobian_pattern(f!, y, x)
 
 Compute the sparsity pattern of the Jacobian of `f!(y, x)`.
 """
-jacobian_pattern(f!, y, x) = pattern(f!, y, JacobianTracer, x)
+function jacobian_pattern(f!, y, x, ::Type{S}=DEFAULT_SET_TYPE) where {S<:AbstractIndexSet}
+    return pattern(f!, y, JacobianTracer{S}, x)
+end
 
 """
-    pattern(f, HessianTracer, x)
+    hessian_pattern(f, HessianTracer, x)
 
 Computes the sparsity pattern of the Hessian of a scalar function `y = f(x)`.
+
+The type of index set `T<:AbstractSet{<:Integer}` can be specified as an optional argument and defaults to `BitSet`.
+
 
 ## Example
 
@@ -116,7 +106,7 @@ julia> x = rand(5);
 
 julia> f(x) = x[1] + x[2]*x[3] + 1/x[4] + 1*x[5];
 
-julia> pattern(f, HessianTracer{BitSet}, x)
+julia> hessian_pattern(f, x)
 5×5 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 3 stored entries:
  ⋅  ⋅  ⋅  ⋅  ⋅
  ⋅  ⋅  1  ⋅  ⋅
@@ -126,7 +116,7 @@ julia> pattern(f, HessianTracer{BitSet}, x)
 
 julia> g(x) = f(x) + x[2]^x[5];
 
-julia> pattern(g, HessianTracer{BitSet}, x)
+julia> hessian_pattern(g, x)
 5×5 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 7 stored entries:
  ⋅  ⋅  ⋅  ⋅  ⋅
  ⋅  1  1  ⋅  1
@@ -135,14 +125,15 @@ julia> pattern(g, HessianTracer{BitSet}, x)
  ⋅  1  ⋅  ⋅  1
 ```
 """
-hessian_pattern(f, x) = pattern(f, HessianTracer, x)
+function hessian_pattern(f, x, ::Type{S}=DEFAULT_SET_TYPE) where {S<:AbstractIndexSet}
+    return pattern(f, HessianTracer{S}, x)
+end
 
 function pattern(f, ::Type{T}, x) where {T<:AbstractTracer}
     xt = trace_input(T, x)
     yt = f(xt)
     return _pattern(xt, yt)
 end
-
 
 function pattern(f!, y, ::Type{T}, x) where {T<:AbstractTracer}
     xt = trace_input(T, x)
