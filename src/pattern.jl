@@ -1,38 +1,38 @@
 ## Enumerate inputs
 
 """
-    trace_input(JacobianTracer, x)
-    trace_input(ConnectivityTracer, x)
+    trace_input(T, x)
+    trace_input(T, x)
 
 
-Enumerates input indices and constructs the specified type of tracer.
-Supports [`JacobianTracer`](@ref) and [`ConnectivityTracer`](@ref).
+Enumerates input indices and constructs the specified type `T` of tracer.
+Supports [`ConnectivityTracer`](@ref), [`JacobianTracer`](@ref) and [`HessianTracer`](@ref).
 
 ## Example
 ```jldoctest
 julia> x = rand(3);
 
-julia> trace_input(ConnectivityTracer, x)
-3-element Vector{ConnectivityTracer}:
- ConnectivityTracer(1,)
- ConnectivityTracer(2,)
- ConnectivityTracer(3,)
+julia> trace_input(ConnectivityTracer{BitSet}, x)
+3-element Vector{ConnectivityTracer{BitSet}}:
+ ConnectivityTracer{BitSet}(1,)
+ ConnectivityTracer{BitSet}(2,)
+ ConnectivityTracer{BitSet}(3,)
 
-julia> trace_input(JacobianTracer, x)
-3-element Vector{JacobianTracer}:
- JacobianTracer(1,)
- JacobianTracer(2,)
- JacobianTracer(3,)
+julia> trace_input(JacobianTracer{BitSet}, x)
+3-element Vector{JacobianTracer{BitSet}}:
+ JacobianTracer{BitSet}(1,)
+ JacobianTracer{BitSet}(2,)
+ JacobianTracer{BitSet}(3,)
 
-julia> trace_input(HessianTracer, x)
-3-element Vector{HessianTracer}:
- HessianTracer(
+julia> trace_input(HessianTracer{BitSet}, x)
+3-element Vector{HessianTracer{BitSet}}:
+ HessianTracer{BitSet}(
   1 => (),
 )
- HessianTracer(
+ HessianTracer{BitSet}(
   2 => (),
 )
- HessianTracer(
+ HessianTracer{BitSet}(
   3 => (),
 )
 ```
@@ -46,16 +46,16 @@ end
 
 ## Construct sparsity pattern matrix
 """
-    pattern(f, ConnectivityTracer, x)
+    pattern(f, ConnectivityTracer{S}, x) where {S<:AbstractSet{<:Integer}}
 
 Enumerates inputs `x` and primal outputs `y = f(x)` and returns sparse matrix `C` of size `(m, n)`
 where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
 
-    pattern(f, JacobianTracer, x)
+    pattern(f, JacobianTracer{S}, x) where {S<:AbstractSet{<:Integer}}
 
 Computes the sparsity pattern of the Jacobian of `y = f(x)`.
 
-    pattern(f, HessianTracer, x)
+    pattern(f, HessianTracer{S}, x) where {S<:AbstractSet{<:Integer}}
 
 Computes the sparsity pattern of the Hessian of a scalar function `y = f(x)`.
 
@@ -67,7 +67,7 @@ julia> x = rand(3);
 
 julia> f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])];
 
-julia> pattern(f, ConnectivityTracer, x)
+julia> pattern(f, ConnectivityTracer{BitSet}, x)
 3×3 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 4 stored entries:
  1  ⋅  ⋅
  1  1  ⋅
@@ -81,7 +81,7 @@ julia> x = rand(5);
 
 julia> f(x) = x[1] + x[2]*x[3] + 1/x[4] + 1*x[5];
 
-julia> pattern(f, HessianTracer, x)
+julia> pattern(f, HessianTracer{BitSet}, x)
 5×5 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 3 stored entries:
  ⋅  ⋅  ⋅  ⋅  ⋅
  ⋅  ⋅  1  ⋅  ⋅
@@ -91,7 +91,7 @@ julia> pattern(f, HessianTracer, x)
 
 julia> g(x) = f(x) + x[2]^x[5];
 
-julia> pattern(g, HessianTracer, x)
+julia> pattern(g, HessianTracer{BitSet}, x)
 5×5 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 7 stored entries:
  ⋅  ⋅  ⋅  ⋅  ⋅
  ⋅  1  1  ⋅  1
@@ -107,11 +107,11 @@ function pattern(f, ::Type{T}, x) where {T<:AbstractTracer}
 end
 
 """
-    pattern(f!, y, JacobianTracer, x)
+    pattern(f!, y, JacobianTracer{S}, x) where {S<:AbstractSet{<:Integer}}
 
 Computes the sparsity pattern of the Jacobian of `f!(y, x)`.
 
-    pattern(f!, y, ConnectivityTracer, x)
+    pattern(f!, y, ConnectivityTracer{S}, x) where {S<:AbstractSet{<:Integer}}
 
 Enumerates inputs `x` and primal outputs `y` after `f!(y, x)` and returns sparse matrix `C` of size `(m, n)`
 where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
@@ -151,8 +151,8 @@ function _pattern_to_sparsemat(
 end
 
 function _pattern_to_sparsemat(
-    xt::AbstractArray{HessianTracer}, yt::AbstractArray{HessianTracer}
-)
+    xt::AbstractArray{HessianTracer{S}}, yt::AbstractArray{HessianTracer{S}}
+) where {S<:AbstractIndexSet}
     length(yt) != 1 && error("pattern(f, HessianTracer, x) expects scalar output y=f(x).")
     y = only(yt)
 

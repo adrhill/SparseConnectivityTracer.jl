@@ -3,7 +3,7 @@ for fn in union(ops_1_to_1_s, ops_1_to_1_f, ops_1_to_1_z)
 end
 
 for fn in ops_1_to_1_const
-    @eval Base.$fn(::ConnectivityTracer) = EMPTY_CONNECTIVITY_TRACER
+    @eval Base.$fn(::T) where {T<:ConnectivityTracer} = empty(T)
 end
 
 for fn in ops_1_to_2
@@ -28,4 +28,4 @@ Base.:^(::Irrational{:ℯ}, t::ConnectivityTracer) = t
 Base.round(t::ConnectivityTracer, ::RoundingMode; kwargs...) = t
 
 ## Random numbers
-rand(::AbstractRNG, ::SamplerType{ConnectivityTracer}) = EMPTY_CONNECTIVITY_TRACER
+rand(::AbstractRNG, ::SamplerType{T}) where {T<:ConnectivityTracer} = empty(T)
