@@ -33,3 +33,8 @@ Utilities to create tracers:
 tracer
 trace_input
 ```
+
+Utility to extract input indices from tracers:
+```@docs
+inputs
+```
