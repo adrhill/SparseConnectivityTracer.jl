@@ -44,8 +44,6 @@ julia> using SparseConnectivityTracer, Flux
 
 julia> x = rand(28, 28, 3, 1);
 
-julia> layer = Conv((3, 3), 3 => 8);
-
 julia> layer = Conv((3, 3), 3 => 2);
 
 julia> jacobian_pattern(layer, x)
