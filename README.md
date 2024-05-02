@@ -8,6 +8,9 @@
 
 Fast Jacobian and Hessian sparsity detection via operator-overloading.
 
+> [!WARNING]
+> This package is in early development. Expect frequent breaking changes and refer to the stable documentation.
+
 ## Installation 
 To install this package, open the Julia REPL and run 
 
@@ -28,7 +31,7 @@ julia> x = rand(3);
 
 julia> f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])];
 
-julia> pattern(f, JacobianTracer, x)
+julia> pattern(f, JacobianTracer{BitSet}, x)
 3×3 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 4 stored entries:
  1  ⋅  ⋅
  1  1  ⋅
@@ -43,7 +46,7 @@ julia> x = rand(28, 28, 3, 1);
 
 julia> layer = Conv((3, 3), 3 => 8);
 
-julia> pattern(layer, JacobianTracer, x)
+julia> pattern(layer, JacobianTracer{BitSet}, x)
 5408×2352 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 146016 stored entries:
 ⎡⠙⢦⡀⠀⠀⠘⢷⣄⠀⠀⠈⠻⣦⡀⠀⠀⠀⎤
 ⎢⠀⠀⠙⢷⣄⠀⠀⠙⠷⣄⠀⠀⠈⠻⣦⡀⠀⎥
@@ -76,7 +79,7 @@ julia> x = rand(5);
 
 julia> f(x) = x[1] + x[2]*x[3] + 1/x[4] + 1*x[5];
 
-julia> pattern(f, HessianTracer, x)
+julia> pattern(f, HessianTracer{BitSet}, x)
 5×5 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 3 stored entries:
  ⋅  ⋅  ⋅  ⋅  ⋅
  ⋅  ⋅  1  ⋅  ⋅
@@ -86,7 +89,7 @@ julia> pattern(f, HessianTracer, x)
 
 julia> g(x) = f(x) + x[2]^x[5];
 
-julia> pattern(g, HessianTracer, x)
+julia> pattern(g, HessianTracer{BitSet}, x)
 5×5 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 7 stored entries:
  ⋅  ⋅  ⋅  ⋅  ⋅
  ⋅  1  1  ⋅  1
