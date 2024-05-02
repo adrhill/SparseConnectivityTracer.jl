@@ -7,7 +7,7 @@ for fn in ops_1_to_1_f
 end
 
 for fn in union(ops_1_to_1_z, ops_1_to_1_const)
-    @eval Base.$fn(::HessianTracer) = EMPTY_HESSIAN_TRACER
+    @eval Base.$fn(::T) where {T<:HessianTracer} = empty(T)
 end
 
 ## 2-to-1
@@ -86,31 +86,31 @@ end
 for fn in ops_2_to_1_szz
     @eval Base.$fn(t::HessianTracer, ::HessianTracer) = promote_order(t)
     @eval Base.$fn(t::HessianTracer, ::Number) = promote_order(t)
-    @eval Base.$fn(::Number, t::HessianTracer) = EMPTY_HESSIAN_TRACER
+    @eval Base.$fn(::Number, t::T) where {T<:HessianTracer} = empty(T)
 end
 
 for fn in ops_2_to_1_zsz
     @eval Base.$fn(::HessianTracer, t::HessianTracer) = promote_order(t)
-    @eval Base.$fn(::HessianTracer, ::Number) = EMPTY_HESSIAN_TRACER
+    @eval Base.$fn(::T, ::Number) where {T<:HessianTracer} = empty(T)
     @eval Base.$fn(::Number, t::HessianTracer) = promote_order(t)
 end
 
 for fn in ops_2_to_1_fzz
     @eval Base.$fn(t::HessianTracer, ::HessianTracer) = t
     @eval Base.$fn(t::HessianTracer, ::Number) = t
-    @eval Base.$fn(::Number, t::HessianTracer) = EMPTY_HESSIAN_TRACER
+    @eval Base.$fn(::Number, t::T) where {T<:HessianTracer} = empty(T)
 end
 
 for fn in ops_2_to_1_zfz
     @eval Base.$fn(::HessianTracer, t::HessianTracer) = t
-    @eval Base.$fn(::HessianTracer, ::Number) = EMPTY_HESSIAN_TRACER
+    @eval Base.$fn(::T, ::Number) where {T<:HessianTracer} = empty(T)
     @eval Base.$fn(::Number, t::HessianTracer) = t
 end
 
 for fn in ops_2_to_1_zzz
-    @eval Base.$fn(::HessianTracer, t::HessianTracer) = EMPTY_HESSIAN_TRACER
-    @eval Base.$fn(::HessianTracer, ::Number) = EMPTY_HESSIAN_TRACER
-    @eval Base.$fn(::Number, t::HessianTracer) = EMPTY_HESSIAN_TRACER
+    @eval Base.$fn(::T, t::T) where {T<:HessianTracer} = empty(T)
+    @eval Base.$fn(::T, ::Number) where {T<:HessianTracer} = empty(T)
+    @eval Base.$fn(::Number, t::T) where {T<:HessianTracer} = empty(T)
 end
 
 # Extra types required for exponent
@@ -122,7 +122,7 @@ Base.:^(t::HessianTracer, ::Irrational{:ℯ}) = promote_order(t)
 Base.:^(::Irrational{:ℯ}, t::HessianTracer) = promote_order(t)
 
 ## Rounding
-Base.round(t::HessianTracer, ::RoundingMode; kwargs...) = EMPTY_HESSIAN_TRACER
+Base.round(t::T, ::RoundingMode; kwargs...) where {T<:HessianTracer} = empty(T)
 
 ## Random numbers
-rand(::AbstractRNG, ::SamplerType{HessianTracer}) = EMPTY_HESSIAN_TRACER
+rand(::AbstractRNG, ::SamplerType{T}) where {T<:HessianTracer} = empty(T)
