@@ -15,7 +15,7 @@ Number type keeping track of input indices of previous computations.
 The provided set type `S` has to be an `AbstractSet{<:Integer}`, e.g. `BitSet` or `Set{UInt64}`.
 
 See also the convenience constructor [`tracer`](@ref).
-For a higher-level interface, refer to [`pattern`](@ref).
+For a higher-level interface, refer to [`connectivity_pattern`](@ref).
 """
 struct ConnectivityTracer{S<:AbstractIndexSet} <: AbstractTracer
     inputs::S # indices of connected, enumerated inputs
@@ -65,7 +65,7 @@ Number type keeping track of input indices of previous computations with non-zer
 The provided set type `S` has to be an `AbstractSet{<:Integer}`, e.g. `BitSet` or `Set{UInt64}`.
 
 See also the convenience constructor [`tracer`](@ref).
-For a higher-level interface, refer to [`pattern`](@ref).
+For a higher-level interface, refer to [`jacobian_pattern`](@ref).
 """
 struct JacobianTracer{S<:AbstractIndexSet} <: AbstractTracer
     inputs::S
@@ -108,7 +108,7 @@ Number type keeping track of input indices of previous computations with non-zer
 The provided set type `S` has to be an `AbstractSet{<:Integer}`, e.g. `BitSet` or `Set{UInt64}`.
 
 See also the convenience constructor [`tracer`](@ref).
-For a higher-level interface, refer to [`pattern`](@ref).
+For a higher-level interface, refer to [`hessian_pattern`](@ref).
 """
 struct HessianTracer{S<:AbstractIndexSet} <: AbstractTracer
     inputs::Dict{UInt64,S}
