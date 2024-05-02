@@ -35,17 +35,17 @@ TracerSparsityDetector() = TracerSparsityDetector(BitSet)
 function ADTypes.jacobian_sparsity(
     f, x, ::TracerSparsityDetector{S}
 ) where {S<:AbstractIndexSet}
-    return pattern(f, JacobianTracer{S}, x)
+    return jacobian_pattern(f, x, S)
 end
 
 function ADTypes.jacobian_sparsity(
     f!, y, x, ::TracerSparsityDetector{S}
 ) where {S<:AbstractIndexSet}
-    return pattern(f!, y, JacobianTracer{S}, x)
+    return jacobian_pattern(f!, y, x, S)
 end
 
 function ADTypes.hessian_sparsity(
     f, x, ::TracerSparsityDetector{S}
 ) where {S<:AbstractIndexSet}
-    return pattern(f, HessianTracer{S}, x)
+    return hessian_pattern(f, x, S)
 end
