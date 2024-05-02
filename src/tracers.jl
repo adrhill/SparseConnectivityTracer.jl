@@ -12,7 +12,7 @@ empty(tracer::T) where {T<:AbstractTracer} = empty(T)
     ConnectivityTracer{S}(indexset) <: Number
 
 Number type keeping track of input indices of previous computations.
-The provided set type `S` has to be an `AbstractSet{<:Integer}`, e.g. `BitSet` or `Set{UInt64}`.
+The provided index set type `S` has to be an `AbstractSet{<:Integer}`, e.g. `BitSet` or `Set{UInt64}`.
 
 See also the convenience constructor [`tracer`](@ref).
 For a higher-level interface, refer to [`connectivity_pattern`](@ref).
@@ -62,7 +62,7 @@ end
     JacobianTracer{S}(indexset) <: Number
 
 Number type keeping track of input indices of previous computations with non-zero derivatives.
-The provided set type `S` has to be an `AbstractSet{<:Integer}`, e.g. `BitSet` or `Set{UInt64}`.
+The provided index set type `S` has to be an `AbstractSet{<:Integer}`, e.g. `BitSet` or `Set{UInt64}`.
 
 See also the convenience constructor [`tracer`](@ref).
 For a higher-level interface, refer to [`jacobian_pattern`](@ref).
@@ -105,7 +105,7 @@ end
     HessianTracer{S}(indexset) <: Number
 
 Number type keeping track of input indices of previous computations with non-zero first and second derivatives.
-The provided set type `S` has to be an `AbstractSet{<:Integer}`, e.g. `BitSet` or `Set{UInt64}`.
+The provided index set type `S` has to be an `AbstractSet{<:Integer}`, e.g. `BitSet` or `Set{UInt64}`.
 
 See also the convenience constructor [`tracer`](@ref).
 For a higher-level interface, refer to [`hessian_pattern`](@ref).
@@ -221,7 +221,7 @@ inputs(t::JacobianTracer) = collect(t.inputs)
     tracer(HessianTracer{S}, indices)
 
 Convenience constructor for [`ConnectivityTracer`](@ref), [`JacobianTracer`](@ref) and [`HessianTracer`](@ref) from input indices.
-The provided set type `S` has to be an `AbstractSet{<:Integer}`, e.g. `BitSet` or `Set{UInt64}`.
+The provided index set type `S` has to be an `AbstractSet{<:Integer}`, e.g. `BitSet` or `Set{UInt64}`.
 
 ## Example
 ```jldoctest

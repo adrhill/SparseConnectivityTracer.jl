@@ -45,13 +45,12 @@ connectivity_pattern(f, x, settype::Type{S}=DEFAULT_SET_TYPE) where {S<:Abstract
 
 """
     connectivity_pattern(f!, y, x)
+    connectivity_pattern(f!, y, x, T)
 
 Enumerates inputs `x` and primal outputs `y` after `f!(y, x)` and returns sparse matrix `C` of size `(m, n)`
 where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
 
 The type of index set `T<:AbstractSet{<:Integer}` can be specified as an optional argument and defaults to `BitSet`.
-
-
 """
 function connectivity_pattern(
     f!, y, x, ::Type{S}=DEFAULT_SET_TYPE
@@ -61,8 +60,11 @@ end
 
 """
     jacobian_pattern(f, x)
+    jacobian_pattern(f, x, T)
 
 Compute the sparsity pattern of the Jacobian of `y = f(x)`.
+
+The type of index set `T<:AbstractSet{<:Integer}` can be specified as an optional argument and defaults to `BitSet`.
 
 ## Example
 
@@ -84,20 +86,23 @@ end
 
 """
     jacobian_pattern(f!, y, x)
+    jacobian_pattern(f!, y, x, T)
 
 Compute the sparsity pattern of the Jacobian of `f!(y, x)`.
+
+The type of index set `T<:AbstractSet{<:Integer}` can be specified as an optional argument and defaults to `BitSet`.
 """
 function jacobian_pattern(f!, y, x, ::Type{S}=DEFAULT_SET_TYPE) where {S<:AbstractIndexSet}
     return pattern(f!, y, JacobianTracer{S}, x)
 end
 
 """
-    hessian_pattern(f, HessianTracer, x)
+    hessian_pattern(f, x)
+    hessian_pattern(f, x, T)
 
 Computes the sparsity pattern of the Hessian of a scalar function `y = f(x)`.
 
 The type of index set `T<:AbstractSet{<:Integer}` can be specified as an optional argument and defaults to `BitSet`.
-
 
 ## Example
 
