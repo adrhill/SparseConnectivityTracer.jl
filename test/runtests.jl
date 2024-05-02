@@ -141,10 +141,7 @@ DocMeta.setdocmeta!(
                 @test empty(t) == empty(HT)
                 @test HT(1) == empty(HT)
 
-                x = rand(4)
-
-                f(x) = x[1] / x[2] + x[3] / 1 + 1 / x[4]
-                H = pattern(f, HT, x)
+                H = pattern(x -> x[1] / x[2] + x[3] / 1 + 1 / x[4], HT, rand(4))
                 @test H ≈ [
                     0 1 0 0
                     1 1 0 0
@@ -152,8 +149,7 @@ DocMeta.setdocmeta!(
                     0 0 0 1
                 ]
 
-                f(x) = x[1] * x[2] + x[3] * 1 + 1 * x[4]
-                H = pattern(f, HT, x)
+                H = pattern(x -> x[1] * x[2] + x[3] * 1 + 1 * x[4], HT, rand(4))
                 @test H ≈ [
                     0 1 0 0
                     1 0 0 0
@@ -161,8 +157,7 @@ DocMeta.setdocmeta!(
                     0 0 0 0
                 ]
 
-                f(x) = (x[1] * x[2]) * (x[3] * x[4])
-                H = pattern(f, HT, x)
+                H = pattern(x -> (x[1] * x[2]) * (x[3] * x[4]), HT, rand(4))
                 @test H ≈ [
                     0 1 1 1
                     1 0 1 1
@@ -170,8 +165,7 @@ DocMeta.setdocmeta!(
                     1 1 1 0
                 ]
 
-                f(x) = (x[1] + x[2]) * (x[3] + x[4])
-                H = pattern(f, HT, x)
+                H = pattern(x -> (x[1] + x[2]) * (x[3] + x[4]), HT, rand(4))
                 @test H ≈ [
                     0 0 1 1
                     0 0 1 1
@@ -179,8 +173,7 @@ DocMeta.setdocmeta!(
                     1 1 0 0
                 ]
 
-                f(x) = (x[1] + x[2] + x[3] + x[4])^2
-                H = pattern(f, HT, x)
+                H = pattern(x -> (x[1] + x[2] + x[3] + x[4])^2, HT, rand(4))
                 @test H ≈ [
                     1 1 1 1
                     1 1 1 1
@@ -188,8 +181,7 @@ DocMeta.setdocmeta!(
                     1 1 1 1
                 ]
 
-                f(x) = 1 / (x[1] + x[2] + x[3] + x[4])
-                H = pattern(f, HT, x)
+                H = pattern(x -> 1 / (x[1] + x[2] + x[3] + x[4]), HT, rand(4))
                 @test H ≈ [
                     1 1 1 1
                     1 1 1 1
@@ -197,8 +189,7 @@ DocMeta.setdocmeta!(
                     1 1 1 1
                 ]
 
-                f(x) = (x[1] - x[2]) + (x[3] - 1) + (1 - x[4])
-                H = pattern(f, HT, x)
+                H = pattern(x -> (x[1] - x[2]) + (x[3] - 1) + (1 - x[4]), HT, rand(4))
                 @test H ≈ [
                     0 0 0 0
                     0 0 0 0
@@ -206,8 +197,8 @@ DocMeta.setdocmeta!(
                     0 0 0 0
                 ]
 
-                f(x) = copysign(x[1] * x[2], x[3] * x[4])
-                H = pattern(f, HT, x)
+                H = pattern(x -> copysign(x[1] * x[2], x[3] * x[4]), HT, rand(4))
+                @show H
                 @test H ≈ [
                     0 1 0 0
                     1 0 0 0
@@ -215,8 +206,7 @@ DocMeta.setdocmeta!(
                     0 0 0 0
                 ]
 
-                f(x) = div(x[1] * x[2], x[3] * x[4])
-                H = pattern(f, HT, x)
+                H = pattern(x -> div(x[1] * x[2], x[3] * x[4]), HT, rand(4))
                 @test H ≈ [
                     0 0 0 0
                     0 0 0 0
@@ -224,14 +214,10 @@ DocMeta.setdocmeta!(
                     0 0 0 0
                 ]
 
-                x = rand()
-                f(x) = sum(sincosd(x))
-                H = pattern(f, HT, x)
+                H = pattern(x -> sum(sincosd(x)), HT, 1.0)
                 @test H ≈ [1;;]
 
-                x = rand(4)
-                f(x) = sum(diff(x) .^ 3)
-                H = pattern(f, HT, x)
+                H = pattern(x -> sum(diff(x) .^ 3), HT, rand(4))
                 @test H ≈ [
                     1 1 0 0
                     1 1 1 0
