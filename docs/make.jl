@@ -21,6 +21,7 @@ makedocs(;
         assets    = String[],
     ),
     pages=["Home" => "index.md", "API Reference" => "api.md"],
+    warnonly=[:missing_docs],
 )
 
 deploydocs(; repo="github.com/adrhill/SparseConnectivityTracer.jl", devbranch="main")
