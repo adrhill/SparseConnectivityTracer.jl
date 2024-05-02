@@ -18,11 +18,14 @@ for TT in (:JacobianTracer, :ConnectivityTracer, :HessianTracer)
     @eval Base.typemax(::Type{T}) where {T<:$TT} = empty(T)
 
     ## Array constructors
-    @eval Base.similar(a::Array{T,1}) where {T<:$TT}                       = zeros(T, size(a, 1))
-    @eval Base.similar(a::Array{T,2}) where {T<:$TT}                       = zeros(T, size(a, 1), size(a, 2))
-    @eval Base.similar(a::Array{A,1}, ::Type{T}) where {A,T<:$TT}          = zeros(T, size(a, 1))
-    @eval Base.similar(a::Array{A,2}, ::Type{T}) where {A,T<:$TT}          = zeros(T, size(a, 1), size(a, 2))
-    @eval Base.similar(::Array{T}, m::Int) where {T<:$TT}                  = zeros(T, m)
-    @eval Base.similar(::Array, ::Type{T}, dims::Dims{N}) where {N,T<:$TT} = zeros(T, dims)
-    @eval Base.similar(::Array{T}, dims::Dims{N}) where {N,T<:$TT}         = zeros(T, dims)
+    @eval Base.similar(a::Array{T,1}) where {T<:$TT}               = zeros(T, size(a, 1))
+    @eval Base.similar(a::Array{T,2}) where {T<:$TT}               = zeros(T, size(a, 1), size(a, 2))
+    @eval Base.similar(a::Array{A,1}, ::Type{T}) where {A,T<:$TT}  = zeros(T, size(a, 1))
+    @eval Base.similar(a::Array{A,2}, ::Type{T}) where {A,T<:$TT}  = zeros(T, size(a, 1), size(a, 2))
+    @eval Base.similar(::Array{T}, m::Int) where {T<:$TT}          = zeros(T, m)
+    @eval Base.similar(::Array{T}, dims::Dims{N}) where {N,T<:$TT} = zeros(T, dims)
+
+    @eval Base.similar(
+        ::Array, ::Type{$TT{S}}, dims::Dims{N}
+    ) where {N,S<:AbstractIndexSet} = zeros($TT{S}, dims)
 end
