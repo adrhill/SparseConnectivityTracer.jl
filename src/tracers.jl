@@ -1,5 +1,6 @@
-const AbstractIndexSet = AbstractSet{<:Integer}
 abstract type AbstractTracer <: Number end
+
+const AbstractIndexSet = AbstractSet{<:Integer}
 
 # Convenience constructor for empty tracers
 empty(tracer::T) where {T<:AbstractTracer} = empty(T)
@@ -14,7 +15,6 @@ empty(tracer::T) where {T<:AbstractTracer} = empty(T)
 Number type keeping track of input indices of previous computations.
 The provided index set type `S` has to be an `AbstractSet{<:Integer}`, e.g. `BitSet` or `Set{UInt64}`.
 
-See also the convenience constructor [`tracer`](@ref).
 For a higher-level interface, refer to [`connectivity_pattern`](@ref).
 """
 struct ConnectivityTracer{S<:AbstractIndexSet} <: AbstractTracer
@@ -64,7 +64,6 @@ end
 Number type keeping track of input indices of previous computations with non-zero derivatives.
 The provided index set type `S` has to be an `AbstractSet{<:Integer}`, e.g. `BitSet` or `Set{UInt64}`.
 
-See also the convenience constructor [`tracer`](@ref).
 For a higher-level interface, refer to [`jacobian_pattern`](@ref).
 """
 struct JacobianTracer{S<:AbstractIndexSet} <: AbstractTracer
@@ -107,7 +106,6 @@ end
 Number type keeping track of input indices of previous computations with non-zero first and second derivatives.
 The provided index set type `S` has to be an `AbstractSet{<:Integer}`, e.g. `BitSet` or `Set{UInt64}`.
 
-See also the convenience constructor [`tracer`](@ref).
 For a higher-level interface, refer to [`hessian_pattern`](@ref).
 """
 struct HessianTracer{S<:AbstractIndexSet} <: AbstractTracer
@@ -191,48 +189,14 @@ end
     inputs(tracer)
 
 Return input indices of a [`ConnectivityTracer`](@ref) or [`JacobianTracer`](@ref)
-
-## Example
-```jldoctest
-julia> a = tracer(ConnectivityTracer{BitSet}, 2)
-ConnectivityTracer{BitSet}(2,)
-
-julia> b = tracer(ConnectivityTracer{BitSet}, 4)
-ConnectivityTracer{BitSet}(4,)
-
-julia> c = a + b
-ConnectivityTracer{BitSet}(2, 4)
-
-julia> inputs(c)
-2-element Vector{Int64}:
- 2
- 4
-```
 """
 inputs(t::ConnectivityTracer) = collect(t.inputs)
 inputs(t::JacobianTracer) = collect(t.inputs)
 
 """
-    tracer(ConnectivityTracer{S}, index)
-    tracer(ConnectivityTracer{S}, indices)
-    tracer(JacobianTracer{S}, index)
-    tracer(JacobianTracer{S}, indices)
-    tracer(HessianTracer{S}, index)
-    tracer(HessianTracer{S}, indices)
+    tracer(T, index) where {T<:AbstractTracer}
 
 Convenience constructor for [`ConnectivityTracer`](@ref), [`JacobianTracer`](@ref) and [`HessianTracer`](@ref) from input indices.
-The provided index set type `S` has to be an `AbstractSet{<:Integer}`, e.g. `BitSet` or `Set{UInt64}`.
-
-## Example
-```jldoctest
-julia> tracer(JacobianTracer{BitSet}, 2)
-JacobianTracer{BitSet}(2,)
-
-julia> tracer(HessianTracer{Set{UInt64}}, 2)
-HessianTracer{Set{UInt64}}(
-  2 => (),
-)
-```
 """
 tracer(::Type{JacobianTracer{S}}, index::Integer) where {S<:AbstractIndexSet} =
     JacobianTracer(S(index))

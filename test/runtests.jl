@@ -1,5 +1,5 @@
 using SparseConnectivityTracer
-using SparseConnectivityTracer: trace_input, empty
+using SparseConnectivityTracer: tracer, trace_input, inputs, empty
 
 using Test
 using ReferenceTests
