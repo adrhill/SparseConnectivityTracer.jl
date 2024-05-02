@@ -45,14 +45,14 @@ DocMeta.setdocmeta!(
     end
     @testset "First order" begin
         x = rand(3)
-        xt = trace_input(ConnectivityTracer, x)
+        xt = trace_input(ConnectivityTracer{BitSet}, x)
 
         # Matrix multiplication
         A = rand(1, 3)
         yt = only(A * xt)
         @test inputs(yt) == [1, 2, 3]
 
-        @test pattern(x -> only(A * x), ConnectivityTracer, x) ≈ [1 1 1]
+        @test pattern(x -> only(A * x), ConnectivityTracer{BitSet}, x) ≈ [1 1 1]
 
         # Custom functions
         f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])]
@@ -61,85 +61,86 @@ DocMeta.setdocmeta!(
         @test inputs(yt[2]) == [1, 2]
         @test inputs(yt[3]) == [3]
 
-        @test pattern(f, ConnectivityTracer, x) ≈ [1 0 0; 1 1 0; 0 0 1]
-        @test pattern(f, JacobianTracer, x) ≈ [1 0 0; 1 1 0; 0 0 1]
+        @test pattern(f, ConnectivityTracer{BitSet}, x) ≈ [1 0 0; 1 1 0; 0 0 1]
+        @test pattern(f, JacobianTracer{BitSet}, x) ≈ [1 0 0; 1 1 0; 0 0 1]
 
-        @test pattern(identity, ConnectivityTracer, rand()) ≈ [1;;]
-        @test pattern(identity, JacobianTracer, rand()) ≈ [1;;]
-        @test pattern(Returns(1), ConnectivityTracer, 1) ≈ [0;;]
-        @test pattern(Returns(1), JacobianTracer, 1) ≈ [0;;]
+        @test pattern(identity, ConnectivityTracer{BitSet}, rand()) ≈ [1;;]
+        @test pattern(identity, JacobianTracer{BitSet}, rand()) ≈ [1;;]
+        @test pattern(Returns(1), ConnectivityTracer{BitSet}, 1) ≈ [0;;]
+        @test pattern(Returns(1), JacobianTracer{BitSet}, 1) ≈ [0;;]
 
         # Test JacobianTracer on functions with zero derivatives
         x = rand(2)
         g(x) = [x[1] * x[2], ceil(x[1] * x[2]), x[1] * round(x[2])]
-        @test pattern(g, ConnectivityTracer, x) ≈ [1 1; 1 1; 1 1]
-        @test pattern(g, JacobianTracer, x) ≈ [1 1; 0 0; 1 0]
+        @test pattern(g, ConnectivityTracer{BitSet}, x) ≈ [1 1; 1 1; 1 1]
+        @test pattern(g, JacobianTracer{BitSet}, x) ≈ [1 1; 0 0; 1 0]
 
         # Code coverage
-        @test pattern(x -> [sincos(x)...], ConnectivityTracer, 1) ≈ [1; 1]
-        @test pattern(x -> [sincos(x)...], JacobianTracer, 1) ≈ [1; 1]
-        @test pattern(typemax, ConnectivityTracer, 1) ≈ [0;;]
-        @test pattern(typemax, JacobianTracer, 1) ≈ [0;;]
-        @test pattern(x -> x^(2//3), ConnectivityTracer, 1) ≈ [1;;]
-        @test pattern(x -> x^(2//3), JacobianTracer, 1) ≈ [1;;]
-        @test pattern(x -> (2//3)^x, ConnectivityTracer, 1) ≈ [1;;]
-        @test pattern(x -> (2//3)^x, JacobianTracer, 1) ≈ [1;;]
-        @test pattern(x -> x^ℯ, ConnectivityTracer, 1) ≈ [1;;]
-        @test pattern(x -> x^ℯ, JacobianTracer, 1) ≈ [1;;]
-        @test pattern(x -> ℯ^x, ConnectivityTracer, 1) ≈ [1;;]
-        @test pattern(x -> ℯ^x, JacobianTracer, 1) ≈ [1;;]
-        @test pattern(x -> round(x, RoundNearestTiesUp), ConnectivityTracer, 1) ≈ [1;;]
-        @test pattern(x -> round(x, RoundNearestTiesUp), JacobianTracer, 1) ≈ [0;;]
+        @test pattern(x -> [sincos(x)...], ConnectivityTracer{BitSet}, 1) ≈ [1; 1]
+        @test pattern(x -> [sincos(x)...], JacobianTracer{BitSet}, 1) ≈ [1; 1]
+        @test pattern(typemax, ConnectivityTracer{BitSet}, 1) ≈ [0;;]
+        @test pattern(typemax, JacobianTracer{BitSet}, 1) ≈ [0;;]
+        @test pattern(x -> x^(2//3), ConnectivityTracer{BitSet}, 1) ≈ [1;;]
+        @test pattern(x -> x^(2//3), JacobianTracer{BitSet}, 1) ≈ [1;;]
+        @test pattern(x -> (2//3)^x, ConnectivityTracer{BitSet}, 1) ≈ [1;;]
+        @test pattern(x -> (2//3)^x, JacobianTracer{BitSet}, 1) ≈ [1;;]
+        @test pattern(x -> x^ℯ, ConnectivityTracer{BitSet}, 1) ≈ [1;;]
+        @test pattern(x -> x^ℯ, JacobianTracer{BitSet}, 1) ≈ [1;;]
+        @test pattern(x -> ℯ^x, ConnectivityTracer{BitSet}, 1) ≈ [1;;]
+        @test pattern(x -> ℯ^x, JacobianTracer{BitSet}, 1) ≈ [1;;]
+        @test pattern(x -> round(x, RoundNearestTiesUp), ConnectivityTracer{BitSet}, 1) ≈
+            [1;;]
+        @test pattern(x -> round(x, RoundNearestTiesUp), JacobianTracer{BitSet}, 1) ≈ [0;;]
 
-        @test rand(ConnectivityTracer) == empty(ConnectivityTracer)
-        @test rand(JacobianTracer) == empty(JacobianTracer)
+        @test rand(ConnectivityTracer{BitSet}) == empty(ConnectivityTracer{BitSet})
+        @test rand(JacobianTracer{BitSet}) == empty(JacobianTracer{BitSet})
 
-        t = tracer(ConnectivityTracer, 1, 2, 3)
+        t = tracer(ConnectivityTracer{BitSet}, 2)
         @test ConnectivityTracer(t) == t
-        @test empty(t) == empty(ConnectivityTracer)
-        @test ConnectivityTracer(1) == empty(ConnectivityTracer)
+        @test empty(t) == empty(ConnectivityTracer{BitSet})
+        @test ConnectivityTracer{BitSet}(1) == empty(ConnectivityTracer{BitSet})
 
-        t = tracer(JacobianTracer, 1, 2, 3)
+        t = tracer(JacobianTracer{BitSet}, 2)
         @test JacobianTracer(t) == t
-        @test empty(t) == empty(JacobianTracer)
-        @test JacobianTracer(1) == empty(JacobianTracer)
+        @test empty(t) == empty(JacobianTracer{BitSet})
+        @test JacobianTracer{BitSet}(1) == empty(JacobianTracer{BitSet})
 
         # Base.show
         @test_reference "references/show/ConnectivityTracer.txt" repr(
-            "text/plain", tracer(ConnectivityTracer, 1, 2, 3)
+            "text/plain", tracer(ConnectivityTracer{BitSet}, 2)
         )
         @test_reference "references/show/JacobianTracer.txt" repr(
-            "text/plain", tracer(JacobianTracer, 1, 2, 3)
+            "text/plain", tracer(JacobianTracer{BitSet}, 2)
         )
     end
     @testset "Second order" begin
-        @test pattern(identity, HessianTracer, rand()) ≈ [0;;]
-        @test pattern(sqrt, HessianTracer, rand()) ≈ [1;;]
+        @test pattern(identity, HessianTracer{BitSet}, rand()) ≈ [0;;]
+        @test pattern(sqrt, HessianTracer{BitSet}, rand()) ≈ [1;;]
 
-        @test pattern(x -> 1 * x, HessianTracer, rand()) ≈ [0;;]
-        @test pattern(x -> x * 1, HessianTracer, rand()) ≈ [0;;]
+        @test pattern(x -> 1 * x, HessianTracer{BitSet}, rand()) ≈ [0;;]
+        @test pattern(x -> x * 1, HessianTracer{BitSet}, rand()) ≈ [0;;]
 
         # Code coverage
-        @test pattern(typemax, HessianTracer, 1) ≈ [0;;]
-        @test pattern(x -> x^(2im), HessianTracer, 1) ≈ [1;;]
-        @test pattern(x -> (2im)^x, HessianTracer, 1) ≈ [1;;]
-        @test pattern(x -> x^(2//3), HessianTracer, 1) ≈ [1;;]
-        @test pattern(x -> (2//3)^x, HessianTracer, 1) ≈ [1;;]
-        @test pattern(x -> x^ℯ, HessianTracer, 1) ≈ [1;;]
-        @test pattern(x -> ℯ^x, HessianTracer, 1) ≈ [1;;]
-        @test pattern(x -> round(x, RoundNearestTiesUp), HessianTracer, 1) ≈ [0;;]
+        @test pattern(typemax, HessianTracer{BitSet}, 1) ≈ [0;;]
+        @test pattern(x -> x^(2im), HessianTracer{BitSet}, 1) ≈ [1;;]
+        @test pattern(x -> (2im)^x, HessianTracer{BitSet}, 1) ≈ [1;;]
+        @test pattern(x -> x^(2//3), HessianTracer{BitSet}, 1) ≈ [1;;]
+        @test pattern(x -> (2//3)^x, HessianTracer{BitSet}, 1) ≈ [1;;]
+        @test pattern(x -> x^ℯ, HessianTracer{BitSet}, 1) ≈ [1;;]
+        @test pattern(x -> ℯ^x, HessianTracer{BitSet}, 1) ≈ [1;;]
+        @test pattern(x -> round(x, RoundNearestTiesUp), HessianTracer{BitSet}, 1) ≈ [0;;]
 
-        @test rand(HessianTracer) == empty(HessianTracer)
+        @test rand(HessianTracer{BitSet}) == empty(HessianTracer{BitSet})
 
-        t = tracer(HessianTracer, 1, 2, 3)
+        t = tracer(HessianTracer{BitSet}, 2)
         @test HessianTracer(t) == t
-        @test empty(t) == empty(HessianTracer)
-        @test HessianTracer(1) == empty(HessianTracer)
+        @test empty(t) == empty(HessianTracer{BitSet})
+        @test HessianTracer{BitSet}(1) == empty(HessianTracer{BitSet})
 
         x = rand(4)
 
         f(x) = x[1] / x[2] + x[3] / 1 + 1 / x[4]
-        H = pattern(f, HessianTracer, x)
+        H = pattern(f, HessianTracer{BitSet}, x)
         @test H ≈ [
             0 1 0 0
             1 1 0 0
@@ -148,7 +149,7 @@ DocMeta.setdocmeta!(
         ]
 
         f(x) = x[1] * x[2] + x[3] * 1 + 1 * x[4]
-        H = pattern(f, HessianTracer, x)
+        H = pattern(f, HessianTracer{BitSet}, x)
         @test H ≈ [
             0 1 0 0
             1 0 0 0
@@ -157,7 +158,7 @@ DocMeta.setdocmeta!(
         ]
 
         f(x) = (x[1] * x[2]) * (x[3] * x[4])
-        H = pattern(f, HessianTracer, x)
+        H = pattern(f, HessianTracer{BitSet}, x)
         @test H ≈ [
             0 1 1 1
             1 0 1 1
@@ -166,7 +167,7 @@ DocMeta.setdocmeta!(
         ]
 
         f(x) = (x[1] + x[2]) * (x[3] + x[4])
-        H = pattern(f, HessianTracer, x)
+        H = pattern(f, HessianTracer{BitSet}, x)
         @test H ≈ [
             0 0 1 1
             0 0 1 1
@@ -175,7 +176,7 @@ DocMeta.setdocmeta!(
         ]
 
         f(x) = (x[1] + x[2] + x[3] + x[4])^2
-        H = pattern(f, HessianTracer, x)
+        H = pattern(f, HessianTracer{BitSet}, x)
         @test H ≈ [
             1 1 1 1
             1 1 1 1
@@ -184,7 +185,7 @@ DocMeta.setdocmeta!(
         ]
 
         f(x) = 1 / (x[1] + x[2] + x[3] + x[4])
-        H = pattern(f, HessianTracer, x)
+        H = pattern(f, HessianTracer{BitSet}, x)
         @test H ≈ [
             1 1 1 1
             1 1 1 1
@@ -193,7 +194,7 @@ DocMeta.setdocmeta!(
         ]
 
         f(x) = (x[1] - x[2]) + (x[3] - 1) + (1 - x[4])
-        H = pattern(f, HessianTracer, x)
+        H = pattern(f, HessianTracer{BitSet}, x)
         @test H ≈ [
             0 0 0 0
             0 0 0 0
@@ -202,7 +203,7 @@ DocMeta.setdocmeta!(
         ]
 
         f(x) = copysign(x[1] * x[2], x[3] * x[4])
-        H = pattern(f, HessianTracer, x)
+        H = pattern(f, HessianTracer{BitSet}, x)
         @test H ≈ [
             0 1 0 0
             1 0 0 0
@@ -211,7 +212,7 @@ DocMeta.setdocmeta!(
         ]
 
         f(x) = div(x[1] * x[2], x[3] * x[4])
-        H = pattern(f, HessianTracer, x)
+        H = pattern(f, HessianTracer{BitSet}, x)
         @test H ≈ [
             0 0 0 0
             0 0 0 0
@@ -221,12 +222,12 @@ DocMeta.setdocmeta!(
 
         x = rand()
         f(x) = sum(sincosd(x))
-        H = pattern(f, HessianTracer, x)
+        H = pattern(f, HessianTracer{BitSet}, x)
         @test H ≈ [1;;]
 
         x = rand(4)
         f(x) = sum(diff(x) .^ 3)
-        H = pattern(f, HessianTracer, x)
+        H = pattern(f, HessianTracer{BitSet}, x)
         @test H ≈ [
             1 1 0 0
             1 1 1 0
@@ -236,7 +237,7 @@ DocMeta.setdocmeta!(
 
         x = rand(5)
         foo(x) = x[1] + x[2] * x[3] + 1 / x[4] + 1 * x[5]
-        H = pattern(foo, HessianTracer, x)
+        H = pattern(foo, HessianTracer{BitSet}, x)
         @test H ≈ [
             0 0 0 0 0
             0 0 1 0 0
@@ -246,7 +247,7 @@ DocMeta.setdocmeta!(
         ]
 
         bar(x) = foo(x) + x[2]^x[5]
-        H = pattern(bar, HessianTracer, x)
+        H = pattern(bar, HessianTracer{BitSet}, x)
         @test H ≈ [
             0 0 0 0 0
             0 1 1 0 1
@@ -257,16 +258,16 @@ DocMeta.setdocmeta!(
 
         # Base.show
         @test_reference "references/show/HessianTracer.txt" repr(
-            "text/plain", tracer(HessianTracer, 1, 2, 3)
+            "text/plain", tracer(HessianTracer{BitSet}, 2)
         )
     end
     @testset "Real-world tests" begin
         @testset "NNlib" begin
             x = rand(3, 3, 2, 1) # WHCN
             w = rand(2, 2, 2, 1) # Conv((2, 2), 2 => 1)
-            C = pattern(x -> NNlib.conv(x, w), ConnectivityTracer, x)
+            C = pattern(x -> NNlib.conv(x, w), ConnectivityTracer{BitSet}, x)
             @test_reference "references/pattern/connectivity/NNlib/conv.txt" BitMatrix(C)
-            J = pattern(x -> NNlib.conv(x, w), JacobianTracer, x)
+            J = pattern(x -> NNlib.conv(x, w), JacobianTracer{BitSet}, x)
             @test_reference "references/pattern/jacobian/NNlib/conv.txt" BitMatrix(J)
             @test C == J
         end
@@ -285,9 +286,9 @@ DocMeta.setdocmeta!(
             du = similar(u)
             f!(du, u) = brusselator_2d_loop(du, u, p, nothing)
 
-            C = pattern(f!, du, ConnectivityTracer, u)
+            C = pattern(f!, du, ConnectivityTracer{BitSet}, u)
             @test_reference "references/pattern/connectivity/Brusselator.txt" BitMatrix(C)
-            J = pattern(f!, du, JacobianTracer, u)
+            J = pattern(f!, du, JacobianTracer{BitSet}, u)
             @test_reference "references/pattern/jacobian/Brusselator.txt" BitMatrix(J)
             @test C == J
 
