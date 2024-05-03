@@ -11,7 +11,7 @@ const SET_TYPE_MESSAGE = """
 The provided index set type `S` has to satisfy the following conditions:
 
 - it is an iterable with `<:Integer` element type
-- it implements methods `union`, `union!` and `push!`
+- it implements `union`
 
 Subtypes of `AbstractSet{<:Integer}` are a natural choice, like `BitSet` or `Set{UInt64}`.
 """
@@ -153,8 +153,8 @@ HessianTracer(t::HessianTracer) = t
 function promote_order(t::HessianTracer)
     d = deepcopy(t.inputs)
     ks = keys(d)
-    for v in values(d)
-        union!(v, ks)
+    for (k, v) in pairs(d)
+        d[k] = reduce(union, ks; init=v)
     end
     return HessianTracer(d)
 end
@@ -168,15 +168,14 @@ end
 function distributive_merge(a::HessianTracer, b::HessianTracer)
     da = deepcopy(a.inputs)
     db = deepcopy(b.inputs)
-    for ka in keys(da)
-        for kb in keys(db)
-            # add second-order interaction term
-            union!(da[ka], kb)
-            union!(db[kb], ka)
-        end
+    # add second-order interaction term
+    for (ka, va) in pairs(da)
+        da[ka] = reduce(union, keys(db); init=va)
     end
-    merge!(da, db)
-    return HessianTracer(da)
+    for (kb, vb) in pairs(db)
+        db[kb] = reduce(union, keys(da); init=vb)
+    end
+    return HessianTracer(merge(da, db))
 end
 
 #===========#
