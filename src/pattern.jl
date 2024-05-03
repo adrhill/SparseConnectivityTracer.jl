@@ -24,7 +24,7 @@ end
 Enumerates inputs `x` and primal outputs `y = f(x)` and returns sparse matrix `C` of size `(m, n)`
 where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
 
-The type of index set `T` can be specified as an optional argument and defaults to `BitSet`.
+The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
 
 ## Example
 
@@ -50,7 +50,7 @@ connectivity_pattern(f, x, settype::Type{S}=DEFAULT_SET_TYPE) where {S} =
 Enumerates inputs `x` and primal outputs `y` after `f!(y, x)` and returns sparse matrix `C` of size `(m, n)`
 where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
 
-The type of index set `T` can be specified as an optional argument and defaults to `BitSet`.
+The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
 """
 function connectivity_pattern(f!, y, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
     return pattern(f!, y, ConnectivityTracer{S}, x)
@@ -62,7 +62,7 @@ end
 
 Compute the sparsity pattern of the Jacobian of `y = f(x)`.
 
-The type of index set `T` can be specified as an optional argument and defaults to `BitSet`.
+The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
 
 ## Example
 
@@ -88,7 +88,7 @@ end
 
 Compute the sparsity pattern of the Jacobian of `f!(y, x)`.
 
-The type of index set `T` can be specified as an optional argument and defaults to `BitSet`.
+The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
 """
 function jacobian_pattern(f!, y, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
     return pattern(f!, y, JacobianTracer{S}, x)
@@ -100,7 +100,7 @@ end
 
 Computes the sparsity pattern of the Hessian of a scalar function `y = f(x)`.
 
-The type of index set `T` can be specified as an optional argument and defaults to `BitSet`.
+The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
 
 ## Example
 
