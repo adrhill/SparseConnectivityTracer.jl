@@ -12,6 +12,7 @@ include("overload_jacobian.jl")
 include("overload_hessian.jl")
 include("pattern.jl")
 include("adtypes.jl")
+include("sortedvector.jl")
 
 export ConnectivityTracer, connectivity_pattern
 export JacobianTracer, jacobian_pattern
