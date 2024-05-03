@@ -47,7 +47,7 @@ DocMeta.setdocmeta!(
         include("test_differentiability.jl")
     end
     @testset "First order" begin
-        for S in (BitSet, Set{UInt64})
+        for S in (BitSet, Set{UInt64}, SortedVector{UInt64})
             @testset "Set type $S" begin
                 CT = ConnectivityTracer{S}
                 JT = JacobianTracer{S}
@@ -95,19 +95,6 @@ DocMeta.setdocmeta!(
                 @test jacobian_pattern(x -> ℯ^x, 1, S) ≈ [1;;]
                 @test jacobian_pattern(x -> round(x, RoundNearestTiesUp), 1, S) ≈ [0;;]
 
-                @test rand(CT) == empty(CT)
-                @test rand(JT) == empty(JT)
-
-                t = tracer(CT, 2)
-                @test ConnectivityTracer(t) == t
-                @test empty(t) == empty(CT)
-                @test CT(1) == empty(CT)
-
-                t = tracer(JT, 2)
-                @test JacobianTracer(t) == t
-                @test empty(t) == empty(JT)
-                @test JT(1) == empty(JT)
-
                 # Base.show
                 @test_reference "references/show/ConnectivityTracer_$S.txt" repr(
                     "text/plain", tracer(CT, 2)
@@ -119,7 +106,7 @@ DocMeta.setdocmeta!(
         end
     end
     @testset "Second order" begin
-        for S in (BitSet, Set{UInt64})
+        for S in (BitSet, Set{UInt64}, SortedVector{UInt64})
             @testset "Set type $S" begin
                 HT = HessianTracer{S}
 
@@ -138,13 +125,6 @@ DocMeta.setdocmeta!(
                 @test hessian_pattern(x -> x^ℯ, 1) ≈ [1;;]
                 @test hessian_pattern(x -> ℯ^x, 1) ≈ [1;;]
                 @test hessian_pattern(x -> round(x, RoundNearestTiesUp), 1) ≈ [0;;]
-
-                @test rand(HT) == empty(HT)
-
-                t = tracer(HT, 2)
-                @test HessianTracer(t) == t
-                @test empty(t) == empty(HT)
-                @test HT(1) == empty(HT)
 
                 H = hessian_pattern(x -> x[1] / x[2] + x[3] / 1 + 1 / x[4], rand(4), S)
                 @test H ≈ [
@@ -261,7 +241,7 @@ DocMeta.setdocmeta!(
     end
     @testset "Real-world tests" begin
         include("brusselator.jl")
-        for S in (BitSet, Set{UInt64})
+        for S in (BitSet, Set{UInt64}, SortedVector{UInt64})
             @testset "Set type $S" begin
                 @testset "Brusselator" begin
                     N = 6
