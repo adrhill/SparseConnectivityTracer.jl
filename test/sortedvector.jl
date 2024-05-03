@@ -1,3 +1,5 @@
+using ADTypes
+using SparseArrays
 using SparseConnectivityTracer
 using SparseConnectivityTracer: SortedVector
 using Test
@@ -21,3 +23,7 @@ using Test
         end
     end
 end;
+
+sd = TracerSparsityDetector(SortedVector{UInt, Vector{UInt}})
+@test ADTypes.jacobian_sparsity(diff, rand(10), sd) isa SparseMatrixCSC
+@test_broken ADTypes.hessian_sparsity(x -> sum(abs2, diff(x)), rand(10), sd) isa SparseMatrixCSC
