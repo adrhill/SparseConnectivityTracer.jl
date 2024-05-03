@@ -31,5 +31,5 @@ HessianTracer
 We also define a custom alternative to sets that can deliver faster `union`:
 
 ```@docs
-SortedVector
+SparseConnectivityTracer.SortedVector
 ```
