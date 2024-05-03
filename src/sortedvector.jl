@@ -35,7 +35,7 @@ struct SortedVector{T,V<:AbstractVector{T}} <: AbstractVector{T}
     end
 
     function SortedVector{T,V}() where {T,V<:AbstractVector{T}}
-        return new{T,V}(convert(V, T[]))
+        return new{T,V}(V())
     end
 end
 
