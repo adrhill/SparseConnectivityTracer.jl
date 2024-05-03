@@ -33,6 +33,10 @@ struct SortedVector{T,V<:AbstractVector{T}} <: AbstractVector{T}
     function SortedVector{T,V}(x::Number) where {T,V<:AbstractVector{T}}
         return new{T,V}(convert(V, [T(x)]))
     end
+
+    function SortedVector{T,V}() where {T,V<:AbstractVector{T}}
+        return new{T,V}(convert(V, T[]))
+    end
 end
 
 Base.eltype(::SortedVector{T}) where {T} = T
