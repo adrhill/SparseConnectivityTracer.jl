@@ -172,10 +172,9 @@ function distributive_merge(a::HessianTracer, b::HessianTracer)
         da[ka] = union(va, keys(db))
     end
     for (kb, vb) in pairs(db)
-        da[kb] = union(vb, keys(da))
+        db[kb] = union(vb, keys(da))
     end
-    merge!(da, db)
-    return HessianTracer(da)  # why can't it be merge(da, db)?
+    return HessianTracer(merge(da, db))
 end
 
 #===========#
