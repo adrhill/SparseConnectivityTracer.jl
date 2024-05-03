@@ -1,7 +1,5 @@
 abstract type AbstractTracer <: Number end
 
-const AbstractIndexSet = AbstractSet{<:Integer}
-
 # Convenience constructor for empty tracers
 empty(tracer::T) where {T<:AbstractTracer} = empty(T)
 
@@ -9,23 +7,33 @@ empty(tracer::T) where {T<:AbstractTracer} = empty(T)
 # Connectivity #
 #==============#
 
+const SET_TYPE_MESSAGE = """
+The provided index set type `S` has to satisfy the following conditions:
+
+- it is an iterable with `<:Integer` element type
+- it implements methods `union`, `union!` and `push!`
+
+Subtypes of `AbstractSet{<:Integer}` are a natural choice, like `BitSet` or `Set{UInt64}`.
+"""
+
 """
     ConnectivityTracer{S}(indexset) <: Number
 
 Number type keeping track of input indices of previous computations.
-The provided index set type `S` has to be an `AbstractSet{<:Integer}`, e.g. `BitSet` or `Set{UInt64}`.
+
+$SET_TYPE_MESSAGE
 
 For a higher-level interface, refer to [`connectivity_pattern`](@ref).
 """
-struct ConnectivityTracer{S<:AbstractIndexSet} <: AbstractTracer
+struct ConnectivityTracer{S} <: AbstractTracer
     inputs::S # indices of connected, enumerated inputs
 end
 
-function Base.show(io::IO, t::ConnectivityTracer{S}) where {S<:AbstractIndexSet}
+function Base.show(io::IO, t::ConnectivityTracer{S}) where {S}
     return Base.show_delim_array(io, inputs(t), "ConnectivityTracer{$S}(", ',', ')', true)
 end
 
-empty(::Type{ConnectivityTracer{S}}) where {S<:AbstractIndexSet} = ConnectivityTracer(S())
+empty(::Type{ConnectivityTracer{S}}) where {S} = ConnectivityTracer(S())
 
 # Performance can be gained by not re-allocating empty tracers
 const EMPTY_CONNECTIVITY_TRACER_BITSET     = ConnectivityTracer(BitSet())
@@ -44,13 +52,11 @@ empty(::Type{ConnectivityTracer{Set{UInt64}}}) = EMPTY_CONNECTIVITY_TRACER_SET_U
 # Generic code expecting "regular" numbers `x` will sometimes convert them 
 # by calling `T(x)` (instead of `convert(T, x)`), where `T` can be `ConnectivityTracer`.
 # When this happens, we create a new empty tracer with no input pattern.
-ConnectivityTracer{S}(::Number) where {S<:AbstractIndexSet} = empty(ConnectivityTracer{S})
+ConnectivityTracer{S}(::Number) where {S} = empty(ConnectivityTracer{S})
 ConnectivityTracer(t::ConnectivityTracer) = t
 
 ## Unions of tracers
-function uniontracer(
-    a::ConnectivityTracer{S}, b::ConnectivityTracer{S}
-) where {S<:AbstractIndexSet}
+function uniontracer(a::ConnectivityTracer{S}, b::ConnectivityTracer{S}) where {S}
     return ConnectivityTracer(union(a.inputs, b.inputs))
 end
 
@@ -62,19 +68,20 @@ end
     JacobianTracer{S}(indexset) <: Number
 
 Number type keeping track of input indices of previous computations with non-zero derivatives.
-The provided index set type `S` has to be an `AbstractSet{<:Integer}`, e.g. `BitSet` or `Set{UInt64}`.
+
+$SET_TYPE_MESSAGE
 
 For a higher-level interface, refer to [`jacobian_pattern`](@ref).
 """
-struct JacobianTracer{S<:AbstractIndexSet} <: AbstractTracer
+struct JacobianTracer{S} <: AbstractTracer
     inputs::S
 end
 
-function Base.show(io::IO, t::JacobianTracer{S}) where {S<:AbstractIndexSet}
+function Base.show(io::IO, t::JacobianTracer{S}) where {S}
     return Base.show_delim_array(io, inputs(t), "JacobianTracer{$S}(", ',', ')', true)
 end
 
-empty(::Type{JacobianTracer{S}}) where {S<:AbstractIndexSet} = JacobianTracer(S())
+empty(::Type{JacobianTracer{S}}) where {S} = JacobianTracer(S())
 
 # Performance can be gained by not re-allocating empty tracers
 const EMPTY_JACOBIAN_TRACER_BITSET     = JacobianTracer(BitSet())
@@ -89,11 +96,11 @@ empty(::Type{JacobianTracer{Set{UInt16}}}) = EMPTY_JACOBIAN_TRACER_SET_UINT16
 empty(::Type{JacobianTracer{Set{UInt32}}}) = EMPTY_JACOBIAN_TRACER_SET_UINT32
 empty(::Type{JacobianTracer{Set{UInt64}}}) = EMPTY_JACOBIAN_TRACER_SET_UINT64
 
-JacobianTracer{S}(::Number) where {S<:AbstractIndexSet} = empty(JacobianTracer{S})
+JacobianTracer{S}(::Number) where {S} = empty(JacobianTracer{S})
 JacobianTracer(t::JacobianTracer) = t
 
 ## Unions of tracers
-function uniontracer(a::JacobianTracer{S}, b::JacobianTracer{S}) where {S<:AbstractIndexSet}
+function uniontracer(a::JacobianTracer{S}, b::JacobianTracer{S}) where {S}
     return JacobianTracer(union(a.inputs, b.inputs))
 end
 
@@ -104,14 +111,15 @@ end
     HessianTracer{S}(indexset) <: Number
 
 Number type keeping track of input indices of previous computations with non-zero first and second derivatives.
-The provided index set type `S` has to be an `AbstractSet{<:Integer}`, e.g. `BitSet` or `Set{UInt64}`.
+
+$SET_TYPE_MESSAGE
 
 For a higher-level interface, refer to [`hessian_pattern`](@ref).
 """
-struct HessianTracer{S<:AbstractIndexSet} <: AbstractTracer
+struct HessianTracer{S} <: AbstractTracer
     inputs::Dict{UInt64,S}
 end
-function Base.show(io::IO, t::HessianTracer{S}) where {S<:AbstractIndexSet}
+function Base.show(io::IO, t::HessianTracer{S}) where {S}
     println(io, "HessianTracer{", S, "}(")
     for key in keys(t.inputs)
         print(io, "  ", key, " => ")
@@ -121,7 +129,7 @@ function Base.show(io::IO, t::HessianTracer{S}) where {S<:AbstractIndexSet}
     return print(io, ")")
 end
 
-function empty(::Type{HessianTracer{S}}) where {S<:AbstractIndexSet}
+function empty(::Type{HessianTracer{S}}) where {S}
     return HessianTracer(Dict{UInt64,S}())
 end
 
@@ -138,7 +146,7 @@ empty(::Type{HessianTracer{Set{UInt16}}}) = EMPTY_HESSIAN_TRACER_SET_UINT16
 empty(::Type{HessianTracer{Set{UInt32}}}) = EMPTY_HESSIAN_TRACER_SET_UINT32
 empty(::Type{HessianTracer{Set{UInt64}}}) = EMPTY_HESSIAN_TRACER_SET_UINT64
 
-HessianTracer{S}(::Number) where {S<:AbstractIndexSet} = empty(HessianTracer{S})
+HessianTracer{S}(::Number) where {S} = empty(HessianTracer{S})
 HessianTracer(t::HessianTracer) = t
 
 # Turn first-order interactions into second-order interactions
@@ -189,27 +197,20 @@ inputs(t::JacobianTracer) = collect(t.inputs)
 
 Convenience constructor for [`ConnectivityTracer`](@ref), [`JacobianTracer`](@ref) and [`HessianTracer`](@ref) from input indices.
 """
-tracer(::Type{JacobianTracer{S}}, index::Integer) where {S<:AbstractIndexSet} =
-    JacobianTracer(S(index))
-function tracer(::Type{ConnectivityTracer{S}}, index::Integer) where {S<:AbstractIndexSet}
+tracer(::Type{JacobianTracer{S}}, index::Integer) where {S} = JacobianTracer(S(index))
+function tracer(::Type{ConnectivityTracer{S}}, index::Integer) where {S}
     return ConnectivityTracer(S(index))
 end
-function tracer(::Type{HessianTracer{S}}, index::Integer) where {S<:AbstractIndexSet}
+function tracer(::Type{HessianTracer{S}}, index::Integer) where {S}
     return HessianTracer(Dict{UInt64,S}(index => S()))
 end
 
-function tracer(
-    ::Type{JacobianTracer{S}}, inds::NTuple{N,<:Integer}
-) where {N,S<:AbstractIndexSet}
+function tracer(::Type{JacobianTracer{S}}, inds::NTuple{N,<:Integer}) where {N,S}
     return JacobianTracer{S}(S(inds))
 end
-function tracer(
-    ::Type{ConnectivityTracer{S}}, inds::NTuple{N,<:Integer}
-) where {N,S<:AbstractIndexSet}
+function tracer(::Type{ConnectivityTracer{S}}, inds::NTuple{N,<:Integer}) where {N,S}
     return ConnectivityTracer{S}(S(inds))
 end
-function tracer(
-    ::Type{HessianTracer{S}}, inds::NTuple{N,<:Integer}
-) where {N,S<:AbstractIndexSet}
+function tracer(::Type{HessianTracer{S}}, inds::NTuple{N,<:Integer}) where {N,S}
     return HessianTracer{S}(Dict{UInt64,S}(i => S() for i in inds))
 end

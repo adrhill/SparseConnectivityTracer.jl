@@ -63,7 +63,7 @@ julia> jacobian_pattern(layer, x)
 ⎣⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠛⢿⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣷⣄⎦
 ```
 
-The type of index set `T<:AbstractSet{<:Integer}` that is internally used to keep track of connectivity can be specified via `jacobian_pattern(f, x, T)`, defaulting to `BitSet`. 
+The type of index set `S` that is internally used to keep track of connectivity can be specified via `jacobian_pattern(f, x, S)`, defaulting to `BitSet`. 
 For high-dimensional functions, `Set{UInt64}` can be more efficient .
 
 ### Hessian
