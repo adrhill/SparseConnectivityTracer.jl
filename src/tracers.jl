@@ -153,7 +153,7 @@ HessianTracer(t::HessianTracer) = t
 function promote_order(t::HessianTracer)
     d = deepcopy(t.inputs)
     for (k, v) in pairs(d)
-        d[k] = reduce(union, keys(d); init=v)
+        d[k] = union(v, keys(d))  # works by not being clever with symmetry
     end
     return HessianTracer(d)
 end
@@ -167,12 +167,12 @@ end
 function distributive_merge(a::HessianTracer, b::HessianTracer)
     da = deepcopy(a.inputs)
     db = deepcopy(b.inputs)
-    # add second-order interaction term
+    # add second-order interaction term, works by not being clever with symmetry
     for (ka, va) in pairs(da)
-        da[ka] = reduce(union, keys(db); init=va)
+        da[ka] = union(va, keys(db))
     end
     for (kb, vb) in pairs(db)
-        db[kb] = reduce(union, keys(da); init=vb)
+        da[kb] = union(vb, keys(da))
     end
     return HessianTracer(merge(da, db))
 end
