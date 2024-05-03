@@ -7,16 +7,21 @@ empty(tracer::T) where {T<:AbstractTracer} = empty(T)
 # Connectivity #
 #==============#
 
+const SET_TYPE_MESSAGE = """
+The provided index set type `S` has to satisfy the following conditions:
+
+- it is an iterable with `<:Integer` element type
+- it implements methods `union`, `union!` and `push!`
+
+Subtypes of `AbstractSet{<:Integer}` are a natural choice, like `BitSet` or `Set{UInt64}`.
+"""
+
 """
     ConnectivityTracer{S}(indexset) <: Number
 
 Number type keeping track of input indices of previous computations.
-The provided index set type `S` has to satisfy the following conditions:
 
-- it is an iterable with `<:Integer` element type
-- it implements methods `union` and `push!`
-
-Subtypes of `AbstractSet{<:Integer}` are a natural choice, like `BitSet` or `Set{UInt64}`.
+$SET_TYPE_MESSAGE
 
 For a higher-level interface, refer to [`connectivity_pattern`](@ref).
 """
@@ -63,7 +68,8 @@ end
     JacobianTracer{S}(indexset) <: Number
 
 Number type keeping track of input indices of previous computations with non-zero derivatives.
-The provided index set type `S` has to be an `AbstractSet{<:Integer}`, e.g. `BitSet` or `Set{UInt64}`.
+
+$SET_TYPE_MESSAGE
 
 For a higher-level interface, refer to [`jacobian_pattern`](@ref).
 """
@@ -105,7 +111,8 @@ end
     HessianTracer{S}(indexset) <: Number
 
 Number type keeping track of input indices of previous computations with non-zero first and second derivatives.
-The provided index set type `S` has to be an `AbstractSet{<:Integer}`, e.g. `BitSet` or `Set{UInt64}`.
+
+$SET_TYPE_MESSAGE
 
 For a higher-level interface, refer to [`hessian_pattern`](@ref).
 """
