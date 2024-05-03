@@ -52,35 +52,35 @@ Base.show(io::IO, sv::SortedVector) = print(io, "SortedVector($(sv.data))")
 
 function Base.union(v1::SortedVector{T,V}, v2::SortedVector{T,V}) where {T,V}
     left, right = v1.data, v2.data
-    both = similar(left, length(left) + length(right))
-    left_index, right_index, both_index = 1, 1, 1
+    result = similar(left, length(left) + length(right))
+    left_index, right_index, result_index = 1, 1, 1
     # common part of left and right
     @inbounds while (
         left_index in eachindex(left) &&
         right_index in eachindex(right) &&
-        both_index in eachindex(both)
+        result_index in eachindex(result)
     )
         left_item = left[left_index]
         right_item = right[right_index]
         left_smaller = left_item <= right_item
         right_smaller = right_item <= left_item
-        both_item = ifelse(left_smaller, left_item, right_item)
-        both[both_index] = both_item
-        both_index += 1
+        result_item = ifelse(left_smaller, left_item, right_item)
+        result[result_index] = result_item
+        result_index += 1
         left_index = ifelse(left_smaller, left_index + 1, left_index)
         right_index = ifelse(right_smaller, right_index + 1, right_index)
     end
     # either left or right has reached its end at this point
-    @inbounds while left_index in eachindex(left) && both_index in eachindex(both)
-        both[both_index] = left[left_index]
+    @inbounds while left_index in eachindex(left) && result_index in eachindex(result)
+        result[result_index] = left[left_index]
         left_index += 1
-        both_index += 1
+        result_index += 1
     end
-    @inbounds while right_index in eachindex(right) && both_index in eachindex(both)
-        both[both_index] = right[right_index]
+    @inbounds while right_index in eachindex(right) && result_index in eachindex(result)
+        result[result_index] = right[right_index]
         right_index += 1
-        both_index += 1
+        result_index += 1
     end
-    resize!(both, both_index - 1)
-    return SortedVector(both; already_sorted=true)
+    resize!(result, result_index - 1)
+    return SortedVector(result; already_sorted=true)
 end
