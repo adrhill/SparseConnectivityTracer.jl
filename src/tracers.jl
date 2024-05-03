@@ -153,16 +153,7 @@ end
 
 # Merge first- and second-order terms in an "additive" fashion
 function additive_merge(a::HessianTracer, b::HessianTracer)
-    da = deepcopy(a.inputs)
-    db = b.inputs
-    for k in keys(db)
-        if haskey(da, k)
-            union!(da[k], db[k])
-        else
-            push!(da, k => db[k])
-        end
-    end
-    return HessianTracer(da)
+    return HessianTracer(mergewith(union, a.inputs, b.inputs))
 end
 
 # Merge first- and second-order terms in a "distributive" fashion
