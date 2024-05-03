@@ -19,38 +19,34 @@ z = union(x, y)
 SortedVector([1, 2, 3, 4, 5])
 ````
 """
-struct SortedVector{T,V<:AbstractVector{T}} <: AbstractVector{T}
-    data::V
+struct SortedVector{T<:Number} <: AbstractVector{T}
+    data::Vector{T}
 
-    function SortedVector{T,V}(data::V; already_sorted=false) where {T,V<:AbstractVector{T}}
-        if already_sorted
-            new{T,V}(data)
-        else
-            new{T,V}(sort(data))
-        end
+    function SortedVector{T}(data::AbstractVector{T}) where {T}
+        return new{T}(convert(Vector{T}, data))
     end
 
-    function SortedVector{T,V}(x::Number) where {T,V<:AbstractVector{T}}
-        return new{T,V}(convert(V, [T(x)]))
+    function SortedVector{T}(x::Number) where {T}
+        return new{T}([convert(T, x)])
     end
 
-    function SortedVector{T,V}() where {T,V<:AbstractVector{T}}
-        return new{T,V}(V())
+    function SortedVector{T}() where {T}
+        return new{T}(T[])
     end
+end
+
+function SortedVector(data::AbstractVector{T}; already_sorted=false) where {T}
+    sorted_data = ifelse(already_sorted, data, sort(data))
+    return SortedVector{T}(sorted_data)
 end
 
 Base.eltype(::SortedVector{T}) where {T} = T
 Base.size(v::SortedVector) = size(v.data)
 Base.getindex(v::SortedVector, i) = v.data[i]
-Base.IndexStyle(::Type{SortedVector{T,V}}) where {T,V} = IndexStyle(V)
+Base.IndexStyle(::Type{SortedVector{T}}) where {T} = IndexStyle(Vector{T})
+Base.show(io::IO, v::SortedVector) = print(io, "SortedVector($(v.data))")
 
-function SortedVector(data::V; already_sorted=false) where {T,V<:AbstractVector{T}}
-    return SortedVector{T,V}(data; already_sorted)
-end
-
-Base.show(io::IO, sv::SortedVector) = print(io, "SortedVector($(sv.data))")
-
-function Base.union(v1::SortedVector{T,V}, v2::SortedVector{T,V}) where {T,V}
+function Base.union(v1::SortedVector{T}, v2::SortedVector{T}) where {T}
     left, right = v1.data, v2.data
     result = similar(left, length(left) + length(right))
     left_index, right_index, result_index = 1, 1, 1
