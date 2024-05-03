@@ -40,7 +40,7 @@ julia> connectivity_pattern(f, x)
  ⋅  ⋅  1
 ```
 """
-connectivity_pattern(f, x, settype::Type{S}=DEFAULT_SET_TYPE) where {S<:AbstractIndexSet} =
+connectivity_pattern(f, x, settype::Type{S}=DEFAULT_SET_TYPE) where {S} =
     pattern(f, ConnectivityTracer{S}, x)
 
 """
@@ -52,9 +52,7 @@ where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to
 
 The type of index set `T<:AbstractSet{<:Integer}` can be specified as an optional argument and defaults to `BitSet`.
 """
-function connectivity_pattern(
-    f!, y, x, ::Type{S}=DEFAULT_SET_TYPE
-) where {S<:AbstractIndexSet}
+function connectivity_pattern(f!, y, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
     return pattern(f!, y, ConnectivityTracer{S}, x)
 end
 
@@ -80,7 +78,7 @@ julia> jacobian_pattern(f, x)
  ⋅  ⋅  ⋅
 ```
 """
-function jacobian_pattern(f, x, ::Type{S}=DEFAULT_SET_TYPE) where {S<:AbstractIndexSet}
+function jacobian_pattern(f, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
     return pattern(f, JacobianTracer{S}, x)
 end
 
@@ -92,7 +90,7 @@ Compute the sparsity pattern of the Jacobian of `f!(y, x)`.
 
 The type of index set `T<:AbstractSet{<:Integer}` can be specified as an optional argument and defaults to `BitSet`.
 """
-function jacobian_pattern(f!, y, x, ::Type{S}=DEFAULT_SET_TYPE) where {S<:AbstractIndexSet}
+function jacobian_pattern(f!, y, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
     return pattern(f!, y, JacobianTracer{S}, x)
 end
 
@@ -130,7 +128,7 @@ julia> hessian_pattern(g, x)
  ⋅  1  ⋅  ⋅  1
 ```
 """
-function hessian_pattern(f, x, ::Type{S}=DEFAULT_SET_TYPE) where {S<:AbstractIndexSet}
+function hessian_pattern(f, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
     return pattern(f, HessianTracer{S}, x)
 end
 
@@ -176,7 +174,7 @@ end
 
 function _pattern_to_sparsemat(
     xt::AbstractArray{HessianTracer{S}}, yt::AbstractArray{HessianTracer{S}}
-) where {S<:AbstractIndexSet}
+) where {S}
     length(yt) != 1 && error("pattern(f, HessianTracer, x) expects scalar output y=f(x).")
     y = only(yt)
 

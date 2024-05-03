@@ -25,7 +25,6 @@ for TT in (:JacobianTracer, :ConnectivityTracer, :HessianTracer)
     @eval Base.similar(::Array{T}, m::Int) where {T<:$TT}          = zeros(T, m)
     @eval Base.similar(::Array{T}, dims::Dims{N}) where {N,T<:$TT} = zeros(T, dims)
 
-    @eval Base.similar(
-        ::Array, ::Type{$TT{S}}, dims::Dims{N}
-    ) where {N,S<:AbstractIndexSet} = zeros($TT{S}, dims)
+    @eval Base.similar(::Array, ::Type{$TT{S}}, dims::Dims{N}) where {N,S} =
+        zeros($TT{S}, dims)
 end
