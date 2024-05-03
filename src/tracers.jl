@@ -30,7 +30,9 @@ struct ConnectivityTracer{S} <: AbstractTracer
 end
 
 function Base.show(io::IO, t::ConnectivityTracer{S}) where {S}
-    return Base.show_delim_array(io, inputs(t), "ConnectivityTracer{$S}(", ',', ')', true)
+    return Base.show_delim_array(
+        io, convert.(Int, inputs(t)), "ConnectivityTracer{$S}(", ',', ')', true
+    )
 end
 
 empty(::Type{ConnectivityTracer{S}}) where {S} = ConnectivityTracer(S())
@@ -78,7 +80,9 @@ struct JacobianTracer{S} <: AbstractTracer
 end
 
 function Base.show(io::IO, t::JacobianTracer{S}) where {S}
-    return Base.show_delim_array(io, inputs(t), "JacobianTracer{$S}(", ',', ')', true)
+    return Base.show_delim_array(
+        io, convert.(Int, inputs(t)), "JacobianTracer{$S}(", ',', ')', true
+    )
 end
 
 empty(::Type{JacobianTracer{S}}) where {S} = JacobianTracer(S())
@@ -122,8 +126,8 @@ end
 function Base.show(io::IO, t::HessianTracer{S}) where {S}
     println(io, "HessianTracer{", S, "}(")
     for key in keys(t.inputs)
-        print(io, "  ", key, " => ")
-        Base.show_delim_array(io, collect(t.inputs[key]), "(", ',', ')', true)
+        print(io, "  ", Int(key), " => ")
+        Base.show_delim_array(io, convert.(Int, t.inputs[key]), "(", ',', ')', true)
         println(io, ",")
     end
     return print(io, ")")
