@@ -40,6 +40,10 @@ function SortedVector(data::AbstractVector{T}; already_sorted=false) where {T}
     return SortedVector{T}(sorted_data)
 end
 
+function Base.convert(::Type{SortedVector{T}}, v::Vector{T}) where {T}
+    return SortedVector(v; already_sorted=false)
+end
+
 Base.eltype(::SortedVector{T}) where {T} = T
 Base.size(v::SortedVector) = size(v.data)
 Base.getindex(v::SortedVector, i) = v.data[i]

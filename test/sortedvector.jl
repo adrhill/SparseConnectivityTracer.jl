@@ -26,5 +26,4 @@ end;
 
 sd = TracerSparsityDetector(SortedVector{UInt})
 @test ADTypes.jacobian_sparsity(diff, rand(10), sd) isa SparseMatrixCSC
-@test_broken ADTypes.hessian_sparsity(x -> sum(abs2, diff(x)), rand(10), sd) isa
-    SparseMatrixCSC
+@test ADTypes.hessian_sparsity(x -> sum(abs2, diff(x)), rand(10), sd) isa SparseMatrixCSC
