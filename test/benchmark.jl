@@ -1,6 +1,6 @@
 using BenchmarkTools
 using SparseConnectivityTracer
-using SparseConnectivityTracer: SortedVector
+using SparseConnectivityTracer: RecursiveSet, SortedVector
 using Symbolics: Symbolics
 using NNlib: conv
 
@@ -21,6 +21,8 @@ function benchmark_brusselator(N::Integer, method=:tracer_bitset)
 
     if method == :tracer_bitset
         return @benchmark jacobian_pattern($f!, $du, $u, BitSet)
+    elseif method == :tracer_recursiveset
+        return @benchmark jacobian_pattern($f!, $du, $u, RecursiveSet{UInt64})
     elseif method == :tracer_sortedvector
         return @benchmark jacobian_pattern($f!, $du, $u, SortedVector{UInt64})
     elseif method == :symbolics
