@@ -6,7 +6,7 @@ using NNlib: conv
 
 include("brusselator.jl")
 
-function benchmark_brusselator(N::Integer, method=:tracer)
+function benchmark_brusselator(N::Integer, method=:tracer_bitset)
     dims = (N, N, 2)
     A = 1.0
     B = 1.0
@@ -28,9 +28,9 @@ function benchmark_brusselator(N::Integer, method=:tracer)
     end
 end
 
-function benchmark_conv(method=:tracer)
-    x = rand(28, 28, 3, 1) # WHCN image 
-    w = rand(5, 5, 3, 16)  # corresponds to Conv((5, 5), 3 => 16)
+function benchmark_conv(N, method=:tracer_bitset)
+    x = rand(N, N, 3, 1) # WHCN image 
+    w = rand(5, 5, 3, 2)  # corresponds to Conv((5, 5), 3 => 2)
     f(x) = conv(x, w)
 
     if method == :tracer_bitset
@@ -52,7 +52,10 @@ for N in (6, 24, 100)
 end
 
 ## Run conv benchmarks
-@info "Benchmarking NNlib.conv with tracer..."
-# Symbolics fails on this example
-b = benchmark_conv(:tracer)
-display(b)
+for N in (28, 224)
+    for method in (:tracer_bitset, :tracer_sortedvector) # Symbolics fails on this example
+        @info "Benchmarking NNlib.conv on image of size ($N, $N, 3) with with $method..."
+        b = benchmark_conv(N, method)
+        display(b)
+    end
+end

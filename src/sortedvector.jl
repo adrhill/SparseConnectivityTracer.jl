@@ -5,13 +5,13 @@ A wrapper for sorted vectors, designed for fast unions.
 
 # Constructor
 
-    SortedVector(data::AbstractVector; already_sorted=false)
+    SortedVector(data::AbstractVector; sorted=false)
 
 # Example
 
 ```jldoctest
 x = SortedVector([3, 4, 2])
-x = SortedVector([1, 3, 5]; already_sorted=true)
+x = SortedVector([1, 3, 5]; sorted=true)
 z = union(x, y)
 
 # output
@@ -22,8 +22,9 @@ SortedVector([1, 2, 3, 4, 5])
 struct SortedVector{T<:Number} <: AbstractVector{T}
     data::Vector{T}
 
-    function SortedVector{T}(data::AbstractVector{T}) where {T}
-        return new{T}(convert(Vector{T}, data))
+    function SortedVector{T}(data::AbstractVector{T}; sorted=false) where {T}
+        sorted_data = ifelse(sorted, data, sort(data))
+        return new{T}(convert(Vector{T}, sorted_data))
     end
 
     function SortedVector{T}(x::Number) where {T}
@@ -35,13 +36,8 @@ struct SortedVector{T<:Number} <: AbstractVector{T}
     end
 end
 
-function SortedVector(data::AbstractVector{T}; already_sorted=false) where {T}
-    sorted_data = ifelse(already_sorted, data, sort(data))
-    return SortedVector{T}(sorted_data)
-end
-
 function Base.convert(::Type{SortedVector{T}}, v::Vector{T}) where {T}
-    return SortedVector(v; already_sorted=false)
+    return SortedVector{T}(v; sorted=false)
 end
 
 Base.eltype(::SortedVector{T}) where {T} = T
@@ -82,5 +78,5 @@ function Base.union(v1::SortedVector{T}, v2::SortedVector{T}) where {T}
         result_index += 1
     end
     resize!(result, result_index - 1)
-    return SortedVector(result; already_sorted=true)
+    return SortedVector{T}(result; sorted=true)
 end
