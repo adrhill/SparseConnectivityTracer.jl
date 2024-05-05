@@ -4,7 +4,7 @@ using SparseConnectivityTracer: RecursiveSet, SortedVector
 using Symbolics: Symbolics
 using NNlib: conv
 
-include("brusselator.jl")
+include("brusselator_definition.jl")
 
 function benchmark_brusselator(N::Integer, method=:tracer_bitset)
     dims = (N, N, 2)
