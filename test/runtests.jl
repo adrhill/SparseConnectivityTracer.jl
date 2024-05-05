@@ -40,8 +40,13 @@ DocMeta.setdocmeta!(
     @testset "Doctests" begin
         Documenter.doctest(SparseConnectivityTracer)
     end
-    @testset "SortedVector" begin
-        include("sortedvector.jl")
+    @testset verbose = true "Set types" begin
+        @testset "SortedVector" begin
+            include("sortedvector.jl")
+        end
+        @testset "RecursiveSet" begin
+            include("recursiveset.jl")
+        end
     end
     @testset "Classification of operators by diff'ability" begin
         include("test_differentiability.jl")
