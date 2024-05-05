@@ -20,6 +20,10 @@ struct RecursiveSet{T<:Number}
     function RecursiveSet{T}(x::Number) where {T}
         return new{T}(convert(T, x), nothing, nothing)
     end
+
+    function RecursiveSet{T}() where {T}
+        return new{T}(nothing, nothing, nothing)
+    end
 end
 
 function Base.show(io::IO, s::RecursiveSet{T}) where {T}
@@ -45,13 +49,17 @@ function Base.union(s1::RecursiveSet{T}, s2::RecursiveSet{T}) where {T}
 end
 
 function Base.collect(s::RecursiveSet{T}) where {T}
-    if !isnothing(s.x)
+    if isnothing(s.x) && isnothing(s.s1) && isnothing(s.s2)
+        return T[]
+    elseif !isnothing(s.x)
         return T[s.x]
     else
         s_noduplicates = Set{T}()
         for l in AT.Leaves(s)
             x = AT.nodevalue(l)
-            push!(s_noduplicates, x)
+            if !isnothing(x)
+                push!(s_noduplicates, x)
+            end
         end
         return collect(s_noduplicates)
     end
@@ -64,9 +72,9 @@ AT.nodevalue(s::RecursiveSet) = s.x
 AT.childtype(::Type{RecursiveSet{T}}) where {T} = RecursiveSet{T}
 
 function AT.children(s::RecursiveSet{T}) where {T}
-    if !isnothing(s.x)
-        return Tuple{}()
-    else
+    if !isnothing(s.s1) && !isnothing(s.s2)
         return (s.s1, s.s2)
+    else
+        return Tuple{}()
     end
 end
