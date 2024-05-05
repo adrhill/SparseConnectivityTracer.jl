@@ -1,5 +1,6 @@
 using ReferenceTests
 using SparseConnectivityTracer
+using SparseConnectivityTracer: tracer, trace_input, inputs, empty
 using SparseConnectivityTracer: SortedVector
 using Test
 
