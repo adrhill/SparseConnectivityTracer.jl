@@ -64,8 +64,6 @@ function Base.collect(rs::RecursiveSet{T}) where {T}
     end
 end
 
-Base.iterate(rs::RecursiveSet, args...) = iterate(collect(rs), args...)  # TODO: improve
-
 ## Tree implementation
 
 AT.childtype(::Type{RecursiveSet{T}}) where {T} = RecursiveSet{T}

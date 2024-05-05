@@ -225,6 +225,7 @@ Return input indices of a [`ConnectivityTracer`](@ref) or [`JacobianTracer`](@re
 """
 inputs(t::ConnectivityTracer) = collect(t.inputs)
 inputs(t::JacobianTracer) = collect(t.inputs)
+inputs(t::HessianTracer, i::Integer) = collect(t.inputs[i])
 
 """
     tracer(T, index) where {T<:AbstractTracer}

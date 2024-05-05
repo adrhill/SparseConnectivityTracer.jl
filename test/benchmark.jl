@@ -20,13 +20,13 @@ function benchmark_brusselator(N::Integer, method=:tracer_bitset)
     f!(du, u) = brusselator_2d_loop(du, u, p, nothing)
 
     if method == :tracer_bitset
-        return @benchmark jacobian_pattern($f!, $du, $u, BitSet)
+        @btime jacobian_pattern($f!, $du, $u, BitSet)
     elseif method == :tracer_recursiveset
-        return @benchmark jacobian_pattern($f!, $du, $u, RecursiveSet{UInt64})
+        @btime jacobian_pattern($f!, $du, $u, RecursiveSet{UInt64})
     elseif method == :tracer_sortedvector
-        return @benchmark jacobian_pattern($f!, $du, $u, SortedVector{UInt64})
+        @btime jacobian_pattern($f!, $du, $u, SortedVector{UInt64})
     elseif method == :symbolics
-        return @benchmark Symbolics.jacobian_sparsity($f!, $du, $u)
+        @btime Symbolics.jacobian_sparsity($f!, $du, $u)
     end
 end
 
@@ -36,28 +36,28 @@ function benchmark_conv(N, method=:tracer_bitset)
     f(x) = conv(x, w)
 
     if method == :tracer_bitset
-        return @benchmark jacobian_pattern($f, $x, BitSet)
+        @btime jacobian_pattern($f, $x, BitSet)
+    elseif method == :tracer_recursiveset
+        @btime jacobian_pattern($f, $x, RecursiveSet{UInt64})
     elseif method == :tracer_sortedvector
-        return @benchmark jacobian_pattern($f, $x, SortedVector{UInt64})
+        @btime jacobian_pattern($f, $x, SortedVector{UInt64})
     elseif method == :symbolics
-        return @benchmark Symbolics.jacobian_sparsity($f, $x)
+        @btime Symbolics.jacobian_sparsity($f, $x)
     end
 end
 
 ## Run Brusselator benchmarks
 for N in (6, 24, 100)
-    for method in (:tracer_bitset, :tracer_sortedvector, :symbolics)
+    for method in (:tracer_bitset, :tracer_recursiveset, :tracer_sortedvector, :symbolics)
         @info "Benchmarking Brusselator of size $N with $method..."
-        b = benchmark_brusselator(N, method)
-        display(b)
+        benchmark_brusselator(N, method)
     end
 end
 
 ## Run conv benchmarks
 for N in (28, 224)
-    for method in (:tracer_bitset, :tracer_sortedvector) # Symbolics fails on this example
+    for method in (:tracer_bitset, :tracer_recursiveset, :tracer_sortedvector) # Symbolics fails on this example
         @info "Benchmarking NNlib.conv on image of size ($N, $N, 3) with with $method..."
-        b = benchmark_conv(N, method)
-        display(b)
+        benchmark_conv(N, method)
     end
 end
