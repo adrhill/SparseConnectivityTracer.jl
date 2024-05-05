@@ -14,6 +14,4 @@ s = union(
     ),
 )
 
-collect(s)
-
 @test sort(collect(s)) == [1, 3, 5, 7]

@@ -1,6 +1,5 @@
 module SparseConnectivityTracer
 
-import AbstractTrees as AT
 using ADTypes: ADTypes
 import SparseArrays: sparse, sprand
 import Random: rand, AbstractRNG, SamplerType

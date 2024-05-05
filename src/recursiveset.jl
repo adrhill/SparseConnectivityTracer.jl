@@ -49,29 +49,20 @@ function Base.union(rs1::RecursiveSet{T}, rs2::RecursiveSet{T}) where {T}
 end
 
 function Base.collect(rs::RecursiveSet{T}) where {T}
-    if isnothing(rs.s) && isnothing(rs.child1) && isnothing(rs.child2)
-        return T[]
-    elseif !isnothing(rs.s)
-        return collect(rs.s)
-    else
-        s_noduplicates = Set{T}()
-        for l in AT.Leaves(rs)
-            if !isnothing(l.s)
-                union!(s_noduplicates, l.s)
-            end
-        end
-        return collect(s_noduplicates)
-    end
+    accumulator = Set{T}()
+    collect_aux!(accumulator, rs)
+    return collect(accumulator)
 end
 
-## Tree implementation
-
-AT.childtype(::Type{RecursiveSet{T}}) where {T} = RecursiveSet{T}
-
-function AT.children(rs::RecursiveSet{T}) where {T}
-    if !isnothing(rs.child1) && !isnothing(rs.child2)
-        return (rs.child1, rs.child2)
-    else
-        return Tuple{}()
+function collect_aux!(accumulator::Set{T}, rs::RecursiveSet{T})::Nothing where {T}
+    if !isnothing(rs.s)
+        union!(accumulator, rs.s)
     end
+    if !isnothing(rs.child1)
+        collect_aux!(accumulator, rs.child1)
+    end
+    if !isnothing(rs.child2)
+        collect_aux!(accumulator, rs.child2)
+    end
+    return nothing
 end
