@@ -1,6 +1,7 @@
 using ReferenceTests
 using SparseConnectivityTracer
-using SparseConnectivityTracer: SortedVector
+using SparseConnectivityTracer: tracer, trace_input, inputs, empty
+using SparseConnectivityTracer: RecursiveSet, SortedVector
 using Test
 
 @testset "Set type $S" for S in (BitSet, Set{UInt64}, SortedVector{UInt64})
