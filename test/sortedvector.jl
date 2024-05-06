@@ -10,8 +10,8 @@ using Test
         k2 in (0, 10, 100, 1000)
 
         for _ in 1:100
-            x = SortedVector(rand(T(1):T(1000), k1); already_sorted=false)
-            y = SortedVector(sort(rand(T(1):T(1000), k2)); already_sorted=true)
+            x = SortedVector{T}(rand(T(1):T(1000), k1); sorted=false)
+            y = SortedVector{T}(sort(rand(T(1):T(1000), k2)); sorted=true)
             z = union(x, y)
             @test eltype(z) == T
             @test issorted(z.data)
