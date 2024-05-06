@@ -175,7 +175,7 @@ function keys2set(::Type{S}, d::Dict{I}) where {I<:Integer,S<:AbstractSet{<:I}}
     return S(keys(d))
 end
 function keys2set(::Type{S}, d::Dict{I}) where {I<:Integer,S<:RecursiveSet{I}}
-    return S(keys(d); sorted=false)
+    return S(keys(d))
 end
 function keys2set(::Type{S}, d::Dict{I}) where {I<:Integer,S<:SortedVector{I}}
     return S(collect(keys(d)); sorted=false)
