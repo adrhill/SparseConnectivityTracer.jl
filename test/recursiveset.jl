@@ -14,6 +14,6 @@ rs = union(
     ),
 )
 
-println(rs)
+string(rs)
 
 @test sort(collect(rs)) == [1, 3, 5, 7]
