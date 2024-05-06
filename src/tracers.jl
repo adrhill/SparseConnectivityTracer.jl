@@ -38,17 +38,23 @@ end
 empty(::Type{ConnectivityTracer{S}}) where {S} = ConnectivityTracer(S())
 
 # Performance can be gained by not re-allocating empty tracers
-const EMPTY_CONNECTIVITY_TRACER_BITSET     = ConnectivityTracer(BitSet())
-const EMPTY_CONNECTIVITY_TRACER_SET_UINT8  = ConnectivityTracer(Set{UInt8}())
-const EMPTY_CONNECTIVITY_TRACER_SET_UINT16 = ConnectivityTracer(Set{UInt16}())
-const EMPTY_CONNECTIVITY_TRACER_SET_UINT32 = ConnectivityTracer(Set{UInt32}())
-const EMPTY_CONNECTIVITY_TRACER_SET_UINT64 = ConnectivityTracer(Set{UInt64}())
+const EMPTY_CONNECTIVITY_TRACER_BITSET  = ConnectivityTracer(BitSet())
+const EMPTY_CONNECTIVITY_TRACER_SET_U8  = ConnectivityTracer(Set{UInt8}())
+const EMPTY_CONNECTIVITY_TRACER_SET_U16 = ConnectivityTracer(Set{UInt16}())
+const EMPTY_CONNECTIVITY_TRACER_SET_U32 = ConnectivityTracer(Set{UInt32}())
+const EMPTY_CONNECTIVITY_TRACER_SET_U64 = ConnectivityTracer(Set{UInt64}())
+const EMPTY_CONNECTIVITY_TRACER_SV_U16  = ConnectivityTracer(SortedVector{UInt16}())
+const EMPTY_CONNECTIVITY_TRACER_SV_U32  = ConnectivityTracer(SortedVector{UInt32}())
+const EMPTY_CONNECTIVITY_TRACER_SV_U64  = ConnectivityTracer(SortedVector{UInt64}())
 
-empty(::Type{ConnectivityTracer{BitSet}})      = EMPTY_CONNECTIVITY_TRACER_BITSET
-empty(::Type{ConnectivityTracer{Set{UInt8}}})  = EMPTY_CONNECTIVITY_TRACER_SET_UINT8
-empty(::Type{ConnectivityTracer{Set{UInt16}}}) = EMPTY_CONNECTIVITY_TRACER_SET_UINT16
-empty(::Type{ConnectivityTracer{Set{UInt32}}}) = EMPTY_CONNECTIVITY_TRACER_SET_UINT32
-empty(::Type{ConnectivityTracer{Set{UInt64}}}) = EMPTY_CONNECTIVITY_TRACER_SET_UINT64
+empty(::Type{ConnectivityTracer{BitSet}})               = EMPTY_CONNECTIVITY_TRACER_BITSET
+empty(::Type{ConnectivityTracer{Set{UInt8}}})           = EMPTY_CONNECTIVITY_TRACER_SET_U8
+empty(::Type{ConnectivityTracer{Set{UInt16}}})          = EMPTY_CONNECTIVITY_TRACER_SET_U16
+empty(::Type{ConnectivityTracer{Set{UInt32}}})          = EMPTY_CONNECTIVITY_TRACER_SET_U32
+empty(::Type{ConnectivityTracer{Set{UInt64}}})          = EMPTY_CONNECTIVITY_TRACER_SET_U64
+empty(::Type{ConnectivityTracer{SortedVector{UInt16}}}) = EMPTY_CONNECTIVITY_TRACER_SV_U16
+empty(::Type{ConnectivityTracer{SortedVector{UInt32}}}) = EMPTY_CONNECTIVITY_TRACER_SV_U32
+empty(::Type{ConnectivityTracer{SortedVector{UInt64}}}) = EMPTY_CONNECTIVITY_TRACER_SV_U64
 
 # We have to be careful when defining constructors:
 # Generic code expecting "regular" numbers `x` will sometimes convert them 
@@ -88,17 +94,23 @@ end
 empty(::Type{JacobianTracer{S}}) where {S} = JacobianTracer(S())
 
 # Performance can be gained by not re-allocating empty tracers
-const EMPTY_JACOBIAN_TRACER_BITSET     = JacobianTracer(BitSet())
-const EMPTY_JACOBIAN_TRACER_SET_UINT8  = JacobianTracer(Set{UInt8}())
-const EMPTY_JACOBIAN_TRACER_SET_UINT16 = JacobianTracer(Set{UInt16}())
-const EMPTY_JACOBIAN_TRACER_SET_UINT32 = JacobianTracer(Set{UInt32}())
-const EMPTY_JACOBIAN_TRACER_SET_UINT64 = JacobianTracer(Set{UInt64}())
+const EMPTY_JACOBIAN_TRACER_BITSET  = JacobianTracer(BitSet())
+const EMPTY_JACOBIAN_TRACER_SET_U8  = JacobianTracer(Set{UInt8}())
+const EMPTY_JACOBIAN_TRACER_SET_U16 = JacobianTracer(Set{UInt16}())
+const EMPTY_JACOBIAN_TRACER_SET_U32 = JacobianTracer(Set{UInt32}())
+const EMPTY_JACOBIAN_TRACER_SET_U64 = JacobianTracer(Set{UInt64}())
+const EMPTY_JACOBIAN_TRACER_SV_U16  = JacobianTracer(SortedVector{UInt16}())
+const EMPTY_JACOBIAN_TRACER_SV_U32  = JacobianTracer(SortedVector{UInt32}())
+const EMPTY_JACOBIAN_TRACER_SV_U64  = JacobianTracer(SortedVector{UInt64}())
 
-empty(::Type{JacobianTracer{BitSet}})      = EMPTY_JACOBIAN_TRACER_BITSET
-empty(::Type{JacobianTracer{Set{UInt8}}})  = EMPTY_JACOBIAN_TRACER_SET_UINT8
-empty(::Type{JacobianTracer{Set{UInt16}}}) = EMPTY_JACOBIAN_TRACER_SET_UINT16
-empty(::Type{JacobianTracer{Set{UInt32}}}) = EMPTY_JACOBIAN_TRACER_SET_UINT32
-empty(::Type{JacobianTracer{Set{UInt64}}}) = EMPTY_JACOBIAN_TRACER_SET_UINT64
+empty(::Type{JacobianTracer{BitSet}})               = EMPTY_JACOBIAN_TRACER_BITSET
+empty(::Type{JacobianTracer{Set{UInt8}}})           = EMPTY_JACOBIAN_TRACER_SET_U8
+empty(::Type{JacobianTracer{Set{UInt16}}})          = EMPTY_JACOBIAN_TRACER_SET_U16
+empty(::Type{JacobianTracer{Set{UInt32}}})          = EMPTY_JACOBIAN_TRACER_SET_U32
+empty(::Type{JacobianTracer{Set{UInt64}}})          = EMPTY_JACOBIAN_TRACER_SET_U64
+empty(::Type{JacobianTracer{SortedVector{UInt16}}}) = EMPTY_JACOBIAN_TRACER_SV_U16
+empty(::Type{JacobianTracer{SortedVector{UInt32}}}) = EMPTY_JACOBIAN_TRACER_SV_U32
+empty(::Type{JacobianTracer{SortedVector{UInt64}}}) = EMPTY_JACOBIAN_TRACER_SV_U64
 
 JacobianTracer{S}(::Number) where {S} = empty(JacobianTracer{S})
 JacobianTracer(t::JacobianTracer) = t
@@ -120,8 +132,8 @@ $SET_TYPE_MESSAGE
 
 For a higher-level interface, refer to [`hessian_pattern`](@ref).
 """
-struct HessianTracer{S} <: AbstractTracer
-    inputs::Dict{UInt64,S}
+struct HessianTracer{S,I<:Integer} <: AbstractTracer
+    inputs::Dict{I,S}
 end
 function Base.show(io::IO, t::HessianTracer{S}) where {S}
     println(io, "HessianTracer{", S, "}(")
@@ -133,31 +145,45 @@ function Base.show(io::IO, t::HessianTracer{S}) where {S}
     return print(io, ")")
 end
 
-function empty(::Type{HessianTracer{S}}) where {S}
-    return HessianTracer(Dict{UInt64,S}())
+function empty(::Type{HessianTracer{S,I}}) where {S,I}
+    return HessianTracer(Dict{I,S}())
 end
 
 # Performance can be gained by not re-allocating empty tracers
-const EMPTY_HESSIAN_TRACER_BITSET     = HessianTracer(Dict{UInt64,BitSet}())
-const EMPTY_HESSIAN_TRACER_SET_UINT8  = HessianTracer(Dict{UInt64,Set{UInt8}}())
-const EMPTY_HESSIAN_TRACER_SET_UINT16 = HessianTracer(Dict{UInt64,Set{UInt16}}())
-const EMPTY_HESSIAN_TRACER_SET_UINT32 = HessianTracer(Dict{UInt64,Set{UInt32}}())
-const EMPTY_HESSIAN_TRACER_SET_UINT64 = HessianTracer(Dict{UInt64,Set{UInt64}}())
+const EMPTY_HESSIAN_TRACER_BITSET  = HessianTracer(Dict{Int,BitSet}())
+const EMPTY_HESSIAN_TRACER_SET_U8  = HessianTracer(Dict{UInt8,Set{UInt8}}())
+const EMPTY_HESSIAN_TRACER_SET_U16 = HessianTracer(Dict{UInt16,Set{UInt16}}())
+const EMPTY_HESSIAN_TRACER_SET_U32 = HessianTracer(Dict{UInt32,Set{UInt32}}())
+const EMPTY_HESSIAN_TRACER_SET_U64 = HessianTracer(Dict{UInt64,Set{UInt64}}())
+const EMPTY_HESSIAN_TRACER_SV_U16  = HessianTracer(Dict{UInt16,SortedVector{UInt16}}())
+const EMPTY_HESSIAN_TRACER_SV_U32  = HessianTracer(Dict{UInt32,SortedVector{UInt32}}())
+const EMPTY_HESSIAN_TRACER_SV_U64  = HessianTracer(Dict{UInt64,SortedVector{UInt64}}())
 
-empty(::Type{HessianTracer{BitSet}})      = EMPTY_HESSIAN_TRACER_BITSET
-empty(::Type{HessianTracer{Set{UInt8}}})  = EMPTY_HESSIAN_TRACER_SET_UINT8
-empty(::Type{HessianTracer{Set{UInt16}}}) = EMPTY_HESSIAN_TRACER_SET_UINT16
-empty(::Type{HessianTracer{Set{UInt32}}}) = EMPTY_HESSIAN_TRACER_SET_UINT32
-empty(::Type{HessianTracer{Set{UInt64}}}) = EMPTY_HESSIAN_TRACER_SET_UINT64
+empty(::Type{HessianTracer{BitSet,Int}})                  = EMPTY_HESSIAN_TRACER_BITSET
+empty(::Type{HessianTracer{Set{UInt8},UInt8}})            = EMPTY_HESSIAN_TRACER_SET_U8
+empty(::Type{HessianTracer{Set{UInt16},UInt16}})          = EMPTY_HESSIAN_TRACER_SET_U16
+empty(::Type{HessianTracer{Set{UInt32},UInt32}})          = EMPTY_HESSIAN_TRACER_SET_U32
+empty(::Type{HessianTracer{Set{UInt64},UInt64}})          = EMPTY_HESSIAN_TRACER_SET_U64
+empty(::Type{HessianTracer{SortedVector{UInt16},UInt16}}) = EMPTY_HESSIAN_TRACER_SV_U16
+empty(::Type{HessianTracer{SortedVector{UInt32},UInt32}}) = EMPTY_HESSIAN_TRACER_SV_U32
+empty(::Type{HessianTracer{SortedVector{UInt64},UInt64}}) = EMPTY_HESSIAN_TRACER_SV_U64
 
-HessianTracer{S}(::Number) where {S} = empty(HessianTracer{S})
+HessianTracer{S,I}(::Number) where {S,I} = empty(HessianTracer{S,I})
 HessianTracer(t::HessianTracer) = t
 
+function keys2set(::Type{S}, d::Dict{I}) where {I<:Integer,S<:AbstractSet{<:I}}
+    return S(keys(d))
+end
+function keys2set(::Type{S}, d::Dict{I}) where {I<:Integer,S<:SortedVector{I}}
+    return S(collect(keys(d)); sorted=false)
+end
+
 # Turn first-order interactions into second-order interactions
-function promote_order(t::HessianTracer)
+function promote_order(t::HessianTracer{S}) where {S}
     d = deepcopy(t.inputs)
+    s = keys2set(S, d)
     for (k, v) in pairs(d)
-        d[k] = union(v, keys(d))  # works by not being clever with symmetry
+        d[k] = union(v, s)  # ignores symmetry
     end
     return HessianTracer(d)
 end
@@ -168,15 +194,18 @@ function additive_merge(a::HessianTracer, b::HessianTracer)
 end
 
 # Merge first- and second-order terms in a "distributive" fashion
-function distributive_merge(a::HessianTracer, b::HessianTracer)
+function distributive_merge(a::HessianTracer{S}, b::HessianTracer{S}) where {S}
     da = deepcopy(a.inputs)
     db = deepcopy(b.inputs)
-    # add second-order interaction term, works by not being clever with symmetry
+    sa = keys2set(S, da)
+    sb = keys2set(S, db)
+
+    # add second-order interaction term by ignoring symmetry
     for (ka, va) in pairs(da)
-        da[ka] = union(va, keys(db))
+        da[ka] = union(va, sb)
     end
     for (kb, vb) in pairs(db)
-        db[kb] = union(vb, keys(da))
+        db[kb] = union(vb, sa)
     end
     return HessianTracer(merge(da, db))
 end
@@ -205,7 +234,8 @@ function tracer(::Type{ConnectivityTracer{S}}, index::Integer) where {S}
     return ConnectivityTracer(S(index))
 end
 function tracer(::Type{HessianTracer{S}}, index::Integer) where {S}
-    return HessianTracer(Dict{UInt64,S}(index => S()))
+    I = eltype(S)
+    return HessianTracer{S,I}(Dict{I,S}(index => S()))
 end
 
 function tracer(::Type{JacobianTracer{S}}, inds::NTuple{N,<:Integer}) where {N,S}
@@ -215,5 +245,6 @@ function tracer(::Type{ConnectivityTracer{S}}, inds::NTuple{N,<:Integer}) where 
     return ConnectivityTracer{S}(S(inds))
 end
 function tracer(::Type{HessianTracer{S}}, inds::NTuple{N,<:Integer}) where {N,S}
-    return HessianTracer{S}(Dict{UInt64,S}(i => S() for i in inds))
+    I = eltype(S)
+    return HessianTracer{S,I}(Dict{I,S}(i => S() for i in inds))
 end

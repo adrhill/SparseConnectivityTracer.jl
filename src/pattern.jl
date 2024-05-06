@@ -194,8 +194,8 @@ function hessian_pattern(f, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
 end
 
 function hessian_pattern_to_mat(
-    xt::AbstractArray{HessianTracer{S}}, yt::HessianTracer{S}
-) where {S}
+    xt::AbstractArray{HessianTracer{S,T}}, yt::HessianTracer{S,T}
+) where {S,T}
     # Allocate Hessian matrix
     n = length(xt)
     I = UInt64[] # row indices
