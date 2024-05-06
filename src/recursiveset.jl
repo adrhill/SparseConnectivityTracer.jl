@@ -7,30 +7,21 @@ A lazy union of sets.
 
     RecursiveSet(s::AbstractSet)
 """
-mutable struct RecursiveSet{T<:Number}
+struct RecursiveSet{T<:Number}
     s::Union{Nothing,Set{T}}
-    child1::RecursiveSet{T}
-    child2::RecursiveSet{T}
+    child1::Union{Nothing,RecursiveSet{T}}
+    child2::Union{Nothing,RecursiveSet{T}}
 
     function RecursiveSet{T}(s) where {T}
-        rs = new{T}(Set{T}(s))
-        rs.child1 = rs
-        rs.child2 = rs
-        return rs
+        return new{T}(Set{T}(s), nothing, nothing)
     end
 
     function RecursiveSet{T}(x::Number) where {T}
-        rs = new{T}(Set{T}(convert(T, x)))
-        rs.child1 = rs
-        rs.child2 = rs
-        return rs
+        return new{T}(Set{T}(convert(T, x)), nothing, nothing)
     end
 
     function RecursiveSet{T}() where {T}
-        rs = new{T}(Set{T}())
-        rs.child1 = rs
-        rs.child2 = rs
-        return rs
+        return new{T}(Set{T}(), nothing, nothing)
     end
 
     function RecursiveSet{T}(rs1::RecursiveSet{T}, rs2::RecursiveSet{T}) where {T}
@@ -73,8 +64,8 @@ function collect_aux!(accumulator::Set{T}, rs::RecursiveSet{T})::Nothing where {
     if !isnothing(rs.s)
         union!(accumulator, rs.s::Set{T})
     else
-        collect_aux!(accumulator, rs.child1)
-        collect_aux!(accumulator, rs.child2)
+        collect_aux!(accumulator, rs.child1::RecursiveSet{T})
+        collect_aux!(accumulator, rs.child2::RecursiveSet{T})
     end
     return nothing
 end
