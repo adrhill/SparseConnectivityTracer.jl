@@ -4,8 +4,8 @@ using ADTypes: ADTypes
 import SparseArrays: sparse
 import Random: rand, AbstractRNG, SamplerType
 
-include("recursiveset.jl")
-include("sortedvector.jl")
+include("settypes/recursiveset.jl")
+include("settypes/sortedvector.jl")
 include("tracers.jl")
 include("conversion.jl")
 include("operators.jl")
