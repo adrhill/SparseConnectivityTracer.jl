@@ -3,7 +3,7 @@ using Test
 
 x = RecursiveSet.(1:10)
 
-s = union(
+rs = union(
     union(x[1], x[3]),  #
     union(  #
         x[3],  #
@@ -14,4 +14,6 @@ s = union(
     ),
 )
 
-@test sort(collect(s)) == [1, 3, 5, 7]
+println(rs)
+
+@test sort(collect(rs)) == [1, 3, 5, 7]

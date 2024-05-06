@@ -7,21 +7,30 @@ A lazy union of sets.
 
     RecursiveSet(s::AbstractSet)
 """
-struct RecursiveSet{T<:Number}
+mutable struct RecursiveSet{T<:Number}
     s::Union{Nothing,Set{T}}
-    child1::Union{Nothing,RecursiveSet{T}}
-    child2::Union{Nothing,RecursiveSet{T}}
+    child1::RecursiveSet{T}
+    child2::RecursiveSet{T}
 
     function RecursiveSet{T}(s) where {T}
-        return new{T}(Set{T}(s), nothing, nothing)
+        rs = new{T}(Set{T}(s))
+        rs.child1 = rs
+        rs.child2 = rs
+        return rs
     end
 
     function RecursiveSet{T}(x::Number) where {T}
-        return new{T}(Set{T}(convert(T, x)), nothing, nothing)
+        rs = new{T}(Set{T}(convert(T, x)))
+        rs.child1 = rs
+        rs.child2 = rs
+        return rs
     end
 
     function RecursiveSet{T}() where {T}
-        return new{T}(nothing, nothing, nothing)
+        rs = new{T}(Set{T}())
+        rs.child1 = rs
+        rs.child2 = rs
+        return rs
     end
 
     function RecursiveSet{T}(rs1::RecursiveSet{T}, rs2::RecursiveSet{T}) where {T}
@@ -29,14 +38,20 @@ struct RecursiveSet{T<:Number}
     end
 end
 
-function Base.show(io::IO, rs::RecursiveSet{T}) where {T}
-    if isnothing(rs.s) && isnothing(rs.child1) && isnothing(rs.child2)
-        print(io, "RecursiveSet{$T} with no elements")
-    elseif !isnothing(rs.s)
-        print(io, "RecursiveSet{$T}($(rs.s))")
+function print_recursiveset(io::IO, rs::RecursiveSet{T}; offset) where {T}
+    if !isnothing(rs.s)
+        print(io, "RecursiveSet{$T} containing $(rs.s)")
     else
-        print(io, "RecursiveSet{$T} with two children")
+        print(io, "RecursiveSet{$T} with two children:")
+        print(io, "\n  ", " "^offset, "1: ")
+        print_recursiveset(io, rs.child1; offset=offset + 2)
+        print(io, "\n  ", " "^offset, "2: ")
+        print_recursiveset(io, rs.child2; offset=offset + 2)
     end
+end
+
+function Base.show(io::IO, rs::RecursiveSet{T}) where {T}
+    return print_recursiveset(io, rs; offset=0)
 end
 
 RecursiveSet(s) = RecursiveSet{eltype(s)}(s)
@@ -56,12 +71,9 @@ end
 
 function collect_aux!(accumulator::Set{T}, rs::RecursiveSet{T})::Nothing where {T}
     if !isnothing(rs.s)
-        union!(accumulator, rs.s)
-    end
-    if !isnothing(rs.child1)
+        union!(accumulator, rs.s::Set{T})
+    else
         collect_aux!(accumulator, rs.child1)
-    end
-    if !isnothing(rs.child2)
         collect_aux!(accumulator, rs.child2)
     end
     return nothing
