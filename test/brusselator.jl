@@ -1,10 +1,13 @@
+using ADTypes
+using ADTypes: AbstractSparsityDetector
 using ReferenceTests
 using SparseConnectivityTracer
+using SparseConnectivityTracer: SortedVector
 using Test
 
 include("brusselator_definition.jl")
 
-@testset "Set type $S" for S in (BitSet, Set{UInt64}, SortedVector{UInt64})
+function test_brusselator(method::AbstractSparsityDetector)
     N = 6
     dims = (N, N, 2)
     A = 1.0
@@ -18,12 +21,14 @@ include("brusselator_definition.jl")
     du = similar(u)
     f!(du, u) = brusselator_2d_loop(du, u, p, nothing)
 
-    C = connectivity_pattern(f!, du, u, S)
-    @test_reference "references/pattern/connectivity/Brusselator.txt" BitMatrix(C)
-    J = jacobian_pattern(f!, du, u, S)
+    J = ADTypes.jacobian_sparsity(f!, du, u, method)
     @test_reference "references/pattern/jacobian/Brusselator.txt" BitMatrix(J)
-    @test C == J
+end
 
-    C_ref = Symbolics.jacobian_sparsity(f!, du, u)
-    @test C == C_ref
+@testset "$method" for method in (
+    TracerSparsityDetector(BitSet),
+    TracerSparsityDetector(Set{UInt64}),
+    TracerSparsityDetector(SortedVector{UInt64}),
+)
+    test_brusselator(method)
 end

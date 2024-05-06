@@ -39,7 +39,7 @@ end
 
 ## Run Brusselator benchmarks
 for N in (6, 24, 100)
-    for method in METHODS 
+    for method in METHODS
         @info "Benchmarking Brusselator of size $N with $method..."
         b = benchmark_brusselator(N, method)
         display(b)
