@@ -70,17 +70,17 @@ function keys2set(::Type{S}, d::Dict{I}) where {I<:Integer,S<:SortedVector{I}}
     return S(collect(keys(d)); sorted=false)
 end
 
-const EMPTY_CONNECTIVITY_TRACER_SV_U16  = ConnectivityTracer(SortedVector{UInt16}())
-const EMPTY_CONNECTIVITY_TRACER_SV_U32  = ConnectivityTracer(SortedVector{UInt32}())
-const EMPTY_CONNECTIVITY_TRACER_SV_U64  = ConnectivityTracer(SortedVector{UInt64}())
+const EMPTY_CONNECTIVITY_TRACER_SV_U16 = ConnectivityTracer(SortedVector{UInt16}())
+const EMPTY_CONNECTIVITY_TRACER_SV_U32 = ConnectivityTracer(SortedVector{UInt32}())
+const EMPTY_CONNECTIVITY_TRACER_SV_U64 = ConnectivityTracer(SortedVector{UInt64}())
 
-const EMPTY_JACOBIAN_TRACER_SV_U16  = JacobianTracer(SortedVector{UInt16}())
-const EMPTY_JACOBIAN_TRACER_SV_U32  = JacobianTracer(SortedVector{UInt32}())
-const EMPTY_JACOBIAN_TRACER_SV_U64  = JacobianTracer(SortedVector{UInt64}())
+const EMPTY_JACOBIAN_TRACER_SV_U16 = JacobianTracer(SortedVector{UInt16}())
+const EMPTY_JACOBIAN_TRACER_SV_U32 = JacobianTracer(SortedVector{UInt32}())
+const EMPTY_JACOBIAN_TRACER_SV_U64 = JacobianTracer(SortedVector{UInt64}())
 
-const EMPTY_HESSIAN_TRACER_SV_U16  = HessianTracer(Dict{UInt16,SortedVector{UInt16}}())
-const EMPTY_HESSIAN_TRACER_SV_U32  = HessianTracer(Dict{UInt32,SortedVector{UInt32}}())
-const EMPTY_HESSIAN_TRACER_SV_U64  = HessianTracer(Dict{UInt64,SortedVector{UInt64}}())
+const EMPTY_HESSIAN_TRACER_SV_U16 = HessianTracer(Dict{UInt16,SortedVector{UInt16}}())
+const EMPTY_HESSIAN_TRACER_SV_U32 = HessianTracer(Dict{UInt32,SortedVector{UInt32}}())
+const EMPTY_HESSIAN_TRACER_SV_U64 = HessianTracer(Dict{UInt64,SortedVector{UInt64}}())
 
 empty(::Type{ConnectivityTracer{SortedVector{UInt16}}}) = EMPTY_CONNECTIVITY_TRACER_SV_U16
 empty(::Type{ConnectivityTracer{SortedVector{UInt32}}}) = EMPTY_CONNECTIVITY_TRACER_SV_U32
