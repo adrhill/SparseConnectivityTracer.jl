@@ -1,12 +1,23 @@
+using ADTypes: AbstractSparsityDetector, jacobian_sparsity
 using BenchmarkTools
+using DifferentiationInterface: SymbolicsSparsityDetector
 using SparseConnectivityTracer
-using SparseConnectivityTracer: SortedVector
+using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Symbolics: Symbolics
 using NNlib: conv
 
+all_sparsity_detectors = [
+    SymbolicsSparsityDetector(),
+    TracerSparsityDetector(BitSet),
+    TracerSparsityDetector(Set{UInt64}),
+    TracerSparsityDetector(DuplicateVector{UInt64}),
+    TracerSparsityDetector(RecursiveSet{UInt64}),
+    TracerSparsityDetector(SortedVector{UInt64}),
+]
+
 include("brusselator_definition.jl")
 
-function benchmark_brusselator(N::Integer, method=:tracer_bitset)
+function benchmark_brusselator(N::Integer, sparsity_detector::AbstractSparsityDetector)
     dims = (N, N, 2)
     A = 1.0
     B = 1.0
@@ -19,43 +30,25 @@ function benchmark_brusselator(N::Integer, method=:tracer_bitset)
     du = similar(u)
     f!(du, u) = brusselator_2d_loop(du, u, p, nothing)
 
-    if method == :tracer_bitset
-        return @benchmark jacobian_pattern($f!, $du, $u, BitSet)
-    elseif method == :tracer_sortedvector
-        return @benchmark jacobian_pattern($f!, $du, $u, SortedVector{UInt64})
-    elseif method == :symbolics
-        return @benchmark Symbolics.jacobian_sparsity($f!, $du, $u)
-    end
+    return @btime jacobian_sparsity($f!, $du, $u, $sparsity_detector)
 end
 
-function benchmark_conv(N, method=:tracer_bitset)
+function benchmark_conv(N::Integer, sparsity_detector::AbstractSparsityDetector)
     x = rand(N, N, 3, 1) # WHCN image 
     w = rand(5, 5, 3, 2)  # corresponds to Conv((5, 5), 3 => 2)
     f(x) = conv(x, w)
-
-    if method == :tracer_bitset
-        return @benchmark jacobian_pattern($f, $x, BitSet)
-    elseif method == :tracer_sortedvector
-        return @benchmark jacobian_pattern($f, $x, SortedVector{UInt64})
-    elseif method == :symbolics
-        return @benchmark Symbolics.jacobian_sparsity($f, $x)
-    end
+    return @btime jacobian_sparsity($f, $x, $sparsity_detector)
 end
 
 ## Run Brusselator benchmarks
-for N in (6, 24, 100)
-    for method in (:tracer_bitset, :tracer_sortedvector, :symbolics)
-        @info "Benchmarking Brusselator of size $N with $method..."
-        b = benchmark_brusselator(N, method)
-        display(b)
-    end
+for N in (6, 24, 100), sparsity_detector in all_sparsity_detectors
+    @info "Benchmarking Brusselator of size $N with $sparsity_detector"
+    benchmark_brusselator(N, sparsity_detector)
 end
 
 ## Run conv benchmarks
-for N in (28, 224)
-    for method in (:tracer_bitset, :tracer_sortedvector) # Symbolics fails on this example
-        @info "Benchmarking NNlib.conv on image of size ($N, $N, 3) with with $method..."
-        b = benchmark_conv(N, method)
-        display(b)
-    end
+for N in (28, 224), sparsity_detector in all_sparsity_detectors[2:end]
+    # Symbolics fails on this example
+    @info "Benchmarking NNlib.conv on image of size ($N, $N, 3) with $sparsity_detector"
+    benchmark_conv(N, sparsity_detector)
 end

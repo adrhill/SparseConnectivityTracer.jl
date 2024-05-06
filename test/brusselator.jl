@@ -1,10 +1,14 @@
 using ReferenceTests
 using SparseConnectivityTracer
+using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
+using Symbolics: Symbolics
 using Test
 
 include("brusselator_definition.jl")
 
-@testset "Set type $S" for S in (BitSet, Set{UInt64}, SortedVector{UInt64})
+@testset "Set type $S" for S in (
+    BitSet, Set{UInt64}, DuplicateVector{UInt64}, RecursiveSet{UInt64}, SortedVector{UInt64}
+)
     N = 6
     dims = (N, N, 2)
     A = 1.0

@@ -1,7 +1,7 @@
-using SparseConnectivityTracer: RecursiveSet
+using SparseConnectivityTracer: DuplicateVector
 using Test
 
-x = RecursiveSet{Int}.(1:10)
+x = DuplicateVector{Int}.(1:10)
 
 y = union(
     union(x[1], x[3]),  #
@@ -13,7 +13,5 @@ y = union(
         ),
     ),
 )
-
-string(y)
 
 @test sort(collect(y)) == [1, 3, 5, 7]

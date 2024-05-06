@@ -1,11 +1,7 @@
 """
     RecursiveSet
 
-A lazy union of sets.
-
-# Constructors
-
-    RecursiveSet(s::AbstractSet)
+Lazy union of sets.
 """
 struct RecursiveSet{T<:Number}
     s::Union{Nothing,Set{T}}
@@ -45,9 +41,6 @@ function Base.show(io::IO, rs::RecursiveSet{T}) where {T}
     return print_recursiveset(io, rs; offset=0)
 end
 
-RecursiveSet(s) = RecursiveSet{eltype(s)}(s)
-RecursiveSet(x::Number) = RecursiveSet{typeof(x)}(x)
-
 Base.eltype(::Type{RecursiveSet{T}}) where {T} = T
 
 function Base.union(rs1::RecursiveSet{T}, rs2::RecursiveSet{T}) where {T}
@@ -68,4 +61,10 @@ function collect_aux!(accumulator::Set{T}, rs::RecursiveSet{T})::Nothing where {
         collect_aux!(accumulator, rs.child2::RecursiveSet{T})
     end
     return nothing
+end
+
+## SCT tricks
+
+function keys2set(::Type{S}, d::Dict{I}) where {I<:Integer,S<:RecursiveSet{I}}
+    return S(keys(d))
 end
