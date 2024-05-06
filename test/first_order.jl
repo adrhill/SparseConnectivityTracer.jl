@@ -1,10 +1,11 @@
 using ReferenceTests
 using SparseConnectivityTracer
 using SparseConnectivityTracer: tracer, trace_input, inputs, empty
-using SparseConnectivityTracer: SortedVector
+using SparseConnectivityTracer: RecursiveSet, SortedVector
 using Test
 
-@testset "Set type $S" for S in (BitSet, Set{UInt64}, SortedVector{UInt64})
+@testset "Set type $S" for S in
+                           (BitSet, Set{UInt64}, RecursiveSet{UInt64}, SortedVector{UInt64})
     CT = ConnectivityTracer{S}
     JT = JacobianTracer{S}
 

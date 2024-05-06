@@ -44,6 +44,9 @@ DocMeta.setdocmeta!(
     end
 
     @testset verbose = true "Set types" begin
+        @testset "RecursiveSet" begin
+            include("recursiveset.jl")
+        end
         @testset "SortedVector" begin
             include("sortedvector.jl")
         end

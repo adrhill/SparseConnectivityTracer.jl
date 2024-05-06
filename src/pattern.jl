@@ -203,7 +203,7 @@ function hessian_pattern_to_mat(
     V = Bool[]   # values
 
     for i in keys(yt.inputs)
-        for j in yt.inputs[i]
+        for j in inputs(yt, i)
             push!(I, i)
             push!(J, j)
             push!(V, true)
