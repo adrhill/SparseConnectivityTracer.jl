@@ -10,7 +10,6 @@ using Documenter
 
 using LinearAlgebra
 using Random
-using Symbolics: Symbolics
 using NNlib
 
 DocMeta.setdocmeta!(
