@@ -39,7 +39,7 @@ function Base.show(io::IO, t::ConnectivityTracer{I,S}) where {I,S}
     )
 end
 
-empty(::Type{ConnectivityTracer{I,S}}) where {I,S} = ConnectivityTracer{I,S}(S())
+empty(::Type{ConnectivityTracer{I,S}}) where {I<:Integer,S} = ConnectivityTracer{I,S}(S())
 
 # We have to be careful when defining constructors:
 # Generic code expecting "regular" numbers `x` will sometimes convert them 
@@ -80,7 +80,7 @@ function Base.show(io::IO, t::JacobianTracer{I,S}) where {I,S}
     )
 end
 
-empty(::Type{JacobianTracer{I,S}}) where {I,S} = JacobianTracer{I,S}(S())
+empty(::Type{JacobianTracer{I,S}}) where {I<:Integer,S} = JacobianTracer{I,S}(S())
 
 JacobianTracer{I,S}(::Number) where {I<:Integer,S} = empty(JacobianTracer{I,S})
 JacobianTracer(t::JacobianTracer) = t
@@ -115,7 +115,9 @@ function Base.show(io::IO, t::HessianTracer{I,S,D}) where {I,S,D}
     return print(io, ")")
 end
 
-empty(::Type{HessianTracer{I,S,D}}) where {I,S,D} = HessianTracer{I,S,D}(D())
+function empty(::Type{HessianTracer{I,S,D}}) where {I<:Integer,S,D<:AbstractDict{I,S}}
+    return HessianTracer{I,S,D}(D())
+end
 
 HessianTracer{I,S,D}(::Number) where {I<:Integer,S,D} = empty(HessianTracer{I,S,D})
 HessianTracer(t::HessianTracer) = t
