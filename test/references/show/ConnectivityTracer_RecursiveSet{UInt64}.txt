@@ -1,1 +1,1 @@
-ConnectivityTracer{RecursiveSet{UInt64}}(2,)
+ConnectivityTracer{UInt64,RecursiveSet{UInt64}}(2,)

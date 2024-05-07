@@ -106,7 +106,7 @@ struct HessianTracer{I<:Integer,S,D<:AbstractDict{I,S}} <: AbstractTracer
     inputs::D
 end
 function Base.show(io::IO, t::HessianTracer{I,S,D}) where {I,S,D}
-    println(io, "HessianTracer{", I, S, D, "}(")
+    println(io, "$(eltype(t))(")
     for key in keys(t.inputs)
         print(io, "  ", Int(key), " => ")
         Base.show_delim_array(io, convert.(Int, t.inputs[key]), "(", ',', ')', true)
