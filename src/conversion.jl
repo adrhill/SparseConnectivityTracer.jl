@@ -33,5 +33,5 @@ function Base.similar(::Array, ::Type{JacobianTracer{I,S}}, dims::Dims{N}) where
     return zeros(JacobianTracer{I,S}, dims)
 end
 function Base.similar(::Array, ::Type{HessianTracer{I,S,D}}, dims::Dims{N}) where {I,S,D,N}
-    return zeros(JacobianTracer{I,S}, dims)
+    return zeros(HessianTracer{I,S,D}, dims)
 end
