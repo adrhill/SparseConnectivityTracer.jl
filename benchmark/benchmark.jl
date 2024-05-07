@@ -1,8 +1,7 @@
-using ADTypes
-using ADTypes: AbstractSparsityDetector
+using ADTypes: AbstractSparsityDetector, jacobian_sparsity
 using BenchmarkTools
 using SparseConnectivityTracer
-using SparseConnectivityTracer: SortedVector
+using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using NNlib: conv
 
 include("../test/brusselator_definition.jl")
@@ -10,23 +9,17 @@ include("../test/brusselator_definition.jl")
 const METHODS = (
     TracerSparsityDetector(BitSet),
     TracerSparsityDetector(Set{UInt64}),
+    TracerSparsityDetector(DuplicateVector{UInt64}),
+    TracerSparsityDetector(RecursiveSet{UInt64}),
     TracerSparsityDetector(SortedVector{UInt64}),
 )
 
 function benchmark_brusselator(N::Integer, method::AbstractSparsityDetector)
-    dims = (N, N, 2)
-    A = 1.0
-    B = 1.0
-    alpha = 1.0
-    xyd = fill(1.0, N)
-    dx = 1.0
-    p = (A, B, alpha, xyd, dx, N)
+    f! = Brusselator!(N)
+    x = rand(N, N, 2)
+    y = similar(x)
 
-    u = rand(dims...)
-    du = similar(u)
-    f!(du, u) = brusselator_2d_loop(du, u, p, nothing)
-
-    return @benchmark ADTypes.jacobian_sparsity($f!, $du, $u, $method)
+    return @benchmark jacobian_sparsity($f!, $y, $x, $method)
 end
 
 function benchmark_conv(N, method::AbstractSparsityDetector)
@@ -34,7 +27,7 @@ function benchmark_conv(N, method::AbstractSparsityDetector)
     w = rand(5, 5, 3, 2)  # corresponds to Conv((5, 5), 3 => 2)
     f(x) = conv(x, w)
 
-    return @benchmark ADTypes.jacobian_sparsity($f, $x, $method)
+    return @benchmark jacobian_sparsity($f, $x, $method)
 end
 
 ## Run Brusselator benchmarks

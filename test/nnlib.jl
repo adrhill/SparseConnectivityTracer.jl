@@ -1,9 +1,9 @@
 using ADTypes
 using ADTypes: AbstractSparsityDetector
+using NNlib
 using ReferenceTests
 using SparseConnectivityTracer
-using SparseConnectivityTracer: SortedVector
-using NNlib
+using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
 function test_nnlib_conv(method::AbstractSparsityDetector)
@@ -18,6 +18,8 @@ end
 @testset "$method" for method in (
     TracerSparsityDetector(BitSet),
     TracerSparsityDetector(Set{UInt64}),
+    TracerSparsityDetector(DuplicateVector{UInt64}),
+    TracerSparsityDetector(RecursiveSet{UInt64}),
     TracerSparsityDetector(SortedVector{UInt64}),
 )
     test_nnlib_conv(method)

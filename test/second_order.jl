@@ -1,10 +1,12 @@
 using ReferenceTests
 using SparseConnectivityTracer
 using SparseConnectivityTracer: tracer, trace_input, inputs, empty
-using SparseConnectivityTracer: SortedVector
+using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
-@testset "Set type $S" for S in (BitSet, Set{UInt64}, SortedVector{UInt64})
+@testset "Set type $S" for S in (
+    BitSet, Set{UInt64}, DuplicateVector{UInt64}, RecursiveSet{UInt64}, SortedVector{UInt64}
+)
     HT = HessianTracer{S}
 
     @test hessian_pattern(identity, rand(), S) ≈ [0;;]
