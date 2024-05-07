@@ -1,7 +1,7 @@
 using ADTypes: AbstractSparsityDetector, jacobian_sparsity
 using BenchmarkTools
 using SparseConnectivityTracer
-using SparseConnectivityTracer: SortedVector
+using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using NNlib: conv
 
 include("../test/brusselator_definition.jl")
