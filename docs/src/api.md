@@ -28,8 +28,10 @@ JacobianTracer
 HessianTracer
 ```
 
-We also define a custom alternative to sets that can deliver faster `union`:
+We also define alternative pseudo-set types that can deliver faster `union`:
 
 ```@docs
+SparseConnectivityTracer.DuplicateVector
+SparseConnectivityTracer.RecursiveSet
 SparseConnectivityTracer.SortedVector
 ```
