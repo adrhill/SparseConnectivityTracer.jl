@@ -81,14 +81,32 @@ const EMPTY_HESSIAN_TRACER_RS_U16 = HessianTracer(Dict{UInt16,RecursiveSet{UInt1
 const EMPTY_HESSIAN_TRACER_RS_U32 = HessianTracer(Dict{UInt32,RecursiveSet{UInt32}}())
 const EMPTY_HESSIAN_TRACER_RS_U64 = HessianTracer(Dict{UInt64,RecursiveSet{UInt64}}())
 
-empty(::Type{ConnectivityTracer{RecursiveSet{UInt16}}}) = EMPTY_CONNECTIVITY_TRACER_RS_U16
-empty(::Type{ConnectivityTracer{RecursiveSet{UInt32}}}) = EMPTY_CONNECTIVITY_TRACER_RS_U32
-empty(::Type{ConnectivityTracer{RecursiveSet{UInt64}}}) = EMPTY_CONNECTIVITY_TRACER_RS_U64
+function empty(::Type{ConnectivityTracer{UInt16,RecursiveSet{UInt16}}})
+    return EMPTY_CONNECTIVITY_TRACER_RS_U16
+end
+function empty(::Type{ConnectivityTracer{UInt32,RecursiveSet{UInt32}}})
+    return EMPTY_CONNECTIVITY_TRACER_RS_U32
+end
+function empty(::Type{ConnectivityTracer{UInt64,RecursiveSet{UInt64}}})
+    return EMPTY_CONNECTIVITY_TRACER_RS_U64
+end
 
-empty(::Type{JacobianTracer{RecursiveSet{UInt16}}}) = EMPTY_JACOBIAN_TRACER_RS_U16
-empty(::Type{JacobianTracer{RecursiveSet{UInt32}}}) = EMPTY_JACOBIAN_TRACER_RS_U32
-empty(::Type{JacobianTracer{RecursiveSet{UInt64}}}) = EMPTY_JACOBIAN_TRACER_RS_U64
+empty(::Type{JacobianTracer{UInt16,RecursiveSet{UInt16}}}) = EMPTY_JACOBIAN_TRACER_RS_U16
+empty(::Type{JacobianTracer{UInt32,RecursiveSet{UInt32}}}) = EMPTY_JACOBIAN_TRACER_RS_U32
+empty(::Type{JacobianTracer{UInt64,RecursiveSet{UInt64}}}) = EMPTY_JACOBIAN_TRACER_RS_U64
 
-empty(::Type{HessianTracer{RecursiveSet{UInt16},UInt16}}) = EMPTY_HESSIAN_TRACER_RS_U16
-empty(::Type{HessianTracer{RecursiveSet{UInt32},UInt32}}) = EMPTY_HESSIAN_TRACER_RS_U32
-empty(::Type{HessianTracer{RecursiveSet{UInt64},UInt64}}) = EMPTY_HESSIAN_TRACER_RS_U64
+function empty(
+    ::Type{HessianTracer{UInt16,RecursiveSet{UInt16},Dict{UInt16,RecursiveSet{UInt16}}}}
+)
+    return EMPTY_HESSIAN_TRACER_RS_U16
+end
+function empty(
+    ::Type{HessianTracer{UInt32,RecursiveSet{UInt32},Dict{UInt32,RecursiveSet{UInt32}}}}
+)
+    return EMPTY_HESSIAN_TRACER_RS_U32
+end
+function empty(
+    ::Type{HessianTracer{UInt64,RecursiveSet{UInt64},Dict{UInt64,RecursiveSet{UInt64}}}}
+)
+    return EMPTY_HESSIAN_TRACER_RS_U64
+end
