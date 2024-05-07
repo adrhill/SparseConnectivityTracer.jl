@@ -68,3 +68,27 @@ end
 function keys2set(::Type{S}, d::Dict{I}) where {I<:Integer,S<:RecursiveSet{I}}
     return S(keys(d))
 end
+
+const EMPTY_CONNECTIVITY_TRACER_RS_U16 = ConnectivityTracer(RecursiveSet{UInt16}())
+const EMPTY_CONNECTIVITY_TRACER_RS_U32 = ConnectivityTracer(RecursiveSet{UInt32}())
+const EMPTY_CONNECTIVITY_TRACER_RS_U64 = ConnectivityTracer(RecursiveSet{UInt64}())
+
+const EMPTY_JACOBIAN_TRACER_RS_U16 = JacobianTracer(RecursiveSet{UInt16}())
+const EMPTY_JACOBIAN_TRACER_RS_U32 = JacobianTracer(RecursiveSet{UInt32}())
+const EMPTY_JACOBIAN_TRACER_RS_U64 = JacobianTracer(RecursiveSet{UInt64}())
+
+const EMPTY_HESSIAN_TRACER_RS_U16 = HessianTracer(Dict{UInt16,RecursiveSet{UInt16}}())
+const EMPTY_HESSIAN_TRACER_RS_U32 = HessianTracer(Dict{UInt32,RecursiveSet{UInt32}}())
+const EMPTY_HESSIAN_TRACER_RS_U64 = HessianTracer(Dict{UInt64,RecursiveSet{UInt64}}())
+
+empty(::Type{ConnectivityTracer{RecursiveSet{UInt16}}}) = EMPTY_CONNECTIVITY_TRACER_RS_U16
+empty(::Type{ConnectivityTracer{RecursiveSet{UInt32}}}) = EMPTY_CONNECTIVITY_TRACER_RS_U32
+empty(::Type{ConnectivityTracer{RecursiveSet{UInt64}}}) = EMPTY_CONNECTIVITY_TRACER_RS_U64
+
+empty(::Type{JacobianTracer{RecursiveSet{UInt16}}}) = EMPTY_JACOBIAN_TRACER_RS_U16
+empty(::Type{JacobianTracer{RecursiveSet{UInt32}}}) = EMPTY_JACOBIAN_TRACER_RS_U32
+empty(::Type{JacobianTracer{RecursiveSet{UInt64}}}) = EMPTY_JACOBIAN_TRACER_RS_U64
+
+empty(::Type{HessianTracer{RecursiveSet{UInt16},UInt16}}) = EMPTY_HESSIAN_TRACER_RS_U16
+empty(::Type{HessianTracer{RecursiveSet{UInt32},UInt32}}) = EMPTY_HESSIAN_TRACER_RS_U32
+empty(::Type{HessianTracer{RecursiveSet{UInt64},UInt64}}) = EMPTY_HESSIAN_TRACER_RS_U64
