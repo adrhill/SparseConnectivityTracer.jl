@@ -7,8 +7,9 @@ using Test
 @testset "Set type $S" for S in (
     BitSet, Set{UInt64}, DuplicateVector{UInt64}, RecursiveSet{UInt64}, SortedVector{UInt64}
 )
-    CT = ConnectivityTracer{S}
-    JT = JacobianTracer{S}
+    I = eltype(S)
+    CT = ConnectivityTracer{I,S}
+    JT = JacobianTracer{I,S}
 
     x = rand(3)
     xt = trace_input(CT, x)

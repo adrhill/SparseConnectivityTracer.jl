@@ -58,7 +58,8 @@ julia> connectivity_pattern(f, x)
 ```
 """
 function connectivity_pattern(f, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
-    xt, yt = trace_function(ConnectivityTracer{S}, f, x)
+    I = eltype(S)
+    xt, yt = trace_function(ConnectivityTracer{I,S}, f, x)
     return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
@@ -72,7 +73,8 @@ where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to
 The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
 """
 function connectivity_pattern(f!, y, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
-    xt, yt = trace_function(ConnectivityTracer{S}, f!, y, x)
+    I = eltype(S)
+    xt, yt = trace_function(ConnectivityTracer{I,S}, f!, y, x)
     return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
@@ -118,7 +120,8 @@ julia> jacobian_pattern(f, x)
 ```
 """
 function jacobian_pattern(f, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
-    xt, yt = trace_function(JacobianTracer{S}, f, x)
+    I = eltype(S)
+    xt, yt = trace_function(JacobianTracer{I,S}, f, x)
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
@@ -131,7 +134,8 @@ Compute the sparsity pattern of the Jacobian of `f!(y, x)`.
 The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
 """
 function jacobian_pattern(f!, y, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
-    xt, yt = trace_function(JacobianTracer{S}, f!, y, x)
+    I = eltype(S)
+    xt, yt = trace_function(JacobianTracer{I,S}, f!, y, x)
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
@@ -189,13 +193,15 @@ julia> hessian_pattern(g, x)
 ```
 """
 function hessian_pattern(f, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
-    xt, yt = trace_function(HessianTracer{S}, f, x)
+    I = eltype(S)
+    T = HessianTracer{I,S,Dict{I,S}}
+    xt, yt = trace_function(T, f, x)
     return hessian_pattern_to_mat(to_array(xt), yt)
 end
 
 function hessian_pattern_to_mat(
-    xt::AbstractArray{HessianTracer{S,T}}, yt::HessianTracer{S,T}
-) where {S,T}
+    xt::AbstractArray{HessianTracer{TI,S,D}}, yt::HessianTracer{TI,S,D}
+) where {TI,S,D}
     # Allocate Hessian matrix
     n = length(xt)
     I = UInt64[] # row indices
