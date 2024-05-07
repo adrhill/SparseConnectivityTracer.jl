@@ -3,10 +3,6 @@ abstract type AbstractTracer <: Number end
 # Convenience constructor for empty tracers
 empty(tracer::T) where {T<:AbstractTracer} = empty(T)
 
-#==============#
-# Connectivity #
-#==============#
-
 const SET_TYPE_MESSAGE = """
 The provided index set type `S` has to satisfy the following conditions:
 
@@ -15,6 +11,10 @@ The provided index set type `S` has to satisfy the following conditions:
 
 Subtypes of `AbstractSet{<:Integer}` are a natural choice, like `BitSet` or `Set{UInt64}`.
 """
+
+#==============#
+# Connectivity #
+#==============#
 
 """
     ConnectivityTracer{S}(indexset) <: Number
@@ -36,19 +36,6 @@ function Base.show(io::IO, t::ConnectivityTracer{S}) where {S}
 end
 
 empty(::Type{ConnectivityTracer{S}}) where {S} = ConnectivityTracer(S())
-
-# Performance can be gained by not re-allocating empty tracers
-const EMPTY_CONNECTIVITY_TRACER_BITSET  = ConnectivityTracer(BitSet())
-const EMPTY_CONNECTIVITY_TRACER_SET_U8  = ConnectivityTracer(Set{UInt8}())
-const EMPTY_CONNECTIVITY_TRACER_SET_U16 = ConnectivityTracer(Set{UInt16}())
-const EMPTY_CONNECTIVITY_TRACER_SET_U32 = ConnectivityTracer(Set{UInt32}())
-const EMPTY_CONNECTIVITY_TRACER_SET_U64 = ConnectivityTracer(Set{UInt64}())
-
-empty(::Type{ConnectivityTracer{BitSet}})      = EMPTY_CONNECTIVITY_TRACER_BITSET
-empty(::Type{ConnectivityTracer{Set{UInt8}}})  = EMPTY_CONNECTIVITY_TRACER_SET_U8
-empty(::Type{ConnectivityTracer{Set{UInt16}}}) = EMPTY_CONNECTIVITY_TRACER_SET_U16
-empty(::Type{ConnectivityTracer{Set{UInt32}}}) = EMPTY_CONNECTIVITY_TRACER_SET_U32
-empty(::Type{ConnectivityTracer{Set{UInt64}}}) = EMPTY_CONNECTIVITY_TRACER_SET_U64
 
 # We have to be careful when defining constructors:
 # Generic code expecting "regular" numbers `x` will sometimes convert them 
@@ -87,19 +74,6 @@ end
 
 empty(::Type{JacobianTracer{S}}) where {S} = JacobianTracer(S())
 
-# Performance can be gained by not re-allocating empty tracers
-const EMPTY_JACOBIAN_TRACER_BITSET  = JacobianTracer(BitSet())
-const EMPTY_JACOBIAN_TRACER_SET_U8  = JacobianTracer(Set{UInt8}())
-const EMPTY_JACOBIAN_TRACER_SET_U16 = JacobianTracer(Set{UInt16}())
-const EMPTY_JACOBIAN_TRACER_SET_U32 = JacobianTracer(Set{UInt32}())
-const EMPTY_JACOBIAN_TRACER_SET_U64 = JacobianTracer(Set{UInt64}())
-
-empty(::Type{JacobianTracer{BitSet}})      = EMPTY_JACOBIAN_TRACER_BITSET
-empty(::Type{JacobianTracer{Set{UInt8}}})  = EMPTY_JACOBIAN_TRACER_SET_U8
-empty(::Type{JacobianTracer{Set{UInt16}}}) = EMPTY_JACOBIAN_TRACER_SET_U16
-empty(::Type{JacobianTracer{Set{UInt32}}}) = EMPTY_JACOBIAN_TRACER_SET_U32
-empty(::Type{JacobianTracer{Set{UInt64}}}) = EMPTY_JACOBIAN_TRACER_SET_U64
-
 JacobianTracer{S}(::Number) where {S} = empty(JacobianTracer{S})
 JacobianTracer(t::JacobianTracer) = t
 
@@ -137,25 +111,8 @@ function empty(::Type{HessianTracer{S,I}}) where {S,I}
     return HessianTracer(Dict{I,S}())
 end
 
-# Performance can be gained by not re-allocating empty tracers
-const EMPTY_HESSIAN_TRACER_BITSET  = HessianTracer(Dict{Int,BitSet}())
-const EMPTY_HESSIAN_TRACER_SET_U8  = HessianTracer(Dict{UInt8,Set{UInt8}}())
-const EMPTY_HESSIAN_TRACER_SET_U16 = HessianTracer(Dict{UInt16,Set{UInt16}}())
-const EMPTY_HESSIAN_TRACER_SET_U32 = HessianTracer(Dict{UInt32,Set{UInt32}}())
-const EMPTY_HESSIAN_TRACER_SET_U64 = HessianTracer(Dict{UInt64,Set{UInt64}}())
-
-empty(::Type{HessianTracer{BitSet,Int}})         = EMPTY_HESSIAN_TRACER_BITSET
-empty(::Type{HessianTracer{Set{UInt8},UInt8}})   = EMPTY_HESSIAN_TRACER_SET_U8
-empty(::Type{HessianTracer{Set{UInt16},UInt16}}) = EMPTY_HESSIAN_TRACER_SET_U16
-empty(::Type{HessianTracer{Set{UInt32},UInt32}}) = EMPTY_HESSIAN_TRACER_SET_U32
-empty(::Type{HessianTracer{Set{UInt64},UInt64}}) = EMPTY_HESSIAN_TRACER_SET_U64
-
 HessianTracer{S,I}(::Number) where {S,I} = empty(HessianTracer{S,I})
 HessianTracer(t::HessianTracer) = t
-
-function keys2set(::Type{S}, d::Dict{I}) where {I<:Integer,S<:AbstractSet{<:I}}
-    return S(keys(d))
-end
 
 # Turn first-order interactions into second-order interactions
 function promote_order(t::HessianTracer{S}) where {S}
