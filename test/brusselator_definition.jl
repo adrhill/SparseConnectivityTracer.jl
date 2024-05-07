@@ -18,3 +18,23 @@ function brusselator_2d_loop(du, u, p, t)
     end
 end
 #! format: on
+
+struct Brusselator!{P}
+    N::Int
+    params::P
+end
+
+Base.show(b!::Brusselator!) = "Brusselator(N=$(b!.N))"
+
+function Brusselator!(N::Integer)
+    dims = (N, N, 2)
+    A = 1.0
+    B = 1.0
+    alpha = 1.0
+    xyd = fill(1.0, N)
+    dx = 1.0
+    params = (; A, B, alpha, xyd, dx, N)
+    return Brusselator!(N, params)
+end
+
+(b!::Brusselator!)(y, x) = brusselator_2d_loop(y, x, b!.params, nothing)
