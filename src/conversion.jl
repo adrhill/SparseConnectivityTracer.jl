@@ -28,3 +28,15 @@ for TT in (:JacobianTracer, :ConnectivityTracer, :HessianTracer)
     @eval Base.similar(::Array, ::Type{$TT{S}}, dims::Dims{N}) where {N,S} =
         zeros($TT{S}, dims)
 end
+
+Base.real(sct::SparseConnectivityTracer.AbstractTracer) = sct
+Base.float(sct::SparseConnectivityTracer.AbstractTracer) = sct
+Base.max(x::SparseConnectivityTracer.AbstractTracer, y::SparseConnectivityTracer.AbstractTracer) = x
+Base.floatmin(x::Type{<:SparseConnectivityTracer.AbstractTracer}) = Base.floatmin(Float32)
+Base.eps(x::Type{<:SparseConnectivityTracer.AbstractTracer}) = Base.eps(Float32)
+Base.isinf(::SparseConnectivityTracer.AbstractTracer) = false
+Base.isless(x::SparseConnectivityTracer.AbstractTracer, ::SparseConnectivityTracer.AbstractTracer) = true
+Base.isless(::SparseConnectivityTracer.AbstractTracer, ::Float64) = true
+Base.isfinite(::SparseConnectivityTracer.AbstractTracer) = true
+Base.conj(x::SparseConnectivityTracer.AbstractTracer) = x
+
