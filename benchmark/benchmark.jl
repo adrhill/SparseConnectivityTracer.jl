@@ -37,7 +37,7 @@ for S in SET_TYPES
     J_global = suite["Jacobian"]["Global"]
 
     ## Sparse matrix multiplication
-    for sparsity in (0.01, 0.05, 0.1, 0.25, 0.5)
+    for sparsity in (0.01, 0.05, 0.1, 0.25)
         x = rand(50)
         f(x) = iterated_sparse_matmul(x; sparsity=sparsity, iterations=5)
         J_global["sparse_matmul"]["sparsity=$sparsity"][setname] = @benchmarkable jacobian_sparsity(
@@ -58,7 +58,7 @@ for S in SET_TYPES
         solver = SimpleEuler()
         prob = ODEProblem(brusselator_2d_loop!, x, (0.0, 1.0), f!.params)
         function brusselator_ode_solve(x)
-            return solve(ODEProblem(brusselator_2d_loop!, x, (0.0, 1.0), f!.params), solver; dt=0.2).u[end]
+            return solve(ODEProblem(brusselator_2d_loop!, x, (0.0, 1.0), f!.params), solver; dt=0.5).u[end]
         end
         J_global["brusselator_ode_solve"]["N=$N"][setname] = @benchmarkable jacobian_sparsity(
             $brusselator_ode_solve, $x, $method
