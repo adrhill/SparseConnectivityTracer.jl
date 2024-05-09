@@ -5,7 +5,7 @@
 #! format: off
 brusselator_f(x, y, t) = ifelse((((x-0.3)^2 + (y-0.6)^2) <= 0.1^2) && (t >= 1.1), 5., 0.)
 limit(a, N) = a == N+1 ? 1 : a == 0 ? N : a
-function brusselator_2d_loop(du, u, p, t)
+function brusselator_2d_loop!(du, u, p, t)
     A, B, alpha, xyd, dx, N = p; alpha = alpha/dx^2
     @inbounds for I in CartesianIndices((N, N))
         i, j = Tuple(I)
@@ -37,4 +37,4 @@ function Brusselator!(N::Integer)
     return Brusselator!(N, params)
 end
 
-(b!::Brusselator!)(y, x) = brusselator_2d_loop(y, x, b!.params, nothing)
+(b!::Brusselator!)(y, x) = brusselator_2d_loop!(y, x, b!.params, nothing)

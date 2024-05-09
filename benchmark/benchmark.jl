@@ -1,49 +1,74 @@
-using ADTypes: AbstractSparsityDetector, jacobian_sparsity
 using BenchmarkTools
+
+using ADTypes: AbstractSparsityDetector, jacobian_sparsity
 using SparseConnectivityTracer
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
-using NNlib: conv
 
+using SimpleDiffEq
+using Flux: Conv
+
+const SET_TYPES = (BitSet, Set{UInt64}, DuplicateVector{UInt64}, SortedVector{UInt64})
+
+## ODEs
 include("../test/brusselator_definition.jl")
 
-const METHODS = (
-    TracerSparsityDetector(BitSet),
-    TracerSparsityDetector(Set{UInt64}),
-    TracerSparsityDetector(DuplicateVector{UInt64}),
-    TracerSparsityDetector(RecursiveSet{UInt64}),
-    TracerSparsityDetector(SortedVector{UInt64}),
-)
-
-function benchmark_brusselator(N::Integer, method::AbstractSparsityDetector)
-    f! = Brusselator!(N)
-    x = rand(N, N, 2)
-    y = similar(x)
-
-    return @benchmark jacobian_sparsity($f!, $y, $x, $method)
-end
-
-function benchmark_conv(N, method::AbstractSparsityDetector)
-    x = rand(N, N, 3, 1) # WHCN image 
-    w = rand(5, 5, 3, 2)  # corresponds to Conv((5, 5), 3 => 2)
-    f(x) = conv(x, w)
-
-    return @benchmark jacobian_sparsity($f, $x, $method)
-end
-
-## Run Brusselator benchmarks
-for N in (6, 24, 100)
-    for method in METHODS
-        @info "Benchmarking Brusselator of size $N with $method..."
-        b = benchmark_brusselator(N, method)
-        display(b)
+## Iterated multiplication by random sparse matrices
+function iterated_sparse_matmul(x; sparsity=0.1, iterations=5)
+    n = length(x)
+    y = copy(x)
+    for _ in 1:iterations
+        A = sprand(n, n, sparsity)
+        y = A * y
     end
+    return y
 end
 
-## Run conv benchmarks
-for N in (28, 128)
-    for method in METHODS # Symbolics fails on this example
-        @info "Benchmarking NNlib.conv on image of size ($N, $N, 3) with with $method..."
-        b = benchmark_conv(N, method)
-        display(b)
+## Deep Learning
+const LAYER = Conv((5, 5), 3 => 2)
+
+## Define Benchmark suite
+suite = BenchmarkGroup()
+
+for S in SET_TYPES
+    setname = string(S)
+    method = TracerSparsityDetector(S)
+
+    suite_J_global = suite["Jacobian"]["Global"]
+
+    ## Sparse matrix multiplication
+    for sparsity in (0.01, 0.05, 0.1, 0.25, 0.5)
+        x = rand(50)
+        f(x) = iterated_sparse_mul(x; sparsity=sparsity, iterations=5)
+        suite_J_global["sparse_matmul"]["$sparsity"][setname] = @benchmarkable jacobian_sparsity(
+            $f, $x, $method
+        )
     end
+
+    ## ODEs
+    for N in (6, 24, 100)
+        f! = Brusselator!(N)
+        x = rand(N, N, 2)
+        y = similar(x)
+        suite_J_global["brusselator"]["$N"][setname] = @benchmarkable jacobian_sparsity(
+            $f!, $y, $x, $method
+        )
+
+        # TODO: test adaptive step solvers on local tracers
+        solver = SimpleEuler()
+        prob = ODEProblem(brusselator_2d_loop!, x, (0.0, 1.0), f!.params)
+        function brusselator_ode_solve(x)
+            return solve(ODEProblem(brusselator_2d_loop!, x, (0.0, 1.0), f!.params), solver; dt=0.2).u[end]
+        end
+        suite_J_global["brusselator_ode_solve"]["$N"][setname] = @benchmarkable jacobian_sparsity(
+            $f, $x, $method
+        )
+    end
+
+    ## Deep Learning
+    for N in (28, 128)
+        suite_J_global["conv"]["$N"][setname] = @benchmarkable jacobian_sparsity(
+            $LAYER, $(rand(N, N, 3, 1)), $method
+        )
+    end
+    # TODO: benchmark local sparsity tracers on LeNet-5 CNN
 end
