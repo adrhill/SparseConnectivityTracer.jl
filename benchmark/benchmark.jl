@@ -66,7 +66,7 @@ for S in SET_TYPES
 
     ## Deep Learning
     for N in (28, 128)
-        J_global["conv"]["size=$(N)x$(N)x3x1"][setname] = @benchmarkable jacobian_sparsity(
+        J_global["conv"]["size=$(N)x$(N)x3"][setname] = @benchmarkable jacobian_sparsity(
             $LAYER, $(rand(N, N, 3, 1)), $method
         )
     end
