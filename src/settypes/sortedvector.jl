@@ -82,14 +82,32 @@ const EMPTY_HESSIAN_TRACER_SV_U16 = HessianTracer(Dict{UInt16,SortedVector{UInt1
 const EMPTY_HESSIAN_TRACER_SV_U32 = HessianTracer(Dict{UInt32,SortedVector{UInt32}}())
 const EMPTY_HESSIAN_TRACER_SV_U64 = HessianTracer(Dict{UInt64,SortedVector{UInt64}}())
 
-empty(::Type{ConnectivityTracer{SortedVector{UInt16}}}) = EMPTY_CONNECTIVITY_TRACER_SV_U16
-empty(::Type{ConnectivityTracer{SortedVector{UInt32}}}) = EMPTY_CONNECTIVITY_TRACER_SV_U32
-empty(::Type{ConnectivityTracer{SortedVector{UInt64}}}) = EMPTY_CONNECTIVITY_TRACER_SV_U64
+function empty(::Type{ConnectivityTracer{UInt16,SortedVector{UInt16}}})
+    return EMPTY_CONNECTIVITY_TRACER_SV_U16
+end
+function empty(::Type{ConnectivityTracer{UInt32,SortedVector{UInt32}}})
+    return EMPTY_CONNECTIVITY_TRACER_SV_U32
+end
+function empty(::Type{ConnectivityTracer{UInt64,SortedVector{UInt64}}})
+    return EMPTY_CONNECTIVITY_TRACER_SV_U64
+end
 
-empty(::Type{JacobianTracer{SortedVector{UInt16}}}) = EMPTY_JACOBIAN_TRACER_SV_U16
-empty(::Type{JacobianTracer{SortedVector{UInt32}}}) = EMPTY_JACOBIAN_TRACER_SV_U32
-empty(::Type{JacobianTracer{SortedVector{UInt64}}}) = EMPTY_JACOBIAN_TRACER_SV_U64
+empty(::Type{JacobianTracer{UInt16,SortedVector{UInt16}}}) = EMPTY_JACOBIAN_TRACER_SV_U16
+empty(::Type{JacobianTracer{UInt32,SortedVector{UInt32}}}) = EMPTY_JACOBIAN_TRACER_SV_U32
+empty(::Type{JacobianTracer{UInt64,SortedVector{UInt64}}}) = EMPTY_JACOBIAN_TRACER_SV_U64
 
-empty(::Type{HessianTracer{SortedVector{UInt16},UInt16}}) = EMPTY_HESSIAN_TRACER_SV_U16
-empty(::Type{HessianTracer{SortedVector{UInt32},UInt32}}) = EMPTY_HESSIAN_TRACER_SV_U32
-empty(::Type{HessianTracer{SortedVector{UInt64},UInt64}}) = EMPTY_HESSIAN_TRACER_SV_U64
+function empty(
+    ::Type{HessianTracer{UInt16,SortedVector{UInt16},Dict{UInt16,SortedVector{UInt16}}}}
+)
+    return EMPTY_HESSIAN_TRACER_SV_U16
+end
+function empty(
+    ::Type{HessianTracer{UInt32,SortedVector{UInt32},Dict{UInt32,SortedVector{UInt32}}}}
+)
+    return EMPTY_HESSIAN_TRACER_SV_U32
+end
+function empty(
+    ::Type{HessianTracer{UInt64,SortedVector{UInt64},Dict{UInt64,SortedVector{UInt64}}}}
+)
+    return EMPTY_HESSIAN_TRACER_SV_U64
+end

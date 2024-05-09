@@ -1,1 +1,1 @@
-ConnectivityTracer{DuplicateVector{UInt64}}(2,)
+ConnectivityTracer{UInt64,DuplicateVector{UInt64}}(2,)

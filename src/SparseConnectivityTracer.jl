@@ -13,6 +13,7 @@ include("overload_hessian.jl")
 include("pattern.jl")
 include("adtypes.jl")
 
+include("settypes/base_sets.jl")
 include("settypes/duplicatevector.jl")
 include("settypes/recursiveset.jl")
 include("settypes/sortedvector.jl")

@@ -24,7 +24,14 @@ for TT in (:JacobianTracer, :ConnectivityTracer, :HessianTracer)
     @eval Base.similar(a::Array{A,2}, ::Type{T}) where {A,T<:$TT}  = zeros(T, size(a, 1), size(a, 2))
     @eval Base.similar(::Array{T}, m::Int) where {T<:$TT}          = zeros(T, m)
     @eval Base.similar(::Array{T}, dims::Dims{N}) where {N,T<:$TT} = zeros(T, dims)
+end
 
-    @eval Base.similar(::Array, ::Type{$TT{S}}, dims::Dims{N}) where {N,S} =
-        zeros($TT{S}, dims)
+function Base.similar(::Array, ::Type{ConnectivityTracer{I,S}}, dims::Dims{N}) where {I,S,N}
+    return zeros(ConnectivityTracer{I,S}, dims)
+end
+function Base.similar(::Array, ::Type{JacobianTracer{I,S}}, dims::Dims{N}) where {I,S,N}
+    return zeros(JacobianTracer{I,S}, dims)
+end
+function Base.similar(::Array, ::Type{HessianTracer{I,S,D}}, dims::Dims{N}) where {I,S,D,N}
+    return zeros(HessianTracer{I,S,D}, dims)
 end
