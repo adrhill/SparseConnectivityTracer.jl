@@ -54,7 +54,6 @@ for S in SET_TYPES
             $f!, $y, $x, $method
         )
 
-        # TODO: test adaptive step solvers on local tracers
         solver = SimpleEuler()
         prob = ODEProblem(brusselator_2d_loop!, x, (0.0, 1.0), f!.params)
         function brusselator_ode_solve(x)
