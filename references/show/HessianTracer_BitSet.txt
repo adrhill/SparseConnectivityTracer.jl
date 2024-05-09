@@ -1,3 +1,0 @@
-HessianTracer{BitSet}(
-  2 => (),
-)
