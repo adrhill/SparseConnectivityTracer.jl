@@ -9,7 +9,7 @@ using Test
 )
     I = eltype(S)
     CT = ConnectivityTracer{I,S}
-    JT = GradientTracer{I,S}
+    JT = GlobalGradientTracer{I,S}
 
     x = rand(3)
     xt = trace_input(CT, x)
@@ -31,7 +31,7 @@ using Test
     @test connectivity_pattern(Returns(1), 1, S) ≈ [0;;]
     @test jacobian_pattern(Returns(1), 1, S) ≈ [0;;]
 
-    # Test GradientTracer on functions with zero derivatives
+    # Test GlobalGradientTracer on functions with zero derivatives
     x = rand(2)
     g(x) = [x[1] * x[2], ceil(x[1] * x[2]), x[1] * round(x[2])]
     @test connectivity_pattern(g, x, S) ≈ [1 1; 1 1; 1 1]

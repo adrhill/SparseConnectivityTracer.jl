@@ -19,8 +19,8 @@ include("settypes/recursiveset.jl")
 include("settypes/sortedvector.jl")
 
 export ConnectivityTracer, connectivity_pattern
-export GradientTracer, jacobian_pattern
-export HessianTracer, hessian_pattern
+export GlobalGradientTracer, jacobian_pattern
+export GlobalHessianTracer, hessian_pattern
 
 export TracerSparsityDetector
 

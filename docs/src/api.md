@@ -24,8 +24,8 @@ Currently, three tracer types are provided:
 
 ```@docs
 ConnectivityTracer
-GradientTracer
-HessianTracer
+GlobalGradientTracer
+GlobalHessianTracer
 ```
 
 We also define alternative pseudo-set types that can deliver faster `union`:

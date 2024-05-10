@@ -58,7 +58,7 @@ end
 #==========#
 
 """
-    GradientTracer{I,S}(indexset) <: Number
+    GlobalGradientTracer{I,S}(indexset) <: Number
 
 Number type keeping track of input indices of previous computations with non-zero derivatives.
 
@@ -66,35 +66,37 @@ $SET_TYPE_MESSAGE
 
 For a higher-level interface, refer to [`jacobian_pattern`](@ref).
 """
-struct GradientTracer{I<:Integer,S} <: AbstractTracer
+struct GlobalGradientTracer{I<:Integer,S} <: AbstractTracer
     inputs::S
 end
-function GradientTracer(inputs::S) where {S}
+function GlobalGradientTracer(inputs::S) where {S}
     I = eltype(S)
-    return GradientTracer{I,S}(inputs)
+    return GlobalGradientTracer{I,S}(inputs)
 end
 
-function Base.show(io::IO, t::GradientTracer{I,S}) where {I,S}
+function Base.show(io::IO, t::GlobalGradientTracer{I,S}) where {I,S}
     return Base.show_delim_array(
-        io, convert.(Int, inputs(t)), "GradientTracer{$I,$S}(", ',', ')', true
+        io, convert.(Int, inputs(t)), "GlobalGradientTracer{$I,$S}(", ',', ')', true
     )
 end
 
-empty(::Type{GradientTracer{I,S}}) where {I<:Integer,S} = GradientTracer{I,S}(S())
+function empty(::Type{GlobalGradientTracer{I,S}}) where {I<:Integer,S}
+    return GlobalGradientTracer{I,S}(S())
+end
 
-GradientTracer{I,S}(::Number) where {I<:Integer,S} = empty(GradientTracer{I,S})
-GradientTracer(t::GradientTracer) = t
+GlobalGradientTracer{I,S}(::Number) where {I<:Integer,S} = empty(GlobalGradientTracer{I,S})
+GlobalGradientTracer(t::GlobalGradientTracer) = t
 
 ## Unions of tracers
-function uniontracer(a::GradientTracer{I,S}, b::GradientTracer{I,S}) where {I,S}
-    return GradientTracer(union(a.inputs, b.inputs))
+function uniontracer(a::GlobalGradientTracer{I,S}, b::GlobalGradientTracer{I,S}) where {I,S}
+    return GlobalGradientTracer(union(a.inputs, b.inputs))
 end
 
 #=========#
 # Hessian #
 #=========#
 """
-    HessianTracer{I,S,D}(indexset) <: Number
+    GlobalHessianTracer{I,S,D}(indexset) <: Number
 
 Number type keeping track of input indices of previous computations with non-zero first and second derivatives.
 
@@ -102,10 +104,10 @@ $SET_TYPE_MESSAGE
 
 For a higher-level interface, refer to [`hessian_pattern`](@ref).
 """
-struct HessianTracer{I<:Integer,S,D<:AbstractDict{I,S}} <: AbstractTracer
+struct GlobalHessianTracer{I<:Integer,S,D<:AbstractDict{I,S}} <: AbstractTracer
     inputs::D
 end
-function Base.show(io::IO, t::HessianTracer{I,S,D}) where {I,S,D}
+function Base.show(io::IO, t::GlobalHessianTracer{I,S,D}) where {I,S,D}
     println(io, "$(eltype(t))(")
     for key in keys(t.inputs)
         print(io, "  ", Int(key), " => ")
@@ -115,30 +117,34 @@ function Base.show(io::IO, t::HessianTracer{I,S,D}) where {I,S,D}
     return print(io, ")")
 end
 
-function empty(::Type{HessianTracer{I,S,D}}) where {I<:Integer,S,D<:AbstractDict{I,S}}
-    return HessianTracer{I,S,D}(D())
+function empty(::Type{GlobalHessianTracer{I,S,D}}) where {I<:Integer,S,D<:AbstractDict{I,S}}
+    return GlobalHessianTracer{I,S,D}(D())
 end
 
-HessianTracer{I,S,D}(::Number) where {I<:Integer,S,D} = empty(HessianTracer{I,S,D})
-HessianTracer(t::HessianTracer) = t
+function GlobalHessianTracer{I,S,D}(::Number) where {I<:Integer,S,D}
+    return empty(GlobalHessianTracer{I,S,D})
+end
+GlobalHessianTracer(t::GlobalHessianTracer) = t
 
 # Turn first-order interactions into second-order interactions
-function promote_order(t::HessianTracer{I,S}) where {I,S}
+function promote_order(t::GlobalHessianTracer{I,S}) where {I,S}
     d = deepcopy(t.inputs)
     s = keys2set(S, d)
     for (k, v) in pairs(d)
         d[k] = union(v, s)  # ignores symmetry
     end
-    return HessianTracer(d)
+    return GlobalHessianTracer(d)
 end
 
 # Merge first- and second-order terms in an "additive" fashion
-function additive_merge(a::HessianTracer, b::HessianTracer)
-    return HessianTracer(mergewith(union, a.inputs, b.inputs))
+function additive_merge(a::GlobalHessianTracer, b::GlobalHessianTracer)
+    return GlobalHessianTracer(mergewith(union, a.inputs, b.inputs))
 end
 
 # Merge first- and second-order terms in a "distributive" fashion
-function distributive_merge(a::HessianTracer{I,S,D}, b::HessianTracer{I,S,D}) where {I,S,D}
+function distributive_merge(
+    a::GlobalHessianTracer{I,S,D}, b::GlobalHessianTracer{I,S,D}
+) where {I,S,D}
     da = deepcopy(a.inputs)
     db = deepcopy(b.inputs)
     sa = keys2set(S, da)
@@ -151,7 +157,7 @@ function distributive_merge(a::HessianTracer{I,S,D}, b::HessianTracer{I,S,D}) wh
     for (kb, vb) in pairs(db)
         db[kb] = union(vb, sa)
     end
-    return HessianTracer(merge(da, db))
+    return GlobalHessianTracer(merge(da, db))
 end
 
 #===========#
@@ -162,33 +168,35 @@ end
 """
     inputs(tracer)
 
-Return input indices of a [`ConnectivityTracer`](@ref) or [`GradientTracer`](@ref)
+Return input indices of a [`ConnectivityTracer`](@ref) or [`GlobalGradientTracer`](@ref)
 """
 inputs(t::ConnectivityTracer) = collect(t.inputs)
-inputs(t::GradientTracer) = collect(t.inputs)
-inputs(t::HessianTracer, i::Integer) = collect(t.inputs[i])
+inputs(t::GlobalGradientTracer) = collect(t.inputs)
+inputs(t::GlobalHessianTracer, i::Integer) = collect(t.inputs[i])
 
 """
     tracer(T, index) where {T<:AbstractTracer}
 
-Convenience constructor for [`ConnectivityTracer`](@ref), [`GradientTracer`](@ref) and [`HessianTracer`](@ref) from input indices.
+Convenience constructor for [`ConnectivityTracer`](@ref), [`GlobalGradientTracer`](@ref) and [`GlobalHessianTracer`](@ref) from input indices.
 """
-function tracer(::Type{GradientTracer{I,S}}, index::Integer) where {I,S}
-    return GradientTracer{I,S}(S(index))
+function tracer(::Type{GlobalGradientTracer{I,S}}, index::Integer) where {I,S}
+    return GlobalGradientTracer{I,S}(S(index))
 end
 function tracer(::Type{ConnectivityTracer{I,S}}, index::Integer) where {I,S}
     return ConnectivityTracer{I,S}(S(index))
 end
-function tracer(::Type{HessianTracer{I,S,D}}, index::Integer) where {I,S,D}
-    return HessianTracer{I,S,D}(D(index => S()))
+function tracer(::Type{GlobalHessianTracer{I,S,D}}, index::Integer) where {I,S,D}
+    return GlobalHessianTracer{I,S,D}(D(index => S()))
 end
 
-function tracer(::Type{GradientTracer{I,S}}, inds::NTuple{N,<:Integer}) where {I,S,N}
-    return GradientTracer{I,S}(S(inds))
+function tracer(::Type{GlobalGradientTracer{I,S}}, inds::NTuple{N,<:Integer}) where {I,S,N}
+    return GlobalGradientTracer{I,S}(S(inds))
 end
 function tracer(::Type{ConnectivityTracer{I,S}}, inds::NTuple{N,<:Integer}) where {I,S,N}
     return ConnectivityTracer{I,S}(S(inds))
 end
-function tracer(::Type{HessianTracer{I,S,D}}, inds::NTuple{N,<:Integer}) where {I,S,D,N}
-    return HessianTracer{I,S,D}(D(i => S() for i in inds))
+function tracer(
+    ::Type{GlobalHessianTracer{I,S,D}}, inds::NTuple{N,<:Integer}
+) where {I,S,D,N}
+    return GlobalHessianTracer{I,S,D}(D(i => S() for i in inds))
 end

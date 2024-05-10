@@ -8,7 +8,7 @@ using Test
     BitSet, Set{UInt64}, DuplicateVector{UInt64}, RecursiveSet{UInt64}, SortedVector{UInt64}
 )
     I = eltype(S)
-    HT = HessianTracer{I,S,Dict{I,S}}
+    HT = GlobalHessianTracer{I,S,Dict{I,S}}
 
     @test hessian_pattern(identity, rand(), S) ≈ [0;;]
     @test hessian_pattern(sqrt, rand(), S) ≈ [1;;]

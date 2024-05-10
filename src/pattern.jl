@@ -7,7 +7,7 @@ const DEFAULT_SET_TYPE = BitSet
 
 
 Enumerates input indices and constructs the specified type `T` of tracer.
-Supports [`ConnectivityTracer`](@ref), [`GradientTracer`](@ref) and [`HessianTracer`](@ref).
+Supports [`ConnectivityTracer`](@ref), [`GlobalGradientTracer`](@ref) and [`GlobalHessianTracer`](@ref).
 """
 trace_input(::Type{T}, x) where {T<:AbstractTracer} = trace_input(T, x, 1)
 trace_input(::Type{T}, ::Number, i) where {T<:AbstractTracer} = tracer(T, i)
@@ -121,7 +121,7 @@ julia> jacobian_pattern(f, x)
 """
 function jacobian_pattern(f, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
     I = eltype(S)
-    xt, yt = trace_function(GradientTracer{I,S}, f, x)
+    xt, yt = trace_function(GlobalGradientTracer{I,S}, f, x)
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
@@ -135,13 +135,13 @@ The type of index set `S` can be specified as an optional argument and defaults 
 """
 function jacobian_pattern(f!, y, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
     I = eltype(S)
-    xt, yt = trace_function(GradientTracer{I,S}, f!, y, x)
+    xt, yt = trace_function(GlobalGradientTracer{I,S}, f!, y, x)
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
 function jacobian_pattern_to_mat(
     xt::AbstractArray{T}, yt::AbstractArray{<:Number}
-) where {T<:GradientTracer}
+) where {T<:GlobalGradientTracer}
     n, m = length(xt), length(yt)
     I = UInt64[] # row indices
     J = UInt64[] # column indices
@@ -194,13 +194,13 @@ julia> hessian_pattern(g, x)
 """
 function hessian_pattern(f, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
     I = eltype(S)
-    T = HessianTracer{I,S,Dict{I,S}}
+    T = GlobalHessianTracer{I,S,Dict{I,S}}
     xt, yt = trace_function(T, f, x)
     return hessian_pattern_to_mat(to_array(xt), yt)
 end
 
 function hessian_pattern_to_mat(
-    xt::AbstractArray{HessianTracer{TI,S,D}}, yt::HessianTracer{TI,S,D}
+    xt::AbstractArray{GlobalHessianTracer{TI,S,D}}, yt::GlobalHessianTracer{TI,S,D}
 ) where {TI,S,D}
     # Allocate Hessian matrix
     n = length(xt)

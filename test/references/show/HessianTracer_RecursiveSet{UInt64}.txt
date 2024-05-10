@@ -1,3 +1,3 @@
-HessianTracer{UInt64, RecursiveSet{UInt64}, Dict{UInt64, RecursiveSet{UInt64}}}(
+GlobalHessianTracer{UInt64, RecursiveSet{UInt64}, Dict{UInt64, RecursiveSet{UInt64}}}(
   2 => (),
 )
