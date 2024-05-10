@@ -188,15 +188,3 @@ end
 function tracer(::Type{GlobalHessianTracer{I,S,D}}, index::Integer) where {I,S,D}
     return GlobalHessianTracer{I,S,D}(D(index => S()))
 end
-
-function tracer(::Type{GlobalGradientTracer{I,S}}, inds::NTuple{N,<:Integer}) where {I,S,N}
-    return GlobalGradientTracer{I,S}(S(inds))
-end
-function tracer(::Type{ConnectivityTracer{I,S}}, inds::NTuple{N,<:Integer}) where {I,S,N}
-    return ConnectivityTracer{I,S}(S(inds))
-end
-function tracer(
-    ::Type{GlobalHessianTracer{I,S,D}}, inds::NTuple{N,<:Integer}
-) where {I,S,D,N}
-    return GlobalHessianTracer{I,S,D}(D(i => S() for i in inds))
-end
