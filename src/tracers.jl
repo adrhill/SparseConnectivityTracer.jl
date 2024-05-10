@@ -19,7 +19,9 @@ sparse_vector(T, index) = T([index])
 sparse_vector(::Type{T}, index) where {T<:DuplicateVector} = T(index)
 sparse_vector(::Type{T}, index) where {T<:SortedVector} = T(index)
 
+# TODO: refactor this properly!
 sparse_matrix(T, index) = T([index;;])
+sparse_matrix(::Type{Dict{I,S}}, index) where {I,S} = Dict(convert(I, index) => S())
 
 #==============#
 # Connectivity #
@@ -34,8 +36,8 @@ $SET_TYPE_MESSAGE
 
 For a higher-level interface, refer to [`connectivity_pattern`](@ref).
 """
-struct ConnectivityTracer{I<:Integer,S} <: AbstractTracer
-    inputs::S # indices of connected, enumerated inputs
+struct ConnectivityTracer{C} <: AbstractTracer
+    inputs::C # sparse binary vector representing non-zero indices of connected, enumerated inputs
 end
 
 function Base.show(io::IO, t::ConnectivityTracer{C}) where {C}
@@ -124,17 +126,21 @@ GlobalHessianTracer(t::GlobalHessianTracer) = t
 
 # Turn first-order interactions into second-order interactions
 function promote_order(t::GlobalHessianTracer{G,H}) where {G,H}
-    d = deepcopy(t.inputs)
-    s = keys2set(S, d)
+    d = deepcopy(t.hessian)
+    s = keys2set(G, d)
     for (k, v) in pairs(d)
         d[k] = union(v, s)  # ignores symmetry
     end
-    return GlobalHessianTracer(d)
+    return GlobalHessianTracer{G,H}(empty_sparse_vector(G), d)
 end
 
 # Merge first- and second-order terms in an "additive" fashion
-function additive_merge(a::GlobalHessianTracer, b::GlobalHessianTracer)
-    return GlobalHessianTracer(mergewith(union, a.hessian, b.hessian))
+function additive_merge(
+    a::GlobalHessianTracer{G,H}, b::GlobalHessianTracer{G,H}
+) where {G,H}
+    return GlobalHessianTracer{G,H}(
+        empty_sparse_vector(G), mergewith(union, a.hessian, b.hessian)
+    )
 end
 
 # Merge first- and second-order terms in a "distributive" fashion
@@ -143,8 +149,8 @@ function distributive_merge(
 ) where {G,H}
     da = deepcopy(a.hessian)
     db = deepcopy(b.hessian)
-    sa = keys2set(S, da)
-    sb = keys2set(S, db)
+    sa = keys2set(G, da)
+    sb = keys2set(G, db)
 
     # add second-order interaction term by ignoring symmetry
     for (ka, va) in pairs(da)
@@ -153,7 +159,7 @@ function distributive_merge(
     for (kb, vb) in pairs(db)
         db[kb] = union(vb, sa)
     end
-    return GlobalHessianTracer(merge(da, db))
+    return GlobalHessianTracer{G,H}(empty_sparse_vector(G), merge(da, db))
 end
 
 #===========#
@@ -182,5 +188,7 @@ function tracer(::Type{ConnectivityTracer{C}}, index::Integer) where {C}
     return ConnectivityTracer{C}(sparse_vector(C, index))
 end
 function tracer(::Type{GlobalHessianTracer{G,H}}, index::Integer) where {G,H}
-    return GlobalHessianTracer{G,H}(sparse_vector(G, index), empty_sparse_matrix(H))
+    # TODO: refactor to
+    # return GlobalHessianTracer{G,H}(sparse_vector(G, index), empty_sparse_matrix(H))
+    return GlobalHessianTracer{G,H}(empty_sparse_vector(G), sparse_matrix(H, index))
 end

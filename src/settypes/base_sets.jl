@@ -1,3 +1,4 @@
-function keys2set(::Type{G}, d::H) where {G,H<:Dict}
-    return G(keys(d))
+function keys2set(::Type{G}, d::Dict) where {G}
+    T = eltype(G)
+    return G(convert.(T, keys(d)))
 end

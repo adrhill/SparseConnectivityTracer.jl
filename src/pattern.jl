@@ -205,7 +205,8 @@ function hessian_pattern_to_mat(
     J = UInt64[] # column indices
     V = Bool[]   # values
 
-    for i in keys(yt.inputs)
+    # TODO: remove inputs
+    for i in keys(yt.hessian)
         for j in inputs(yt, i)
             push!(I, i)
             push!(J, j)
