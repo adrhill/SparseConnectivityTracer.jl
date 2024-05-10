@@ -1,1 +1,1 @@
-GlobalGradientTracer{UInt64,DuplicateVector{UInt64}}(2,)
+GlobalGradientTracer{DuplicateVector{UInt64}}(2,)

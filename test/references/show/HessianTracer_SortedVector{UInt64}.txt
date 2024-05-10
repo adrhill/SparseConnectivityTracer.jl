@@ -1,3 +1,3 @@
-GlobalHessianTracer{UInt64, SortedVector{UInt64}, Dict{UInt64, SortedVector{UInt64}}}(
+GlobalHessianTracer{SortedVector{UInt64}, Dict{UInt64, SortedVector{UInt64}}}(
   2 => (),
 )

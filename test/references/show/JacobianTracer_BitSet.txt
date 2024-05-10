@@ -1,1 +1,1 @@
-GlobalGradientTracer{Int64,BitSet}(2,)
+GlobalGradientTracer{BitSet}(2,)

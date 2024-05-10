@@ -1,1 +1,1 @@
-ConnectivityTracer{Int64,BitSet}(2,)
+ConnectivityTracer{BitSet}(2,)

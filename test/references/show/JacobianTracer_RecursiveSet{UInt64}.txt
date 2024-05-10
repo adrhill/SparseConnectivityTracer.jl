@@ -1,1 +1,1 @@
-GlobalGradientTracer{UInt64,RecursiveSet{UInt64}}(2,)
+GlobalGradientTracer{RecursiveSet{UInt64}}(2,)
