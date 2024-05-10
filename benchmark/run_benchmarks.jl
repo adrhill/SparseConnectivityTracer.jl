@@ -6,5 +6,5 @@
 using BenchmarkCI
 on_CI = haskey(ENV, "GITHUB_ACTIONS")
 
-BenchmarkCI.judge()
+BenchmarkCI.judge(; baseline="origin/main")
 on_CI ? BenchmarkCI.postjudge() : BenchmarkCI.displayjudgement()

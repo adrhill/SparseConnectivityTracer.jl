@@ -28,13 +28,13 @@ end
 const LAYER = Conv((5, 5), 3 => 2)
 
 ## Define Benchmark suite
-suite = BenchmarkGroup()
+SUITE = BenchmarkGroup()
 
 for S in SET_TYPES
     setname = string(S)
     method = TracerSparsityDetector(S)
 
-    J_global = suite["Jacobian"]["Global"]
+    J_global = SUITE["Jacobian"]["Global"]
 
     ## Sparse matrix multiplication
     for sparsity in (0.01, 0.05, 0.1, 0.25)
