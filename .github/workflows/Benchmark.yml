@@ -6,6 +6,10 @@ on:
 jobs:
   Benchmark:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      actions: write # needed to allow julia-actions/cache to proactively delete old caches that it has created
+      contents: read
     if: contains(github.event.pull_request.labels.*.name, 'run benchmark')
     steps:
       - uses: actions/checkout@v4
