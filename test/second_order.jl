@@ -1,14 +1,13 @@
 using ReferenceTests
 using SparseConnectivityTracer
-using SparseConnectivityTracer: tracer, trace_input, inputs, empty
+using SparseConnectivityTracer: tracer, trace_input, empty
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
 @testset "Set type $S" for S in (
     BitSet, Set{UInt64}, DuplicateVector{UInt64}, RecursiveSet{UInt64}, SortedVector{UInt64}
 )
-    I = eltype(S)
-    HT = GlobalHessianTracer{I,S,Dict{I,S}}
+    HT = GlobalHessianTracer{S,Dict{eltype(S),S}}
 
     @test hessian_pattern(identity, rand(), S) ≈ [0;;]
     @test hessian_pattern(sqrt, rand(), S) ≈ [1;;]

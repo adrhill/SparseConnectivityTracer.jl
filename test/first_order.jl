@@ -8,8 +8,8 @@ using Test
     BitSet, Set{UInt64}, DuplicateVector{UInt64}, RecursiveSet{UInt64}, SortedVector{UInt64}
 )
     I = eltype(S)
-    CT = ConnectivityTracer{I,S}
-    JT = GlobalGradientTracer{I,S}
+    CT = ConnectivityTracer{S}
+    JT = GlobalGradientTracer{S}
 
     x = rand(3)
     xt = trace_input(CT, x)
