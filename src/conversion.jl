@@ -1,5 +1,5 @@
 ## Type conversions
-for TT in (:JacobianTracer, :ConnectivityTracer, :HessianTracer)
+for TT in (:GradientTracer, :ConnectivityTracer, :HessianTracer)
     @eval Base.promote_rule(::Type{T}, ::Type{N}) where {T<:$TT,N<:Number} = T
     @eval Base.promote_rule(::Type{N}, ::Type{T}) where {T<:$TT,N<:Number} = T
 
@@ -29,8 +29,8 @@ end
 function Base.similar(::Array, ::Type{ConnectivityTracer{I,S}}, dims::Dims{N}) where {I,S,N}
     return zeros(ConnectivityTracer{I,S}, dims)
 end
-function Base.similar(::Array, ::Type{JacobianTracer{I,S}}, dims::Dims{N}) where {I,S,N}
-    return zeros(JacobianTracer{I,S}, dims)
+function Base.similar(::Array, ::Type{GradientTracer{I,S}}, dims::Dims{N}) where {I,S,N}
+    return zeros(GradientTracer{I,S}, dims)
 end
 function Base.similar(::Array, ::Type{HessianTracer{I,S,D}}, dims::Dims{N}) where {I,S,D,N}
     return zeros(HessianTracer{I,S,D}, dims)

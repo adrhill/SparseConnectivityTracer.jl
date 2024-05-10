@@ -24,7 +24,7 @@ Currently, three tracer types are provided:
 
 ```@docs
 ConnectivityTracer
-JacobianTracer
+GradientTracer
 HessianTracer
 ```
 

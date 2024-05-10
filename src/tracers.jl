@@ -58,7 +58,7 @@ end
 #==========#
 
 """
-    JacobianTracer{I,S}(indexset) <: Number
+    GradientTracer{I,S}(indexset) <: Number
 
 Number type keeping track of input indices of previous computations with non-zero derivatives.
 
@@ -66,28 +66,28 @@ $SET_TYPE_MESSAGE
 
 For a higher-level interface, refer to [`jacobian_pattern`](@ref).
 """
-struct JacobianTracer{I<:Integer,S} <: AbstractTracer
+struct GradientTracer{I<:Integer,S} <: AbstractTracer
     inputs::S
 end
-function JacobianTracer(inputs::S) where {S}
+function GradientTracer(inputs::S) where {S}
     I = eltype(S)
-    return JacobianTracer{I,S}(inputs)
+    return GradientTracer{I,S}(inputs)
 end
 
-function Base.show(io::IO, t::JacobianTracer{I,S}) where {I,S}
+function Base.show(io::IO, t::GradientTracer{I,S}) where {I,S}
     return Base.show_delim_array(
-        io, convert.(Int, inputs(t)), "JacobianTracer{$I,$S}(", ',', ')', true
+        io, convert.(Int, inputs(t)), "GradientTracer{$I,$S}(", ',', ')', true
     )
 end
 
-empty(::Type{JacobianTracer{I,S}}) where {I<:Integer,S} = JacobianTracer{I,S}(S())
+empty(::Type{GradientTracer{I,S}}) where {I<:Integer,S} = GradientTracer{I,S}(S())
 
-JacobianTracer{I,S}(::Number) where {I<:Integer,S} = empty(JacobianTracer{I,S})
-JacobianTracer(t::JacobianTracer) = t
+GradientTracer{I,S}(::Number) where {I<:Integer,S} = empty(GradientTracer{I,S})
+GradientTracer(t::GradientTracer) = t
 
 ## Unions of tracers
-function uniontracer(a::JacobianTracer{I,S}, b::JacobianTracer{I,S}) where {I,S}
-    return JacobianTracer(union(a.inputs, b.inputs))
+function uniontracer(a::GradientTracer{I,S}, b::GradientTracer{I,S}) where {I,S}
+    return GradientTracer(union(a.inputs, b.inputs))
 end
 
 #=========#
@@ -162,19 +162,19 @@ end
 """
     inputs(tracer)
 
-Return input indices of a [`ConnectivityTracer`](@ref) or [`JacobianTracer`](@ref)
+Return input indices of a [`ConnectivityTracer`](@ref) or [`GradientTracer`](@ref)
 """
 inputs(t::ConnectivityTracer) = collect(t.inputs)
-inputs(t::JacobianTracer) = collect(t.inputs)
+inputs(t::GradientTracer) = collect(t.inputs)
 inputs(t::HessianTracer, i::Integer) = collect(t.inputs[i])
 
 """
     tracer(T, index) where {T<:AbstractTracer}
 
-Convenience constructor for [`ConnectivityTracer`](@ref), [`JacobianTracer`](@ref) and [`HessianTracer`](@ref) from input indices.
+Convenience constructor for [`ConnectivityTracer`](@ref), [`GradientTracer`](@ref) and [`HessianTracer`](@ref) from input indices.
 """
-function tracer(::Type{JacobianTracer{I,S}}, index::Integer) where {I,S}
-    return JacobianTracer{I,S}(S(index))
+function tracer(::Type{GradientTracer{I,S}}, index::Integer) where {I,S}
+    return GradientTracer{I,S}(S(index))
 end
 function tracer(::Type{ConnectivityTracer{I,S}}, index::Integer) where {I,S}
     return ConnectivityTracer{I,S}(S(index))
@@ -183,8 +183,8 @@ function tracer(::Type{HessianTracer{I,S,D}}, index::Integer) where {I,S,D}
     return HessianTracer{I,S,D}(D(index => S()))
 end
 
-function tracer(::Type{JacobianTracer{I,S}}, inds::NTuple{N,<:Integer}) where {I,S,N}
-    return JacobianTracer{I,S}(S(inds))
+function tracer(::Type{GradientTracer{I,S}}, inds::NTuple{N,<:Integer}) where {I,S,N}
+    return GradientTracer{I,S}(S(inds))
 end
 function tracer(::Type{ConnectivityTracer{I,S}}, inds::NTuple{N,<:Integer}) where {I,S,N}
     return ConnectivityTracer{I,S}(S(inds))
