@@ -28,18 +28,19 @@ julia> ADTypes.hessian_sparsity(f, rand(4), TracerSparsityDetector())
  ⋅  ⋅  ⋅  1
 ```
 """
-struct TracerSparsityDetector{S} <: ADTypes.AbstractSparsityDetector end
-TracerSparsityDetector(::Type{S}) where {S} = TracerSparsityDetector{S}()
-TracerSparsityDetector() = TracerSparsityDetector(BitSet)
+struct TracerSparsityDetector{G,H} <: ADTypes.AbstractSparsityDetector end
+TracerSparsityDetector(::Type{G}, ::Type{H}) where {G,H} = TracerSparsityDetector{G,H}()
+TracerSparsityDetector(::Type{G}) where {G} = TracerSparsityDetector{G,Dict{eltype(G),G}}()
+TracerSparsityDetector() = TracerSparsityDetector(BitSet, Dict{Int,BitSet})
 
-function ADTypes.jacobian_sparsity(f, x, ::TracerSparsityDetector{S}) where {S}
-    return jacobian_pattern(f, x, S)
+function ADTypes.jacobian_sparsity(f, x, ::TracerSparsityDetector{G,H}) where {G,H}
+    return jacobian_pattern(f, x, G)
 end
 
-function ADTypes.jacobian_sparsity(f!, y, x, ::TracerSparsityDetector{S}) where {S}
-    return jacobian_pattern(f!, y, x, S)
+function ADTypes.jacobian_sparsity(f!, y, x, ::TracerSparsityDetector{G,H}) where {G,H}
+    return jacobian_pattern(f!, y, x, G)
 end
 
-function ADTypes.hessian_sparsity(f, x, ::TracerSparsityDetector{S}) where {S}
-    return hessian_pattern(f, x, S)
+function ADTypes.hessian_sparsity(f, x, ::TracerSparsityDetector{G,H}) where {G,H}
+    return hessian_pattern(f, x, G, H)
 end
