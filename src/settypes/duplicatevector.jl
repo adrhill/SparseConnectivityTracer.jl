@@ -21,6 +21,6 @@ Base.collect(dv::DuplicateVector) = collect(Set(dv.data))
 
 ## SCT tricks
 
-function keys2set(::Type{S}, d::Dict{I}) where {I<:Integer,S<:DuplicateVector{I}}
-    return S(collect(keys(d)))
+function keys2set(::Type{G}, d::H) where {G,H<:Dict}
+    return G(collect(keys(d)))
 end

@@ -66,6 +66,6 @@ end
 
 ## SCT tricks
 
-function keys2set(::Type{S}, d::Dict{I}) where {I<:Integer,S<:SortedVector{I}}
-    return S(collect(keys(d)); sorted=false)
+function keys2set(::Type{G}, d::H) where {G,H<:Dict}
+    return G(collect(keys(d)); sorted=false)
 end

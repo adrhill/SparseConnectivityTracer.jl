@@ -1,3 +1,3 @@
-function keys2set(::Type{S}, d::Dict{I}) where {I<:Integer,S<:AbstractSet{<:I}}
-    return S(keys(d))
+function keys2set(::Type{G}, d::H) where {G,H<:Dict}
+    return G(keys(d))
 end
