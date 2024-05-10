@@ -26,16 +26,14 @@ for TT in (:GlobalGradientTracer, :ConnectivityTracer, :GlobalHessianTracer)
     @eval Base.similar(::Array{T}, dims::Dims{N}) where {N,T<:$TT} = zeros(T, dims)
 end
 
-function Base.similar(::Array, ::Type{ConnectivityTracer{I,S}}, dims::Dims{N}) where {I,S,N}
-    return zeros(ConnectivityTracer{I,S}, dims)
+function Base.similar(::Array, ::Type{ConnectivityTracer{C}}, dims::Dims{N}) where {C,N}
+    return zeros(ConnectivityTracer{C}, dims)
+end
+function Base.similar(::Array, ::Type{GlobalGradientTracer{G}}, dims::Dims{N}) where {G,N}
+    return zeros(GlobalGradientTracer{G}, dims)
 end
 function Base.similar(
-    ::Array, ::Type{GlobalGradientTracer{I,S}}, dims::Dims{N}
-) where {I,S,N}
-    return zeros(GlobalGradientTracer{I,S}, dims)
-end
-function Base.similar(
-    ::Array, ::Type{GlobalHessianTracer{I,S,D}}, dims::Dims{N}
-) where {I,S,D,N}
-    return zeros(GlobalHessianTracer{I,S,D}, dims)
+    ::Array, ::Type{GlobalHessianTracer{G,H}}, dims::Dims{N}
+) where {G,H,N}
+    return zeros(GlobalHessianTracer{G,H}, dims)
 end

@@ -1,4 +1,5 @@
-const DEFAULT_SET_TYPE = BitSet
+const DEFAULT_VECTOR_TYPE = BitSet
+const DEFAULT_MATRIX_TYPE = Dict{Int,BitSet}
 
 ## Enumerate inputs
 """
@@ -57,9 +58,8 @@ julia> connectivity_pattern(f, x)
  ⋅  ⋅  1
 ```
 """
-function connectivity_pattern(f, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
-    I = eltype(S)
-    xt, yt = trace_function(ConnectivityTracer{I,S}, f, x)
+function connectivity_pattern(f, x, ::Type{C}=DEFAULT_VECTOR_TYPE) where {C}
+    xt, yt = trace_function(ConnectivityTracer{C}, f, x)
     return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
@@ -72,9 +72,8 @@ where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to
 
 The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
 """
-function connectivity_pattern(f!, y, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
-    I = eltype(S)
-    xt, yt = trace_function(ConnectivityTracer{I,S}, f!, y, x)
+function connectivity_pattern(f!, y, x, ::Type{C}=DEFAULT_VECTOR_TYPE) where {C}
+    xt, yt = trace_function(ConnectivityTracer{C}, f!, y, x)
     return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
@@ -119,9 +118,8 @@ julia> jacobian_pattern(f, x)
  ⋅  ⋅  ⋅
 ```
 """
-function jacobian_pattern(f, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
-    I = eltype(S)
-    xt, yt = trace_function(GlobalGradientTracer{I,S}, f, x)
+function jacobian_pattern(f, x, ::Type{G}=DEFAULT_VECTOR_TYPE) where {G}
+    xt, yt = trace_function(GlobalGradientTracer{G}, f, x)
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
@@ -133,9 +131,8 @@ Compute the sparsity pattern of the Jacobian of `f!(y, x)`.
 
 The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
 """
-function jacobian_pattern(f!, y, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
-    I = eltype(S)
-    xt, yt = trace_function(GlobalGradientTracer{I,S}, f!, y, x)
+function jacobian_pattern(f!, y, x, ::Type{G}=DEFAULT_VECTOR_TYPE) where {G}
+    xt, yt = trace_function(GlobalGradientTracer{G}, f!, y, x)
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
@@ -192,16 +189,16 @@ julia> hessian_pattern(g, x)
  ⋅  1  ⋅  ⋅  1
 ```
 """
-function hessian_pattern(f, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
-    I = eltype(S)
-    T = GlobalHessianTracer{I,S,Dict{I,S}}
-    xt, yt = trace_function(T, f, x)
+function hessian_pattern(
+    f, x, ::Type{G}=DEFAULT_VECTOR_TYPE, ::Type{H}=DEFAULT_MATRIX_TYPE
+) where {G,H}
+    xt, yt = trace_function(GlobalHessianTracer{G,H}, f, x)
     return hessian_pattern_to_mat(to_array(xt), yt)
 end
 
 function hessian_pattern_to_mat(
-    xt::AbstractArray{GlobalHessianTracer{TI,S,D}}, yt::GlobalHessianTracer{TI,S,D}
-) where {TI,S,D}
+    xt::AbstractArray{GlobalHessianTracer{G,H}}, yt::GlobalHessianTracer{G,H}
+) where {G,H}
     # Allocate Hessian matrix
     n = length(xt)
     I = UInt64[] # row indices
@@ -215,6 +212,6 @@ function hessian_pattern_to_mat(
             push!(V, true)
         end
     end
-    H = sparse(I, J, V, n, n)
-    return H
+    h = sparse(I, J, V, n, n)
+    return h
 end
