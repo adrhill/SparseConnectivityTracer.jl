@@ -23,6 +23,44 @@ sparse_vector(::Type{T}, index) where {T<:SortedVector} = T(index)
 sparse_matrix(T, index) = T([index;;])
 sparse_matrix(::Type{Dict{I,S}}, index) where {I,S} = Dict(convert(I, index) => S())
 
+#================#
+# Elementwise OR #
+#================#
+
+## We use ∨ to represent the elementwise OR
+# REVIEW TODO: \vee looks to much like the character 'v' in code
+# Gradient representations
+∨(a::G, b::G) where {G<:AbstractSet} = a ∪ b
+∨(a::G, b::G) where {G<:DuplicateVector} = G(vcat(a.data, b.data))
+∨(a::G, b::G) where {G<:SortedVector} = a ∪ b
+∨(a::G, b::G) where {G<:RecursiveSet} = a ∪ b
+
+# Hessian representations
+∨(a::H, b::H) where {I<:Integer,H<:AbstractSet{Tuple{I,I}}} = a ∪ b
+
+## Outer product on gradients
+# Compute `out ∨ (𝟙[∇a] ∨ 𝟙[∇b]ᵀ)` in out
+# TODO: add special dispatches based on type of G
+function outer_product_or!(
+    out::H, a::G, b::G
+) where {I<:Integer,H<:AbstractSet{Tuple{I,I}},G}
+    for i in a
+        for j in b
+            push!(out, (i, j))
+        end
+    end
+    return out
+end
+# Compute `out ∨ (𝟙[∇a] ∨ 𝟙[∇a])ᵀ` in out
+function outer_product_or!(out::H, a::G) where {I<:Integer,H<:AbstractSet{Tuple{I,I}},G}
+    for i in a
+        for j in a
+            push!(out, (i, j))
+        end
+    end
+    return out
+end
+
 #==============#
 # Connectivity #
 #==============#
@@ -46,7 +84,9 @@ function Base.show(io::IO, t::ConnectivityTracer{C}) where {C}
     )
 end
 
-empty(::Type{ConnectivityTracer{C}}) where {C} = ConnectivityTracer{C}(C())
+function empty(::Type{ConnectivityTracer{C}}) where {C}
+    return ConnectivityTracer{C}(empty_sparse_vector(C))
+end
 
 # We have to be careful when defining constructors:
 # Generic code expecting "regular" numbers `x` will sometimes convert them 
@@ -56,9 +96,7 @@ ConnectivityTracer{C}(::Number) where {C} = empty(ConnectivityTracer{C})
 ConnectivityTracer(t::ConnectivityTracer) = t
 
 ## Unions of tracers
-function uniontracer(a::ConnectivityTracer{C}, b::ConnectivityTracer{C}) where {C}
-    return ConnectivityTracer(union(a.inputs, b.inputs))
-end
+∨(a::T, b::T) where {T<:ConnectivityTracer} = T(a.inputs ∨ b.inputs)
 
 #==========#
 # Jacobian #
@@ -74,7 +112,7 @@ $SET_TYPE_MESSAGE
 For a higher-level interface, refer to [`jacobian_pattern`](@ref).
 """
 struct GlobalGradientTracer{G} <: AbstractTracer
-    grad::G # sparse binary vector representing non-zero entries in the gradient
+    gradient::G # sparse binary vector representing non-zero entries in the gradient
 end
 
 function Base.show(io::IO, t::GlobalGradientTracer{G}) where {G}
@@ -83,15 +121,15 @@ function Base.show(io::IO, t::GlobalGradientTracer{G}) where {G}
     )
 end
 
-empty(::Type{GlobalGradientTracer{G}}) where {G} = GlobalGradientTracer{G}(G())
+function empty(::Type{GlobalGradientTracer{G}}) where {G}
+    return GlobalGradientTracer{G}(empty_sparse_vector(G))
+end
 
 GlobalGradientTracer{G}(::Number) where {G} = empty(GlobalGradientTracer{G})
 GlobalGradientTracer(t::GlobalGradientTracer) = t
 
 ## Unions of tracers
-function uniontracer(a::GlobalGradientTracer{G}, b::GlobalGradientTracer{G}) where {G}
-    return GlobalGradientTracer(union(a.grad, b.grad))
-end
+∨(a::T, b::T) where {T<:GlobalGradientTracer} = T(a.gradient ∨ b.gradient)
 
 #=========#
 # Hessian #
@@ -106,8 +144,8 @@ $SET_TYPE_MESSAGE
 For a higher-level interface, refer to [`hessian_pattern`](@ref).
 """
 struct GlobalHessianTracer{G,H} <: AbstractTracer
-    grad::G # sparse binary vector representation of non-zero entries in the gradient
-    hessian::H  # sparse binary matrix representation non-zero entries in the Hessian
+    gradient::G # sparse binary vector representation of non-zero entries in the gradient
+    hessian::H  # sparse binary matrix representation of non-zero entries in the Hessian
 end
 function Base.show(io::IO, t::GlobalHessianTracer{G,H}) where {G,H}
     println(io, "$(eltype(t))(")
@@ -119,48 +157,12 @@ function Base.show(io::IO, t::GlobalHessianTracer{G,H}) where {G,H}
     return print(io, ")")
 end
 
-empty(::Type{GlobalHessianTracer{G,H}}) where {G,H} = GlobalHessianTracer{G,H}(G(), H())
+function empty(::Type{GlobalHessianTracer{G,H}}) where {G,H}
+    return GlobalHessianTracer{G,H}(empty_sparse_vector(G), empty_sparse_matrix(H))
+end
 
 GlobalHessianTracer{G,H}(::Number) where {G,H} = empty(GlobalHessianTracer{G,H})
 GlobalHessianTracer(t::GlobalHessianTracer) = t
-
-# Turn first-order interactions into second-order interactions
-function promote_order(t::GlobalHessianTracer{G,H}) where {G,H}
-    d = deepcopy(t.hessian)
-    s = keys2set(G, d)
-    for (k, v) in pairs(d)
-        d[k] = union(v, s)  # ignores symmetry
-    end
-    return GlobalHessianTracer{G,H}(empty_sparse_vector(G), d)
-end
-
-# Merge first- and second-order terms in an "additive" fashion
-function additive_merge(
-    a::GlobalHessianTracer{G,H}, b::GlobalHessianTracer{G,H}
-) where {G,H}
-    return GlobalHessianTracer{G,H}(
-        empty_sparse_vector(G), mergewith(union, a.hessian, b.hessian)
-    )
-end
-
-# Merge first- and second-order terms in a "distributive" fashion
-function distributive_merge(
-    a::GlobalHessianTracer{G,H}, b::GlobalHessianTracer{G,H}
-) where {G,H}
-    da = deepcopy(a.hessian)
-    db = deepcopy(b.hessian)
-    sa = keys2set(G, da)
-    sb = keys2set(G, db)
-
-    # add second-order interaction term by ignoring symmetry
-    for (ka, va) in pairs(da)
-        da[ka] = union(va, sb)
-    end
-    for (kb, vb) in pairs(db)
-        db[kb] = union(vb, sa)
-    end
-    return GlobalHessianTracer{G,H}(empty_sparse_vector(G), merge(da, db))
-end
 
 #===========#
 # Utilities #
@@ -173,7 +175,7 @@ end
 Return input indices of a [`ConnectivityTracer`](@ref) or [`GlobalGradientTracer`](@ref)
 """
 inputs(t::ConnectivityTracer) = collect(t.inputs)
-inputs(t::GlobalGradientTracer) = collect(t.grad)
+inputs(t::GlobalGradientTracer) = collect(t.gradient)
 inputs(t::GlobalHessianTracer, i::Integer) = collect(t.hessian[i])
 
 """

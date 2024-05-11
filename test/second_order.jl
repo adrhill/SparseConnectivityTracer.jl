@@ -7,7 +7,8 @@ using Test
 @testset "Set type $G" for G in (
     BitSet, Set{UInt64}, DuplicateVector{UInt64}, RecursiveSet{UInt64}, SortedVector{UInt64}
 )
-    H = Dict{eltype(G),G}
+    I = eltype(G)
+    H = Set{Tuple{I,I}}
     HT = GlobalHessianTracer{G,H}
 
     @test hessian_pattern(identity, rand(), G, H) ≈ [0;;]
