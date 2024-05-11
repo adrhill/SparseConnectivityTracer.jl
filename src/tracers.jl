@@ -19,10 +19,6 @@ sparse_vector(T, index) = T([index])
 sparse_vector(::Type{T}, index) where {T<:DuplicateVector} = T(index)
 sparse_vector(::Type{T}, index) where {T<:SortedVector} = T(index)
 
-# TODO: refactor this properly!
-sparse_matrix(T, index) = T([index;;])
-sparse_matrix(::Type{Dict{I,S}}, index) where {I,S} = Dict(convert(I, index) => S())
-
 #================#
 # Elementwise OR #
 #================#
@@ -36,6 +32,7 @@ sparse_matrix(::Type{Dict{I,S}}, index) where {I,S} = Dict(convert(I, index) => 
 ∨(a::G, b::G) where {G<:RecursiveSet} = a ∪ b
 
 # Hessian representations
+# REVIEW TODO: for now, we assume Hessians are represented as a set of tuples
 ∨(a::H, b::H) where {I<:Integer,H<:AbstractSet{Tuple{I,I}}} = a ∪ b
 
 ## Outer product on gradients
@@ -46,15 +43,6 @@ function outer_product_or!(
 ) where {I<:Integer,H<:AbstractSet{Tuple{I,I}},G}
     for i in a
         for j in b
-            push!(out, (i, j))
-        end
-    end
-    return out
-end
-# Compute `out ∨ (𝟙[∇a] ∨ 𝟙[∇a])ᵀ` in out
-function outer_product_or!(out::H, a::G) where {I<:Integer,H<:AbstractSet{Tuple{I,I}},G}
-    for i in a
-        for j in a
             push!(out, (i, j))
         end
     end
@@ -149,12 +137,10 @@ struct GlobalHessianTracer{G,H} <: AbstractTracer
 end
 function Base.show(io::IO, t::GlobalHessianTracer{G,H}) where {G,H}
     println(io, "$(eltype(t))(")
-    for key in keys(t.hessian)
-        print(io, "  ", Int(key), " => ")
-        Base.show_delim_array(io, convert.(Int, t.hessian[key]), "(", ',', ')', true)
-        println(io, ",")
-    end
-    return print(io, ")")
+    println(io, "  Gradient: ", t.gradient, ",")
+    println(io, "  Hessian:  ", t.hessian)
+    print(io, ")")
+    return nothing
 end
 
 function empty(::Type{GlobalHessianTracer{G,H}}) where {G,H}
@@ -190,7 +176,5 @@ function tracer(::Type{ConnectivityTracer{C}}, index::Integer) where {C}
     return ConnectivityTracer{C}(sparse_vector(C, index))
 end
 function tracer(::Type{GlobalHessianTracer{G,H}}, index::Integer) where {G,H}
-    # TODO: refactor to
-    # return GlobalHessianTracer{G,H}(sparse_vector(G, index), empty_sparse_matrix(H))
-    return GlobalHessianTracer{G,H}(empty_sparse_vector(G), sparse_matrix(H, index))
+    return GlobalHessianTracer{G,H}(sparse_vector(G, index), empty_sparse_matrix(H))
 end

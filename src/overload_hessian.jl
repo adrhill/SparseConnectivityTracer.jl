@@ -31,18 +31,26 @@ for fn in ops_2_to_1
             if !is_firstder_arg2_zero_global($fn)
                 (a.gradient ∨ b.gradient, a.hessian ∨ b.hessian)
             else
-                (a.gradient, deepcopy(a))
+                (a.gradient, deepcopy(a.hessian))
             end
         else # is_firstder_arg1_zero_global
             if !is_firstder_arg2_zero_global($fn)
-                (b.gradient, deepcopy(b))
+                (b.gradient, deepcopy(b.hessian))
             else
                 (empty_sparse_vector(G), empty_sparse_matrix(H))
             end
         end
-        !is_seconder_arg1_zero_global($fn) && outer_product_or!(out, a.gradient, a.gradient)
-        !is_seconder_arg2_zero_global($fn) && outer_product_or!(out, b.gradient, b.gradient)
-        !is_crossder_zero_global($fn) && outer_product_or!(out, a.gradient, b.gradient)
+
+        if !is_seconder_arg1_zero_global($fn)
+            outer_product_or!(hessian_out, a.gradient, a.gradient)
+        end
+        if !is_seconder_arg2_zero_global($fn)
+            outer_product_or!(hessian_out, b.gradient, b.gradient)
+        end
+        if !is_crossder_zero_global($fn)
+            outer_product_or!(hessian_out, a.gradient, b.gradient)
+            outer_product_or!(hessian_out, b.gradient, a.gradient)
+        end
         return T(gradient_out, hessian_out)
     end
 
