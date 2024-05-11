@@ -1,5 +1,5 @@
 const DEFAULT_VECTOR_TYPE = BitSet
-const DEFAULT_MATRIX_TYPE = Dict{Int,BitSet}
+const DEFAULT_MATRIX_TYPE = Set{Tuple{Int,Int}}
 
 ## Enumerate inputs
 """
@@ -196,9 +196,10 @@ function hessian_pattern(
     return hessian_pattern_to_mat(to_array(xt), yt)
 end
 
+# TODO: add methods for other non-set Hessian representations
 function hessian_pattern_to_mat(
-    xt::AbstractArray{GlobalHessianTracer{G,H}}, yt::GlobalHessianTracer{G,H}
-) where {G,H}
+    xt::AbstractArray{T}, yt::T
+) where {G,H<:AbstractSet,T<:GlobalHessianTracer{G,H}}
     # Allocate Hessian matrix
     n = length(xt)
     I = UInt64[] # row indices
@@ -206,12 +207,10 @@ function hessian_pattern_to_mat(
     V = Bool[]   # values
 
     # TODO: remove inputs
-    for i in keys(yt.hessian)
-        for j in inputs(yt, i)
-            push!(I, i)
-            push!(J, j)
-            push!(V, true)
-        end
+    for (i, j) in yt.hessian
+        push!(I, i)
+        push!(J, j)
+        push!(V, true)
     end
     h = sparse(I, J, V, n, n)
     return h
