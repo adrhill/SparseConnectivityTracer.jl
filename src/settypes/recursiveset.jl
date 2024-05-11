@@ -62,12 +62,3 @@ function collect_aux!(accumulator::Set{T}, rs::RecursiveSet{T})::Nothing where {
     end
     return nothing
 end
-
-## SCT tricks
-function keys2set(::Type{RecursiveSet{T}}, d::Dict{T,S}) where {T,S}
-    return RecursiveSet{T}(collect(keys(d)))
-end
-
-function keys2set(::Type{RecursiveSet{T}}, d::Dict{I,S}) where {T,I,S}
-    return RecursiveSet{T}(convert.(T, keys(d)))
-end

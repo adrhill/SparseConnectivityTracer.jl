@@ -63,13 +63,3 @@ function Base.union(v1::SortedVector{T}, v2::SortedVector{T}) where {T}
     resize!(result, result_index - 1)
     return SortedVector{T}(result; sorted=true)
 end
-
-## SCT tricks
-
-function keys2set(::Type{SortedVector{T}}, d::Dict{T,S}) where {T,S}
-    return SortedVector{T}(collect(keys(d)); sorted=false)
-end
-
-function keys2set(::Type{SortedVector{T}}, d::Dict{I,S}) where {T,I,S}
-    return SortedVector{T}(convert.(T, keys(d)); sorted=false)
-end
