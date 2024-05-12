@@ -13,4 +13,11 @@ end
 
 Base.eltype(::Type{DuplicateVector{T}}) where {T} = T
 
-Base.collect(dv::DuplicateVector) = collect(Set(dv.data))
+Base.collect(dv::DuplicateVector) = unique!(dv.data)
+
+function Base.union(dv1::DuplicateVector{T}, dv2::DuplicateVector{T}) where {T}
+    return DuplicateVector{T}(vcat(dv1.data, dv2.data))
+end
+
+Base.iterate(dv::DuplicateVector)             = iterate(collect(dv))
+Base.iterate(dv::DuplicateVector, i::Integer) = iterate(collect(dv), i)

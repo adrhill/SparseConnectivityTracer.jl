@@ -62,3 +62,6 @@ function collect_aux!(accumulator::Set{T}, rs::RecursiveSet{T})::Nothing where {
     end
     return nothing
 end
+
+Base.iterate(rs::RecursiveSet)             = iterate(collect(rs))
+Base.iterate(rs::RecursiveSet, i::Integer) = iterate(collect(rs), i)
