@@ -1,3 +1,4 @@
-GlobalHessianTracer{SortedVector{UInt64}, Dict{UInt64, SortedVector{UInt64}}}(
-  2 => (),
+GlobalHessianTracer{SortedVector{UInt64}, Set{Tuple{UInt64, UInt64}}}(
+  Gradient: SortedVector(UInt64[0x0000000000000002]),
+  Hessian:  Set{Tuple{UInt64, UInt64}}()
 )

@@ -196,7 +196,6 @@ function hessian_pattern(
     return hessian_pattern_to_mat(to_array(xt), yt)
 end
 
-# TODO: add methods for other non-set Hessian representations
 function hessian_pattern_to_mat(
     xt::AbstractArray{T}, yt::T
 ) where {G,H<:AbstractSet,T<:GlobalHessianTracer{G,H}}
@@ -206,7 +205,6 @@ function hessian_pattern_to_mat(
     J = UInt64[] # column indices
     V = Bool[]   # values
 
-    # TODO: remove inputs
     for (i, j) in yt.hessian
         push!(I, i)
         push!(J, j)

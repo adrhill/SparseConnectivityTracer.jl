@@ -3,7 +3,7 @@ using SparseConnectivityTracer
 using SparseArrays
 using Test
 
-sd = TracerSparsityDetector(BitSet, Dict{Int,BitSet})
+sd = TracerSparsityDetector(BitSet, Set{Tuple{Int,Int}})
 
 x = rand(10)
 y = zeros(9)

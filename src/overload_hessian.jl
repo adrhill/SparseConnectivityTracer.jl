@@ -1,5 +1,5 @@
-# REVIEW TODO: this keeps popping up so often that think it's worth an abstraction  
-# This was previously called "promote_order".
+# TODO REVIEW: this keeps popping up so often that think it's worth an abstraction.  
+# It was previously called "promote_order".
 # The overly descriptive name is TEMPORARY.
 function tracer_from_hessian_OR_outer_product_OR_of_gradient(
     t::T

@@ -24,7 +24,7 @@ sparse_vector(::Type{T}, index) where {T<:SortedVector} = T(index)
 #================#
 
 ## We use ∨ to represent the elementwise OR
-# REVIEW TODO: \vee looks to much like the character 'v' in code
+# TODO REVIEW: \vee looks too much like the character 'v' in code
 # Gradient representations
 ∨(a::G, b::G) where {G<:AbstractSet} = a ∪ b
 ∨(a::G, b::G) where {G<:DuplicateVector} = G(vcat(a.data, b.data))
@@ -32,12 +32,11 @@ sparse_vector(::Type{T}, index) where {T<:SortedVector} = T(index)
 ∨(a::G, b::G) where {G<:RecursiveSet} = a ∪ b
 
 # Hessian representations
-# REVIEW TODO: for now, we assume Hessians are represented as a set of tuples
+# TODO REVIEW: for now, we only support representing Hessians as a set of tuples
 ∨(a::H, b::H) where {I<:Integer,H<:AbstractSet{Tuple{I,I}}} = a ∪ b
 
 ## Outer product on gradients
 # Compute `out ∨ (𝟙[∇a] ∨ 𝟙[∇b]ᵀ)` in out
-# TODO: add special dispatches based on type of G
 function outer_product_or!(
     out::H, a::G, b::G
 ) where {I<:Integer,H<:AbstractSet{Tuple{I,I}},G}
