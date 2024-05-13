@@ -57,6 +57,8 @@ end
 function ConnectivityTracer{C}(::Number) where {C<:AbstractSet{<:Integer}}
     return empty(ConnectivityTracer{C})
 end
+
+ConnectivityTracer{C}(t::ConnectivityTracer{C}) where {C<:AbstractSet{<:Integer}} = t
 ConnectivityTracer(t::ConnectivityTracer) = t
 
 #=================#
@@ -98,6 +100,8 @@ end
 function GlobalGradientTracer{G}(::Number) where {G<:AbstractSet{<:Integer}}
     return empty(GlobalGradientTracer{G})
 end
+
+GlobalGradientTracer{G}(t::GlobalGradientTracer{G}) where {G<:AbstractSet{<:Integer}} = t
 GlobalGradientTracer(t::GlobalGradientTracer) = t
 
 #=========#
@@ -151,6 +155,12 @@ function GlobalHessianTracer{G,H}(
     ::Number
 ) where {G<:AbstractSet{<:Integer},H<:AbstractPairSet{<:Integer}}
     return empty(GlobalHessianTracer{G,H})
+end
+
+function GlobalHessianTracer{G,H}(
+    t::GlobalHessianTracer{G,H}
+) where {G<:AbstractSet{<:Integer},H<:AbstractPairSet{<:Integer}}
+    return t
 end
 GlobalHessianTracer(t::GlobalHessianTracer) = t
 
