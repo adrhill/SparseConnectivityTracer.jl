@@ -3,7 +3,7 @@
 
 Sorted vector without duplicates, designed for fast set unions with merging.
 """
-struct SortedVector{T<:Number} <: AbstractVector{T}
+struct SortedVector{T<:Number} <: AbstractSet{T}
     data::Vector{T}
 
     function SortedVector{T}(data::AbstractVector{T}; sorted=false) where {T}

@@ -11,7 +11,7 @@ for fn in ops_1_to_2
 end
 
 for fn in ops_2_to_1
-    @eval Base.$fn(a::ConnectivityTracer, b::ConnectivityTracer) = a ∨ b
+    @eval Base.$fn(a::ConnectivityTracer, b::ConnectivityTracer) = a ∪ b
     @eval Base.$fn(t::ConnectivityTracer, ::Number) = t
     @eval Base.$fn(::Number, t::ConnectivityTracer) = t
 end

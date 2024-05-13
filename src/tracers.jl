@@ -1,51 +1,19 @@
 abstract type AbstractTracer <: Number end
 
+# We represent sparse Hessians as sets of index tuples.
+const AbstractPairSet{T} = AbstractSet{Tuple{T,T}}
+
 # Convenience constructor for empty tracers
 empty(tracer::T) where {T<:AbstractTracer} = empty(T)
-
-const SET_TYPE_MESSAGE = """
-The provided index set type `S` has to satisfy the following conditions:
-
-- it is an iterable with `<:Integer` element type
-- it implements `union`
-
-Subtypes of `AbstractSet{<:Integer}` are a natural choice, like `BitSet` or `Set{UInt64}`.
-"""
-
 empty(T) = T()
 
 sparse_vector(T, index) = T([index])
-sparse_vector(::Type{T}, index) where {T<:DuplicateVector} = T(index)
-sparse_vector(::Type{T}, index) where {T<:SortedVector} = T(index)
 
 #================#
 # Elementwise OR #
 #================#
 
-## We use ∨ to represent the elementwise OR
-# TODO REVIEW: \vee looks too much like the character 'v' in code
-# Gradient representations
-∨(a::G, b::G) where {G<:AbstractSet} = a ∪ b
-∨(a::G, b::G) where {G<:DuplicateVector} = G(vcat(a.data, b.data))
-∨(a::G, b::G) where {G<:SortedVector} = a ∪ b
-∨(a::G, b::G) where {G<:RecursiveSet} = a ∪ b
-
-# Hessian representations
-# TODO REVIEW: for now, we only support representing Hessians as a set of tuples
-∨(a::H, b::H) where {I<:Integer,H<:AbstractSet{Tuple{I,I}}} = a ∪ b
-
-## Outer product on gradients
-# Compute `out ∨ (𝟙[∇a] ∨ 𝟙[∇b]ᵀ)` in out
-function outer_product_or!(
-    out::H, a::G, b::G
-) where {I<:Integer,H<:AbstractSet{Tuple{I,I}},G}
-    for i in a
-        for j in b
-            push!(out, (i, j))
-        end
-    end
-    return out
-end
+×(a::G, b::G) where {T,G<:AbstractSet{T}} = Set((i, j) for i in a, j in b)
 
 #==============#
 # Connectivity #
@@ -55,8 +23,6 @@ end
     ConnectivityTracer{C}(indexset) <: Number
 
 Number type keeping track of input indices of previous computations.
-
-$SET_TYPE_MESSAGE
 
 For a higher-level interface, refer to [`connectivity_pattern`](@ref).
 """
@@ -82,7 +48,7 @@ ConnectivityTracer{C}(::Number) where {C} = empty(ConnectivityTracer{C})
 ConnectivityTracer(t::ConnectivityTracer) = t
 
 ## Unions of tracers
-∨(a::T, b::T) where {T<:ConnectivityTracer} = T(a.inputs ∨ b.inputs)
+∪(a::T, b::T) where {T<:ConnectivityTracer} = T(a.inputs ∪ b.inputs)
 
 #==========#
 # Jacobian #
@@ -93,12 +59,10 @@ ConnectivityTracer(t::ConnectivityTracer) = t
 
 Number type keeping track of input indices of previous computations with non-zero derivatives.
 
-$SET_TYPE_MESSAGE
-
 For a higher-level interface, refer to [`jacobian_pattern`](@ref).
 """
 struct GlobalGradientTracer{G} <: AbstractTracer
-    gradient::G # sparse binary vector representing non-zero entries in the gradient
+    grad::G # sparse binary vector representing non-zero entries in the gradient
 end
 
 function Base.show(io::IO, t::GlobalGradientTracer{G}) where {G}
@@ -115,7 +79,7 @@ GlobalGradientTracer{G}(::Number) where {G} = empty(GlobalGradientTracer{G})
 GlobalGradientTracer(t::GlobalGradientTracer) = t
 
 ## Unions of tracers
-∨(a::T, b::T) where {T<:GlobalGradientTracer} = T(a.gradient ∨ b.gradient)
+∪(a::T, b::T) where {T<:GlobalGradientTracer} = T(a.grad ∪ b.grad)
 
 #=========#
 # Hessian #
@@ -125,18 +89,16 @@ GlobalGradientTracer(t::GlobalGradientTracer) = t
 
 Number type keeping track of input indices of previous computations with non-zero first and second derivatives.
 
-$SET_TYPE_MESSAGE
-
 For a higher-level interface, refer to [`hessian_pattern`](@ref).
 """
 struct GlobalHessianTracer{G,H} <: AbstractTracer
-    gradient::G # sparse binary vector representation of non-zero entries in the gradient
-    hessian::H  # sparse binary matrix representation of non-zero entries in the Hessian
+    grad::G  # sparse binary vector representation of non-zero entries in the gradient
+    hess::H  # sparse binary matrix representation of non-zero entries in the Hessian
 end
 function Base.show(io::IO, t::GlobalHessianTracer{G,H}) where {G,H}
     println(io, "$(eltype(t))(")
-    println(io, "  Gradient: ", t.gradient, ",")
-    println(io, "  Hessian:  ", t.hessian)
+    println(io, "  Gradient: ", t.grad, ",")
+    println(io, "  Hessian:  ", t.hess)
     print(io, ")")
     return nothing
 end
@@ -159,8 +121,8 @@ GlobalHessianTracer(t::GlobalHessianTracer) = t
 Return input indices of a [`ConnectivityTracer`](@ref) or [`GlobalGradientTracer`](@ref)
 """
 inputs(t::ConnectivityTracer) = collect(t.inputs)
-inputs(t::GlobalGradientTracer) = collect(t.gradient)
-inputs(t::GlobalHessianTracer, i::Integer) = collect(t.hessian[i])
+inputs(t::GlobalGradientTracer) = collect(t.grad)
+inputs(t::GlobalHessianTracer, i::Integer) = collect(t.hess[i])
 
 """
     tracer(T, index) where {T<:AbstractTracer}

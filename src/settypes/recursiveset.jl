@@ -3,7 +3,7 @@
 
 Lazy union of sets.
 """
-struct RecursiveSet{T<:Number}
+struct RecursiveSet{T<:Number} <: AbstractSet{T}
     s::Union{Nothing,Set{T}}
     child1::Union{Nothing,RecursiveSet{T}}
     child2::Union{Nothing,RecursiveSet{T}}

@@ -3,7 +3,7 @@
 
 Vector that can have duplicate values, for which union is just concatenation.
 """
-struct DuplicateVector{T<:Number}
+struct DuplicateVector{T<:Number} <: AbstractSet{T}
     data::Vector{T}
 
     DuplicateVector{T}(data::AbstractVector{T}) where {T} = new{T}(convert(Vector{T}, data))

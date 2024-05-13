@@ -1,15 +1,4 @@
-# TODO REVIEW: this keeps popping up so often that think it's worth an abstraction.  
-# It was previously called "promote_order".
-# The overly descriptive name is TEMPORARY.
-function tracer_from_hessian_OR_outer_product_OR_of_gradient(
-    t::T
-) where {T<:GlobalHessianTracer}
-    hessian_out = deepcopy(t.hessian)
-    hessian_out = outer_product_or!(hessian_out, t.gradient, t.gradient)
-    return T(t.gradient, hessian_out)
-end
-
-# ## 1-to-1
+## 1-to-1
 for fn in ops_1_to_1
     @eval function Base.$fn(t::T) where {T<:GlobalHessianTracer}
         if is_seconder_zero_global($fn)
@@ -19,39 +8,34 @@ for fn in ops_1_to_1
                 return t
             end
         else
-            return tracer_from_hessian_OR_outer_product_OR_of_gradient(t)
+            return T(t.grad, t.hess ∪ (t.grad ∪ t.grad))
         end
     end
 end
 
-# ## 2-to-1
+## 2-to-1
 for fn in ops_2_to_1
     @eval function Base.$fn(a::T, b::T) where {G,H,T<:GlobalHessianTracer{G,H}}
-        gradient_out, hessian_out = if !is_firstder_arg1_zero_global($fn)
-            if !is_firstder_arg2_zero_global($fn)
-                (a.gradient ∨ b.gradient, a.hessian ∨ b.hessian)
-            else
-                (a.gradient, deepcopy(a.hessian))
-            end
-        else # is_firstder_arg1_zero_global
-            if !is_firstder_arg2_zero_global($fn)
-                (b.gradient, deepcopy(b.hessian))
-            else
-                (empty(G), empty(H))
-            end
+        grad = empty(G)
+        hess = empty(H)
+        if !is_firstder_arg1_zero_global($fn)
+            grad = grad ∪ a.grad
+            hess = hess ∪ a.hess
         end
-
+        if !is_firstder_arg2_zero_global($fn)
+            grad = grad ∪ b.grad
+            hess = hess ∪ b.hess
+        end
         if !is_seconder_arg1_zero_global($fn)
-            outer_product_or!(hessian_out, a.gradient, a.gradient)
+            hess = hess ∪ (a.grad × a.grad)
         end
         if !is_seconder_arg2_zero_global($fn)
-            outer_product_or!(hessian_out, b.gradient, b.gradient)
+            hess = hess ∪ (b.grad × b.grad)
         end
         if !is_crossder_zero_global($fn)
-            outer_product_or!(hessian_out, a.gradient, b.gradient)
-            outer_product_or!(hessian_out, b.gradient, a.gradient)
+            hess = hess ∪ (a.grad × b.grad) ∪ (b.grad × a.grad)
         end
-        return T(gradient_out, hessian_out)
+        return T(grad, hess)
     end
 
     @eval function Base.$fn(t::T, ::Number) where {T<:GlobalHessianTracer}
@@ -62,7 +46,7 @@ for fn in ops_2_to_1
                 return t
             end
         else
-            return tracer_from_hessian_OR_outer_product_OR_of_gradient(t)
+            return T(t.grad, t.hess ∪ (t.grad ∪ t.grad))
         end
     end
     @eval function Base.$fn(::Number, t::T) where {T<:GlobalHessianTracer}
@@ -73,23 +57,21 @@ for fn in ops_2_to_1
                 return t
             end
         else
-            return tracer_from_hessian_OR_outer_product_OR_of_gradient(t)
+            return T(t.grad, t.hess ∪ (t.grad ∪ t.grad))
         end
     end
 end
 
 # Extra types required for exponent
 for T in (:Real, :Integer, :Rational)
-    @eval Base.:^(t::GlobalHessianTracer, ::$T) =
-        tracer_from_hessian_OR_outer_product_OR_of_gradient(t)
-    @eval Base.:^(::$T, t::GlobalHessianTracer) =
-        tracer_from_hessian_OR_outer_product_OR_of_gradient(t)
+    @eval Base.:^(t::GlobalHessianTracer, ::$T) = T(t.grad, t.hess ∪ (t.grad ∪ t.grad))
+    @eval Base.:^(::$T, t::GlobalHessianTracer) = T(t.grad, t.hess ∪ (t.grad ∪ t.grad))
 end
 function Base.:^(t::GlobalHessianTracer, ::Irrational{:ℯ})
-    return tracer_from_hessian_OR_outer_product_OR_of_gradient(t)
+    return T(t.grad, t.hess ∪ (t.grad ∪ t.grad))
 end
 function Base.:^(::Irrational{:ℯ}, t::GlobalHessianTracer)
-    return tracer_from_hessian_OR_outer_product_OR_of_gradient(t)
+    return T(t.grad, t.hess ∪ (t.grad ∪ t.grad))
 end
 
 ## Rounding
