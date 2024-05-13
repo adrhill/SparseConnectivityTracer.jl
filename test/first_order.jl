@@ -1,4 +1,3 @@
-using ReferenceTests
 using SparseConnectivityTracer
 using SparseConnectivityTracer: tracer, trace_input, empty
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
@@ -52,12 +51,4 @@ using Test
     @test jacobian_pattern(x -> x^ℯ, 1, G) ≈ [1;;]
     @test jacobian_pattern(x -> ℯ^x, 1, G) ≈ [1;;]
     @test jacobian_pattern(x -> round(x, RoundNearestTiesUp), 1, G) ≈ [0;;]
-
-    # Base.show
-    @test_reference "references/show/ConnectivityTracer_$G.txt" repr(
-        "text/plain", tracer(CT, 2)
-    )
-    @test_reference "references/show/JacobianTracer_$G.txt" repr(
-        "text/plain", tracer(JT, 2)
-    )
 end

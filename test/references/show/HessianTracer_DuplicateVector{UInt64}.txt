@@ -1,4 +1,0 @@
-GlobalHessianTracer{DuplicateVector{UInt64}, Set{Tuple{UInt64, UInt64}}}(
-  Gradient: DuplicateVector{UInt64}(UInt64[0x0000000000000002]),
-  Hessian:  Set{Tuple{UInt64, UInt64}}()
-)

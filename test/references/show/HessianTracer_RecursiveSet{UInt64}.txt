@@ -1,4 +1,0 @@
-GlobalHessianTracer{RecursiveSet{UInt64}, Set{Tuple{UInt64, UInt64}}}(
-  Gradient: RecursiveSet{UInt64} containing Set(UInt64[0x0000000000000002]),
-  Hessian:  Set{Tuple{UInt64, UInt64}}()
-)

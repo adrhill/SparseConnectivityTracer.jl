@@ -1,4 +1,0 @@
-GlobalHessianTracer{BitSet, Set{Tuple{Int64, Int64}}}(
-  Gradient: BitSet([2]),
-  Hessian:  Set{Tuple{Int64, Int64}}()
-)

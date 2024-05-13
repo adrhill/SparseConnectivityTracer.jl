@@ -1,4 +1,3 @@
-using ReferenceTests
 using SparseConnectivityTracer
 using SparseConnectivityTracer: tracer, trace_input, empty
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
@@ -140,7 +139,4 @@ end
         0 0 0 1 0
         0 1 0 0 1
     ]
-
-    # Base.show
-    @test_reference "references/show/HessianTracer_$G.txt" repr("text/plain", tracer(HT, 2))
 end

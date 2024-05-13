@@ -25,6 +25,16 @@ sparse_vector(T, index) = T([index])
 Number type keeping track of input indices of previous computations.
 
 For a higher-level interface, refer to [`connectivity_pattern`](@ref).
+
+```jldoctest
+julia> inputs = Set([1, 3])
+Set{Int64} with 2 elements:
+  3
+  1
+
+julia> ConnectivityTracer(inputs)
+ConnectivityTracer{Set{Int64}}(1, 3)
+```
 """
 struct ConnectivityTracer{C<:AbstractSet{<:Integer}} <: AbstractTracer
     inputs::C # sparse binary vector representing non-zero indices of connected, enumerated inputs
@@ -59,6 +69,17 @@ ConnectivityTracer(t::ConnectivityTracer) = t
 Number type keeping track of input indices of previous computations with non-zero derivatives.
 
 For a higher-level interface, refer to [`jacobian_pattern`](@ref).
+
+## Example
+```jldoctest
+julia> grad = Set([1, 3])
+Set{Int64} with 2 elements:
+  3
+  1
+
+julia> GlobalGradientTracer(grad)
+GlobalGradientTracer{Set{Int64}}(1, 3)
+```
 """
 struct GlobalGradientTracer{G<:AbstractSet{<:Integer}} <: AbstractTracer
     grad::G # sparse binary vector representing non-zero entries in the gradient
@@ -88,6 +109,26 @@ GlobalGradientTracer(t::GlobalGradientTracer) = t
 Number type keeping track of input indices of previous computations with non-zero first and second derivatives.
 
 For a higher-level interface, refer to [`hessian_pattern`](@ref).
+
+## Example
+```jldoctest
+julia> grad = Set([1, 3])
+Set{Int64} with 2 elements:
+  3
+  1
+
+julia> hess = Set([(1, 1), (2, 3), (3, 2)])
+Set{Tuple{Int64, Int64}} with 3 elements:
+  (3, 2)
+  (1, 1)
+  (2, 3)
+
+julia> GlobalHessianTracer(grad, hess)
+GlobalHessianTracer{Set{Int64}, Set{Tuple{Int64, Int64}}}(
+  Gradient: Set([3, 1]),
+  Hessian:  Set([(3, 2), (1, 1), (2, 3)])
+)
+```
 """
 struct GlobalHessianTracer{G<:AbstractSet{<:Integer},H<:AbstractPairSet{<:Integer}} <:
        AbstractTracer
