@@ -19,11 +19,11 @@ for fn in ops_2_to_1
         grad = empty(G)
         hess = empty(H)
         if !is_firstder_arg1_zero_global($fn)
-            union!(grad, a.grad)
+            grad = union(grad, a.grad) # TODO: use union!
             union!(hess, a.hess)
         end
         if !is_firstder_arg2_zero_global($fn)
-            union!(grad, b.grad)
+            grad = union(grad, b.grad) # TODO: use union!
             union!(hess, b.hess)
         end
         if !is_seconder_arg1_zero_global($fn)
