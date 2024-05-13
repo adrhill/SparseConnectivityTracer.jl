@@ -64,8 +64,12 @@ end
 
 # Extra types required for exponent
 for T in (:Real, :Integer, :Rational)
-    @eval Base.:^(t::GlobalHessianTracer, ::$T) = T(t.grad, t.hess ∪ (t.grad × t.grad))
-    @eval Base.:^(::$T, t::GlobalHessianTracer) = T(t.grad, t.hess ∪ (t.grad × t.grad))
+    @eval function Base.:^(t::T, ::$T) where {T<:GlobalHessianTracer}
+        return T(t.grad, t.hess ∪ (t.grad × t.grad))
+    end
+    @eval function Base.:^(::$T, t::T) where {T<:GlobalHessianTracer}
+        return T(t.grad, t.hess ∪ (t.grad × t.grad))
+    end
 end
 function Base.:^(t::T, ::Irrational{:ℯ}) where {T<:GlobalHessianTracer}
     return T(t.grad, t.hess ∪ (t.grad × t.grad))

@@ -13,7 +13,7 @@ sparse_vector(T, index) = T([index])
 # Elementwise OR #
 #================#
 
-×(a::G, b::G) where {T,G<:AbstractSet{T}} = Set((i, j) for i in a, j in b)
+×(a::G, b::G) where {G<:AbstractSet} = Set((i, j) for i in a, j in b)
 
 #==============#
 # Connectivity #
@@ -44,7 +44,9 @@ end
 # Generic code expecting "regular" numbers `x` will sometimes convert them 
 # by calling `T(x)` (instead of `convert(T, x)`), where `T` can be `ConnectivityTracer`.
 # When this happens, we create a new empty tracer with no input pattern.
-ConnectivityTracer{C}(::Number) where {C} = empty(ConnectivityTracer{C})
+function ConnectivityTracer{C}(::Number) where {C<:AbstractSet{<:Integer}}
+    return empty(ConnectivityTracer{C})
+end
 ConnectivityTracer(t::ConnectivityTracer) = t
 
 #==========#
@@ -72,7 +74,9 @@ function empty(::Type{GlobalGradientTracer{G}}) where {G}
     return GlobalGradientTracer{G}(empty(G))
 end
 
-GlobalGradientTracer{G}(::Number) where {G} = empty(GlobalGradientTracer{G})
+function GlobalGradientTracer{G}(::Number) where {G<:AbstractSet{<:Integer}}
+    return empty(GlobalGradientTracer{G})
+end
 GlobalGradientTracer(t::GlobalGradientTracer) = t
 
 #=========#
@@ -102,7 +106,11 @@ function empty(::Type{GlobalHessianTracer{G,H}}) where {G,H}
     return GlobalHessianTracer{G,H}(empty(G), empty(H))
 end
 
-GlobalHessianTracer{G,H}(::Number) where {G,H} = empty(GlobalHessianTracer{G,H})
+function GlobalHessianTracer{G,H}(
+    ::Number
+) where {G<:AbstractSet{<:Integer},H<:AbstractPairSet{<:Integer}}
+    return empty(GlobalHessianTracer{G,H})
+end
 GlobalHessianTracer(t::GlobalHessianTracer) = t
 
 #===========#
