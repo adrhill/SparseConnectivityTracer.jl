@@ -59,9 +59,9 @@ function ConnectivityTracer{C}(::Number) where {C<:AbstractSet{<:Integer}}
 end
 ConnectivityTracer(t::ConnectivityTracer) = t
 
-#==========#
-# Jacobian #
-#==========#
+#=================#
+# Gradient Tracer #
+#=================#
 
 """
     GlobalGradientTracer{G}(indexset) <: Number
