@@ -26,7 +26,7 @@ Number type keeping track of input indices of previous computations.
 
 For a higher-level interface, refer to [`connectivity_pattern`](@ref).
 """
-struct ConnectivityTracer{C} <: AbstractTracer
+struct ConnectivityTracer{C<:AbstractSet{<:Integer}} <: AbstractTracer
     inputs::C # sparse binary vector representing non-zero indices of connected, enumerated inputs
 end
 
@@ -58,7 +58,7 @@ Number type keeping track of input indices of previous computations with non-zer
 
 For a higher-level interface, refer to [`jacobian_pattern`](@ref).
 """
-struct GlobalGradientTracer{G} <: AbstractTracer
+struct GlobalGradientTracer{G<:AbstractSet{<:Integer}} <: AbstractTracer
     grad::G # sparse binary vector representing non-zero entries in the gradient
 end
 
@@ -85,11 +85,12 @@ Number type keeping track of input indices of previous computations with non-zer
 
 For a higher-level interface, refer to [`hessian_pattern`](@ref).
 """
-struct GlobalHessianTracer{G,H} <: AbstractTracer
+struct GlobalHessianTracer{G<:AbstractSet{<:Integer},H<:AbstractPairSet{<:Integer}} <:
+       AbstractTracer
     grad::G  # sparse binary vector representation of non-zero entries in the gradient
     hess::H  # sparse binary matrix representation of non-zero entries in the Hessian
 end
-function Base.show(io::IO, t::GlobalHessianTracer{G,H}) where {G,H}
+function Base.show(io::IO, t::GlobalHessianTracer)
     println(io, "$(eltype(t))(")
     println(io, "  Gradient: ", t.grad, ",")
     println(io, "  Hessian:  ", t.hess)
