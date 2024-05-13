@@ -65,3 +65,12 @@ end
 
 Base.iterate(rs::RecursiveSet)             = iterate(collect(rs))
 Base.iterate(rs::RecursiveSet, i::Integer) = iterate(collect(rs), i)
+
+# TODO: required by `Base.Iterators.ProductIterator` called in method `×` in src/tracers.jl.
+# This is most likely slow and could be replaced by a custom `×` on `RecursiveSet`s.
+function Base.length(rs::RecursiveSet)
+    l = length(rs.s)
+    !isnothing(rs.child1) && (l += length(rs.child1))
+    !isnothing(rs.child2) && (l += length(rs.child2))
+    return l
+end
