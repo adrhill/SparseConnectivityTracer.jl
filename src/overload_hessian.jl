@@ -37,7 +37,7 @@ for fn in ops_2_to_1
             if !is_firstder_arg2_zero_global($fn)
                 (b.gradient, deepcopy(b.hessian))
             else
-                (empty_sparse_vector(G), empty_sparse_matrix(H))
+                (empty(G), empty(H))
             end
         end
 

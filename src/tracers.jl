@@ -12,8 +12,7 @@ The provided index set type `S` has to satisfy the following conditions:
 Subtypes of `AbstractSet{<:Integer}` are a natural choice, like `BitSet` or `Set{UInt64}`.
 """
 
-empty_sparse_vector(T) = T()
-empty_sparse_matrix(T) = T()
+empty(T) = T()
 
 sparse_vector(T, index) = T([index])
 sparse_vector(::Type{T}, index) where {T<:DuplicateVector} = T(index)
@@ -72,7 +71,7 @@ function Base.show(io::IO, t::ConnectivityTracer{C}) where {C}
 end
 
 function empty(::Type{ConnectivityTracer{C}}) where {C}
-    return ConnectivityTracer{C}(empty_sparse_vector(C))
+    return ConnectivityTracer{C}(empty(C))
 end
 
 # We have to be careful when defining constructors:
@@ -109,7 +108,7 @@ function Base.show(io::IO, t::GlobalGradientTracer{G}) where {G}
 end
 
 function empty(::Type{GlobalGradientTracer{G}}) where {G}
-    return GlobalGradientTracer{G}(empty_sparse_vector(G))
+    return GlobalGradientTracer{G}(empty(G))
 end
 
 GlobalGradientTracer{G}(::Number) where {G} = empty(GlobalGradientTracer{G})
@@ -143,7 +142,7 @@ function Base.show(io::IO, t::GlobalHessianTracer{G,H}) where {G,H}
 end
 
 function empty(::Type{GlobalHessianTracer{G,H}}) where {G,H}
-    return GlobalHessianTracer{G,H}(empty_sparse_vector(G), empty_sparse_matrix(H))
+    return GlobalHessianTracer{G,H}(empty(G), empty(H))
 end
 
 GlobalHessianTracer{G,H}(::Number) where {G,H} = empty(GlobalHessianTracer{G,H})
@@ -175,5 +174,5 @@ function tracer(::Type{ConnectivityTracer{C}}, index::Integer) where {C}
     return ConnectivityTracer{C}(sparse_vector(C, index))
 end
 function tracer(::Type{GlobalHessianTracer{G,H}}, index::Integer) where {G,H}
-    return GlobalHessianTracer{G,H}(sparse_vector(G, index), empty_sparse_matrix(H))
+    return GlobalHessianTracer{G,H}(sparse_vector(G, index), empty(H))
 end
