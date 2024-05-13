@@ -86,7 +86,7 @@ function connectivity_pattern_to_mat(
     V = Bool[]   # values
     for (i, y) in enumerate(yt)
         if y isa T
-            for j in inputs(y)
+            for j in y.inputs
                 push!(I, i)
                 push!(J, j)
                 push!(V, true)
@@ -145,7 +145,7 @@ function jacobian_pattern_to_mat(
     V = Bool[]   # values
     for (i, y) in enumerate(yt)
         if y isa T
-            for j in inputs(y)
+            for j in y.grad
                 push!(I, i)
                 push!(J, j)
                 push!(V, true)
@@ -205,7 +205,7 @@ function hessian_pattern_to_mat(
     J = UInt64[] # column indices
     V = Bool[]   # values
 
-    for (i, j) in yt.hessian
+    for (i, j) in yt.hess
         push!(I, i)
         push!(J, j)
         push!(V, true)

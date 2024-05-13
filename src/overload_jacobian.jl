@@ -16,7 +16,7 @@ for fn in union(
     ops_2_to_1_ffc,
     ops_2_to_1_ffz,
 )
-    @eval Base.$fn(a::GlobalGradientTracer, b::GlobalGradientTracer) = a ∪ b
+    @eval Base.$fn(a::T, b::T) where {T<:GlobalGradientTracer} = T(a.grad ∪ b.grad)
     @eval Base.$fn(t::GlobalGradientTracer, ::Number) = t
     @eval Base.$fn(::Number, t::GlobalGradientTracer) = t
 end

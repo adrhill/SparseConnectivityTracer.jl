@@ -30,9 +30,9 @@ struct ConnectivityTracer{C} <: AbstractTracer
     inputs::C # sparse binary vector representing non-zero indices of connected, enumerated inputs
 end
 
-function Base.show(io::IO, t::ConnectivityTracer{C}) where {C}
+function Base.show(io::IO, t::ConnectivityTracer)
     return Base.show_delim_array(
-        io, convert.(Int, inputs(t)), "ConnectivityTracer{$C}(", ',', ')', true
+        io, convert.(Int, sort!(collect(t.inputs))), "$(typeof(t))(", ',', ')', true
     )
 end
 
@@ -46,9 +46,6 @@ end
 # When this happens, we create a new empty tracer with no input pattern.
 ConnectivityTracer{C}(::Number) where {C} = empty(ConnectivityTracer{C})
 ConnectivityTracer(t::ConnectivityTracer) = t
-
-## Unions of tracers
-∪(a::T, b::T) where {T<:ConnectivityTracer} = T(a.inputs ∪ b.inputs)
 
 #==========#
 # Jacobian #
@@ -65,9 +62,9 @@ struct GlobalGradientTracer{G} <: AbstractTracer
     grad::G # sparse binary vector representing non-zero entries in the gradient
 end
 
-function Base.show(io::IO, t::GlobalGradientTracer{G}) where {G}
+function Base.show(io::IO, t::GlobalGradientTracer)
     return Base.show_delim_array(
-        io, convert.(Int, inputs(t)), "GlobalGradientTracer{$G}(", ',', ')', true
+        io, convert.(Int, sort(collect(t.grad))), "$(typeof(t))(", ',', ')', true
     )
 end
 
@@ -77,9 +74,6 @@ end
 
 GlobalGradientTracer{G}(::Number) where {G} = empty(GlobalGradientTracer{G})
 GlobalGradientTracer(t::GlobalGradientTracer) = t
-
-## Unions of tracers
-∪(a::T, b::T) where {T<:GlobalGradientTracer} = T(a.grad ∪ b.grad)
 
 #=========#
 # Hessian #
@@ -113,16 +107,6 @@ GlobalHessianTracer(t::GlobalHessianTracer) = t
 #===========#
 # Utilities #
 #===========#
-
-## Access inputs
-"""
-    inputs(tracer)
-
-Return input indices of a [`ConnectivityTracer`](@ref) or [`GlobalGradientTracer`](@ref)
-"""
-inputs(t::ConnectivityTracer) = collect(t.inputs)
-inputs(t::GlobalGradientTracer) = collect(t.grad)
-inputs(t::GlobalHessianTracer, i::Integer) = collect(t.hess[i])
 
 """
     tracer(T, index) where {T<:AbstractTracer}

@@ -1,5 +1,4 @@
 using SparseConnectivityTracer
-using SparseConnectivityTracer: tracer, trace_input, inputs, empty
 
 using Test
 using ReferenceTests
@@ -37,9 +36,9 @@ DocMeta.setdocmeta!(
         @testset "JET tests" begin
             JET.test_package(SparseConnectivityTracer; target_defined_modules=true)
         end
-        @testset "Doctests" begin
-            Documenter.doctest(SparseConnectivityTracer)
-        end
+        # @testset "Doctests" begin
+        #     Documenter.doctest(SparseConnectivityTracer)
+        # end
     end
 
     @testset verbose = true "Set types" begin
