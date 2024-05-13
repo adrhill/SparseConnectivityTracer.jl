@@ -6,8 +6,12 @@ Sorted vector without duplicates, designed for fast set unions with merging.
 struct SortedVector{T<:Number} <: AbstractSet{T}
     data::Vector{T}
 
-    function SortedVector{T}(data::AbstractVector{T}; sorted=false) where {T}
-        sorted_data = ifelse(sorted, data, sort(data))
+    function SortedVector{T}(data::AbstractVector; sorted=false) where {T}
+        sorted_data = if sorted
+            data
+        else
+            sort(data)
+        end
         return new{T}(convert(Vector{T}, sorted_data))
     end
 
@@ -24,6 +28,7 @@ function Base.convert(::Type{SortedVector{T}}, v::Vector{T}) where {T}
     return SortedVector{T}(v; sorted=false)
 end
 
+Base.length(v::SortedVector) = length(v.data)
 Base.size(v::SortedVector) = size(v.data)
 Base.getindex(v::SortedVector, i) = v.data[i]
 Base.IndexStyle(::Type{SortedVector{T}}) where {T} = IndexStyle(Vector{T})
@@ -63,3 +68,6 @@ function Base.union(v1::SortedVector{T}, v2::SortedVector{T}) where {T}
     resize!(result, result_index - 1)
     return SortedVector{T}(result; sorted=true)
 end
+
+Base.iterate(v::SortedVector)             = iterate(v.data)
+Base.iterate(v::SortedVector, i::Integer) = iterate(v.data, i)
