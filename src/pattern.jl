@@ -82,8 +82,8 @@ function connectivity_pattern_to_mat(
     xt::AbstractArray{T}, yt::AbstractArray{<:Number}
 ) where {T<:ConnectivityTracer}
     n, m = length(xt), length(yt)
-    I = UInt64[] # row indices
-    J = UInt64[] # column indices
+    I = Int[] # row indices
+    J = Int[] # column indices
     V = Bool[]   # values
     for (i, y) in enumerate(yt)
         if y isa T
@@ -143,8 +143,8 @@ function jacobian_pattern_to_mat(
     xt::AbstractArray{T}, yt::AbstractArray{<:Number}
 ) where {T<:JacobianTracer}
     n, m = length(xt), length(yt)
-    I = UInt64[] # row indices
-    J = UInt64[] # column indices
+    I = Int[] # row indices
+    J = Int[] # column indices
     V = Bool[]   # values
     for (i, y) in enumerate(yt)
         if y isa T
@@ -204,8 +204,8 @@ function hessian_pattern_to_mat(
 ) where {TI,S,D}
     # Allocate Hessian matrix
     n = length(xt)
-    I = UInt64[] # row indices
-    J = UInt64[] # column indices
+    I = Int[] # row indices
+    J = Int[] # column indices
     V = Bool[]   # values
 
     for i in keys(yt.inputs)
