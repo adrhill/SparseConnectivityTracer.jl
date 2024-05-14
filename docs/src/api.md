@@ -23,9 +23,9 @@ SparseConnectivityTracer works by pushing `Number` types called tracers through 
 Currently, three tracer types are provided:
 
 ```@docs
-ConnectivityTracer
-GlobalGradientTracer
-GlobalHessianTracer
+SparseConnectivityTracer.ConnectivityTracer
+SparseConnectivityTracer.GlobalGradientTracer
+SparseConnectivityTracer.GlobalHessianTracer
 ```
 
 We also define alternative pseudo-set types that can deliver faster `union`:
