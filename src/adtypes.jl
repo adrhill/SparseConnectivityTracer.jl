@@ -9,7 +9,7 @@ Singleton struct for integration with the sparsity detection framework of ADType
 julia> using ADTypes, SparseConnectivityTracer
 
 julia> ADTypes.jacobian_sparsity(diff, rand(4), TracerSparsityDetector())
-3×4 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 6 stored entries:
+3×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 6 stored entries:
  1  1  ⋅  ⋅
  ⋅  1  1  ⋅
  ⋅  ⋅  1  1
@@ -21,7 +21,7 @@ julia> using ADTypes, SparseConnectivityTracer
 julia> f(x) = x[1] + x[2]*x[3] + 1/x[4];
 
 julia> ADTypes.hessian_sparsity(f, rand(4), TracerSparsityDetector())
-4×4 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 3 stored entries:
+4×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 3 stored entries:
  ⋅  ⋅  ⋅  ⋅
  ⋅  ⋅  1  ⋅
  ⋅  1  ⋅  ⋅
