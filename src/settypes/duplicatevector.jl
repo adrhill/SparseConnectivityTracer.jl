@@ -3,72 +3,29 @@
 
 Vector that can have duplicate values, for which union is just concatenation.
 """
-struct DuplicateVector{T<:Number}
+struct DuplicateVector{T<:Number} <: AbstractSet{T}
     data::Vector{T}
 
-    DuplicateVector{T}(data::AbstractVector{T}) where {T} = new{T}(convert(Vector{T}, data))
+    DuplicateVector{T}(data::AbstractVector) where {T} = new{T}(convert(Vector{T}, data))
     DuplicateVector{T}(x::Number) where {T} = new{T}([convert(T, x)])
     DuplicateVector{T}() where {T} = new{T}(T[])
 end
 
 Base.eltype(::Type{DuplicateVector{T}}) where {T} = T
 
-function Base.union(dv1::DuplicateVector{T}, dv2::DuplicateVector{T}) where {T}
-    return DuplicateVector{T}(vcat(dv1.data, dv2.data))
+Base.collect(dv::DuplicateVector) = unique!(dv.data)
+
+function Base.union(a::S, b::S) where {S<:DuplicateVector}
+    return S(vcat(a.data, b.data))
 end
 
-Base.collect(dv::DuplicateVector) = collect(Set(dv.data))
-
-## SCT tricks
-
-function keys2set(::Type{S}, d::Dict{I}) where {I<:Integer,S<:DuplicateVector{I}}
-    return S(collect(keys(d)))
+function Base.union!(a::S, b::S) where {S<:DuplicateVector}
+    return append!(a.data, b.data)
 end
 
-const EMPTY_CONNECTIVITY_TRACER_DV_U16 = ConnectivityTracer(DuplicateVector{UInt16}())
-const EMPTY_CONNECTIVITY_TRACER_DV_U32 = ConnectivityTracer(DuplicateVector{UInt32}())
-const EMPTY_CONNECTIVITY_TRACER_DV_U64 = ConnectivityTracer(DuplicateVector{UInt64}())
+Base.iterate(dv::DuplicateVector)             = iterate(collect(dv))
+Base.iterate(dv::DuplicateVector, i::Integer) = iterate(collect(dv), i)
 
-const EMPTY_JACOBIAN_TRACER_DV_U16 = JacobianTracer(DuplicateVector{UInt16}())
-const EMPTY_JACOBIAN_TRACER_DV_U32 = JacobianTracer(DuplicateVector{UInt32}())
-const EMPTY_JACOBIAN_TRACER_DV_U64 = JacobianTracer(DuplicateVector{UInt64}())
-
-const EMPTY_HESSIAN_TRACER_DV_U16 = HessianTracer(Dict{UInt16,DuplicateVector{UInt16}}())
-const EMPTY_HESSIAN_TRACER_DV_U32 = HessianTracer(Dict{UInt32,DuplicateVector{UInt32}}())
-const EMPTY_HESSIAN_TRACER_DV_U64 = HessianTracer(Dict{UInt64,DuplicateVector{UInt64}}())
-
-function empty(::Type{ConnectivityTracer{UInt16,DuplicateVector{UInt16}}})
-    return EMPTY_CONNECTIVITY_TRACER_DV_U16
-end
-function empty(::Type{ConnectivityTracer{UInt32,DuplicateVector{UInt32}}})
-    return EMPTY_CONNECTIVITY_TRACER_DV_U32
-end
-function empty(::Type{ConnectivityTracer{UInt64,DuplicateVector{UInt64}}})
-    return EMPTY_CONNECTIVITY_TRACER_DV_U64
-end
-
-empty(::Type{JacobianTracer{UInt16,DuplicateVector{UInt16}}}) = EMPTY_JACOBIAN_TRACER_DV_U16
-empty(::Type{JacobianTracer{UInt32,DuplicateVector{UInt32}}}) = EMPTY_JACOBIAN_TRACER_DV_U32
-empty(::Type{JacobianTracer{UInt64,DuplicateVector{UInt64}}}) = EMPTY_JACOBIAN_TRACER_DV_U64
-
-function empty(
-    ::Type{
-        HessianTracer{UInt16,DuplicateVector{UInt16},Dict{UInt16,DuplicateVector{UInt16}}}
-    },
-)
-    return EMPTY_HESSIAN_TRACER_DV_U16
-end
-function empty(
-    ::Type{
-        HessianTracer{UInt32,DuplicateVector{UInt32},Dict{UInt32,DuplicateVector{UInt32}}}
-    },
-)
-    return EMPTY_HESSIAN_TRACER_DV_U32
-end
-function empty(
-    ::Type{
-        HessianTracer{UInt64,DuplicateVector{UInt64},Dict{UInt64,DuplicateVector{UInt64}}}
-    },
-)
-    return EMPTY_HESSIAN_TRACER_DV_U64
-end
+# TODO: required by `Base.Iterators.ProductIterator` called in method `×` in src/tracers.jl.
+# This is very slow and should be replaced by a custom `×` on `DuplicateVector`s.
+Base.length(dv::DuplicateVector) = length(unique!(dv.data))

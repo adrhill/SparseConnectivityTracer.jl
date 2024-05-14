@@ -4,24 +4,26 @@ using ADTypes: ADTypes
 import SparseArrays: sparse
 import Random: rand, AbstractRNG, SamplerType
 
-include("tracers.jl")
-include("conversion.jl")
-include("operators.jl")
-include("overload_connectivity.jl")
-include("overload_jacobian.jl")
-include("overload_hessian.jl")
-include("pattern.jl")
-include("adtypes.jl")
+using DocStringExtensions
 
-include("settypes/base_sets.jl")
 include("settypes/duplicatevector.jl")
 include("settypes/recursiveset.jl")
 include("settypes/sortedvector.jl")
 
-export ConnectivityTracer, connectivity_pattern
-export JacobianTracer, jacobian_pattern
-export HessianTracer, hessian_pattern
+include("tracers.jl")
+include("conversion.jl")
+include("operators.jl")
+include("overload_connectivity.jl")
+include("overload_gradient.jl")
+include("overload_hessian.jl")
+include("pattern.jl")
+include("adtypes.jl")
 
+export connectivity_pattern
+export jacobian_pattern
+export hessian_pattern
+
+# ADTypes interface
 export TracerSparsityDetector
 
 end # module

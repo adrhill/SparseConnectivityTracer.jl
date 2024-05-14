@@ -17,13 +17,12 @@ using Test
             @test issorted(z.data)
             @test Set(z.data) == union(Set(x.data), Set(y.data))
             if k1 > 0 && k2 > 0
-                @test z[1] == min(x[1], y[1])
-                @test z[end] == max(x[end], y[end])
+                xc = collect(x)
+                yc = collect(y)
+                zc = collect(z)
+                @test zc[1] == min(xc[1], yc[1])
+                @test zc[end] == max(xc[end], yc[end])
             end
         end
     end
 end;
-
-sd = TracerSparsityDetector(SortedVector{UInt})
-@test ADTypes.jacobian_sparsity(diff, rand(10), sd) isa SparseMatrixCSC
-@test ADTypes.hessian_sparsity(x -> sum(abs2, diff(x)), rand(10), sd) isa SparseMatrixCSC

@@ -1,3 +1,0 @@
-HessianTracer{Int64, BitSet, Dict{Int64, BitSet}}(
-  2 => (),
-)

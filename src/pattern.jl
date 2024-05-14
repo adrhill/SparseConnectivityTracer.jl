@@ -1,4 +1,5 @@
-const DEFAULT_SET_TYPE = BitSet
+const DEFAULT_VECTOR_TYPE = BitSet
+const DEFAULT_MATRIX_TYPE = Set{Tuple{Int,Int}}
 
 ## Enumerate inputs
 """
@@ -7,7 +8,7 @@ const DEFAULT_SET_TYPE = BitSet
 
 
 Enumerates input indices and constructs the specified type `T` of tracer.
-Supports [`ConnectivityTracer`](@ref), [`JacobianTracer`](@ref) and [`HessianTracer`](@ref).
+Supports [`ConnectivityTracer`](@ref), [`GlobalGradientTracer`](@ref) and [`GlobalHessianTracer`](@ref).
 """
 trace_input(::Type{T}, x) where {T<:AbstractTracer} = trace_input(T, x, 1)
 trace_input(::Type{T}, ::Number, i) where {T<:AbstractTracer} = tracer(T, i)
@@ -57,9 +58,8 @@ julia> connectivity_pattern(f, x)
  ⋅  ⋅  1
 ```
 """
-function connectivity_pattern(f, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
-    I = eltype(S)
-    xt, yt = trace_function(ConnectivityTracer{I,S}, f, x)
+function connectivity_pattern(f, x, ::Type{C}=DEFAULT_VECTOR_TYPE) where {C}
+    xt, yt = trace_function(ConnectivityTracer{C}, f, x)
     return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
@@ -72,9 +72,8 @@ where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to
 
 The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
 """
-function connectivity_pattern(f!, y, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
-    I = eltype(S)
-    xt, yt = trace_function(ConnectivityTracer{I,S}, f!, y, x)
+function connectivity_pattern(f!, y, x, ::Type{C}=DEFAULT_VECTOR_TYPE) where {C}
+    xt, yt = trace_function(ConnectivityTracer{C}, f!, y, x)
     return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
@@ -87,7 +86,7 @@ function connectivity_pattern_to_mat(
     V = Bool[]   # values
     for (i, y) in enumerate(yt)
         if y isa T
-            for j in inputs(y)
+            for j in y.inputs
                 push!(I, i)
                 push!(J, j)
                 push!(V, true)
@@ -119,9 +118,8 @@ julia> jacobian_pattern(f, x)
  ⋅  ⋅  ⋅
 ```
 """
-function jacobian_pattern(f, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
-    I = eltype(S)
-    xt, yt = trace_function(JacobianTracer{I,S}, f, x)
+function jacobian_pattern(f, x, ::Type{G}=DEFAULT_VECTOR_TYPE) where {G}
+    xt, yt = trace_function(GlobalGradientTracer{G}, f, x)
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
@@ -133,22 +131,21 @@ Compute the sparsity pattern of the Jacobian of `f!(y, x)`.
 
 The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
 """
-function jacobian_pattern(f!, y, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
-    I = eltype(S)
-    xt, yt = trace_function(JacobianTracer{I,S}, f!, y, x)
+function jacobian_pattern(f!, y, x, ::Type{G}=DEFAULT_VECTOR_TYPE) where {G}
+    xt, yt = trace_function(GlobalGradientTracer{G}, f!, y, x)
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
 function jacobian_pattern_to_mat(
     xt::AbstractArray{T}, yt::AbstractArray{<:Number}
-) where {T<:JacobianTracer}
+) where {T<:GlobalGradientTracer}
     n, m = length(xt), length(yt)
     I = Int[] # row indices
     J = Int[] # column indices
     V = Bool[]   # values
     for (i, y) in enumerate(yt)
         if y isa T
-            for j in inputs(y)
+            for j in y.grad
                 push!(I, i)
                 push!(J, j)
                 push!(V, true)
@@ -192,29 +189,27 @@ julia> hessian_pattern(g, x)
  ⋅  1  ⋅  ⋅  1
 ```
 """
-function hessian_pattern(f, x, ::Type{S}=DEFAULT_SET_TYPE) where {S}
-    I = eltype(S)
-    T = HessianTracer{I,S,Dict{I,S}}
-    xt, yt = trace_function(T, f, x)
+function hessian_pattern(
+    f, x, ::Type{G}=DEFAULT_VECTOR_TYPE, ::Type{H}=DEFAULT_MATRIX_TYPE
+) where {G,H}
+    xt, yt = trace_function(GlobalHessianTracer{G,H}, f, x)
     return hessian_pattern_to_mat(to_array(xt), yt)
 end
 
 function hessian_pattern_to_mat(
-    xt::AbstractArray{HessianTracer{TI,S,D}}, yt::HessianTracer{TI,S,D}
-) where {TI,S,D}
+    xt::AbstractArray{T}, yt::T
+) where {G,H<:AbstractSet,T<:GlobalHessianTracer{G,H}}
     # Allocate Hessian matrix
     n = length(xt)
     I = Int[] # row indices
     J = Int[] # column indices
     V = Bool[]   # values
 
-    for i in keys(yt.inputs)
-        for j in inputs(yt, i)
-            push!(I, i)
-            push!(J, j)
-            push!(V, true)
-        end
+    for (i, j) in yt.hess
+        push!(I, i)
+        push!(J, j)
+        push!(V, true)
     end
-    H = sparse(I, J, V, n, n)
-    return H
+    h = sparse(I, J, V, n, n)
+    return h
 end

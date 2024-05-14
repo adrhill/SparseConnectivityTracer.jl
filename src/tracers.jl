@@ -2,193 +2,197 @@ abstract type AbstractTracer <: Number end
 
 # Convenience constructor for empty tracers
 empty(tracer::T) where {T<:AbstractTracer} = empty(T)
+empty(T) = T()
 
-const SET_TYPE_MESSAGE = """
-The provided index set type `S` has to satisfy the following conditions:
+sparse_vector(T, index) = T([index])
 
-- it is an iterable with `<:Integer` element type
-- it implements `union`
+#================#
+# Elementwise OR #
+#================#
 
-Subtypes of `AbstractSet{<:Integer}` are a natural choice, like `BitSet` or `Set{UInt64}`.
-"""
+×(a::G, b::G) where {G<:AbstractSet} = Set((i, j) for i in a, j in b)
 
 #==============#
 # Connectivity #
 #==============#
 
 """
-    ConnectivityTracer{I,S}(indexset) <: Number
+$(TYPEDEF)
 
-Number type keeping track of input indices of previous computations.
-
-$SET_TYPE_MESSAGE
+`Number` type keeping track of input indices of previous computations.
 
 For a higher-level interface, refer to [`connectivity_pattern`](@ref).
+
+## Fields
+$(TYPEDFIELDS)
+
+## Example
+```jldoctest
+julia> inputs = Set([1, 3])
+Set{Int64} with 2 elements:
+  3
+  1
+
+julia> SparseConnectivityTracer.ConnectivityTracer(inputs)
+SparseConnectivityTracer.ConnectivityTracer{Set{Int64}}(1, 3)
+```
 """
-struct ConnectivityTracer{I<:Integer,S} <: AbstractTracer
-    inputs::S # indices of connected, enumerated inputs
-end
-function ConnectivityTracer(inputs::S) where {S}
-    I = eltype(S)
-    return ConnectivityTracer{I,S}(inputs)
+struct ConnectivityTracer{C<:AbstractSet{<:Integer}} <: AbstractTracer
+    "Sparse binary vector representing non-zero indices of connected, enumerated inputs."
+    inputs::C
 end
 
-function Base.show(io::IO, t::ConnectivityTracer{I,S}) where {I,S}
+function Base.show(io::IO, t::ConnectivityTracer)
     return Base.show_delim_array(
-        io, convert.(Int, inputs(t)), "ConnectivityTracer{$I,$S}(", ',', ')', true
+        io, convert.(Int, sort(collect(t.inputs))), "$(typeof(t))(", ',', ')', true
     )
 end
 
-empty(::Type{ConnectivityTracer{I,S}}) where {I<:Integer,S} = ConnectivityTracer{I,S}(S())
+function empty(::Type{ConnectivityTracer{C}}) where {C}
+    return ConnectivityTracer{C}(empty(C))
+end
 
 # We have to be careful when defining constructors:
 # Generic code expecting "regular" numbers `x` will sometimes convert them 
 # by calling `T(x)` (instead of `convert(T, x)`), where `T` can be `ConnectivityTracer`.
 # When this happens, we create a new empty tracer with no input pattern.
-ConnectivityTracer{I,S}(::Number) where {I<:Integer,S} = empty(ConnectivityTracer{I,S})
+function ConnectivityTracer{C}(::Number) where {C<:AbstractSet{<:Integer}}
+    return empty(ConnectivityTracer{C})
+end
+
+ConnectivityTracer{C}(t::ConnectivityTracer{C}) where {C<:AbstractSet{<:Integer}} = t
 ConnectivityTracer(t::ConnectivityTracer) = t
 
-## Unions of tracers
-function uniontracer(a::ConnectivityTracer{I,S}, b::ConnectivityTracer{I,S}) where {I,S}
-    return ConnectivityTracer(union(a.inputs, b.inputs))
-end
-
-#==========#
-# Jacobian #
-#==========#
+#=================#
+# Gradient Tracer #
+#=================#
 
 """
-    JacobianTracer{I,S}(indexset) <: Number
+$(TYPEDEF)
 
-Number type keeping track of input indices of previous computations with non-zero derivatives.
-
-$SET_TYPE_MESSAGE
+`Number` type keeping track of non-zero gradient entries.
 
 For a higher-level interface, refer to [`jacobian_pattern`](@ref).
+
+## Fields
+$(TYPEDFIELDS)
+
+## Example
+```jldoctest
+julia> grad = Set([1, 3])
+Set{Int64} with 2 elements:
+  3
+  1
+
+julia> SparseConnectivityTracer.GlobalGradientTracer(grad)
+SparseConnectivityTracer.GlobalGradientTracer{Set{Int64}}(1, 3)
+```
 """
-struct JacobianTracer{I<:Integer,S} <: AbstractTracer
-    inputs::S
-end
-function JacobianTracer(inputs::S) where {S}
-    I = eltype(S)
-    return JacobianTracer{I,S}(inputs)
+struct GlobalGradientTracer{G<:AbstractSet{<:Integer}} <: AbstractTracer
+    "Sparse binary vector representing non-zero entries in the gradient."
+    grad::G
 end
 
-function Base.show(io::IO, t::JacobianTracer{I,S}) where {I,S}
+function Base.show(io::IO, t::GlobalGradientTracer)
     return Base.show_delim_array(
-        io, convert.(Int, inputs(t)), "JacobianTracer{$I,$S}(", ',', ')', true
+        io, convert.(Int, sort(collect(t.grad))), "$(typeof(t))(", ',', ')', true
     )
 end
 
-empty(::Type{JacobianTracer{I,S}}) where {I<:Integer,S} = JacobianTracer{I,S}(S())
-
-JacobianTracer{I,S}(::Number) where {I<:Integer,S} = empty(JacobianTracer{I,S})
-JacobianTracer(t::JacobianTracer) = t
-
-## Unions of tracers
-function uniontracer(a::JacobianTracer{I,S}, b::JacobianTracer{I,S}) where {I,S}
-    return JacobianTracer(union(a.inputs, b.inputs))
+function empty(::Type{GlobalGradientTracer{G}}) where {G}
+    return GlobalGradientTracer{G}(empty(G))
 end
+
+function GlobalGradientTracer{G}(::Number) where {G<:AbstractSet{<:Integer}}
+    return empty(GlobalGradientTracer{G})
+end
+
+GlobalGradientTracer{G}(t::GlobalGradientTracer{G}) where {G<:AbstractSet{<:Integer}} = t
+GlobalGradientTracer(t::GlobalGradientTracer) = t
 
 #=========#
 # Hessian #
 #=========#
+
 """
-    HessianTracer{I,S,D}(indexset) <: Number
+$(TYPEDEF)
 
-Number type keeping track of input indices of previous computations with non-zero first and second derivatives.
-
-$SET_TYPE_MESSAGE
+`Number` type keeping track of non-zero gradient and Hessian entries.
 
 For a higher-level interface, refer to [`hessian_pattern`](@ref).
+
+## Fields
+$(TYPEDFIELDS)
+
+## Example
+```jldoctest
+julia> grad = Set([1, 3])
+Set{Int64} with 2 elements:
+  3
+  1
+
+julia> hess = Set([(1, 1), (2, 3), (3, 2)])
+Set{Tuple{Int64, Int64}} with 3 elements:
+  (3, 2)
+  (1, 1)
+  (2, 3)
+
+julia> SparseConnectivityTracer.GlobalHessianTracer(grad, hess)
+SparseConnectivityTracer.GlobalHessianTracer{Set{Int64}, Set{Tuple{Int64, Int64}}}(
+  Gradient: Set([3, 1]),
+  Hessian:  Set([(3, 2), (1, 1), (2, 3)])
+)
+```
 """
-struct HessianTracer{I<:Integer,S,D<:AbstractDict{I,S}} <: AbstractTracer
-    inputs::D
+struct GlobalHessianTracer{
+    G<:AbstractSet{<:Integer},H<:AbstractSet{<:Tuple{Integer,Integer}}
+} <: AbstractTracer
+    "Sparse binary vector representation of non-zero entries in the gradient."
+    grad::G
+    "Sparse binary matrix representation of non-zero entries in the Hessian."
+    hess::H
 end
-function Base.show(io::IO, t::HessianTracer{I,S,D}) where {I,S,D}
+
+function Base.show(io::IO, t::GlobalHessianTracer)
     println(io, "$(eltype(t))(")
-    for key in keys(t.inputs)
-        print(io, "  ", Int(key), " => ")
-        Base.show_delim_array(io, convert.(Int, t.inputs[key]), "(", ',', ')', true)
-        println(io, ",")
-    end
-    return print(io, ")")
+    println(io, "  Gradient: ", t.grad, ",")
+    println(io, "  Hessian:  ", t.hess)
+    print(io, ")")
+    return nothing
 end
 
-function empty(::Type{HessianTracer{I,S,D}}) where {I<:Integer,S,D<:AbstractDict{I,S}}
-    return HessianTracer{I,S,D}(D())
+function empty(::Type{GlobalHessianTracer{G,H}}) where {G,H}
+    return GlobalHessianTracer{G,H}(empty(G), empty(H))
 end
 
-HessianTracer{I,S,D}(::Number) where {I<:Integer,S,D} = empty(HessianTracer{I,S,D})
-HessianTracer(t::HessianTracer) = t
-
-# Turn first-order interactions into second-order interactions
-function promote_order(t::HessianTracer{I,S}) where {I,S}
-    d = deepcopy(t.inputs)
-    s = keys2set(S, d)
-    for (k, v) in pairs(d)
-        d[k] = union(v, s)  # ignores symmetry
-    end
-    return HessianTracer(d)
+function GlobalHessianTracer{G,H}(
+    ::Number
+) where {G<:AbstractSet{<:Integer},H<:AbstractSet{<:Tuple{Integer,Integer}}}
+    return empty(GlobalHessianTracer{G,H})
 end
 
-# Merge first- and second-order terms in an "additive" fashion
-function additive_merge(a::HessianTracer, b::HessianTracer)
-    return HessianTracer(mergewith(union, a.inputs, b.inputs))
+function GlobalHessianTracer{G,H}(
+    t::GlobalHessianTracer{G,H}
+) where {G<:AbstractSet{<:Integer},H<:AbstractSet{<:Tuple{Integer,Integer}}}
+    return t
 end
-
-# Merge first- and second-order terms in a "distributive" fashion
-function distributive_merge(a::HessianTracer{I,S,D}, b::HessianTracer{I,S,D}) where {I,S,D}
-    da = deepcopy(a.inputs)
-    db = deepcopy(b.inputs)
-    sa = keys2set(S, da)
-    sb = keys2set(S, db)
-
-    # add second-order interaction term by ignoring symmetry
-    for (ka, va) in pairs(da)
-        da[ka] = union(va, sb)
-    end
-    for (kb, vb) in pairs(db)
-        db[kb] = union(vb, sa)
-    end
-    return HessianTracer(merge(da, db))
-end
+GlobalHessianTracer(t::GlobalHessianTracer) = t
 
 #===========#
 # Utilities #
 #===========#
 
-## Access inputs
-"""
-    inputs(tracer)
-
-Return input indices of a [`ConnectivityTracer`](@ref) or [`JacobianTracer`](@ref)
-"""
-inputs(t::ConnectivityTracer) = collect(t.inputs)
-inputs(t::JacobianTracer) = collect(t.inputs)
-inputs(t::HessianTracer, i::Integer) = collect(t.inputs[i])
-
 """
     tracer(T, index) where {T<:AbstractTracer}
 
-Convenience constructor for [`ConnectivityTracer`](@ref), [`JacobianTracer`](@ref) and [`HessianTracer`](@ref) from input indices.
+Convenience constructor for [`ConnectivityTracer`](@ref), [`GlobalGradientTracer`](@ref) and [`GlobalHessianTracer`](@ref) from input indices.
 """
-function tracer(::Type{JacobianTracer{I,S}}, index::Integer) where {I,S}
-    return JacobianTracer{I,S}(S(index))
+function tracer(::Type{GlobalGradientTracer{G}}, index::Integer) where {G}
+    return GlobalGradientTracer{G}(sparse_vector(G, index))
 end
-function tracer(::Type{ConnectivityTracer{I,S}}, index::Integer) where {I,S}
-    return ConnectivityTracer{I,S}(S(index))
+function tracer(::Type{ConnectivityTracer{C}}, index::Integer) where {C}
+    return ConnectivityTracer{C}(sparse_vector(C, index))
 end
-function tracer(::Type{HessianTracer{I,S,D}}, index::Integer) where {I,S,D}
-    return HessianTracer{I,S,D}(D(index => S()))
-end
-
-function tracer(::Type{JacobianTracer{I,S}}, inds::NTuple{N,<:Integer}) where {I,S,N}
-    return JacobianTracer{I,S}(S(inds))
-end
-function tracer(::Type{ConnectivityTracer{I,S}}, inds::NTuple{N,<:Integer}) where {I,S,N}
-    return ConnectivityTracer{I,S}(S(inds))
-end
-function tracer(::Type{HessianTracer{I,S,D}}, inds::NTuple{N,<:Integer}) where {I,S,D,N}
-    return HessianTracer{I,S,D}(D(i => S() for i in inds))
+function tracer(::Type{GlobalHessianTracer{G,H}}, index::Integer) where {G,H}
+    return GlobalHessianTracer{G,H}(sparse_vector(G, index), empty(H))
 end

@@ -3,7 +3,7 @@
 
 Lazy union of sets.
 """
-struct RecursiveSet{T<:Number}
+struct RecursiveSet{T<:Number} <: AbstractSet{T}
     s::Union{Nothing,Set{T}}
     child1::Union{Nothing,RecursiveSet{T}}
     child2::Union{Nothing,RecursiveSet{T}}
@@ -63,50 +63,9 @@ function collect_aux!(accumulator::Set{T}, rs::RecursiveSet{T})::Nothing where {
     return nothing
 end
 
-## SCT tricks
+Base.iterate(rs::RecursiveSet)             = iterate(collect(rs))
+Base.iterate(rs::RecursiveSet, i::Integer) = iterate(collect(rs), i)
 
-function keys2set(::Type{S}, d::Dict{I}) where {I<:Integer,S<:RecursiveSet{I}}
-    return S(keys(d))
-end
-
-const EMPTY_CONNECTIVITY_TRACER_RS_U16 = ConnectivityTracer(RecursiveSet{UInt16}())
-const EMPTY_CONNECTIVITY_TRACER_RS_U32 = ConnectivityTracer(RecursiveSet{UInt32}())
-const EMPTY_CONNECTIVITY_TRACER_RS_U64 = ConnectivityTracer(RecursiveSet{UInt64}())
-
-const EMPTY_JACOBIAN_TRACER_RS_U16 = JacobianTracer(RecursiveSet{UInt16}())
-const EMPTY_JACOBIAN_TRACER_RS_U32 = JacobianTracer(RecursiveSet{UInt32}())
-const EMPTY_JACOBIAN_TRACER_RS_U64 = JacobianTracer(RecursiveSet{UInt64}())
-
-const EMPTY_HESSIAN_TRACER_RS_U16 = HessianTracer(Dict{UInt16,RecursiveSet{UInt16}}())
-const EMPTY_HESSIAN_TRACER_RS_U32 = HessianTracer(Dict{UInt32,RecursiveSet{UInt32}}())
-const EMPTY_HESSIAN_TRACER_RS_U64 = HessianTracer(Dict{UInt64,RecursiveSet{UInt64}}())
-
-function empty(::Type{ConnectivityTracer{UInt16,RecursiveSet{UInt16}}})
-    return EMPTY_CONNECTIVITY_TRACER_RS_U16
-end
-function empty(::Type{ConnectivityTracer{UInt32,RecursiveSet{UInt32}}})
-    return EMPTY_CONNECTIVITY_TRACER_RS_U32
-end
-function empty(::Type{ConnectivityTracer{UInt64,RecursiveSet{UInt64}}})
-    return EMPTY_CONNECTIVITY_TRACER_RS_U64
-end
-
-empty(::Type{JacobianTracer{UInt16,RecursiveSet{UInt16}}}) = EMPTY_JACOBIAN_TRACER_RS_U16
-empty(::Type{JacobianTracer{UInt32,RecursiveSet{UInt32}}}) = EMPTY_JACOBIAN_TRACER_RS_U32
-empty(::Type{JacobianTracer{UInt64,RecursiveSet{UInt64}}}) = EMPTY_JACOBIAN_TRACER_RS_U64
-
-function empty(
-    ::Type{HessianTracer{UInt16,RecursiveSet{UInt16},Dict{UInt16,RecursiveSet{UInt16}}}}
-)
-    return EMPTY_HESSIAN_TRACER_RS_U16
-end
-function empty(
-    ::Type{HessianTracer{UInt32,RecursiveSet{UInt32},Dict{UInt32,RecursiveSet{UInt32}}}}
-)
-    return EMPTY_HESSIAN_TRACER_RS_U32
-end
-function empty(
-    ::Type{HessianTracer{UInt64,RecursiveSet{UInt64},Dict{UInt64,RecursiveSet{UInt64}}}}
-)
-    return EMPTY_HESSIAN_TRACER_RS_U64
-end
+# TODO: required by `Base.Iterators.ProductIterator` called in method `×` in src/tracers.jl.
+# This is very slow and should be replaced by a custom `×` on `RecursiveSet`s.
+Base.length(rs::RecursiveSet) = length(collect(rs))

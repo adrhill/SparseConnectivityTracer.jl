@@ -3,11 +3,15 @@
 
 Sorted vector without duplicates, designed for fast set unions with merging.
 """
-struct SortedVector{T<:Number} <: AbstractVector{T}
+struct SortedVector{T<:Number} <: AbstractSet{T}
     data::Vector{T}
 
-    function SortedVector{T}(data::AbstractVector{T}; sorted=false) where {T}
-        sorted_data = ifelse(sorted, data, sort(data))
+    function SortedVector{T}(data::AbstractVector; sorted=false) where {T}
+        sorted_data = if sorted
+            data
+        else
+            sort(data)
+        end
         return new{T}(convert(Vector{T}, sorted_data))
     end
 
@@ -24,6 +28,7 @@ function Base.convert(::Type{SortedVector{T}}, v::Vector{T}) where {T}
     return SortedVector{T}(v; sorted=false)
 end
 
+Base.length(v::SortedVector) = length(v.data)
 Base.size(v::SortedVector) = size(v.data)
 Base.getindex(v::SortedVector, i) = v.data[i]
 Base.IndexStyle(::Type{SortedVector{T}}) where {T} = IndexStyle(Vector{T})
@@ -64,50 +69,5 @@ function Base.union(v1::SortedVector{T}, v2::SortedVector{T}) where {T}
     return SortedVector{T}(result; sorted=true)
 end
 
-## SCT tricks
-
-function keys2set(::Type{S}, d::Dict{I}) where {I<:Integer,S<:SortedVector{I}}
-    return S(collect(keys(d)); sorted=false)
-end
-
-const EMPTY_CONNECTIVITY_TRACER_SV_U16 = ConnectivityTracer(SortedVector{UInt16}())
-const EMPTY_CONNECTIVITY_TRACER_SV_U32 = ConnectivityTracer(SortedVector{UInt32}())
-const EMPTY_CONNECTIVITY_TRACER_SV_U64 = ConnectivityTracer(SortedVector{UInt64}())
-
-const EMPTY_JACOBIAN_TRACER_SV_U16 = JacobianTracer(SortedVector{UInt16}())
-const EMPTY_JACOBIAN_TRACER_SV_U32 = JacobianTracer(SortedVector{UInt32}())
-const EMPTY_JACOBIAN_TRACER_SV_U64 = JacobianTracer(SortedVector{UInt64}())
-
-const EMPTY_HESSIAN_TRACER_SV_U16 = HessianTracer(Dict{UInt16,SortedVector{UInt16}}())
-const EMPTY_HESSIAN_TRACER_SV_U32 = HessianTracer(Dict{UInt32,SortedVector{UInt32}}())
-const EMPTY_HESSIAN_TRACER_SV_U64 = HessianTracer(Dict{UInt64,SortedVector{UInt64}}())
-
-function empty(::Type{ConnectivityTracer{UInt16,SortedVector{UInt16}}})
-    return EMPTY_CONNECTIVITY_TRACER_SV_U16
-end
-function empty(::Type{ConnectivityTracer{UInt32,SortedVector{UInt32}}})
-    return EMPTY_CONNECTIVITY_TRACER_SV_U32
-end
-function empty(::Type{ConnectivityTracer{UInt64,SortedVector{UInt64}}})
-    return EMPTY_CONNECTIVITY_TRACER_SV_U64
-end
-
-empty(::Type{JacobianTracer{UInt16,SortedVector{UInt16}}}) = EMPTY_JACOBIAN_TRACER_SV_U16
-empty(::Type{JacobianTracer{UInt32,SortedVector{UInt32}}}) = EMPTY_JACOBIAN_TRACER_SV_U32
-empty(::Type{JacobianTracer{UInt64,SortedVector{UInt64}}}) = EMPTY_JACOBIAN_TRACER_SV_U64
-
-function empty(
-    ::Type{HessianTracer{UInt16,SortedVector{UInt16},Dict{UInt16,SortedVector{UInt16}}}}
-)
-    return EMPTY_HESSIAN_TRACER_SV_U16
-end
-function empty(
-    ::Type{HessianTracer{UInt32,SortedVector{UInt32},Dict{UInt32,SortedVector{UInt32}}}}
-)
-    return EMPTY_HESSIAN_TRACER_SV_U32
-end
-function empty(
-    ::Type{HessianTracer{UInt64,SortedVector{UInt64},Dict{UInt64,SortedVector{UInt64}}}}
-)
-    return EMPTY_HESSIAN_TRACER_SV_U64
-end
+Base.iterate(v::SortedVector)             = iterate(v.data)
+Base.iterate(v::SortedVector, i::Integer) = iterate(v.data, i)
