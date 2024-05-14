@@ -1,8 +1,5 @@
 abstract type AbstractTracer <: Number end
 
-# We represent sparse Hessians as sets of index tuples.
-const AbstractPairSet{T} = AbstractSet{Tuple{T,T}}
-
 # Convenience constructor for empty tracers
 empty(tracer::T) where {T<:AbstractTracer} = empty(T)
 empty(T) = T()
@@ -20,24 +17,29 @@ sparse_vector(T, index) = T([index])
 #==============#
 
 """
-    ConnectivityTracer{C}(indexset) <: Number
+$(TYPEDEF)
 
-Number type keeping track of input indices of previous computations.
+`Number` type keeping track of input indices of previous computations.
 
 For a higher-level interface, refer to [`connectivity_pattern`](@ref).
 
+## Fields
+$(TYPEDFIELDS)
+
+## Example
 ```jldoctest
 julia> inputs = Set([1, 3])
 Set{Int64} with 2 elements:
   3
   1
 
-julia> ConnectivityTracer(inputs)
-ConnectivityTracer{Set{Int64}}(1, 3)
+julia> SparseConnectivityTracer.ConnectivityTracer(inputs)
+SparseConnectivityTracer.ConnectivityTracer{Set{Int64}}(1, 3)
 ```
 """
 struct ConnectivityTracer{C<:AbstractSet{<:Integer}} <: AbstractTracer
-    inputs::C # sparse binary vector representing non-zero indices of connected, enumerated inputs
+    "Sparse binary vector representing non-zero indices of connected, enumerated inputs."
+    inputs::C
 end
 
 function Base.show(io::IO, t::ConnectivityTracer)
@@ -66,11 +68,14 @@ ConnectivityTracer(t::ConnectivityTracer) = t
 #=================#
 
 """
-    GlobalGradientTracer{G}(indexset) <: Number
+$(TYPEDEF)
 
-Number type keeping track of input indices of previous computations with non-zero derivatives.
+`Number` type keeping track of non-zero gradient entries.
 
 For a higher-level interface, refer to [`jacobian_pattern`](@ref).
+
+## Fields
+$(TYPEDFIELDS)
 
 ## Example
 ```jldoctest
@@ -79,12 +84,13 @@ Set{Int64} with 2 elements:
   3
   1
 
-julia> GlobalGradientTracer(grad)
-GlobalGradientTracer{Set{Int64}}(1, 3)
+julia> SparseConnectivityTracer.GlobalGradientTracer(grad)
+SparseConnectivityTracer.GlobalGradientTracer{Set{Int64}}(1, 3)
 ```
 """
 struct GlobalGradientTracer{G<:AbstractSet{<:Integer}} <: AbstractTracer
-    grad::G # sparse binary vector representing non-zero entries in the gradient
+    "Sparse binary vector representing non-zero entries in the gradient."
+    grad::G
 end
 
 function Base.show(io::IO, t::GlobalGradientTracer)
@@ -107,12 +113,16 @@ GlobalGradientTracer(t::GlobalGradientTracer) = t
 #=========#
 # Hessian #
 #=========#
-"""
-    GlobalHessianTracer{G,H}(indexset) <: Number
 
-Number type keeping track of input indices of previous computations with non-zero first and second derivatives.
+"""
+$(TYPEDEF)
+
+`Number` type keeping track of non-zero gradient and Hessian entries.
 
 For a higher-level interface, refer to [`hessian_pattern`](@ref).
+
+## Fields
+$(TYPEDFIELDS)
 
 ## Example
 ```jldoctest
@@ -127,18 +137,22 @@ Set{Tuple{Int64, Int64}} with 3 elements:
   (1, 1)
   (2, 3)
 
-julia> GlobalHessianTracer(grad, hess)
-GlobalHessianTracer{Set{Int64}, Set{Tuple{Int64, Int64}}}(
+julia> SparseConnectivityTracer.GlobalHessianTracer(grad, hess)
+SparseConnectivityTracer.GlobalHessianTracer{Set{Int64}, Set{Tuple{Int64, Int64}}}(
   Gradient: Set([3, 1]),
   Hessian:  Set([(3, 2), (1, 1), (2, 3)])
 )
 ```
 """
-struct GlobalHessianTracer{G<:AbstractSet{<:Integer},H<:AbstractPairSet{<:Integer}} <:
-       AbstractTracer
-    grad::G  # sparse binary vector representation of non-zero entries in the gradient
-    hess::H  # sparse binary matrix representation of non-zero entries in the Hessian
+struct GlobalHessianTracer{
+    G<:AbstractSet{<:Integer},H<:AbstractSet{<:Tuple{Integer,Integer}}
+} <: AbstractTracer
+    "Sparse binary vector representation of non-zero entries in the gradient."
+    grad::G
+    "Sparse binary matrix representation of non-zero entries in the Hessian."
+    hess::H
 end
+
 function Base.show(io::IO, t::GlobalHessianTracer)
     println(io, "$(eltype(t))(")
     println(io, "  Gradient: ", t.grad, ",")
@@ -153,13 +167,13 @@ end
 
 function GlobalHessianTracer{G,H}(
     ::Number
-) where {G<:AbstractSet{<:Integer},H<:AbstractPairSet{<:Integer}}
+) where {G<:AbstractSet{<:Integer},H<:AbstractSet{<:Tuple{Integer,Integer}}}
     return empty(GlobalHessianTracer{G,H})
 end
 
 function GlobalHessianTracer{G,H}(
     t::GlobalHessianTracer{G,H}
-) where {G<:AbstractSet{<:Integer},H<:AbstractPairSet{<:Integer}}
+) where {G<:AbstractSet{<:Integer},H<:AbstractSet{<:Tuple{Integer,Integer}}}
     return t
 end
 GlobalHessianTracer(t::GlobalHessianTracer) = t

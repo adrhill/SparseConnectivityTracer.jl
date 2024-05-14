@@ -4,6 +4,8 @@ using ADTypes: ADTypes
 import SparseArrays: sparse
 import Random: rand, AbstractRNG, SamplerType
 
+using DocStringExtensions
+
 include("settypes/duplicatevector.jl")
 include("settypes/recursiveset.jl")
 include("settypes/sortedvector.jl")
