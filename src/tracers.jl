@@ -44,7 +44,7 @@ end
 
 function Base.show(io::IO, t::ConnectivityTracer)
     return Base.show_delim_array(
-        io, convert.(Int, sort!(collect(t.inputs))), "$(typeof(t))(", ',', ')', true
+        io, convert.(Int, sort(collect(t.inputs))), "$(typeof(t))(", ',', ')', true
     )
 end
 
