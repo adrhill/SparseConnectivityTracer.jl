@@ -1,5 +1,6 @@
 using SparseConnectivityTracer
-using SparseConnectivityTracer: tracer, trace_input, empty
+using SparseConnectivityTracer:
+    ConnectivityTracer, GlobalGradientTracer, tracer, trace_input, empty
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 

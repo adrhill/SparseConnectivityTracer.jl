@@ -17,10 +17,11 @@ include("overload_hessian.jl")
 include("pattern.jl")
 include("adtypes.jl")
 
-export ConnectivityTracer, connectivity_pattern
-export GlobalGradientTracer, jacobian_pattern
-export GlobalHessianTracer, hessian_pattern
+export connectivity_pattern
+export jacobian_pattern
+export hessian_pattern
 
+# ADTypes interface
 export TracerSparsityDetector
 
 end # module
