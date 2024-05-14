@@ -51,7 +51,7 @@ julia> x = rand(3);
 julia> f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sign(x[3])];
 
 julia> connectivity_pattern(f, x)
-3×3 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 4 stored entries:
+3×3 SparseArrays.SparseMatrixCSC{Bool, Int64} with 4 stored entries:
  1  ⋅  ⋅
  1  1  ⋅
  ⋅  ⋅  1
@@ -113,7 +113,7 @@ julia> x = rand(3);
 julia> f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sign(x[3])];
 
 julia> jacobian_pattern(f, x)
-3×3 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 3 stored entries:
+3×3 SparseArrays.SparseMatrixCSC{Bool, Int64} with 3 stored entries:
  1  ⋅  ⋅
  1  1  ⋅
  ⋅  ⋅  ⋅
@@ -174,7 +174,7 @@ julia> x = rand(5);
 julia> f(x) = x[1] + x[2]*x[3] + 1/x[4] + 1*x[5];
 
 julia> hessian_pattern(f, x)
-5×5 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 3 stored entries:
+5×5 SparseArrays.SparseMatrixCSC{Bool, Int64} with 3 stored entries:
  ⋅  ⋅  ⋅  ⋅  ⋅
  ⋅  ⋅  1  ⋅  ⋅
  ⋅  1  ⋅  ⋅  ⋅
@@ -184,7 +184,7 @@ julia> hessian_pattern(f, x)
 julia> g(x) = f(x) + x[2]^x[5];
 
 julia> hessian_pattern(g, x)
-5×5 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 7 stored entries:
+5×5 SparseArrays.SparseMatrixCSC{Bool, Int64} with 7 stored entries:
  ⋅  ⋅  ⋅  ⋅  ⋅
  ⋅  1  1  ⋅  1
  ⋅  1  ⋅  ⋅  ⋅
