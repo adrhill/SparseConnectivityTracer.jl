@@ -105,7 +105,6 @@ ops_1_to_1 = union(
     ops_1_to_1_const,
 )
 
-
 ##==================================#
 # Operators for functions f: ℝ² → ℝ #
 #===================================#
@@ -148,14 +147,14 @@ end
 # ∂²f/∂y²  != 0
 # ∂²f/∂x∂y == 0
 ops_2_to_1_ssz = ()
-for op in ops_2_to_1_ssz
-    T = typeof(eval(op))
-    SparseConnectivityTracer.is_seconder_arg1_zero_global(::T) = false
-    SparseConnectivityTracer.is_firstder_arg1_zero_global(::T) = false
-    SparseConnectivityTracer.is_firstder_arg2_zero_global(::T) = false
-    SparseConnectivityTracer.is_seconder_arg2_zero_global(::T) = false
-    SparseConnectivityTracer.is_crossder_zero_global(::T)      = true
-end
+# for op in ops_2_to_1_ssz
+#     T = typeof(eval(op))
+#     SparseConnectivityTracer.is_seconder_arg1_zero_global(::T) = false
+#     SparseConnectivityTracer.is_firstder_arg1_zero_global(::T) = false
+#     SparseConnectivityTracer.is_firstder_arg2_zero_global(::T) = false
+#     SparseConnectivityTracer.is_seconder_arg2_zero_global(::T) = false
+#     SparseConnectivityTracer.is_crossder_zero_global(::T)      = true
+# end
 
 # ops_2_to_1_sfc: 
 # ∂f/∂x    != 0
@@ -164,14 +163,14 @@ end
 # ∂²f/∂y²  == 0
 # ∂²f/∂x∂y != 0
 ops_2_to_1_sfc = ()
-for op in ops_2_to_1_sfc
-    T = typeof(eval(op))
-    SparseConnectivityTracer.is_firstder_arg1_zero_global(::T) = false
-    SparseConnectivityTracer.is_seconder_arg1_zero_global(::T) = false
-    SparseConnectivityTracer.is_firstder_arg2_zero_global(::T) = false
-    SparseConnectivityTracer.is_seconder_arg2_zero_global(::T) = true
-    SparseConnectivityTracer.is_crossder_zero_global(::T)      = false
-end
+# for op in ops_2_to_1_sfc
+#     T = typeof(eval(op))
+#     SparseConnectivityTracer.is_firstder_arg1_zero_global(::T) = false
+#     SparseConnectivityTracer.is_seconder_arg1_zero_global(::T) = false
+#     SparseConnectivityTracer.is_firstder_arg2_zero_global(::T) = false
+#     SparseConnectivityTracer.is_seconder_arg2_zero_global(::T) = true
+#     SparseConnectivityTracer.is_crossder_zero_global(::T)      = false
+# end
 
 # ops_2_to_1_sfz: 
 # ∂f/∂x    != 0
@@ -180,14 +179,14 @@ end
 # ∂²f/∂y²  == 0
 # ∂²f/∂x∂y == 0
 ops_2_to_1_sfz = ()
-for op in ops_2_to_1_sfz
-    T = typeof(eval(op))
-    SparseConnectivityTracer.is_firstder_arg1_zero_global(::T) = false
-    SparseConnectivityTracer.is_seconder_arg1_zero_global(::T) = false
-    SparseConnectivityTracer.is_firstder_arg2_zero_global(::T) = false
-    SparseConnectivityTracer.is_seconder_arg2_zero_global(::T) = true
-    SparseConnectivityTracer.is_crossder_zero_global(::T)      = true
-end
+# for op in ops_2_to_1_sfz
+#     T = typeof(eval(op))
+#     SparseConnectivityTracer.is_firstder_arg1_zero_global(::T) = false
+#     SparseConnectivityTracer.is_seconder_arg1_zero_global(::T) = false
+#     SparseConnectivityTracer.is_firstder_arg2_zero_global(::T) = false
+#     SparseConnectivityTracer.is_seconder_arg2_zero_global(::T) = true
+#     SparseConnectivityTracer.is_crossder_zero_global(::T)      = true
+# end
 
 # ops_2_to_1_fsc: 
 # ∂f/∂x    != 0
@@ -218,14 +217,14 @@ SparseConnectivityTracer.is_firstder_arg2_zero_local(::typeof(Base.:/)) = iszero
 # ∂²f/∂y²  != 0
 # ∂²f/∂x∂y == 0
 ops_2_to_1_fsz = ()
-for op in ops_2_to_1_fsz
-    T = typeof(eval(op))
-    SparseConnectivityTracer.is_firstder_arg1_zero_global(::T) = false
-    SparseConnectivityTracer.is_seconder_arg1_zero_global(::T) = true
-    SparseConnectivityTracer.is_firstder_arg2_zero_global(::T) = false
-    SparseConnectivityTracer.is_seconder_arg2_zero_global(::T) = false
-    SparseConnectivityTracer.is_crossder_zero_global(::T)      = true
-end
+# for op in ops_2_to_1_fsz
+#     T = typeof(eval(op))
+#     SparseConnectivityTracer.is_firstder_arg1_zero_global(::T) = false
+#     SparseConnectivityTracer.is_seconder_arg1_zero_global(::T) = true
+#     SparseConnectivityTracer.is_firstder_arg2_zero_global(::T) = false
+#     SparseConnectivityTracer.is_seconder_arg2_zero_global(::T) = false
+#     SparseConnectivityTracer.is_crossder_zero_global(::T)      = true
+# end
 
 # ops_2_to_1_ffc: 
 # ∂f/∂x    != 0
@@ -286,14 +285,14 @@ is_firstder_arg2_zero_local(::typeof(min), x, y) = y > x
 # ∂²f/∂y²  == 0
 # ∂²f/∂x∂y == 0
 ops_2_to_1_szz = ()
-for op in ops_2_to_1_szz
-    T = typeof(eval(op))
-    SparseConnectivityTracer.is_firstder_arg1_zero_global(::T) = false
-    SparseConnectivityTracer.is_seconder_arg1_zero_global(::T) = false
-    SparseConnectivityTracer.is_firstder_arg2_zero_global(::T) = true
-    SparseConnectivityTracer.is_seconder_arg2_zero_global(::T) = true
-    SparseConnectivityTracer.is_crossder_zero_global(::T)      = true
-end
+# for op in ops_2_to_1_szz
+#     T = typeof(eval(op))
+#     SparseConnectivityTracer.is_firstder_arg1_zero_global(::T) = false
+#     SparseConnectivityTracer.is_seconder_arg1_zero_global(::T) = false
+#     SparseConnectivityTracer.is_firstder_arg2_zero_global(::T) = true
+#     SparseConnectivityTracer.is_seconder_arg2_zero_global(::T) = true
+#     SparseConnectivityTracer.is_crossder_zero_global(::T)      = true
+# end
 
 # ops_2_to_1_zsz: 
 # ∂f/∂x    == 0
@@ -302,14 +301,14 @@ end
 # ∂²f/∂y²  != 0
 # ∂²f/∂x∂y == 0
 ops_2_to_1_zsz = ()
-for op in ops_2_to_1_zsz
-    T = typeof(eval(op))
-    SparseConnectivityTracer.is_firstder_arg1_zero_global(::T) = true
-    SparseConnectivityTracer.is_seconder_arg1_zero_global(::T) = true
-    SparseConnectivityTracer.is_firstder_arg2_zero_global(::T) = false
-    SparseConnectivityTracer.is_seconder_arg2_zero_global(::T) = false
-    SparseConnectivityTracer.is_crossder_zero_global(::T)      = true
-end
+# for op in ops_2_to_1_zsz
+#     T = typeof(eval(op))
+#     SparseConnectivityTracer.is_firstder_arg1_zero_global(::T) = true
+#     SparseConnectivityTracer.is_seconder_arg1_zero_global(::T) = true
+#     SparseConnectivityTracer.is_firstder_arg2_zero_global(::T) = false
+#     SparseConnectivityTracer.is_seconder_arg2_zero_global(::T) = false
+#     SparseConnectivityTracer.is_crossder_zero_global(::T)      = true
+# end
 
 # ops_2_to_1_fzz: 
 # ∂f/∂x    != 0
@@ -336,14 +335,14 @@ end
 # ∂²f/∂y²  == 0
 # ∂²f/∂x∂y == 0
 ops_2_to_1_zfz = ()
-for op in ops_2_to_1_zfz
-    T = typeof(eval(op))
-    SparseConnectivityTracer.is_firstder_arg1_zero_global(::T) = true
-    SparseConnectivityTracer.is_seconder_arg1_zero_global(::T) = true
-    SparseConnectivityTracer.is_firstder_arg2_zero_global(::T) = false
-    SparseConnectivityTracer.is_seconder_arg2_zero_global(::T) = true
-    SparseConnectivityTracer.is_crossder_zero_global(::T)      = true
-end
+# for op in ops_2_to_1_zfz
+#     T = typeof(eval(op))
+#     SparseConnectivityTracer.is_firstder_arg1_zero_global(::T) = true
+#     SparseConnectivityTracer.is_seconder_arg1_zero_global(::T) = true
+#     SparseConnectivityTracer.is_firstder_arg2_zero_global(::T) = false
+#     SparseConnectivityTracer.is_seconder_arg2_zero_global(::T) = true
+#     SparseConnectivityTracer.is_crossder_zero_global(::T)      = true
+# end
 
 # ops_2_to_1_zfz: 
 # ∂f/∂x    == 0
@@ -427,13 +426,13 @@ end
 # ∂f₂/∂x   != 0
 # ∂²f₂/∂x² == 0
 ops_1_to_2_sf = ()
-for op in ops_1_to_2_sf
-    T = typeof(eval(op))
-    SparseConnectivityTracer.is_firstder_out1_zero_global(::T) = false
-    SparseConnectivityTracer.is_seconder_out1_zero_global(::T) = false
-    SparseConnectivityTracer.is_firstder_out2_zero_global(::T) = false
-    SparseConnectivityTracer.is_seconder_out2_zero_global(::T) = true
-end
+# for op in ops_1_to_2_sf
+#     T = typeof(eval(op))
+#     SparseConnectivityTracer.is_firstder_out1_zero_global(::T) = false
+#     SparseConnectivityTracer.is_seconder_out1_zero_global(::T) = false
+#     SparseConnectivityTracer.is_firstder_out2_zero_global(::T) = false
+#     SparseConnectivityTracer.is_seconder_out2_zero_global(::T) = true
+# end
 
 # ops_1_to_2_sz: 
 # ∂f₁/∂x   != 0
@@ -441,13 +440,13 @@ end
 # ∂f₂/∂x   == 0
 # ∂²f₂/∂x² == 0
 ops_1_to_2_sz = ()
-for op in ops_1_to_2_sz
-    T = typeof(eval(op))
-    SparseConnectivityTracer.is_firstder_out1_zero_global(::T) = false
-    SparseConnectivityTracer.is_seconder_out1_zero_global(::T) = false
-    SparseConnectivityTracer.is_firstder_out2_zero_global(::T) = true
-    SparseConnectivityTracer.is_seconder_out2_zero_global(::T) = true
-end
+# for op in ops_1_to_2_sz
+#     T = typeof(eval(op))
+#     SparseConnectivityTracer.is_firstder_out1_zero_global(::T) = false
+#     SparseConnectivityTracer.is_seconder_out1_zero_global(::T) = false
+#     SparseConnectivityTracer.is_firstder_out2_zero_global(::T) = true
+#     SparseConnectivityTracer.is_seconder_out2_zero_global(::T) = true
+# end
 
 # ops_1_to_2_fs: 
 # ∂f₁/∂x   != 0
@@ -455,13 +454,13 @@ end
 # ∂f₂/∂x   != 0
 # ∂²f₂/∂x² != 0
 ops_1_to_2_fs = ()
-for op in ops_1_to_2_fs
-    T = typeof(eval(op))
-    SparseConnectivityTracer.is_firstder_out1_zero_global(::T) = false
-    SparseConnectivityTracer.is_seconder_out1_zero_global(::T) = true
-    SparseConnectivityTracer.is_firstder_out2_zero_global(::T) = false
-    SparseConnectivityTracer.is_seconder_out2_zero_global(::T) = false
-end
+# for op in ops_1_to_2_fs
+#     T = typeof(eval(op))
+#     SparseConnectivityTracer.is_firstder_out1_zero_global(::T) = false
+#     SparseConnectivityTracer.is_seconder_out1_zero_global(::T) = true
+#     SparseConnectivityTracer.is_firstder_out2_zero_global(::T) = false
+#     SparseConnectivityTracer.is_seconder_out2_zero_global(::T) = false
+# end
 
 # ops_1_to_2_ff: 
 # ∂f₁/∂x   != 0
@@ -469,13 +468,13 @@ end
 # ∂f₂/∂x   != 0
 # ∂²f₂/∂x² == 0
 ops_1_to_2_ff = ()
-for op in ops_1_to_2_ff
-    T = typeof(eval(op))
-    SparseConnectivityTracer.is_firstder_out1_zero_global(::T) = false
-    SparseConnectivityTracer.is_seconder_out1_zero_global(::T) = true
-    SparseConnectivityTracer.is_firstder_out2_zero_global(::T) = false
-    SparseConnectivityTracer.is_seconder_out2_zero_global(::T) = true
-end
+# for op in ops_1_to_2_ff
+#     T = typeof(eval(op))
+#     SparseConnectivityTracer.is_firstder_out1_zero_global(::T) = false
+#     SparseConnectivityTracer.is_seconder_out1_zero_global(::T) = true
+#     SparseConnectivityTracer.is_firstder_out2_zero_global(::T) = false
+#     SparseConnectivityTracer.is_seconder_out2_zero_global(::T) = true
+# end
 
 # ops_1_to_2_fz: 
 # ∂f₁/∂x   != 0
@@ -485,13 +484,13 @@ end
 ops_1_to_2_fz = (
     # :frexp,  # TODO: removed for now
 )
-for op in ops_1_to_2_fz
-    T = typeof(eval(op))
-    SparseConnectivityTracer.is_firstder_out1_zero_global(::T) = false
-    SparseConnectivityTracer.is_seconder_out1_zero_global(::T) = true
-    SparseConnectivityTracer.is_firstder_out2_zero_global(::T) = true
-    SparseConnectivityTracer.is_seconder_out2_zero_global(::T) = true
-end
+# for op in ops_1_to_2_fz
+#     T = typeof(eval(op))
+#     SparseConnectivityTracer.is_firstder_out1_zero_global(::T) = false
+#     SparseConnectivityTracer.is_seconder_out1_zero_global(::T) = true
+#     SparseConnectivityTracer.is_firstder_out2_zero_global(::T) = true
+#     SparseConnectivityTracer.is_seconder_out2_zero_global(::T) = true
+# end
 
 # ops_1_to_2_zs: 
 # ∂f₁/∂x   == 0
@@ -499,13 +498,13 @@ end
 # ∂f₂/∂x   != 0
 # ∂²f₂/∂x² != 0
 ops_1_to_2_zs = ()
-for op in ops_1_to_2_zs
-    T = typeof(eval(op))
-    SparseConnectivityTracer.is_firstder_out1_zero_global(::T) = true
-    SparseConnectivityTracer.is_seconder_out1_zero_global(::T) = true
-    SparseConnectivityTracer.is_firstder_out2_zero_global(::T) = false
-    SparseConnectivityTracer.is_seconder_out2_zero_global(::T) = false
-end
+# for op in ops_1_to_2_zs
+#     T = typeof(eval(op))
+#     SparseConnectivityTracer.is_firstder_out1_zero_global(::T) = true
+#     SparseConnectivityTracer.is_seconder_out1_zero_global(::T) = true
+#     SparseConnectivityTracer.is_firstder_out2_zero_global(::T) = false
+#     SparseConnectivityTracer.is_seconder_out2_zero_global(::T) = false
+# end
 
 # ops_1_to_2_zf: 
 # ∂f₁/∂x   == 0
@@ -513,13 +512,13 @@ end
 # ∂f₂/∂x   != 0
 # ∂²f₂/∂x² == 0
 ops_1_to_2_zf = ()
-for op in ops_1_to_2_zf
-    T = typeof(eval(op))
-    SparseConnectivityTracer.is_firstder_out1_zero_global(::T) = true
-    SparseConnectivityTracer.is_seconder_out1_zero_global(::T) = true
-    SparseConnectivityTracer.is_firstder_out2_zero_global(::T) = false
-    SparseConnectivityTracer.is_seconder_out2_zero_global(::T) = true
-end
+# for op in ops_1_to_2_zf
+#     T = typeof(eval(op))
+#     SparseConnectivityTracer.is_firstder_out1_zero_global(::T) = true
+#     SparseConnectivityTracer.is_seconder_out1_zero_global(::T) = true
+#     SparseConnectivityTracer.is_firstder_out2_zero_global(::T) = false
+#     SparseConnectivityTracer.is_seconder_out2_zero_global(::T) = true
+# end
 
 # ops_1_to_2_zz: 
 # ∂f₁/∂x   == 0
@@ -527,13 +526,13 @@ end
 # ∂f₂/∂x   == 0
 # ∂²f₂/∂x² == 0
 ops_1_to_2_zz = ()
-for op in ops_1_to_2_zz
-    T = typeof(eval(op))
-    SparseConnectivityTracer.is_firstder_out1_zero_global(::T) = true
-    SparseConnectivityTracer.is_seconder_out1_zero_global(::T) = true
-    SparseConnectivityTracer.is_firstder_out2_zero_global(::T) = true
-    SparseConnectivityTracer.is_seconder_out2_zero_global(::T) = true
-end
+# for op in ops_1_to_2_zz
+#     T = typeof(eval(op))
+#     SparseConnectivityTracer.is_firstder_out1_zero_global(::T) = true
+#     SparseConnectivityTracer.is_seconder_out1_zero_global(::T) = true
+#     SparseConnectivityTracer.is_firstder_out2_zero_global(::T) = true
+#     SparseConnectivityTracer.is_seconder_out2_zero_global(::T) = true
+# end
 
 ops_1_to_2 = union(
     ops_1_to_2_ss,
