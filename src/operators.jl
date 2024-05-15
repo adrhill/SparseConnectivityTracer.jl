@@ -14,6 +14,9 @@
 function is_firstder_zero_global end
 function is_seconder_zero_global end
 
+is_firstder_zero_local(f::Type, x, y) = is_firstder_zero_global(f) 
+is_seconder_zero_local(f::Type, x, y) = is_seconder_zero_global(f)
+
 # ops_1_to_1_s: 
 # ∂f/∂x   != 0
 # ∂²f/∂x² != 0
@@ -111,6 +114,12 @@ function is_firstder_arg2_zero_global end
 function is_seconder_arg2_zero_global end
 function is_crossder_zero_global end
 
+is_firstder_arg1_zero_local(f::Type, x, y) = is_firstder_arg1_zero_global(f)
+is_seconder_arg1_zero_local(f::Type, x, y) = is_firstder_arg1_zero_global(f)
+is_firstder_arg2_zero_local(f::Type, x, y) = is_firstder_arg1_zero_global(f)
+is_seconder_arg2_zero_local(f::Type, x, y) = is_firstder_arg1_zero_global(f)
+is_crossder_zero_local(f::Type, x, y)      = is_firstder_arg1_zero_global(f)
+
 # ops_2_to_1_ssc: 
 # ∂f/∂x    != 0
 # ∂²f/∂x²  != 0
@@ -196,6 +205,9 @@ for op in ops_2_to_1_fsc
     SparseConnectivityTracer.is_crossder_zero_global(::T)      = false
 end
 
+is_firstder_arg1_zero_local(::Type{typeof(:/)}, x, y) = iszero(x)
+is_crossder_zero_local(::Type{typeof(:/)}, x, y)      = iszero(x)
+
 # ops_2_to_1_fsz: 
 # ∂f/∂x    != 0
 # ∂²f/∂x²  == 0
@@ -230,6 +242,12 @@ for op in ops_2_to_1_ffc
     SparseConnectivityTracer.is_crossder_zero_global(::T)      = false
 end
 
+is_firstder_arg1_zero_local(::Type{typeof(:*)}, x, y) = iszero(x)
+is_seconder_arg1_zero_local(::Type{typeof(:*)}, x, y) = iszero(x)
+is_firstder_arg2_zero_local(::Type{typeof(:*)}, x, y) = iszero(y)
+is_seconder_arg2_zero_local(::Type{typeof(:*)}, x, y) = iszero(y)
+is_crossder_zero_local(::Type{typeof(:*)}, x, y)      = iszero(x) || iszero(y)
+
 # ops_2_to_1_ffz: 
 # ∂f/∂x    != 0
 # ∂²f/∂x²  == 0
@@ -239,6 +257,7 @@ end
 ops_2_to_1_ffz = (
     :+, :-,
     :mod, :rem,
+    :min, :max,
 )
 for op in ops_2_to_1_ffz
     T = typeof(eval(op))
@@ -248,6 +267,16 @@ for op in ops_2_to_1_ffz
     SparseConnectivityTracer.is_seconder_arg2_zero_global(::T) = true
     SparseConnectivityTracer.is_crossder_zero_global(::T)      = true
 end
+
+
+is_firstder_arg2_zero_local(::Type{typeof(mod)}, x, y) = ifelse(y > 0, y>x, x>y)
+is_firstder_arg2_zero_local(::Type{typeof(rem)}, x, y) = ifelse(y > 0, y>x, x>y)
+
+is_firstder_arg1_zero_local(::Type{typeof(max)}, x, y) = x < y 
+is_firstder_arg2_zero_local(::Type{typeof(max)}, x, y) = y < x 
+
+is_firstder_arg1_zero_local(::Type{typeof(min)}, x, y) = x > y 
+is_firstder_arg2_zero_local(::Type{typeof(min)}, x, y) = y > x 
 
 # ops_2_to_1_szz: 
 # ∂f/∂x    != 0
@@ -368,6 +397,11 @@ function is_firstder_out1_zero_global end
 function is_seconder_out1_zero_global end
 function is_firstder_out2_zero_global end
 function is_seconder_out2_zero_global end
+
+is_firstder_out1_zero_local(f::Type, x, y) = is_firstder_out1_zero_global(f)
+is_seconder_out1_zero_local(f::Type, x, y) = is_seconder_out1_zero_global(f)
+is_firstder_out2_zero_local(f::Type, x, y) = is_firstder_out2_zero_global(f)
+is_seconder_out2_zero_local(f::Type, x, y) = is_seconder_out2_zero_global(f)
 
 # ops_1_to_2_ss: 
 # ∂f₁/∂x   != 0
