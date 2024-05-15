@@ -13,7 +13,7 @@ for fn in ops_1_to_1
         if is_firstder_zero_local($fn, x)
             return Dual(out, empty(T))
         else
-            return Dual(out, t)
+            return Dual(out, tracer(t))
         end
     end
 end
@@ -48,11 +48,11 @@ for fn in ops_2_to_1
             if ∂f∂y0
                 return Dual(out, empty(T))
             else # ∂f∂y ≠ 0 
-                return Dual(out, ty)
+                return Dual(out, tracer(ty))
             end
         else # ∂f∂x ≠ 0 
             if ∂f∂y0
-                return Dual(out, tx)
+                return Dual(out, tracer(tx))
             else # ∂f∂y ≠ 0 
                 return Dual(out, T(gradient(tx) ∪ gradient(ty)))
             end
@@ -72,7 +72,7 @@ for fn in ops_2_to_1
         if is_firstder_arg1_zero_local($fn, x, y)
             return Dual(out, empty(T))
         else
-            return Dual(out, t)
+            return Dual(out, tracer(tx))
         end
     end
 
@@ -89,7 +89,7 @@ for fn in ops_2_to_1
         if is_firstder_arg2_zero_local($fn, x, y)
             return Dual(out, empty(T))
         else
-            return Dual(out, t)
+            return Dual(out, tracer(ty))
         end
     end
 end
@@ -117,12 +117,12 @@ for fn in ops_1_to_2
         tracer1 = if is_firstder_out1_zero_global($fn)
             empty(T)
         else
-            t
+            tracer(tx)
         end
         tracer2 = if is_firstder_out2_zero_global($fn)
             empty(T)
         else
-            t
+            tracer(tx)
         end
         return (Dual(out1, tracer1), Dual(out2, tracer2))
     end

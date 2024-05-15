@@ -247,7 +247,6 @@ end
 # gradient of x*y: [y x]
 SparseConnectivityTracer.is_firstder_arg1_zero_local(::typeof(Base.:*), x, y) = iszero(y)
 SparseConnectivityTracer.is_firstder_arg2_zero_local(::typeof(Base.:*), x, y) = iszero(x)
-SparseConnectivityTracer.is_crossder_zero_local(::typeof(Base.:*), x, y)      = iszero(x) || iszero(y)
 
 # ops_2_to_1_ffz: 
 # ∂f/∂x    != 0

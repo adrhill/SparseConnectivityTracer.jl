@@ -20,8 +20,8 @@ include("pattern.jl")
 include("adtypes.jl")
 
 export connectivity_pattern
-export jacobian_pattern
-export hessian_pattern
+export jacobian_pattern, local_jacobian_pattern
+export hessian_pattern, local_hessian_pattern
 
 # ADTypes interface
 export TracerSparsityDetector

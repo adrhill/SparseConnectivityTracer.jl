@@ -97,7 +97,7 @@ for fn in ops_2_to_1
             if is_firstder_arg1_zero_local($fn, x, y)
                 return Dual(out, empty(T))
             else
-                return Dual(out, t)
+                return Dual(out, tracer(t))
             end
         else
             return Dual(out, T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t))))
@@ -124,7 +124,7 @@ for fn in ops_2_to_1
             if is_firstder_arg2_zero_local($fn, x, y)
                 return Dual(out, empty(T))
             else
-                return Dual(out, t)
+                return Dual(out, tracer(t))
             end
         else
             return Dual(out, T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t))))
@@ -164,7 +164,7 @@ for fn in ops_1_to_2
             if is_firstder_out1_zero_local($fn, x)
                 return empty(T)
             else
-                return t
+                return tracer(t)
             end
         else
             return T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))
@@ -173,7 +173,7 @@ for fn in ops_1_to_2
             if is_firstder_out2_zero_local($fn, x)
                 return empty(T)
             else
-                return t
+                return tracer(t)
             end
         else
             return T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))

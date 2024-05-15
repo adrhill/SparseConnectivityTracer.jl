@@ -11,10 +11,13 @@ Enumerates input indices and constructs the specified type `T` of tracer.
 Supports [`ConnectivityTracer`](@ref), [`GradientTracer`](@ref) and [`HessianTracer`](@ref).
 """
 trace_input(::Type{T}, x) where {T<:AbstractTracer} = trace_input(T, x, 1)
-trace_input(::Type{T}, ::Number, i) where {T<:AbstractTracer} = tracer(T, i)
-function trace_input(::Type{T}, x::AbstractArray, i) where {T<:AbstractTracer}
-    indices = (i - 1) .+ reshape(1:length(x), size(x))
-    return tracer.(T, indices)
+
+function trace_input(::Type{T}, x::Number, i::Integer) where {T<:AbstractTracer}
+    return create_tracer(T, x, i)
+end
+function trace_input(::Type{T}, xs::AbstractArray, i) where {T<:AbstractTracer}
+    indices = reshape(1:length(xs), size(xs)) .+ (i - 1)
+    return create_tracer.(T, xs, indices)
 end
 
 ## Trace function
@@ -124,6 +127,34 @@ function jacobian_pattern(f, x, ::Type{G}=DEFAULT_VECTOR_TYPE) where {G}
 end
 
 """
+    local_jacobian_pattern(f, x)
+    local_jacobian_pattern(f, x, T)
+
+Compute the local sparsity pattern of the Jacobian of `y = f(x)` at `x`.
+
+The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
+
+## Example
+
+```jldoctest
+julia> x = rand(3);
+
+julia> f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sign(x[3])];
+
+julia> local_jacobian_pattern(f, x)
+3×3 SparseArrays.SparseMatrixCSC{Bool, Int64} with 3 stored entries:
+ 1  ⋅  ⋅
+ 1  1  ⋅
+ ⋅  ⋅  ⋅
+```
+"""
+function local_jacobian_pattern(f, x, ::Type{G}=DEFAULT_VECTOR_TYPE) where {G}
+    D = Dual{eltype(x),GradientTracer{G}}
+    xt, yt = trace_function(D, f, x)
+    return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
+end
+
+"""
     jacobian_pattern(f!, y, x)
     jacobian_pattern(f!, y, x, T)
 
@@ -136,9 +167,23 @@ function jacobian_pattern(f!, y, x, ::Type{G}=DEFAULT_VECTOR_TYPE) where {G}
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
+"""
+    local_jacobian_pattern(f!, y, x)
+    local_jacobian_pattern(f!, y, x, T)
+
+Compute the local sparsity pattern of the Jacobian of `f!(y, x)` at `x`.
+
+The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
+"""
+function local_jacobian_pattern(f!, y, x, ::Type{G}=DEFAULT_VECTOR_TYPE) where {G}
+    D = Dual{eltype(x),GradientTracer{G}}
+    xt, yt = trace_function(D, f!, y, x)
+    return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
+end
+
 function jacobian_pattern_to_mat(
     xt::AbstractArray{T}, yt::AbstractArray{<:Number}
-) where {T<:GradientTracer}
+) where {P,G<:GradientTracer,T<:Union{G,Dual{P,G}}}
     n, m = length(xt), length(yt)
     I = Int[] # row indices
     J = Int[] # column indices

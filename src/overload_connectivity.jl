@@ -1,3 +1,5 @@
+# TODO: support Duals
+
 for fn in union(ops_1_to_1_s, ops_1_to_1_f, ops_1_to_1_z)
     @eval Base.$fn(t::ConnectivityTracer) = t
 end
