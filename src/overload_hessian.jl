@@ -8,7 +8,20 @@ for fn in ops_1_to_1
                 return t
             end
         else
-            return T(t.grad, t.hess ∪ (t.grad × t.grad))
+            return T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))
+        end
+    end
+    @eval function Base.$fn(t::D) where {P,T<:HessianTracer,D<:Dual{P,T}}
+        x = primal(t)
+        out = Base.$fn(x)
+        if is_seconder_zero_local($fn, x)
+            if is_firstder_zero_local($fn, x)
+                return Dual(out, empty(T))
+            else
+                return Dual(out, t)
+            end
+        else
+            return Dual(out, T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t))))
         end
     end
 end
@@ -19,23 +32,49 @@ for fn in ops_2_to_1
         grad = empty(G)
         hess = empty(H)
         if !is_firstder_arg1_zero_global($fn)
-            grad = union(grad, a.grad) # TODO: use union!
-            union!(hess, a.hess)
+            grad = union(grad, gradient(a)) # TODO: use union!
+            union!(hess, hessian(a))
         end
         if !is_firstder_arg2_zero_global($fn)
-            grad = union(grad, b.grad) # TODO: use union!
-            union!(hess, b.hess)
+            grad = union(grad, gradient(b)) # TODO: use union!
+            union!(hess, hessian(b))
         end
         if !is_seconder_arg1_zero_global($fn)
-            union!(hess, a.grad × a.grad)
+            union!(hess, gradient(a) × gradient(a))
         end
         if !is_seconder_arg2_zero_global($fn)
-            union!(hess, b.grad × b.grad)
+            union!(hess, gradient(b) × gradient(b))
         end
         if !is_crossder_zero_global($fn)
-            union!(hess, (a.grad × b.grad) ∪ (b.grad × a.grad))
+            union!(hess, (gradient(a) × gradient(b)) ∪ (gradient(b) × gradient(a)))
         end
         return T(grad, hess)
+    end
+    @eval function Base.$fn(a::D, b::D) where {P,G,H,T<:HessianTracer{G,H},D<:Dual{P,T}}
+        x = primal(a)
+        y = primal(b)
+        out = Base.$fn(x, y)
+
+        grad = empty(G)
+        hess = empty(H)
+        if !is_firstder_arg1_zero_local($fn, x, y)
+            grad = union(grad, gradient(a)) # TODO: use union!
+            union!(hess, hessian(a))
+        end
+        if !is_firstder_arg2_zero_local($fn, x, y)
+            grad = union(grad, gradient(b)) # TODO: use union!
+            union!(hess, hessian(b))
+        end
+        if !is_seconder_arg1_zero_local($fn, x, y)
+            union!(hess, gradient(a) × gradient(a))
+        end
+        if !is_seconder_arg2_zero_local($fn, x, y)
+            union!(hess, gradient(b) × gradient(b))
+        end
+        if !is_crossder_zero_local($fn, x, y)
+            union!(hess, (gradient(a) × gradient(b)) ∪ (gradient(b) × gradient(a)))
+        end
+        return Dual(out, T(grad, hess))
     end
 
     @eval function Base.$fn(t::T, ::Number) where {G,H,T<:HessianTracer{G,H}}
@@ -46,10 +85,26 @@ for fn in ops_2_to_1
                 return t
             end
         else
-            return T(t.grad, t.hess ∪ (t.grad × t.grad))
+            return T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))
         end
     end
-    @eval function Base.$fn(::Number, t::T) where {G,H,T<:HessianTracer{G,H}}
+    @eval function Base.$fn(
+        t::D, y::Number
+    ) where {P,G,H,T<:HessianTracer{G,H},D<:Dual{P,T}}
+        x = primal(t)
+        out = Base.$fn(x, y)
+        if is_seconder_arg1_zero_local($fn, x, y)
+            if is_firstder_arg1_zero_local($fn, x, y)
+                return Dual(out, empty(T))
+            else
+                return Dual(out, t)
+            end
+        else
+            return Dual(out, T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t))))
+        end
+    end
+
+    @eval function Base.$fn(x::Number, t::T) where {G,H,T<:HessianTracer{G,H}}
         if is_seconder_arg2_zero_global($fn)
             if is_firstder_arg2_zero_global($fn)
                 return empty(T)
@@ -57,25 +112,41 @@ for fn in ops_2_to_1
                 return t
             end
         else
-            return T(t.grad, t.hess ∪ (t.grad × t.grad))
+            return T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))
+        end
+    end
+    @eval function Base.$fn(
+        x::Number, t::D
+    ) where {P,G,H,T<:HessianTracer{G,H},D<:Dual{P,T}}
+        y = primal(t)
+        out = Base.$fn(x, y)
+        if is_seconder_arg2_zero_local($fn, x, y)
+            if is_firstder_arg2_zero_local($fn, x, y)
+                return Dual(out, empty(T))
+            else
+                return Dual(out, t)
+            end
+        else
+            return Dual(out, T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t))))
         end
     end
 end
 
+# TODO: support Dual tracers for these.
 # Extra types required for exponent
 for T in (:Real, :Integer, :Rational)
     @eval function Base.:^(t::T, ::$T) where {T<:HessianTracer}
-        return T(t.grad, t.hess ∪ (t.grad × t.grad))
+        return T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))
     end
     @eval function Base.:^(::$T, t::T) where {T<:HessianTracer}
-        return T(t.grad, t.hess ∪ (t.grad × t.grad))
+        return T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))
     end
 end
 function Base.:^(t::T, ::Irrational{:ℯ}) where {T<:HessianTracer}
-    return T(t.grad, t.hess ∪ (t.grad × t.grad))
+    return T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))
 end
 function Base.:^(::Irrational{:ℯ}, t::T) where {T<:HessianTracer}
-    return T(t.grad, t.hess ∪ (t.grad × t.grad))
+    return T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))
 end
 
 ## Rounding

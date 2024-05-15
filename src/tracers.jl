@@ -202,6 +202,7 @@ struct Dual{P<:Number,T<:AbstractTracer} <: AbstractTracer
 end
 
 primal(d::Dual) = d.primal
+tracer(d::Dual) = d.tracer
 
 inputs(d::Dual{P,T}) where {P,T<:ConnectivityTracer} = inputs(d.tracer)
 gradient(d::Dual{P,T}) where {P,T<:GradientTracer} = gradient(d.tracer)
