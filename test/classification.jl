@@ -132,6 +132,10 @@ function classify_2_to_1(f, x, y; atol)
     return (first_arg, second_arg, cross)
 end
 
+# Some exceptions have to be manually specified
+classify_2_to_1(::typeof(max), x, y; atol) = (first_order, first_order, zero_order)
+classify_2_to_1(::typeof(min), x, y; atol) = (first_order, first_order, zero_order)
+
 function classify_2_to_1(op::Symbol; atol=1e-5, trials=100)
     f = sym2fn(op)
     try
