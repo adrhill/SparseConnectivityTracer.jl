@@ -42,9 +42,11 @@ struct ConnectivityTracer{C<:AbstractSet{<:Integer}} <: AbstractTracer
     inputs::C
 end
 
+inputs(t::ConnectivityTracer) = t.inputs
+
 function Base.show(io::IO, t::ConnectivityTracer)
     return Base.show_delim_array(
-        io, convert.(Int, sort(collect(t.inputs))), "$(typeof(t))(", ',', ')', true
+        io, convert.(Int, sort(collect(inputs(t)))), "$(typeof(t))(", ',', ')', true
     )
 end
 
@@ -93,9 +95,11 @@ struct GradientTracer{G<:AbstractSet{<:Integer}} <: AbstractTracer
     grad::G
 end
 
+gradient(t::GradientTracer) = t.grad
+
 function Base.show(io::IO, t::GradientTracer)
     return Base.show_delim_array(
-        io, convert.(Int, sort(collect(t.grad))), "$(typeof(t))(", ',', ')', true
+        io, convert.(Int, sort(collect(gradient(t)))), "$(typeof(t))(", ',', ')', true
     )
 end
 
@@ -152,10 +156,13 @@ struct HessianTracer{G<:AbstractSet{<:Integer},H<:AbstractSet{<:Tuple{Integer,In
     hess::H
 end
 
+gradient(t::HessianTracer) = t.grad
+hessian(t::HessianTracer)  = t.hess
+
 function Base.show(io::IO, t::HessianTracer)
     println(io, "$(eltype(t))(")
-    println(io, "  Gradient: ", t.grad, ",")
-    println(io, "  Hessian:  ", t.hess)
+    println(io, "  Gradient: ", gradient(t), ",")
+    println(io, "  Hessian:  ", hessian(t))
     print(io, ")")
     return nothing
 end
@@ -176,6 +183,30 @@ function HessianTracer{G,H}(
     return t
 end
 HessianTracer(t::HessianTracer) = t
+
+#================================#
+# Dual numbers for local tracing #
+#================================#
+
+"""
+$(TYPEDEF)
+
+Dual number type keeping track of the results of a primal computation as well as a tracer.
+
+## Fields
+$(TYPEDFIELDS)
+"""
+struct Dual{P<:Number,T<:AbstractTracer} <: AbstractTracer
+    primal::P
+    tracer::T
+end
+
+primal(d::Dual) = d.primal
+
+input(d::Dual{P,T}) where {P,T<:ConnectivityTracer} = input(d.tracer)
+gradient(d::Dual{P,T}) where {P,T<:GradientTracer} = gradient(d.tracer)
+gradient(d::Dual{P,T}) where {P,T<:HessianTracer} = gradient(d.tracer)
+hessian(d::Dual{P,T}) where {P,T<:HessianTracer} = hessian(d.tracer)
 
 #===========#
 # Utilities #
