@@ -1,55 +1,65 @@
-for fn in union(ops_1_to_1_s, ops_1_to_1_f)
-    @eval Base.$fn(t::GradientTracer) = t
+## 1-to-1
+for fn in ops_1_to_1
+    @eval function Base.$fn(t::T) where {T<:GradientTracer}
+        if is_firstder_zero_global($fn)
+            return empty(T)
+        else
+            return t
+        end
+    end
 end
 
-for fn in union(ops_1_to_1_z, ops_1_to_1_const)
-    @eval Base.$fn(::T) where {T<:GradientTracer} = empty(T)
+## 2-to-1
+for fn in ops_2_to_1
+    @eval function Base.$fn(tx::T, ty::T) where {T<:GradientTracer}
+        ∂f∂x0 = is_firstder_arg1_zero_global($fn)
+        ∂f∂y0 = is_firstder_arg2_zero_global($fn)
+        if ∂f∂x0
+            if ∂f∂y0
+                return empty(T)
+            else # ∂f∂y ≠ 0 
+                return ty
+            end
+        else # ∂f∂x ≠ 0 
+            if ∂f∂y0
+                return tx
+            else # ∂f∂y ≠ 0 
+                return T(gradient(tx) ∪ gradient(ty))
+            end
+        end
+    end
+
+    @eval function Base.$fn(t::T, ::Number) where {T<:GradientTracer}
+        if is_firstder_arg1_zero_global($fn)
+            return empty(T)
+        else
+            return t
+        end
+    end
+    @eval function Base.$fn(::Number, t::T) where {T<:GradientTracer}
+        if is_firstder_arg2_zero_global($fn)
+            return empty(T)
+        else
+            return t
+        end
+    end
 end
 
-for fn in union(
-    ops_2_to_1_ssc,
-    ops_2_to_1_ssz,
-    ops_2_to_1_sfc,
-    ops_2_to_1_sfz,
-    ops_2_to_1_fsc,
-    ops_2_to_1_fsz,
-    ops_2_to_1_ffc,
-    ops_2_to_1_ffz,
-)
-    @eval Base.$fn(a::T, b::T) where {T<:GradientTracer} = T(a.grad ∪ b.grad)
-    @eval Base.$fn(t::GradientTracer, ::Number) = t
-    @eval Base.$fn(::Number, t::GradientTracer) = t
-end
-
-for fn in union(ops_2_to_1_zsz, ops_2_to_1_zfz)
-    @eval Base.$fn(::GradientTracer, t::GradientTracer) = t
-    @eval Base.$fn(::T, ::Number) where {T<:GradientTracer} = empty(T)
-    @eval Base.$fn(::Number, t::GradientTracer) = t
-end
-for fn in union(ops_2_to_1_szz, ops_2_to_1_fzz)
-    @eval Base.$fn(t::GradientTracer, ::GradientTracer) = t
-    @eval Base.$fn(t::GradientTracer, ::Number) = t
-    @eval Base.$fn(::Number, ::T) where {T<:GradientTracer} = empty(T)
-end
-for fn in ops_2_to_1_zzz
-    @eval Base.$fn(::T, ::T) where {T<:GradientTracer}      = empty(T)
-    @eval Base.$fn(::T, ::Number) where {T<:GradientTracer} = empty(T)
-    @eval Base.$fn(::Number, ::T) where {T<:GradientTracer} = empty(T)
-end
-
-for fn in union(ops_1_to_2_ss, ops_1_to_2_sf, ops_1_to_2_fs, ops_1_to_2_ff)
-    @eval Base.$fn(t::GradientTracer) = (t, t)
-end
-
-for fn in union(ops_1_to_2_sz, ops_1_to_2_fz)
-    @eval Base.$fn(t::T) where {T<:GradientTracer} = (t, empty(T))
-end
-
-for fn in union(ops_1_to_2_zs, ops_1_to_2_zf)
-    @eval Base.$fn(t::T) where {T<:GradientTracer} = (empty(T), t)
-end
-for fn in ops_1_to_2_zz
-    @eval Base.$fn(::T) where {T<:GradientTracer} = (empty(T), empty(T))
+## 1-to-2
+for fn in ops_1_to_2
+    @eval function Base.$fn(t::T) where {T<:GradientTracer}
+        g1 = if is_firstder_out1_zero_global($fn)
+            empty(T)
+        else
+            t
+        end
+        g2 = if is_firstder_out2_zero_global($fn)
+            empty(T)
+        else
+            t
+        end
+        return (g1, g2)
+    end
 end
 
 # Extra types required for exponent
