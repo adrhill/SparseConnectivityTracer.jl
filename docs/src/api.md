@@ -24,8 +24,8 @@ Currently, three tracer types are provided:
 
 ```@docs
 SparseConnectivityTracer.ConnectivityTracer
-SparseConnectivityTracer.GlobalGradientTracer
-SparseConnectivityTracer.GlobalHessianTracer
+SparseConnectivityTracer.GradientTracer
+SparseConnectivityTracer.HessianTracer
 ```
 
 We also define alternative pseudo-set types that can deliver faster `union`:

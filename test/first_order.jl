@@ -1,6 +1,6 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer:
-    ConnectivityTracer, GlobalGradientTracer, tracer, trace_input, empty
+    ConnectivityTracer, GradientTracer, tracer, trace_input, empty
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
@@ -8,7 +8,7 @@ using Test
     BitSet, Set{UInt64}, DuplicateVector{UInt64}, RecursiveSet{UInt64}, SortedVector{UInt64}
 )
     CT = ConnectivityTracer{G}
-    JT = GlobalGradientTracer{G}
+    JT = GradientTracer{G}
 
     x = rand(3)
     xt = trace_input(CT, x)
@@ -30,7 +30,7 @@ using Test
     @test connectivity_pattern(Returns(1), 1, G) ≈ [0;;]
     @test jacobian_pattern(Returns(1), 1, G) ≈ [0;;]
 
-    # Test GlobalGradientTracer on functions with zero derivatives
+    # Test GradientTracer on functions with zero derivatives
     x = rand(2)
     g(x) = [x[1] * x[2], ceil(x[1] * x[2]), x[1] * round(x[2])]
     @test connectivity_pattern(g, x, G) ≈ [1 1; 1 1; 1 1]

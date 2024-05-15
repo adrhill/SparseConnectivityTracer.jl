@@ -1,5 +1,5 @@
 using SparseConnectivityTracer
-using SparseConnectivityTracer: GlobalHessianTracer, tracer, trace_input, empty
+using SparseConnectivityTracer: HessianTracer, tracer, trace_input, empty
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
@@ -18,7 +18,7 @@ end
 )
     I = eltype(G)
     H = Set{Tuple{I,I}}
-    HT = GlobalHessianTracer{G,H}
+    HT = HessianTracer{G,H}
 
     @test hessian_pattern(identity, rand(), G, H) ≈ [0;;]
     @test hessian_pattern(sqrt, rand(), G, H) ≈ [1;;]

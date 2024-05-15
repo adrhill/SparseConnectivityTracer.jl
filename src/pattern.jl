@@ -8,7 +8,7 @@ const DEFAULT_MATRIX_TYPE = Set{Tuple{Int,Int}}
 
 
 Enumerates input indices and constructs the specified type `T` of tracer.
-Supports [`ConnectivityTracer`](@ref), [`GlobalGradientTracer`](@ref) and [`GlobalHessianTracer`](@ref).
+Supports [`ConnectivityTracer`](@ref), [`GradientTracer`](@ref) and [`HessianTracer`](@ref).
 """
 trace_input(::Type{T}, x) where {T<:AbstractTracer} = trace_input(T, x, 1)
 trace_input(::Type{T}, ::Number, i) where {T<:AbstractTracer} = tracer(T, i)
@@ -119,7 +119,7 @@ julia> jacobian_pattern(f, x)
 ```
 """
 function jacobian_pattern(f, x, ::Type{G}=DEFAULT_VECTOR_TYPE) where {G}
-    xt, yt = trace_function(GlobalGradientTracer{G}, f, x)
+    xt, yt = trace_function(GradientTracer{G}, f, x)
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
@@ -132,13 +132,13 @@ Compute the sparsity pattern of the Jacobian of `f!(y, x)`.
 The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
 """
 function jacobian_pattern(f!, y, x, ::Type{G}=DEFAULT_VECTOR_TYPE) where {G}
-    xt, yt = trace_function(GlobalGradientTracer{G}, f!, y, x)
+    xt, yt = trace_function(GradientTracer{G}, f!, y, x)
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
 function jacobian_pattern_to_mat(
     xt::AbstractArray{T}, yt::AbstractArray{<:Number}
-) where {T<:GlobalGradientTracer}
+) where {T<:GradientTracer}
     n, m = length(xt), length(yt)
     I = Int[] # row indices
     J = Int[] # column indices
@@ -192,13 +192,13 @@ julia> hessian_pattern(g, x)
 function hessian_pattern(
     f, x, ::Type{G}=DEFAULT_VECTOR_TYPE, ::Type{H}=DEFAULT_MATRIX_TYPE
 ) where {G,H}
-    xt, yt = trace_function(GlobalHessianTracer{G,H}, f, x)
+    xt, yt = trace_function(HessianTracer{G,H}, f, x)
     return hessian_pattern_to_mat(to_array(xt), yt)
 end
 
 function hessian_pattern_to_mat(
     xt::AbstractArray{T}, yt::T
-) where {G,H<:AbstractSet,T<:GlobalHessianTracer{G,H}}
+) where {G,H<:AbstractSet,T<:HessianTracer{G,H}}
     # Allocate Hessian matrix
     n = length(xt)
     I = Int[] # row indices
