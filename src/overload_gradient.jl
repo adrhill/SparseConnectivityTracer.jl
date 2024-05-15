@@ -107,7 +107,7 @@ for fn in ops_1_to_2
         else
             t
         end
-        return (tracer1,)
+        return (tracer1, tracer2)
     end
 
     @eval function Base.$fn(tx::D) where {P,T<:GradientTracer,D<:Dual{P,T}}

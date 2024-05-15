@@ -132,6 +132,56 @@ for fn in ops_2_to_1
     end
 end
 
+## 1-to-2
+for fn in ops_1_to_2
+    @eval function Base.$fn(t::T) where {T<:HessianTracer}
+        tracer1 = if is_seconder_out1_zero_global($fn)
+            if is_firstder_out1_zero_global($fn)
+                return empty(T)
+            else
+                return t
+            end
+        else
+            return T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))
+        end
+        tracer2 = if is_seconder_out2_zero_global($fn)
+            if is_firstder_out2_zero_global($fn)
+                return empty(T)
+            else
+                return t
+            end
+        else
+            return T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))
+        end
+        return (tracer1, tracer2)
+    end
+
+    @eval function Base.$fn(tx::D) where {P,T<:HessianTracer,D<:Dual{P,T}}
+        x = primal(tx)
+        out1, out2 = Base.$fn(x)
+
+        tracer1 = if is_seconder_out1_zero_local($fn, x)
+            if is_firstder_out1_zero_local($fn, x)
+                return empty(T)
+            else
+                return t
+            end
+        else
+            return T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))
+        end
+        tracer2 = if is_seconder_out2_zero_local($fn, x)
+            if is_firstder_out2_zero_local($fn, x)
+                return empty(T)
+            else
+                return t
+            end
+        else
+            return T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))
+        end
+        return (Dual(out1, tracer1), Dual(out2, tracer2))
+    end
+end
+
 # TODO: support Dual tracers for these.
 # Extra types required for exponent
 for T in (:Real, :Integer, :Rational)
