@@ -15,7 +15,7 @@ function is_firstder_zero_global end
 function is_seconder_zero_global end
 
 # Fallbacks for local derivatives:
-is_firstder_zero_local(f, x) = is_firstder_zero_global(f) 
+is_firstder_zero_local(f, x) = is_firstder_zero_global(f)
 is_seconder_zero_local(f, x) = is_seconder_zero_global(f)
 
 # ops_1_to_1_s: 
@@ -208,6 +208,9 @@ for op in ops_2_to_1_fsc
     SparseConnectivityTracer.is_crossder_zero_global(::T)      = false
 end
 
+# gradient of x/y: [1/y -x/y²]
+SparseConnectivityTracer.is_firstder_arg2_zero_local(::typeof(Base.:/)) = iszero(x)
+
 # ops_2_to_1_fsz: 
 # ∂f/∂x    != 0
 # ∂²f/∂x²  == 0
@@ -242,6 +245,11 @@ for op in ops_2_to_1_ffc
     SparseConnectivityTracer.is_crossder_zero_global(::T)      = false
 end
 
+# gradient of x*y: [y x]
+SparseConnectivityTracer.is_firstder_arg1_zero_local(::typeof(Base.:*)) = iszero(y)
+SparseConnectivityTracer.is_firstder_arg2_zero_local(::typeof(Base.:*)) = iszero(x)
+SparseConnectivityTracer.is_crossder_zero_local(::typeof(Base.:*))      = iszero(x) || iszero(y)
+
 # ops_2_to_1_ffz: 
 # ∂f/∂x    != 0
 # ∂²f/∂x²  == 0
@@ -262,15 +270,14 @@ for op in ops_2_to_1_ffz
     SparseConnectivityTracer.is_crossder_zero_global(::T)      = true
 end
 
+is_firstder_arg2_zero_local(::typeof(mod), x, y) = ifelse(y > 0, y > x, x > y)
+is_firstder_arg2_zero_local(::typeof(rem), x, y) = ifelse(y > 0, y > x, x > y)
 
-is_firstder_arg2_zero_local(::Type{typeof(mod)}, x, y) = ifelse(y > 0, y>x, x>y)
-is_firstder_arg2_zero_local(::Type{typeof(rem)}, x, y) = ifelse(y > 0, y>x, x>y)
+is_firstder_arg1_zero_local(::typeof(max), x, y) = x < y
+is_firstder_arg2_zero_local(::typeof(max), x, y) = y < x
 
-is_firstder_arg1_zero_local(::Type{typeof(max)}, x, y) = x < y 
-is_firstder_arg2_zero_local(::Type{typeof(max)}, x, y) = y < x 
-
-is_firstder_arg1_zero_local(::Type{typeof(min)}, x, y) = x > y 
-is_firstder_arg2_zero_local(::Type{typeof(min)}, x, y) = y > x 
+is_firstder_arg1_zero_local(::typeof(min), x, y) = x > y
+is_firstder_arg2_zero_local(::typeof(min), x, y) = y > x
 
 # ops_2_to_1_szz: 
 # ∂f/∂x    != 0
@@ -365,10 +372,9 @@ ops_2_to_1 = union(
     # Including second- and first-order
     ops_2_to_1_sfc,
     ops_2_to_1_sfz,
-    
     ops_2_to_1_fsc,
     ops_2_to_1_fsz,
-    
+
     # Including first-order only
     ops_2_to_1_ffc,
     ops_2_to_1_ffz,
@@ -376,11 +382,9 @@ ops_2_to_1 = union(
     # Including zero-order
     ops_2_to_1_szz,
     ops_2_to_1_zsz,
-
     ops_2_to_1_fzz,
     ops_2_to_1_zfz,
-
-    ops_2_to_1_zzz,   
+    ops_2_to_1_zzz,
 )
 
 ##==================================#
