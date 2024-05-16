@@ -126,5 +126,4 @@ function Base.round(
 end
 
 ## Random numbers 
-# TODO: support random numbers on Duals
 rand(::AbstractRNG, ::SamplerType{T}) where {T<:GradientTracer} = empty(T)
