@@ -1,9 +1,10 @@
-## Type conversions
+## Type conversions (non-dual)
 for TT in (:GradientTracer, :ConnectivityTracer, :HessianTracer)
     @eval Base.promote_rule(::Type{T}, ::Type{N}) where {T<:$TT,N<:Number} = T
     @eval Base.promote_rule(::Type{N}, ::Type{T}) where {T<:$TT,N<:Number} = T
 
     @eval Base.big(::Type{T}) where {T<:$TT}   = T
+    @eval Base.big(t::T) where {T<:$TT}        = t
     @eval Base.widen(::Type{T}) where {T<:$TT} = T
     @eval Base.widen(t::T) where {T<:$TT}      = t
 
@@ -12,10 +13,22 @@ for TT in (:GradientTracer, :ConnectivityTracer, :HessianTracer)
     @eval Base.convert(::Type{<:Number}, t::T) where {T<:$TT} = t
 
     ## Constants
-    @eval Base.zero(::Type{T}) where {T<:$TT}    = empty(T)
-    @eval Base.one(::Type{T}) where {T<:$TT}     = empty(T)
-    @eval Base.typemin(::Type{T}) where {T<:$TT} = empty(T)
-    @eval Base.typemax(::Type{T}) where {T<:$TT} = empty(T)
+    @eval Base.zero(::Type{T}) where {T<:$TT}        = empty(T)
+    @eval Base.zero(::T) where {T<:$TT}              = empty(T)
+    @eval Base.one(::Type{T}) where {T<:$TT}         = empty(T)
+    @eval Base.one(::T) where {T<:$TT}               = empty(T)
+    @eval Base.typemin(::Type{T}) where {T<:$TT}     = empty(T)
+    @eval Base.typemin(::T) where {T<:$TT}           = empty(T)
+    @eval Base.typemax(::Type{T}) where {T<:$TT}     = empty(T)
+    @eval Base.typemax(::T) where {T<:$TT}           = empty(T)
+    @eval Base.eps(::Type{T}) where {T<:$TT}         = empty(T)
+    @eval Base.eps(::T) where {T<:$TT}               = empty(T)
+    @eval Base.floatmin(::Type{T}) where {T<:$TT}    = empty(T)
+    @eval Base.floatmin(::T) where {T<:$TT}          = empty(T)
+    @eval Base.floatmax(::Type{T}) where {T<:$TT}    = empty(T)
+    @eval Base.floatmax(::T) where {T<:$TT}          = empty(T)
+    @eval Base.maxintfloat(::Type{T}) where {T<:$TT} = empty(T)
+    @eval Base.maxintfloat(::T) where {T<:$TT}       = empty(T)
 
     ## Array constructors
     @eval Base.similar(a::Array{T,1}) where {T<:$TT}               = zeros(T, size(a, 1))

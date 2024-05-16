@@ -1,11 +1,7 @@
 # TODO: support Duals
 
-for fn in union(ops_1_to_1_s, ops_1_to_1_f, ops_1_to_1_z)
+for fn in ops_1_to_1
     @eval Base.$fn(t::ConnectivityTracer) = t
-end
-
-for fn in ops_1_to_1_const
-    @eval Base.$fn(::T) where {T<:ConnectivityTracer} = empty(T)
 end
 
 for fn in ops_1_to_2

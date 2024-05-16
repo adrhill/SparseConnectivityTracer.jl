@@ -82,27 +82,10 @@ for op in ops_1_to_1_z
     SparseConnectivityTracer.is_seconder_zero_global(::T) = true
 end
 
-# Functions returning constant output
-# that only depends on the input type.
-# For the purpose of operator overloading,
-# these are kept separate from ops_1_to_1_z.
-ops_1_to_1_const = (
-    :zero, :one,
-    :eps, 
-    :typemin, :typemax,
-    :floatmin, :floatmax, :maxintfloat, 
-)
-for op in ops_1_to_1_const
-    T = typeof(eval(op))
-    SparseConnectivityTracer.is_firstder_zero_global(::T) = true
-    SparseConnectivityTracer.is_seconder_zero_global(::T) = true
-end
-
 ops_1_to_1 = union(
     ops_1_to_1_s, 
     ops_1_to_1_f, 
     ops_1_to_1_z,
-    ops_1_to_1_const,
 )
 
 ##==================================#
