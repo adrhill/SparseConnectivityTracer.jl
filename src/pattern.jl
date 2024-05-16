@@ -263,6 +263,16 @@ julia> local_hessian_pattern(f, x)
  ⋅  1  ⋅  ⋅  ⋅
  ⋅  ⋅  ⋅  1  ⋅
  ⋅  1  ⋅  ⋅  ⋅
+
+julia> x = [4.0 3.0 5.0 1.0 2.0];
+
+julia> local_hessian_pattern(f, x)
+5×5 SparseArrays.SparseMatrixCSC{Bool, Int64} with 5 stored entries:
+ ⋅  1  ⋅  ⋅  ⋅
+ 1  ⋅  1  ⋅  ⋅
+ ⋅  1  ⋅  ⋅  ⋅
+ ⋅  ⋅  ⋅  1  ⋅
+ ⋅  ⋅  ⋅  ⋅  ⋅
 ```
 """
 function local_hessian_pattern(
