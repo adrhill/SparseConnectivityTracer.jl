@@ -1,130 +1,123 @@
 ## 1-to-1
+function gradient_tracer_1_to_1(t::T, is_firstder_zero::Bool) where {T<:GradientTracer}
+    if is_firstder_zero
+        return empty(T)
+    else
+        return t
+    end
+end
+
 for fn in ops_1_to_1
     @eval function Base.$fn(t::T) where {T<:GradientTracer}
-        if is_firstder_zero_global($fn)
-            return empty(T)
-        else
-            return t
-        end
+        return gradient_tracer_1_to_1(t, is_firstder_zero_global($fn))
     end
     @eval function Base.$fn(t::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
         x = primal(t)
-        out = Base.$fn(x)
-        if is_firstder_zero_local($fn, x)
-            return Dual(out, empty(T))
-        else
-            return Dual(out, tracer(t))
-        end
+        p_out = Base.$fn(x)
+        t_out = gradient_tracer_1_to_1(tracer(t), is_firstder_zero_local($fn, x))
+        return Dual(p_out, t_out)
     end
 end
 
 ## 2-to-1
-for fn in ops_2_to_1
-    @eval function Base.$fn(tx::T, ty::T) where {T<:GradientTracer}
-        ∂f∂x0 = is_firstder_arg1_zero_global($fn)
-        ∂f∂y0 = is_firstder_arg2_zero_global($fn)
-        if ∂f∂x0
-            if ∂f∂y0
-                return empty(T)
-            else # ∂f∂y ≠ 0 
-                return ty
-            end
-        else # ∂f∂x ≠ 0 
-            if ∂f∂y0
-                return tx
-            else # ∂f∂y ≠ 0 
-                return T(gradient(tx) ∪ gradient(ty))
-            end
-        end
-    end
-    @eval function Base.$fn(tx::D, ty::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
-        x = primal(tx)
-        y = primal(ty)
-        out = Base.$fn(x, y)
-
-        ∂f∂x0 = is_firstder_arg1_zero_local($fn, x, y)
-        ∂f∂y0 = is_firstder_arg2_zero_local($fn, x, y)
-        if ∂f∂x0
-            if ∂f∂y0
-                return Dual(out, empty(T))
-            else # ∂f∂y ≠ 0 
-                return Dual(out, tracer(ty))
-            end
-        else # ∂f∂x ≠ 0 
-            if ∂f∂y0
-                return Dual(out, tracer(tx))
-            else # ∂f∂y ≠ 0 
-                return Dual(out, T(gradient(tx) ∪ gradient(ty)))
-            end
-        end
-    end
-
-    @eval function Base.$fn(t::T, ::Number) where {T<:GradientTracer}
-        if is_firstder_arg1_zero_global($fn)
+function gradient_tracer_2_to_1(
+    tx::T,
+    ty::T,
+    is_firstder_arg1_zero_or_number::Bool,
+    is_firstder_arg2_zero_or_number::Bool,
+) where {T<:GradientTracer}
+    if is_firstder_arg1_zero_or_number
+        if is_firstder_arg2_zero_or_number
             return empty(T)
         else
-            return t
+            return ty
         end
-    end
-    @eval function Base.$fn(tx::D, y::Number) where {P,T<:GradientTracer,D<:Dual{P,T}}
-        x = primal(tx)
-        out = Base.$fn(x, y)
-        if is_firstder_arg1_zero_local($fn, x, y)
-            return Dual(out, empty(T))
+    else # ∂f∂x ≠ 0 
+        if is_firstder_arg2_zero_or_number
+            return tx
         else
-            return Dual(out, tracer(tx))
-        end
-    end
-
-    @eval function Base.$fn(::Number, t::T) where {T<:GradientTracer}
-        if is_firstder_arg2_zero_global($fn)
-            return empty(T)
-        else
-            return t
-        end
-    end
-    @eval function Base.$fn(x::Number, ty::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
-        y = primal(ty)
-        out = Base.$fn(x, y)
-        if is_firstder_arg2_zero_local($fn, x, y)
-            return Dual(out, empty(T))
-        else
-            return Dual(out, tracer(ty))
+            return T(gradient(tx) ∪ gradient(ty))
         end
     end
 end
 
-## 1-to-2
-for fn in ops_1_to_2
-    @eval function Base.$fn(t::T) where {T<:GradientTracer}
-        tracer1 = if is_firstder_out1_zero_global($fn)
-            empty(T)
-        else
-            t
-        end
-        tracer2 = if is_firstder_out2_zero_global($fn)
-            empty(T)
-        else
-            t
-        end
-        return (tracer1, tracer2)
+function gradient_tracer_2_to_1_one_tracer(
+    t::T, is_firstder_zero::Bool
+) where {T<:GradientTracer}
+    if is_firstder_zero
+        return empty(T)
+    else
+        return t
+    end
+end
+
+for fn in ops_2_to_1
+    @eval function Base.$fn(tx::T, ty::T) where {T<:GradientTracer}
+        return gradient_tracer_2_to_1(
+            tx, ty, is_firstder_arg1_zero_global($fn), is_firstder_arg2_zero_global($fn)
+        )
+    end
+    @eval function Base.$fn(dx::D, dy::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
+        x = primal(dx)
+        y = primal(dy)
+        p_out = Base.$fn(x, y)
+        t_out = gradient_tracer_2_to_1(
+            tracer(dx),
+            tracer(dy),
+            is_firstder_arg1_zero_local($fn, x, y),
+            is_firstder_arg2_zero_local($fn, x, y),
+        )
+        return Dual(p_out, t_out)
     end
 
-    @eval function Base.$fn(tx::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
-        x = primal(tx)
-        out1, out2 = Base.$fn(x)
+    @eval function Base.$fn(t::T, ::Number) where {T<:GradientTracer}
+        return gradient_tracer_2_to_1_one_tracer(t, is_firstder_arg1_zero_global($fn))
+    end
+    @eval function Base.$fn(dx::D, y::Number) where {P,T<:GradientTracer,D<:Dual{P,T}}
+        x = primal(dx)
+        p_out = Base.$fn(x, y)
+        t_out = gradient_tracer_2_to_1_one_tracer(
+            tracer(dx), is_firstder_arg1_zero_local($fn, x, y)
+        )
+        return Dual(p_out, t_out)
+    end
 
-        tracer1 = if is_firstder_out1_zero_global($fn)
-            empty(T)
-        else
-            tracer(tx)
-        end
-        tracer2 = if is_firstder_out2_zero_global($fn)
-            empty(T)
-        else
-            tracer(tx)
-        end
-        return (Dual(out1, tracer1), Dual(out2, tracer2))
+    @eval function Base.$fn(::Number, t::T) where {T<:GradientTracer}
+        return gradient_tracer_2_to_1_one_tracer(t, is_firstder_arg2_zero_global($fn))
+    end
+    @eval function Base.$fn(x::Number, dy::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
+        y = primal(dy)
+        p_out = Base.$fn(x, y)
+        t_out = gradient_tracer_2_to_1_one_tracer(
+            tracer(dx), is_firstder_arg2_zero_local($fn, x, y)
+        )
+        return Dual(p_out, t_out)
+    end
+end
+
+## 1-to-2
+function gradient_tracer_1_to_2(
+    t::T, is_firstder_out1_zero::Bool, is_firstder_out2_zero::Bool
+) where {T<:GradientTracer}
+    t1 = gradient_tracer_1_to_1(t, is_firstder_out1_zero)
+    t2 = gradient_tracer_1_to_1(t, is_firstder_out2_zero)
+    return (t1, t2)
+end
+
+for fn in ops_1_to_2
+    @eval function Base.$fn(t::T) where {T<:GradientTracer}
+        return gradient_tracer_1_to_2(
+            t, is_firstder_out1_zero_global($fn), is_firstder_out2_zero_global($fn)
+        )
+    end
+
+    @eval function Base.$fn(dx::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
+        x = primal(dx)
+        p1_out, p2_out = Base.$fn(x)
+        t1_out, t2_out = gradient_tracer_1_to_2(
+            t, is_firstder_out1_zero_local($fn, x), is_firstder_out2_zero_local($fn, x)
+        )
+        return (Dual(p1_out, t1_out), Dual(p1_out, t1_out))
     end
 end
 
