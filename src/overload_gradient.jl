@@ -11,10 +11,10 @@ for fn in ops_1_to_1
     @eval function Base.$fn(t::T) where {T<:GradientTracer}
         return gradient_tracer_1_to_1(t, is_firstder_zero_global($fn))
     end
-    @eval function Base.$fn(t::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
-        x = primal(t)
+    @eval function Base.$fn(d::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
+        x = primal(d)
         p_out = Base.$fn(x)
-        t_out = gradient_tracer_1_to_1(tracer(t), is_firstder_zero_local($fn, x))
+        t_out = gradient_tracer_1_to_1(tracer(d), is_firstder_zero_local($fn, x))
         return Dual(p_out, t_out)
     end
 end
@@ -70,8 +70,8 @@ for fn in ops_2_to_1
         return Dual(p_out, t_out)
     end
 
-    @eval function Base.$fn(t::T, ::Number) where {T<:GradientTracer}
-        return gradient_tracer_2_to_1_one_tracer(t, is_firstder_arg1_zero_global($fn))
+    @eval function Base.$fn(tx::T, ::Number) where {T<:GradientTracer}
+        return gradient_tracer_2_to_1_one_tracer(tx, is_firstder_arg1_zero_global($fn))
     end
     @eval function Base.$fn(dx::D, y::Number) where {P,T<:GradientTracer,D<:Dual{P,T}}
         x = primal(dx)
@@ -82,8 +82,8 @@ for fn in ops_2_to_1
         return Dual(p_out, t_out)
     end
 
-    @eval function Base.$fn(::Number, t::T) where {T<:GradientTracer}
-        return gradient_tracer_2_to_1_one_tracer(t, is_firstder_arg2_zero_global($fn))
+    @eval function Base.$fn(::Number, ty::T) where {T<:GradientTracer}
+        return gradient_tracer_2_to_1_one_tracer(ty, is_firstder_arg2_zero_global($fn))
     end
     @eval function Base.$fn(x::Number, dy::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
         y = primal(dy)
@@ -111,8 +111,8 @@ for fn in ops_1_to_2
         )
     end
 
-    @eval function Base.$fn(dx::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
-        x = primal(dx)
+    @eval function Base.$fn(d::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
+        x = primal(d)
         p1_out, p2_out = Base.$fn(x)
         t1_out, t2_out = gradient_tracer_1_to_2(
             t, is_firstder_out1_zero_local($fn, x), is_firstder_out2_zero_local($fn, x)
