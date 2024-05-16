@@ -1,7 +1,7 @@
 ## 1-to-1
 function hessian_tracer_1_to_1(
     t::T, is_firstder_zero::Bool, is_seconder_zero::Bool
-) where {T<:HessianTracer}
+) where {G,H,T<:HessianTracer{G,H}}
     if is_seconder_zero
         if is_firstder_zero
             return empty(T)
@@ -9,7 +9,11 @@ function hessian_tracer_1_to_1(
             return t
         end
     else
-        return T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))
+        if is_firstder_zero
+            return T(empty(G), gradient(t) × gradient(t))
+        else
+            return T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))
+        end
     end
 end
 
