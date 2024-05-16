@@ -89,7 +89,7 @@ for fn in ops_2_to_1
         y = primal(dy)
         p_out = Base.$fn(x, y)
         t_out = gradient_tracer_2_to_1_one_tracer(
-            tracer(dx), is_firstder_arg2_zero_local($fn, x, y)
+            tracer(dy), is_firstder_arg2_zero_local($fn, x, y)
         )
         return Dual(p_out, t_out)
     end
@@ -126,10 +126,10 @@ for T in (Real, Integer, Rational, Irrational{:ℯ})
     Base.:^(t::GradientTracer, ::T) = t
     Base.:^(::T, t::GradientTracer) = t
 
-    function Base.:^(dx::D, y::T) where {P,T<:GradientTracer,D<:Dual{P,T}}
+    function Base.:^(dx::D, y::T) where {P,GT<:GradientTracer,D<:Dual{P,GT}}
         return Dual(primal(dx)^y, tracer(dx))
     end
-    function Base.:^(x::T, dy::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
+    function Base.:^(x::T, dy::D) where {P,GT<:GradientTracer,D<:Dual{P,GT}}
         return Dual(x^primal(dy), tracer(dy))
     end
 end

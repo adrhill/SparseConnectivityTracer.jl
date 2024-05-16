@@ -1,4 +1,4 @@
-# Overload comparisons on Dual numbers
+# Special overloads for Dual numbers
 for fn in (
     :iseven,
     :isfinite,
@@ -11,6 +11,7 @@ for fn in (
     :isone,
     :isreal,
     :iszero,
+    :real,
 )
     @eval Base.$fn(d::D) where {D<:Dual} = $fn(primal(d))
 end
