@@ -48,3 +48,42 @@ end
 function Base.similar(::Array, ::Type{HessianTracer{G,H}}, dims::Dims{N}) where {G,H,N}
     return zeros(HessianTracer{G,H}, dims)
 end
+
+## Duals
+function Base.promote_rule(::Type{D}, ::Type{N}) where {P,T,D<:Dual{P,T},N<:Number}
+    PP = Base.promote_rule(P, N) # TODO: possible method call error?
+    return D{PP,T}
+end
+function Base.promote_rule(::Type{N}, ::Type{D}) where {P,T,D<:Dual{P,T},N<:Number}
+    PP = Base.promote_rule(P, N) # TODO: possible method call error?
+    return D{PP,T}
+end
+
+Base.big(::Type{D}) where {P,T,D<:Dual{P,T}}   = Dual{big(P),T}
+Base.big(::Type{D}) where {P,T,D<:Dual{P,T}}   = Dual(big(primal(d)), tracer(d))
+Base.widen(::Type{D}) where {P,T,D<:Dual{P,T}} = Dual{widen(P),T}
+Base.widen(d::D) where {P,T,D<:Dual{P,T}}      = Dual(widen(primal(d)), tracer(d))
+
+Base.convert(::Type{D}, x::Number) where {P,T,D<:Dual{P,T}} = Dual(x, empty(T))
+Base.convert(::Type{D}, d::D) where {D<:Dual} = d
+function Base.convert(::Type{T}, d::D) where {T<:Number,D<:Dual}
+    return Dual(convert(T, primal(d)), tracer(d))
+end
+
+## Constants
+Base.zero(::Type{D}) where {P,T,D<:Dual{P,T}}        = D(zero(P), empty(T))
+Base.zero(d::D) where {P,T,D<:Dual{P,T}}             = D(zero(primal(d)), empty(T))
+Base.one(::Type{D}) where {P,T,D<:Dual{P,T}}         = D(one(P), empty(T))
+Base.one(d::D) where {P,T,D<:Dual{P,T}}              = D(one(primal(d)), empty(T))
+Base.typemin(::Type{D}) where {P,T,D<:Dual{P,T}}     = D(typemin(P), empty(T))
+Base.typemin(d::D) where {P,T,D<:Dual{P,T}}          = D(typemin(primal(d)), empty(T))
+Base.typemax(::Type{D}) where {P,T,D<:Dual{P,T}}     = D(typemax(P), empty(T))
+Base.typemax(d::D) where {P,T,D<:Dual{P,T}}          = D(typemax(primal(d)), empty(T))
+Base.eps(::Type{D}) where {P,T,D<:Dual{P,T}}         = D(eps(P), empty(T))
+Base.eps(d::D) where {P,T,D<:Dual{P,T}}              = D(eps(primal(d)), empty(T))
+Base.floatmin(::Type{D}) where {P,T,D<:Dual{P,T}}    = D(floatmin(P), empty(T))
+Base.floatmin(d::D) where {P,T,D<:Dual{P,T}}         = D(floatmin(primal(d)), empty(T))
+Base.floatmax(::Type{D}) where {P,T,D<:Dual{P,T}}    = D(floatmax(P), empty(T))
+Base.floatmax(d::D) where {P,T,D<:Dual{P,T}}         = D(floatmax(primal(d)), empty(T))
+Base.maxintfloat(::Type{D}) where {P,T,D<:Dual{P,T}} = D(maxintfloat(P), empty(T))
+Base.maxintfloat(d::D) where {P,T,D<:Dual{P,T}}      = D(maxintfloat(primal(d)), empty(T))
