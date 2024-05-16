@@ -23,17 +23,17 @@ end
 function gradient_tracer_2_to_1(
     tx::T,
     ty::T,
-    is_firstder_arg1_zero_or_number::Bool,
-    is_firstder_arg2_zero_or_number::Bool,
+    is_firstder_arg1_zero::Bool,
+    is_firstder_arg2_zero::Bool,
 ) where {T<:GradientTracer}
-    if is_firstder_arg1_zero_or_number
-        if is_firstder_arg2_zero_or_number
+    if is_firstder_arg1_zero
+        if is_firstder_arg2_zero
             return empty(T)
         else
             return ty
         end
     else # ∂f∂x ≠ 0 
-        if is_firstder_arg2_zero_or_number
+        if is_firstder_arg2_zero
             return tx
         else
             return T(gradient(tx) ∪ gradient(ty))

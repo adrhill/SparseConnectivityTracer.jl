@@ -182,14 +182,14 @@ function local_jacobian_pattern(f!, y, x, ::Type{G}=DEFAULT_VECTOR_TYPE) where {
 end
 
 function jacobian_pattern_to_mat(
-    xt::AbstractArray{TT}, yt::AbstractArray{<:Number}
-) where {P,T<:GradientTracer,D<:Dual{P,T},TT<:Union{T,D}}
+    xt::AbstractArray{T}, yt::AbstractArray{<:Number}
+) where {T<:GradientTracer}
     n, m = length(xt), length(yt)
     I = Int[] # row indices
     J = Int[] # column indices
     V = Bool[]   # values
     for (i, y) in enumerate(yt)
-        if y isa TT
+        if y isa T
             for j in gradient(y)
                 push!(I, i)
                 push!(J, j)
@@ -198,6 +198,15 @@ function jacobian_pattern_to_mat(
         end
     end
     return sparse(I, J, V, m, n)
+end
+
+_tracer_or_number(x::Number) = x
+_tracer_or_number(d::Dual) = tracer(d)
+
+function jacobian_pattern_to_mat(
+    xt::AbstractArray{D}, yt::AbstractArray{<:Number}
+) where {P,T<:GradientTracer,D<:Dual{P,T}}
+    return jacobian_pattern_to_mat(tracer.(xt), _tracer_or_number.(yt))
 end
 
 """
@@ -283,11 +292,7 @@ function local_hessian_pattern(
     return hessian_pattern_to_mat(to_array(xt), yt)
 end
 
-function hessian_pattern_to_mat(
-    xt::AbstractArray{TT}, yt::TT
-) where {P,T<:HessianTracer,D<:Dual{P,T},TT<:Union{T,D}}
-
-    # Allocate Hessian matrix
+function hessian_pattern_to_mat(xt::AbstractArray{T}, yt::T) where {T<:HessianTracer}
     n = length(xt)
     I = Int[] # row indices
     J = Int[] # column indices
@@ -300,4 +305,10 @@ function hessian_pattern_to_mat(
     end
     h = sparse(I, J, V, n, n)
     return h
+end
+
+function hessian_pattern_to_mat(
+    xt::AbstractArray{D}, yt::D
+) where {P,T<:HessianTracer,D<:Dual{P,T}}
+    return hessian_pattern_to_mat(tracer.(xt), tracer(yt))
 end
