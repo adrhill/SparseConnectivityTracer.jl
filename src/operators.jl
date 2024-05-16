@@ -269,7 +269,6 @@ for op in ops_2_to_1_ffz
 end
 
 is_firstder_arg2_zero_local(::typeof(mod), x, y) = ifelse(y > 0, y > x, x > y)
-is_firstder_arg2_zero_local(::typeof(rem), x, y) = ifelse(y > 0, y > x, x > y)
 
 is_firstder_arg1_zero_local(::typeof(max), x, y) = x < y
 is_firstder_arg2_zero_local(::typeof(max), x, y) = y < x
