@@ -21,10 +21,7 @@ end
 
 ## 2-to-1
 function gradient_tracer_2_to_1(
-    tx::T,
-    ty::T,
-    is_firstder_arg1_zero::Bool,
-    is_firstder_arg2_zero::Bool,
+    tx::T, ty::T, is_firstder_arg1_zero::Bool, is_firstder_arg2_zero::Bool
 ) where {T<:GradientTracer}
     if is_firstder_arg1_zero
         if is_firstder_arg2_zero
@@ -38,18 +35,6 @@ function gradient_tracer_2_to_1(
         else
             return T(gradient(tx) ∪ gradient(ty))
         end
-    end
-end
-
-function gradient_tracer_2_to_1_one_tracer(
-    t::T, is_firstder_zero::Bool
-) where {T<:GradientTracer}
-    # NOTE: this is identical to gradient_tracer_1_to_1 due to ignored second argument having empty set
-    # TODO: remove once gdalle agrees
-    if is_firstder_zero
-        return empty(T)
-    else
-        return t
     end
 end
 
@@ -73,26 +58,22 @@ for fn in ops_2_to_1
     end
 
     @eval function Base.$fn(tx::GradientTracer, ::Number)
-        return gradient_tracer_2_to_1_one_tracer(tx, is_firstder_arg1_zero_global($fn))
+        return gradient_tracer_1_to_1(tx, is_firstder_arg1_zero_global($fn))
     end
     @eval function Base.$fn(dx::D, y::Number) where {P,T<:GradientTracer,D<:Dual{P,T}}
         x = primal(dx)
         p_out = Base.$fn(x, y)
-        t_out = gradient_tracer_2_to_1_one_tracer(
-            tracer(dx), is_firstder_arg1_zero_local($fn, x, y)
-        )
+        t_out = gradient_tracer_1_to_1(tracer(dx), is_firstder_arg1_zero_local($fn, x, y))
         return Dual(p_out, t_out)
     end
 
     @eval function Base.$fn(::Number, ty::GradientTracer)
-        return gradient_tracer_2_to_1_one_tracer(ty, is_firstder_arg2_zero_global($fn))
+        return gradient_tracer_1_to_1(ty, is_firstder_arg2_zero_global($fn))
     end
     @eval function Base.$fn(x::Number, dy::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
         y = primal(dy)
         p_out = Base.$fn(x, y)
-        t_out = gradient_tracer_2_to_1_one_tracer(
-            tracer(dy), is_firstder_arg2_zero_local($fn, x, y)
-        )
+        t_out = gradient_tracer_1_to_1(tracer(dy), is_firstder_arg2_zero_local($fn, x, y))
         return Dual(p_out, t_out)
     end
 end

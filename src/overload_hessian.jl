@@ -61,22 +61,6 @@ function hessian_tracer_2_to_1(
     return T(grad, hess)
 end
 
-function hessian_tracer_2_to_1_one_tracer(
-    t::T, is_firstder_zero::Bool, is_seconder_zero::Bool
-) where {T<:HessianTracer}
-    # NOTE: this is identical to hessian_tracer_1_to_1 due to ignored second argument having empty set
-    # TODO: remove once gdalle agrees
-    if is_seconder_zero
-        if is_firstder_zero
-            return empty(T)
-        else
-            return t
-        end
-    else
-        return T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))
-    end
-end
-
 for fn in ops_2_to_1
     @eval function Base.$fn(tx::T, ty::T) where {T<:HessianTracer}
         return hessian_tracer_2_to_1(
@@ -106,12 +90,12 @@ for fn in ops_2_to_1
     end
 
     @eval function Base.$fn(tx::HessianTracer, y::Number)
-        return hessian_tracer_2_to_1_one_tracer(
+        return hessian_tracer_1_to_1(
             tx, is_firstder_arg1_zero_global($fn), is_seconder_arg1_zero_global($fn)
         )
     end
     @eval function Base.$fn(x::Number, ty::HessianTracer)
-        return hessian_tracer_2_to_1_one_tracer(
+        return hessian_tracer_1_to_1(
             ty, is_firstder_arg2_zero_global($fn), is_seconder_arg2_zero_global($fn)
         )
     end
@@ -119,7 +103,7 @@ for fn in ops_2_to_1
     @eval function Base.$fn(dx::D, y::Number) where {P,T<:HessianTracer,D<:Dual{P,T}}
         x = primal(dx)
         p_out = Base.$fn(x, y)
-        t_out = hessian_tracer_2_to_1_one_tracer(
+        t_out = hessian_tracer_1_to_1(
             tracer(dx),
             is_firstder_arg1_zero_local($fn, x, y),
             is_seconder_arg1_zero_local($fn, x, y),
@@ -129,7 +113,7 @@ for fn in ops_2_to_1
     @eval function Base.$fn(x::Number, dy::D) where {P,T<:HessianTracer,D<:Dual{P,T}}
         y = primal(dy)
         p_out = Base.$fn(x, y)
-        t_out = hessian_tracer_2_to_1_one_tracer(
+        t_out = hessian_tracer_1_to_1(
             tracer(dy),
             is_firstder_arg2_zero_local($fn, x, y),
             is_seconder_arg2_zero_local($fn, x, y),
