@@ -8,7 +8,7 @@ function gradient_tracer_1_to_1(t::T, is_firstder_zero::Bool) where {T<:Gradient
 end
 
 for fn in ops_1_to_1
-    @eval function Base.$fn(t::T) where {T<:GradientTracer}
+    @eval function Base.$fn(t::GradientTracer)
         return gradient_tracer_1_to_1(t, is_firstder_zero_global($fn))
     end
     @eval function Base.$fn(d::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
@@ -44,6 +44,8 @@ end
 function gradient_tracer_2_to_1_one_tracer(
     t::T, is_firstder_zero::Bool
 ) where {T<:GradientTracer}
+    # NOTE: this is identical to gradient_tracer_1_to_1 due to ignored second argument having empty set
+    # TODO: remove once gdalle agrees
     if is_firstder_zero
         return empty(T)
     else
@@ -70,7 +72,7 @@ for fn in ops_2_to_1
         return Dual(p_out, t_out)
     end
 
-    @eval function Base.$fn(tx::T, ::Number) where {T<:GradientTracer}
+    @eval function Base.$fn(tx::GradientTracer, ::Number)
         return gradient_tracer_2_to_1_one_tracer(tx, is_firstder_arg1_zero_global($fn))
     end
     @eval function Base.$fn(dx::D, y::Number) where {P,T<:GradientTracer,D<:Dual{P,T}}
@@ -82,7 +84,7 @@ for fn in ops_2_to_1
         return Dual(p_out, t_out)
     end
 
-    @eval function Base.$fn(::Number, ty::T) where {T<:GradientTracer}
+    @eval function Base.$fn(::Number, ty::GradientTracer)
         return gradient_tracer_2_to_1_one_tracer(ty, is_firstder_arg2_zero_global($fn))
     end
     @eval function Base.$fn(x::Number, dy::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
@@ -105,7 +107,7 @@ function gradient_tracer_1_to_2(
 end
 
 for fn in ops_1_to_2
-    @eval function Base.$fn(t::T) where {T<:GradientTracer}
+    @eval function Base.$fn(t::GradientTracer)
         return gradient_tracer_1_to_2(
             t, is_firstder_out1_zero_global($fn), is_firstder_out2_zero_global($fn)
         )
