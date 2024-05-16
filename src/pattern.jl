@@ -142,7 +142,7 @@ julia> x = [1.0, 2.0, 3.0];
 julia> f(x) = [x[1]^2, 2 * x[1] * x[2]^2, max(x[2],x[3])];
 
 julia> local_jacobian_pattern(f, x)
-3×3 SparseArrays.SparseMatrixCSC{Bool, Int64} with 3 stored entries:
+3×3 SparseArrays.SparseMatrixCSC{Bool, Int64} with 4 stored entries:
  1  ⋅  ⋅
  1  1  ⋅
  ⋅  ⋅  1
@@ -254,26 +254,15 @@ The type of index set `S` can be specified as an optional argument and defaults 
 ```jldoctest
 julia> x = [1.0 3.0 5.0 1.0 2.0];
 
-julia> f(x) = x[1] + x[2]*x[3] + 1/x[4] + x[5];
-
-julia> hessian_pattern(f, x)
-5×5 SparseArrays.SparseMatrixCSC{Bool, Int64} with 3 stored entries:
- ⋅  ⋅  ⋅  ⋅  ⋅
- ⋅  ⋅  1  ⋅  ⋅
- ⋅  1  ⋅  ⋅  ⋅
- ⋅  ⋅  ⋅  1  ⋅
- ⋅  ⋅  ⋅  ⋅  ⋅
-
-julia> g(x) = x[2] * max(x[1], x[5]);
+julia> f(x) = x[1] + x[2]*x[3] + 1/x[4] + x[2] * max(x[1], x[5]);
 
 julia> local_hessian_pattern(f, x)
-5×5 SparseArrays.SparseMatrixCSC{Bool, Int64} with 3 stored entries:
+5×5 SparseArrays.SparseMatrixCSC{Bool, Int64} with 5 stored entries:
  ⋅  ⋅  ⋅  ⋅  ⋅
  ⋅  ⋅  1  ⋅  1
  ⋅  1  ⋅  ⋅  ⋅
  ⋅  ⋅  ⋅  1  ⋅
  ⋅  1  ⋅  ⋅  ⋅
-
 ```
 """
 function local_hessian_pattern(
