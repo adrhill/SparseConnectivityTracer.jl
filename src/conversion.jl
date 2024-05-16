@@ -90,11 +90,11 @@ function Base.similar(a::Array{D,2}) where {P,T,D<:Dual{P,T}}
     p_out = similar(primal.(a))
     return Dual.(p_out, empty(T))
 end
-function Base.similar(a::Array{A,1}, ::Type{D}) where {A,P,T,D<:Dual{P,T}}
+function Base.similar(a::Array{A,1}, ::Type{D}) where {P,T,D<:Dual{P,T},A}
     p_out = similar(a, P)
     return Dual.(p_out, empty(T))
 end
-function Base.similar(a::Array{A,2}, ::Type{D}) where {A,P,T,D<:Dual{P,T}}
+function Base.similar(a::Array{A,2}, ::Type{D}) where {P,T,D<:Dual{P,T},A}
     p_out = similar(a, P)
     return Dual.(p_out, empty(T))
 end
@@ -102,7 +102,7 @@ function Base.similar(a::Array{D}, m::Int) where {P,T,D<:Dual{P,T}}
     p_out = similar(primal.(a), m)
     return Dual.(p_out, empty(T))
 end
-function Base.similar(a::Array{D}, dims::Dims{N}) where {N,D<:Dual}
+function Base.similar(a::Array{D}, dims::Dims{N}) where {P,T,D<:Dual{P,T}, N}
     p_out = similar(primal.(a), dims)
     return Dual.(p_out, empty(T))
 end

@@ -182,14 +182,14 @@ function local_jacobian_pattern(f!, y, x, ::Type{G}=DEFAULT_VECTOR_TYPE) where {
 end
 
 function jacobian_pattern_to_mat(
-    xt::AbstractArray{T}, yt::AbstractArray{<:Number}
-) where {P,G<:GradientTracer,T<:Union{G,Dual{P,G}}}
+    xt::AbstractArray{TT}, yt::AbstractArray{<:Number}
+) where {P,T<:GradientTracer,D<:Dual{P,T},TT<:Union{T,D}}
     n, m = length(xt), length(yt)
     I = Int[] # row indices
     J = Int[] # column indices
     V = Bool[]   # values
     for (i, y) in enumerate(yt)
-        if y isa T
+        if y isa TT
             for j in gradient(y)
                 push!(I, i)
                 push!(J, j)
@@ -285,8 +285,9 @@ function local_hessian_pattern(
 end
 
 function hessian_pattern_to_mat(
-    xt::AbstractArray{T}, yt::T
-) where {P,G,H<:AbstractSet,HT<:HessianTracer{G,H},T<:Union{HT,Dual{P,HT}}}
+    xt::AbstractArray{TT}, yt::TT
+) where {P,T<:HessianTracer,D<:Dual{P,T},TT<:Union{T,D}}
+
     # Allocate Hessian matrix
     n = length(xt)
     I = Int[] # row indices

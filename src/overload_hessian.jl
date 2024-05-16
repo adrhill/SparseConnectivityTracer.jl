@@ -38,7 +38,7 @@ function hessian_tracer_2_to_1(
     is_firstder_arg2_zero::Bool,
     is_seconder_arg2_zero::Bool,
     is_crossder_zero::Bool,
-) where {T<:HessianTracer}
+) where {G,H,T<:HessianTracer{G,H}}
     grad = empty(G)
     hess = empty(H)
     if !is_firstder_arg1_zero
@@ -63,7 +63,7 @@ end
 
 function hessian_tracer_2_to_1_one_tracer(
     t::T, is_firstder_zero::Bool, is_seconder_zero::Bool
-) where {T<:GradientTracer}
+) where {T<:HessianTracer}
     # NOTE: this is identical to hessian_tracer_1_to_1 due to ignored second argument having empty set
     # TODO: remove once gdalle agrees
     if is_seconder_zero
@@ -177,12 +177,12 @@ end
 
 # TODO: support Dual tracers for these.
 # Extra types required for exponent
-for T in (Real, Integer, Rational, Irrational{:ℯ})
-    function Base.:^(t::HT, ::T) where {HT<:HessianTracer}
-        return HT(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))
+for S in (Real, Integer, Rational, Irrational{:ℯ})
+    function Base.:^(t::T, ::S) where {T<:HessianTracer}
+        return T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))
     end
-    function Base.:^(::T, t::HT) where {HT<:HessianTracer}
-        return HT(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))
+    function Base.:^(::S, t::T) where {T<:HessianTracer}
+        return T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))
     end
 end
 

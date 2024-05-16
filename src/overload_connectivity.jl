@@ -32,14 +32,14 @@ for fn in ops_1_to_2
 end
 
 # Extra types required for exponent
-for T in (Real, Integer, Rational, Irrational{:ℯ})
-    Base.:^(t::ConnectivityTracer, ::T) = t
-    function Base.:^(dx::D, y::Number) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
+for S in (Real, Integer, Rational, Irrational{:ℯ})
+    Base.:^(t::ConnectivityTracer, ::S) = t
+    function Base.:^(dx::D, y::S) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
         return Dual(primal(dx)^y, tracer(dx))
     end
 
-    Base.:^(::T, t::ConnectivityTracer) = t
-    function Base.:^(x::Number, dy::D) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
+    Base.:^(::S, t::ConnectivityTracer) = t
+    function Base.:^(x::S, dy::D) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
         return Dual(x^primal(dy), tracer(dy))
     end
 end

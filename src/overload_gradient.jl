@@ -124,14 +124,14 @@ for fn in ops_1_to_2
 end
 
 # Extra types required for exponent 
-for T in (Real, Integer, Rational, Irrational{:ℯ})
-    Base.:^(t::GradientTracer, ::T) = t
-    Base.:^(::T, t::GradientTracer) = t
+for S in (Real, Integer, Rational, Irrational{:ℯ})
+    Base.:^(t::GradientTracer, ::S) = t
+    Base.:^(::S, t::GradientTracer) = t
 
-    function Base.:^(dx::D, y::T) where {P,GT<:GradientTracer,D<:Dual{P,GT}}
+    function Base.:^(dx::D, y::S) where {P,T<:GradientTracer,D<:Dual{P,T}}
         return Dual(primal(dx)^y, tracer(dx))
     end
-    function Base.:^(x::T, dy::D) where {P,GT<:GradientTracer,D<:Dual{P,GT}}
+    function Base.:^(x::S, dy::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
         return Dual(x^primal(dy), tracer(dy))
     end
 end
