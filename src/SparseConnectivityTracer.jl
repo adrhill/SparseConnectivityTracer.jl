@@ -16,6 +16,7 @@ include("operators.jl")
 include("overload_connectivity.jl")
 include("overload_gradient.jl")
 include("overload_hessian.jl")
+include("overload_comparisons.jl")
 include("pattern.jl")
 include("adtypes.jl")
 

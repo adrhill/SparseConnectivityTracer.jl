@@ -121,17 +121,27 @@ for fn in ops_1_to_2
     end
 end
 
-# TODO: support Dual tracers for these.
 # Extra types required for exponent 
-for T in (:Real, :Integer, :Rational)
-    @eval Base.:^(t::GradientTracer, ::$T) = t
-    @eval Base.:^(::$T, t::GradientTracer) = t
+for T in (Real, Integer, Rational, Irrational{:ℯ})
+    Base.:^(t::GradientTracer, ::T) = t
+    Base.:^(::T, t::GradientTracer) = t
+
+    function Base.:^(dx::D, y::T) where {P,T<:GradientTracer,D<:Dual{P,T}}
+        return Dual(primal(dx)^y, tracer(dx))
+    end
+    function Base.:^(x::T, dy::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
+        return Dual(x^primal(dy), tracer(dy))
+    end
 end
-Base.:^(t::GradientTracer, ::Irrational{:ℯ}) = t
-Base.:^(::Irrational{:ℯ}, t::GradientTracer) = t
 
 ## Rounding
 Base.round(t::T, ::RoundingMode; kwargs...) where {T<:GradientTracer} = empty(T)
+function Base.round(
+    d::D, mode::RoundingMode; kwargs...
+) where {P,T<:GradientTracer,D<:Dual{P,T}}
+    return Dual(round(primal(d), mode; kwargs...), empty(T))
+end
 
-## Random numbers
+## Random numbers 
+# TODO: support random numbers on Duals
 rand(::AbstractRNG, ::SamplerType{T}) where {T<:GradientTracer} = empty(T)
