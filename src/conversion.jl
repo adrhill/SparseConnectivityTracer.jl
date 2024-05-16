@@ -87,3 +87,33 @@ Base.floatmax(::Type{D}) where {P,T,D<:Dual{P,T}}    = D(floatmax(P), empty(T))
 Base.floatmax(d::D) where {P,T,D<:Dual{P,T}}         = D(floatmax(primal(d)), empty(T))
 Base.maxintfloat(::Type{D}) where {P,T,D<:Dual{P,T}} = D(maxintfloat(P), empty(T))
 Base.maxintfloat(d::D) where {P,T,D<:Dual{P,T}}      = D(maxintfloat(primal(d)), empty(T))
+
+## Array constructors
+function Base.similar(a::Array{D,1}) where {P,T,D<:Dual{P,T}}
+    p_out = similar(primal.(a))
+    return Dual.(p_out, empty(T))
+end
+function Base.similar(a::Array{D,2}) where {P,T,D<:Dual{P,T}}
+    p_out = similar(primal.(a))
+    return Dual.(p_out, empty(T))
+end
+function Base.similar(a::Array{A,1}, ::Type{D}) where {A,P,T,D<:Dual{P,T}}
+    p_out = similar(a, P)
+    return Dual.(p_out, empty(T))
+end
+function Base.similar(a::Array{A,2}, ::Type{D}) where {A,P,T,D<:Dual{P,T}}
+    p_out = similar(a, P)
+    return Dual.(p_out, empty(T))
+end
+function Base.similar(a::Array{D}, m::Int) where {P,T,D<:Dual{P,T}}
+    p_out = similar(primal.(a), m)
+    return Dual.(p_out, empty(T))
+end
+function Base.similar(a::Array{D}, dims::Dims{N}) where {N,D<:Dual}
+    p_out = similar(primal.(a), dims)
+    return Dual.(p_out, empty(T))
+end
+function Base.similar(a::Array, ::Type{D}, dims::Dims{N}) where {P,T,D<:Dual{P,T},N}
+    p_out = similar(primal.(a), P, dims)
+    return Dual.(p_out, empty(T))
+end
