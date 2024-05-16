@@ -2,6 +2,8 @@ using SparseConnectivityTracer
 using SparseConnectivityTracer:
     ConnectivityTracer, GradientTracer, tracer, trace_input, empty
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
+
+using LinearAlgebra: det, logdet
 using Test
 
 const FIRST_ORDER_SET_TYPES = (
@@ -79,5 +81,9 @@ end
         @test local_jacobian_pattern(x -> min(x[1], x[2]), [1.0, 2.0], G) ≈ [1 0;]
         @test local_jacobian_pattern(x -> min(x[1], x[2]), [2.0, 1.0], G) ≈ [0 1;]
         @test local_jacobian_pattern(x -> min(x[1], x[2]), [1.0, 1.0], G) ≈ [1 1;]
+
+        # Linear algebra
+        @test local_jacobian_pattern(logdet, [1.0 0.0; 2.0 2.0], G) ≈ [1 1; 1 1]  # (#68)
+        @test local_jacobian_pattern(x -> log(det(x)), [1.0 0.0; 2.0 2.0], G) ≈ [1 1; 1 1]
     end
 end
