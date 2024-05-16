@@ -137,15 +137,15 @@ The type of index set `S` can be specified as an optional argument and defaults 
 ## Example
 
 ```jldoctest
-julia> x = rand(3);
+julia> x = [1.0, 2.0, 3.0];
 
-julia> f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sign(x[3])];
+julia> f(x) = [x[1]^2, 2 * x[1] * x[2]^2, max(x[2],x[3])];
 
 julia> local_jacobian_pattern(f, x)
 3×3 SparseArrays.SparseMatrixCSC{Bool, Int64} with 3 stored entries:
  1  ⋅  ⋅
  1  1  ⋅
- ⋅  ⋅  ⋅
+ ⋅  ⋅  1
 ```
 """
 function local_jacobian_pattern(f, x, ::Type{G}=DEFAULT_VECTOR_TYPE) where {G}
@@ -241,9 +241,52 @@ function hessian_pattern(
     return hessian_pattern_to_mat(to_array(xt), yt)
 end
 
+"""
+    local_hessian_pattern(f, x)
+    local_hessian_pattern(f, x, T)
+
+Computes the local sparsity pattern of the Hessian of a scalar function `y = f(x)` at `x`.
+
+The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
+
+## Example
+
+```jldoctest
+julia> x = [1.0 3.0 5.0 1.0 2.0];
+
+julia> f(x) = x[1] + x[2]*x[3] + 1/x[4] + x[5];
+
+julia> hessian_pattern(f, x)
+5×5 SparseArrays.SparseMatrixCSC{Bool, Int64} with 3 stored entries:
+ ⋅  ⋅  ⋅  ⋅  ⋅
+ ⋅  ⋅  1  ⋅  ⋅
+ ⋅  1  ⋅  ⋅  ⋅
+ ⋅  ⋅  ⋅  1  ⋅
+ ⋅  ⋅  ⋅  ⋅  ⋅
+
+julia> g(x) = x[2] * max(x[1], x[5]);
+
+julia> local_hessian_pattern(f, x)
+5×5 SparseArrays.SparseMatrixCSC{Bool, Int64} with 3 stored entries:
+ ⋅  ⋅  ⋅  ⋅  ⋅
+ ⋅  ⋅  1  ⋅  1
+ ⋅  1  ⋅  ⋅  ⋅
+ ⋅  ⋅  ⋅  1  ⋅
+ ⋅  1  ⋅  ⋅  ⋅
+
+```
+"""
+function local_hessian_pattern(
+    f, x, ::Type{G}=DEFAULT_VECTOR_TYPE, ::Type{H}=DEFAULT_MATRIX_TYPE
+) where {G,H}
+    D = Dual{eltype(x),HessianTracer{G,H}}
+    xt, yt = trace_function(D, f, x)
+    return hessian_pattern_to_mat(to_array(xt), yt)
+end
+
 function hessian_pattern_to_mat(
     xt::AbstractArray{T}, yt::T
-) where {G,H<:AbstractSet,T<:HessianTracer{G,H}}
+) where {P,G,H<:AbstractSet,HT<:HessianTracer{G,H},T<:Union{HT,Dual{P,HT}}}
     # Allocate Hessian matrix
     n = length(xt)
     I = Int[] # row indices
