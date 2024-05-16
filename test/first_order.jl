@@ -82,6 +82,20 @@ end
         @test local_jacobian_pattern(x -> min(x[1], x[2]), [2.0, 1.0], G) ≈ [0 1;]
         @test local_jacobian_pattern(x -> min(x[1], x[2]), [1.0, 1.0], G) ≈ [1 1;]
 
+        # Comparisons
+        @test local_jacobian_pattern(
+            x -> x[1] > x[2] ? x[3] : x[4], [1.0, 2.0, 3.0, 4.0], G
+        ) ≈ [0 0 0 1;]
+        @test local_jacobian_pattern(
+            x -> x[1] > x[2] ? x[3] : x[4], [2.0, 1.0, 3.0, 4.0], G
+        ) ≈ [0 0 1 0;]
+        @test local_jacobian_pattern(
+            x -> x[1] < x[2] ? x[3] : x[4], [1.0, 2.0, 3.0, 4.0], G
+        ) ≈ [0 0 1 0;]
+        @test local_jacobian_pattern(
+            x -> x[1] < x[2] ? x[3] : x[4], [2.0, 1.0, 3.0, 4.0], G
+        ) ≈ [0 0 0 1;]
+
         # Linear algebra
         @test local_jacobian_pattern(logdet, [1.0 -1.0; 2.0 2.0], G) ≈ [1 1 1 1]  # (#68)
         @test local_jacobian_pattern(x -> log(det(x)), [1.0 -1.0; 2.0 2.0], G) ≈ [1 1 1 1]
