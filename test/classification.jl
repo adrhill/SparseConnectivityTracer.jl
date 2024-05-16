@@ -3,7 +3,6 @@ using SparseConnectivityTracer:
     ops_1_to_1_s,
     ops_1_to_1_f,
     ops_1_to_1_z,
-    ops_1_to_1_const,
     ops_2_to_1,
     ops_2_to_1_ssc,
     ops_2_to_1_ssz,
