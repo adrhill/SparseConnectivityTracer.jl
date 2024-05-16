@@ -101,8 +101,8 @@ function is_crossder_zero_global end
 # Fallbacks for local derivatives:
 is_firstder_arg1_zero_local(f::F, x, y) where {F} = is_firstder_arg1_zero_global(f)
 is_seconder_arg1_zero_local(f::F, x, y) where {F} = is_seconder_arg1_zero_global(f)
-is_firstder_arg2_zero_local(f::F, x, y) where {F} = is_firstder_arg1_zero_global(f)
-is_seconder_arg2_zero_local(f::F, x, y) where {F} = is_seconder_arg1_zero_global(f)
+is_firstder_arg2_zero_local(f::F, x, y) where {F} = is_firstder_arg2_zero_global(f)
+is_seconder_arg2_zero_local(f::F, x, y) where {F} = is_seconder_arg2_zero_global(f)
 is_crossder_zero_local(f::F, x, y) where {F}      = is_crossder_zero_global(f)
 
 # ops_2_to_1_ssc: 
