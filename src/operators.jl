@@ -15,8 +15,8 @@ function is_firstder_zero_global end
 function is_seconder_zero_global end
 
 # Fallbacks for local derivatives:
-is_firstder_zero_local(f, x) = is_firstder_zero_global(f)
-is_seconder_zero_local(f, x) = is_seconder_zero_global(f)
+is_firstder_zero_local(f::F, x) where {F} = is_firstder_zero_global(f)
+is_seconder_zero_local(f::F, x) where {F} = is_seconder_zero_global(f)
 
 # ops_1_to_1_s: 
 # ∂f/∂x   != 0
@@ -116,11 +116,11 @@ function is_seconder_arg2_zero_global end
 function is_crossder_zero_global end
 
 # Fallbacks for local derivatives:
-is_firstder_arg1_zero_local(f, x, y) = is_firstder_arg1_zero_global(f)
-is_seconder_arg1_zero_local(f, x, y) = is_firstder_arg1_zero_global(f)
-is_firstder_arg2_zero_local(f, x, y) = is_firstder_arg1_zero_global(f)
-is_seconder_arg2_zero_local(f, x, y) = is_firstder_arg1_zero_global(f)
-is_crossder_zero_local(f, x, y)      = is_firstder_arg1_zero_global(f)
+is_firstder_arg1_zero_local(f::F, x, y) where {F} = is_firstder_arg1_zero_global(f)
+is_seconder_arg1_zero_local(f::F, x, y) where {F} = is_firstder_arg1_zero_global(f)
+is_firstder_arg2_zero_local(f::F, x, y) where {F} = is_firstder_arg1_zero_global(f)
+is_seconder_arg2_zero_local(f::F, x, y) where {F} = is_firstder_arg1_zero_global(f)
+is_crossder_zero_local(f::F, x, y) where {F}      = is_firstder_arg1_zero_global(f)
 
 # ops_2_to_1_ssc: 
 # ∂f/∂x    != 0
@@ -394,10 +394,10 @@ function is_firstder_out2_zero_global end
 function is_seconder_out2_zero_global end
 
 # Fallbacks for local derivatives:
-is_seconder_out1_zero_local(f, x) = is_seconder_out1_zero_global(f)
-is_firstder_out1_zero_local(f, x) = is_firstder_out1_zero_global(f)
-is_firstder_out2_zero_local(f, x) = is_firstder_out2_zero_global(f)
-is_seconder_out2_zero_local(f, x) = is_seconder_out2_zero_global(f)
+is_seconder_out1_zero_local(f::F, x) where {F} = is_seconder_out1_zero_global(f)
+is_firstder_out1_zero_local(f::F, x) where {F} = is_firstder_out1_zero_global(f)
+is_firstder_out2_zero_local(f::F, x) where {F} = is_firstder_out2_zero_global(f)
+is_seconder_out2_zero_local(f::F, x) where {F} = is_seconder_out2_zero_global(f)
 
 
 # ops_1_to_2_ss: 
