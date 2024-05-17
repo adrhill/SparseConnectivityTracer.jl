@@ -52,7 +52,7 @@ SparseConnectivityTracer.GradientTracer
 SparseConnectivityTracer.HessianTracer
 ```
 
-These can be used alone or inside of the dual number type [`Dual`](@ref),
+These can be used alone or inside of the dual number type `Dual`,
 which keeps track of the primal computation and allows tracing through comparisons and control flow:
 
 ```@docs
