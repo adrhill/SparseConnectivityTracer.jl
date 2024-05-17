@@ -98,7 +98,7 @@ julia> hessian_pattern(g, x)
 
 For more detailled examples, take a look at the [documentation](https://adrianhill.de/SparseConnectivityTracer.jl/dev).
 
-### Global function tracing
+### Local tracing
 
 The functions `jacobian_pattern`, `hessian_pattern` and `connectivity_pattern` return conservative sparsity patterns over the entire input domain of `x`. 
 They are not compatible with functions that require information about the primal values of a computation (e.g. `iszero`, `>`, `==`).
