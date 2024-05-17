@@ -3,7 +3,6 @@ using SparseConnectivityTracer:
     ops_1_to_1_s,
     ops_1_to_1_f,
     ops_1_to_1_z,
-    ops_1_to_1_const,
     ops_2_to_1,
     ops_2_to_1_ssc,
     ops_2_to_1_ssz,
@@ -131,6 +130,10 @@ function classify_2_to_1(f, x, y; atol)
     cross = isapproxzero(∂²f∂x∂y; atol) ? zero_order : second_order
     return (first_arg, second_arg, cross)
 end
+
+# Some exceptions have to be manually specified
+classify_2_to_1(::typeof(max), x, y; atol) = (first_order, first_order, zero_order)
+classify_2_to_1(::typeof(min), x, y; atol) = (first_order, first_order, zero_order)
 
 function classify_2_to_1(op::Symbol; atol=1e-5, trials=100)
     f = sym2fn(op)

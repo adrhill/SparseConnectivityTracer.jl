@@ -12,9 +12,9 @@ sparse_vector(T, index) = T([index])
 
 ×(a::G, b::G) where {G<:AbstractSet} = Set((i, j) for i in a, j in b)
 
-#==============#
-# Connectivity #
-#==============#
+#====================#
+# ConnectivityTracer #
+#====================#
 
 """
 $(TYPEDEF)
@@ -42,9 +42,11 @@ struct ConnectivityTracer{C<:AbstractSet{<:Integer}} <: AbstractTracer
     inputs::C
 end
 
+inputs(t::ConnectivityTracer) = t.inputs
+
 function Base.show(io::IO, t::ConnectivityTracer)
     return Base.show_delim_array(
-        io, convert.(Int, sort(collect(t.inputs))), "$(typeof(t))(", ',', ')', true
+        io, convert.(Int, sort(collect(inputs(t)))), "$(typeof(t))(", ',', ')', true
     )
 end
 
@@ -63,9 +65,9 @@ end
 ConnectivityTracer{C}(t::ConnectivityTracer{C}) where {C<:AbstractSet{<:Integer}} = t
 ConnectivityTracer(t::ConnectivityTracer) = t
 
-#=================#
-# Gradient Tracer #
-#=================#
+#================#
+# GradientTracer #
+#================#
 
 """
 $(TYPEDEF)
@@ -84,35 +86,37 @@ Set{Int64} with 2 elements:
   3
   1
 
-julia> SparseConnectivityTracer.GlobalGradientTracer(grad)
-SparseConnectivityTracer.GlobalGradientTracer{Set{Int64}}(1, 3)
+julia> SparseConnectivityTracer.GradientTracer(grad)
+SparseConnectivityTracer.GradientTracer{Set{Int64}}(1, 3)
 ```
 """
-struct GlobalGradientTracer{G<:AbstractSet{<:Integer}} <: AbstractTracer
+struct GradientTracer{G<:AbstractSet{<:Integer}} <: AbstractTracer
     "Sparse binary vector representing non-zero entries in the gradient."
     grad::G
 end
 
-function Base.show(io::IO, t::GlobalGradientTracer)
+gradient(t::GradientTracer) = t.grad
+
+function Base.show(io::IO, t::GradientTracer)
     return Base.show_delim_array(
-        io, convert.(Int, sort(collect(t.grad))), "$(typeof(t))(", ',', ')', true
+        io, convert.(Int, sort(collect(gradient(t)))), "$(typeof(t))(", ',', ')', true
     )
 end
 
-function empty(::Type{GlobalGradientTracer{G}}) where {G}
-    return GlobalGradientTracer{G}(empty(G))
+function empty(::Type{GradientTracer{G}}) where {G}
+    return GradientTracer{G}(empty(G))
 end
 
-function GlobalGradientTracer{G}(::Number) where {G<:AbstractSet{<:Integer}}
-    return empty(GlobalGradientTracer{G})
+function GradientTracer{G}(::Number) where {G<:AbstractSet{<:Integer}}
+    return empty(GradientTracer{G})
 end
 
-GlobalGradientTracer{G}(t::GlobalGradientTracer{G}) where {G<:AbstractSet{<:Integer}} = t
-GlobalGradientTracer(t::GlobalGradientTracer) = t
+GradientTracer{G}(t::GradientTracer{G}) where {G<:AbstractSet{<:Integer}} = t
+GradientTracer(t::GradientTracer) = t
 
-#=========#
-# Hessian #
-#=========#
+#===============#
+# HessianTracer #
+#===============#
 
 """
 $(TYPEDEF)
@@ -137,62 +141,95 @@ Set{Tuple{Int64, Int64}} with 3 elements:
   (1, 1)
   (2, 3)
 
-julia> SparseConnectivityTracer.GlobalHessianTracer(grad, hess)
-SparseConnectivityTracer.GlobalHessianTracer{Set{Int64}, Set{Tuple{Int64, Int64}}}(
+julia> SparseConnectivityTracer.HessianTracer(grad, hess)
+SparseConnectivityTracer.HessianTracer{Set{Int64}, Set{Tuple{Int64, Int64}}}(
   Gradient: Set([3, 1]),
   Hessian:  Set([(3, 2), (1, 1), (2, 3)])
 )
 ```
 """
-struct GlobalHessianTracer{
-    G<:AbstractSet{<:Integer},H<:AbstractSet{<:Tuple{Integer,Integer}}
-} <: AbstractTracer
+struct HessianTracer{G<:AbstractSet{<:Integer},H<:AbstractSet{<:Tuple{Integer,Integer}}} <:
+       AbstractTracer
     "Sparse binary vector representation of non-zero entries in the gradient."
     grad::G
     "Sparse binary matrix representation of non-zero entries in the Hessian."
     hess::H
 end
 
-function Base.show(io::IO, t::GlobalHessianTracer)
+gradient(t::HessianTracer) = t.grad
+hessian(t::HessianTracer)  = t.hess
+
+function Base.show(io::IO, t::HessianTracer)
     println(io, "$(eltype(t))(")
-    println(io, "  Gradient: ", t.grad, ",")
-    println(io, "  Hessian:  ", t.hess)
+    println(io, "  Gradient: ", gradient(t), ",")
+    println(io, "  Hessian:  ", hessian(t))
     print(io, ")")
     return nothing
 end
 
-function empty(::Type{GlobalHessianTracer{G,H}}) where {G,H}
-    return GlobalHessianTracer{G,H}(empty(G), empty(H))
+function empty(::Type{HessianTracer{G,H}}) where {G,H}
+    return HessianTracer{G,H}(empty(G), empty(H))
 end
 
-function GlobalHessianTracer{G,H}(
+function HessianTracer{G,H}(
     ::Number
 ) where {G<:AbstractSet{<:Integer},H<:AbstractSet{<:Tuple{Integer,Integer}}}
-    return empty(GlobalHessianTracer{G,H})
+    return empty(HessianTracer{G,H})
 end
 
-function GlobalHessianTracer{G,H}(
-    t::GlobalHessianTracer{G,H}
+function HessianTracer{G,H}(
+    t::HessianTracer{G,H}
 ) where {G<:AbstractSet{<:Integer},H<:AbstractSet{<:Tuple{Integer,Integer}}}
     return t
 end
-GlobalHessianTracer(t::GlobalHessianTracer) = t
+HessianTracer(t::HessianTracer) = t
+
+#================================#
+# Dual numbers for local tracing #
+#================================#
+
+"""
+$(TYPEDEF)
+
+Dual number type keeping track of the results of a primal computation as well as a tracer.
+
+## Fields
+$(TYPEDFIELDS)
+"""
+struct Dual{P<:Number,T<:Union{ConnectivityTracer,GradientTracer,HessianTracer}} <:
+       AbstractTracer
+    primal::P
+    tracer::T
+end
+# TODO: support ConnectivityTracer
+
+primal(d::Dual) = d.primal
+tracer(d::Dual) = d.tracer
+
+inputs(d::Dual{P,T}) where {P,T<:ConnectivityTracer} = inputs(d.tracer)
+gradient(d::Dual{P,T}) where {P,T<:GradientTracer} = gradient(d.tracer)
+gradient(d::Dual{P,T}) where {P,T<:HessianTracer} = gradient(d.tracer)
+hessian(d::Dual{P,T}) where {P,T<:HessianTracer} = hessian(d.tracer)
 
 #===========#
 # Utilities #
 #===========#
 
 """
-    tracer(T, index) where {T<:AbstractTracer}
+    create_tracer(T, index) where {T<:AbstractTracer}
 
-Convenience constructor for [`ConnectivityTracer`](@ref), [`GlobalGradientTracer`](@ref) and [`GlobalHessianTracer`](@ref) from input indices.
+Convenience constructor for [`ConnectivityTracer`](@ref), [`GradientTracer`](@ref) and [`HessianTracer`](@ref) from input indices.
 """
-function tracer(::Type{GlobalGradientTracer{G}}, index::Integer) where {G}
-    return GlobalGradientTracer{G}(sparse_vector(G, index))
+function create_tracer(::Type{Dual{P,T}}, primal::Number, index::Integer) where {P,T}
+    return Dual(primal, create_tracer(T, primal, index))
 end
-function tracer(::Type{ConnectivityTracer{C}}, index::Integer) where {C}
+
+function create_tracer(::Type{GradientTracer{G}}, ::Number, index::Integer) where {G}
+    return GradientTracer{G}(sparse_vector(G, index))
+end
+function create_tracer(::Type{ConnectivityTracer{C}}, ::Number, index::Integer) where {C}
     return ConnectivityTracer{C}(sparse_vector(C, index))
 end
-function tracer(::Type{GlobalHessianTracer{G,H}}, index::Integer) where {G,H}
-    return GlobalHessianTracer{G,H}(sparse_vector(G, index), empty(H))
+function create_tracer(::Type{HessianTracer{G,H}}, ::Number, index::Integer) where {G,H}
+    return HessianTracer{G,H}(sparse_vector(G, index), empty(H))
 end

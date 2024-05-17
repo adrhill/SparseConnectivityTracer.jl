@@ -1,67 +1,129 @@
-for fn in union(ops_1_to_1_s, ops_1_to_1_f)
-    @eval Base.$fn(t::GlobalGradientTracer) = t
+## 1-to-1
+function gradient_tracer_1_to_1(t::T, is_firstder_zero::Bool) where {T<:GradientTracer}
+    if is_firstder_zero
+        return empty(T)
+    else
+        return t
+    end
 end
 
-for fn in union(ops_1_to_1_z, ops_1_to_1_const)
-    @eval Base.$fn(::T) where {T<:GlobalGradientTracer} = empty(T)
+for fn in ops_1_to_1
+    @eval function Base.$fn(t::GradientTracer)
+        return gradient_tracer_1_to_1(t, is_firstder_zero_global($fn))
+    end
+    @eval function Base.$fn(d::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
+        x = primal(d)
+        p_out = Base.$fn(x)
+        t_out = gradient_tracer_1_to_1(tracer(d), is_firstder_zero_local($fn, x))
+        return Dual(p_out, t_out)
+    end
 end
 
-for fn in union(
-    ops_2_to_1_ssc,
-    ops_2_to_1_ssz,
-    ops_2_to_1_sfc,
-    ops_2_to_1_sfz,
-    ops_2_to_1_fsc,
-    ops_2_to_1_fsz,
-    ops_2_to_1_ffc,
-    ops_2_to_1_ffz,
-)
-    @eval Base.$fn(a::T, b::T) where {T<:GlobalGradientTracer} = T(a.grad ∪ b.grad)
-    @eval Base.$fn(t::GlobalGradientTracer, ::Number) = t
-    @eval Base.$fn(::Number, t::GlobalGradientTracer) = t
+## 2-to-1
+function gradient_tracer_2_to_1(
+    tx::T, ty::T, is_firstder_arg1_zero::Bool, is_firstder_arg2_zero::Bool
+) where {T<:GradientTracer}
+    if is_firstder_arg1_zero
+        if is_firstder_arg2_zero
+            return empty(T)
+        else
+            return ty
+        end
+    else # ∂f∂x ≠ 0 
+        if is_firstder_arg2_zero
+            return tx
+        else
+            return T(gradient(tx) ∪ gradient(ty))
+        end
+    end
 end
 
-for fn in union(ops_2_to_1_zsz, ops_2_to_1_zfz)
-    @eval Base.$fn(::GlobalGradientTracer, t::GlobalGradientTracer) = t
-    @eval Base.$fn(::T, ::Number) where {T<:GlobalGradientTracer} = empty(T)
-    @eval Base.$fn(::Number, t::GlobalGradientTracer) = t
-end
-for fn in union(ops_2_to_1_szz, ops_2_to_1_fzz)
-    @eval Base.$fn(t::GlobalGradientTracer, ::GlobalGradientTracer) = t
-    @eval Base.$fn(t::GlobalGradientTracer, ::Number) = t
-    @eval Base.$fn(::Number, ::T) where {T<:GlobalGradientTracer} = empty(T)
-end
-for fn in ops_2_to_1_zzz
-    @eval Base.$fn(::T, ::T) where {T<:GlobalGradientTracer}      = empty(T)
-    @eval Base.$fn(::T, ::Number) where {T<:GlobalGradientTracer} = empty(T)
-    @eval Base.$fn(::Number, ::T) where {T<:GlobalGradientTracer} = empty(T)
+for fn in ops_2_to_1
+    @eval function Base.$fn(tx::T, ty::T) where {T<:GradientTracer}
+        return gradient_tracer_2_to_1(
+            tx, ty, is_firstder_arg1_zero_global($fn), is_firstder_arg2_zero_global($fn)
+        )
+    end
+    @eval function Base.$fn(dx::D, dy::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
+        x = primal(dx)
+        y = primal(dy)
+        p_out = Base.$fn(x, y)
+        t_out = gradient_tracer_2_to_1(
+            tracer(dx),
+            tracer(dy),
+            is_firstder_arg1_zero_local($fn, x, y),
+            is_firstder_arg2_zero_local($fn, x, y),
+        )
+        return Dual(p_out, t_out)
+    end
+
+    @eval function Base.$fn(tx::GradientTracer, ::Number)
+        return gradient_tracer_1_to_1(tx, is_firstder_arg1_zero_global($fn))
+    end
+    @eval function Base.$fn(dx::D, y::Number) where {P,T<:GradientTracer,D<:Dual{P,T}}
+        x = primal(dx)
+        p_out = Base.$fn(x, y)
+        t_out = gradient_tracer_1_to_1(tracer(dx), is_firstder_arg1_zero_local($fn, x, y))
+        return Dual(p_out, t_out)
+    end
+
+    @eval function Base.$fn(::Number, ty::GradientTracer)
+        return gradient_tracer_1_to_1(ty, is_firstder_arg2_zero_global($fn))
+    end
+    @eval function Base.$fn(x::Number, dy::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
+        y = primal(dy)
+        p_out = Base.$fn(x, y)
+        t_out = gradient_tracer_1_to_1(tracer(dy), is_firstder_arg2_zero_local($fn, x, y))
+        return Dual(p_out, t_out)
+    end
 end
 
-for fn in union(ops_1_to_2_ss, ops_1_to_2_sf, ops_1_to_2_fs, ops_1_to_2_ff)
-    @eval Base.$fn(t::GlobalGradientTracer) = (t, t)
+## 1-to-2
+function gradient_tracer_1_to_2(
+    t::T, is_firstder_out1_zero::Bool, is_firstder_out2_zero::Bool
+) where {T<:GradientTracer}
+    t1 = gradient_tracer_1_to_1(t, is_firstder_out1_zero)
+    t2 = gradient_tracer_1_to_1(t, is_firstder_out2_zero)
+    return (t1, t2)
 end
 
-for fn in union(ops_1_to_2_sz, ops_1_to_2_fz)
-    @eval Base.$fn(t::T) where {T<:GlobalGradientTracer} = (t, empty(T))
+for fn in ops_1_to_2
+    @eval function Base.$fn(t::GradientTracer)
+        return gradient_tracer_1_to_2(
+            t, is_firstder_out1_zero_global($fn), is_firstder_out2_zero_global($fn)
+        )
+    end
+
+    @eval function Base.$fn(d::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
+        x = primal(d)
+        p1_out, p2_out = Base.$fn(x)
+        t1_out, t2_out = gradient_tracer_1_to_2(
+            t, is_firstder_out1_zero_local($fn, x), is_firstder_out2_zero_local($fn, x)
+        )
+        return (Dual(p1_out, t1_out), Dual(p1_out, t1_out))
+    end
 end
 
-for fn in union(ops_1_to_2_zs, ops_1_to_2_zf)
-    @eval Base.$fn(t::T) where {T<:GlobalGradientTracer} = (empty(T), t)
-end
-for fn in ops_1_to_2_zz
-    @eval Base.$fn(::T) where {T<:GlobalGradientTracer} = (empty(T), empty(T))
-end
+# Extra types required for exponent 
+for S in (Real, Integer, Rational, Irrational{:ℯ})
+    Base.:^(t::GradientTracer, ::S) = t
+    Base.:^(::S, t::GradientTracer) = t
 
-# Extra types required for exponent
-for T in (:Real, :Integer, :Rational)
-    @eval Base.:^(t::GlobalGradientTracer, ::$T) = t
-    @eval Base.:^(::$T, t::GlobalGradientTracer) = t
+    function Base.:^(dx::D, y::S) where {P,T<:GradientTracer,D<:Dual{P,T}}
+        return Dual(primal(dx)^y, tracer(dx))
+    end
+    function Base.:^(x::S, dy::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
+        return Dual(x^primal(dy), tracer(dy))
+    end
 end
-Base.:^(t::GlobalGradientTracer, ::Irrational{:ℯ}) = t
-Base.:^(::Irrational{:ℯ}, t::GlobalGradientTracer) = t
 
 ## Rounding
-Base.round(t::T, ::RoundingMode; kwargs...) where {T<:GlobalGradientTracer} = empty(T)
+Base.round(t::T, ::RoundingMode; kwargs...) where {T<:GradientTracer} = empty(T)
+function Base.round(
+    d::D, mode::RoundingMode; kwargs...
+) where {P,T<:GradientTracer,D<:Dual{P,T}}
+    return Dual(round(primal(d), mode; kwargs...), empty(T))
+end
 
-## Random numbers
-rand(::AbstractRNG, ::SamplerType{T}) where {T<:GlobalGradientTracer} = empty(T)
+## Random numbers 
+rand(::AbstractRNG, ::SamplerType{T}) where {T<:GradientTracer} = empty(T)
