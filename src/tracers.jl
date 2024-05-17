@@ -211,6 +211,10 @@ gradient(d::Dual{P,T}) where {P,T<:GradientTracer} = gradient(d.tracer)
 gradient(d::Dual{P,T}) where {P,T<:HessianTracer} = gradient(d.tracer)
 hessian(d::Dual{P,T}) where {P,T<:HessianTracer} = hessian(d.tracer)
 
+function Dual{P,T}(x::Number) where {P<:Number,T<:AbstractTracer}
+    return Dual(convert(P, x), empty(T))
+end
+
 #===========#
 # Utilities #
 #===========#
