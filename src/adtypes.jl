@@ -1,7 +1,7 @@
 """
     TracerSparsityDetector <: ADTypes.AbstractSparsityDetector
 
-Singleton struct for integration with the sparsity detection framework of ADTypes.jl.
+Singleton struct for integration with the sparsity detection framework of [ADTypes.jl](https://github.com/SciML/ADTypes.jl).
 
 # Example
 
