@@ -11,6 +11,7 @@ include("settypes/recursiveset.jl")
 include("settypes/sortedvector.jl")
 
 include("tracers.jl")
+include("exceptions.jl")
 include("conversion.jl")
 include("operators.jl")
 include("overload_connectivity.jl")

@@ -1,5 +1,6 @@
 using SparseConnectivityTracer
-using SparseConnectivityTracer: HessianTracer, tracer, trace_input, empty
+using SparseConnectivityTracer:
+    HessianTracer, MissingPrimalError, tracer, trace_input, empty
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
@@ -147,8 +148,7 @@ end
 
 @testset "Local" begin
     @testset "Set type $G" for G in SECOND_ORDER_SET_TYPES
-        x = f1(x) = x[1] + x[2] * x[3] + 1 / x[4] + x[2] * max(x[1], x[5])
-
+        f1(x) = x[1] + x[2] * x[3] + 1 / x[4] + x[2] * max(x[1], x[5])
         h = local_hessian_pattern(f1, [1.0 3.0 5.0 1.0 2.0], G)
         @test h ≈ [
             0  0  0  0  0
@@ -157,7 +157,6 @@ end
             0  0  0  1  0
             0  1  0  0  0
         ]
-
         h = local_hessian_pattern(f1, [4.0 3.0 5.0 1.0 2.0], G)
         @test h ≈ [
             0  1  0  0  0
@@ -166,5 +165,23 @@ end
             0  0  0  1  0
             0  0  0  0  0
         ]
+
+        f2(x) = ifelse(x[2] < x[3], x[1] * x[2], x[3] * x[4])
+        h = local_hessian_pattern(f2, [1 2 3 4], G)
+        @test h ≈ [
+            0  1  0  0
+            1  0  0  0
+            0  0  0  0
+            0  0  0  0
+        ]
+        h = local_hessian_pattern(f2, [1 3 2 4], G)
+        @test h ≈ [
+            0  0  0  0
+            0  0  0  0
+            0  0  0  1
+            0  0  1  0
+        ]
+        ## Error handling when applying non-dual tracers to "local" functions with control flow
+        @test_throws MissingPrimalError hessian_pattern(f2, [1 3 2 4], G)
     end
 end

@@ -1,6 +1,6 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer:
-    ConnectivityTracer, GradientTracer, tracer, trace_input, empty
+    ConnectivityTracer, GradientTracer, MissingPrimalError, tracer, trace_input, empty
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 
 using LinearAlgebra: det, logdet
@@ -99,5 +99,21 @@ end
         # Linear algebra
         @test local_jacobian_pattern(logdet, [1.0 -1.0; 2.0 2.0], G) ≈ [1 1 1 1]  # (#68)
         @test local_jacobian_pattern(x -> log(det(x)), [1.0 -1.0; 2.0 2.0], G) ≈ [1 1 1 1]
+
+        ## ConnectivityTracer
+        @test local_connectivity_pattern(
+            x -> ifelse(x[2] < x[3], x[1] + x[2], x[3] * x[4]), [1 2 3 4], G
+        ) ≈ [1 1 0 0]
+        @test local_connectivity_pattern(
+            x -> ifelse(x[2] < x[3], x[1] + x[2], x[3] * x[4]), [1 3 2 4], G
+        ) ≈ [0 0 1 1]
+
+        ## Error handling when applying non-dual tracers to "local" functions with control flow
+        @test_throws MissingPrimalError connectivity_pattern(
+            x -> ifelse(x[2] < x[3], x[1] + x[2], x[3] * x[4]), [1 2 3 4], G
+        ) ≈ [1 1 0 0]
+        @test_throws MissingPrimalError jacobian_pattern(
+            x -> x[1] > x[2] ? x[3] : x[4], [1.0, 2.0, 3.0, 4.0], G
+        ) ≈ [0 0 0 1;]
     end
 end
