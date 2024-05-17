@@ -17,6 +17,7 @@ for TT in (GradientTracer, ConnectivityTracer, HessianTracer)
     ## Constants
     Base.zero(::Type{T})        where {T<:TT} = empty(T)
     Base.one(::Type{T})         where {T<:TT} = empty(T)
+    Base.oneunit(::Type{T})     where {T<:TT} = empty(T)
     Base.typemin(::Type{T})     where {T<:TT} = empty(T)
     Base.typemax(::Type{T})     where {T<:TT} = empty(T)
     Base.eps(::Type{T})         where {T<:TT} = empty(T)
@@ -27,6 +28,7 @@ for TT in (GradientTracer, ConnectivityTracer, HessianTracer)
     
     Base.zero(::T)        where {T<:TT} = empty(T)
     Base.one(::T)         where {T<:TT} = empty(T)
+    Base.oneunit(::T)     where {T<:TT} = empty(T)
     Base.typemin(::T)     where {T<:TT} = empty(T)
     Base.typemax(::T)     where {T<:TT} = empty(T)
     Base.eps(::T)         where {T<:TT} = empty(T)
@@ -48,15 +50,18 @@ Base.similar(::Array, ::Type{ConnectivityTracer{C}}, dims::Dims{N}) where {C,N} 
 Base.similar(::Array, ::Type{GradientTracer{G}},     dims::Dims{N}) where {G,N}   = zeros(GradientTracer{G},     dims)
 Base.similar(::Array, ::Type{HessianTracer{G,H}},    dims::Dims{N}) where {G,H,N} = zeros(HessianTracer{G,H},    dims)
 
-
 ## Duals
-function Base.promote_rule(::Type{D}, ::Type{N}) where {P,T,D<:Dual{P,T},N<:Number}
-    PP = Base.promote_rule(P, N) # TODO: possible method call error?
-    return D{PP,T}
+function Base.promote_rule(::Type{Dual{P1, T}}, ::Type{Dual{P2, T}}) where {P1,P2,T}
+    PP = Base.promote_type(P1, P2) # TODO: possible method call error?
+    return Dual{PP,T}
 end
-function Base.promote_rule(::Type{N}, ::Type{D}) where {P,T,D<:Dual{P,T},N<:Number}
-    PP = Base.promote_rule(P, N) # TODO: possible method call error?
-    return D{PP,T}
+function Base.promote_rule(::Type{Dual{P, T}}, ::Type{N}) where {P,T,N<:Number}
+    PP = Base.promote_type(P, N) # TODO: possible method call error?
+    return Dual{PP,T}
+end
+function Base.promote_rule(::Type{N}, ::Type{Dual{P, T}}) where {P,T,N<:Number}
+    PP = Base.promote_type(P, N) # TODO: possible method call error?
+    return Dual{PP,T}
 end
 
 Base.big(::Type{D})   where {P,T,D<:Dual{P,T}} = Dual{big(P),T}
@@ -64,13 +69,18 @@ Base.widen(::Type{D}) where {P,T,D<:Dual{P,T}} = Dual{widen(P),T}
 Base.big(d::D)        where {P,T,D<:Dual{P,T}} = Dual(big(primal(d)),   tracer(d))
 Base.widen(d::D)      where {P,T,D<:Dual{P,T}} = Dual(widen(primal(d)), tracer(d))
 
-Base.convert(::Type{D}, x::Number) where {P,T,D<:Dual{P,T}}  = Dual(x, empty(T))
-Base.convert(::Type{D}, d::D)      where {D<:Dual}           = d
-Base.convert(::Type{T}, d::D)      where {T<:Number,D<:Dual} = Dual(convert(T, primal(d)), tracer(d))
+Base.convert(::Type{D}, x::Number) where {P,T,D<:Dual{P,T}}           = Dual(x, empty(T))
+Base.convert(::Type{D}, d::D)      where {P,T,D<:Dual{P,T}}           = d
+Base.convert(::Type{N}, d::D)      where {N<:Number,P,T,D<:Dual{P,T}} = Dual(convert(T, primal(d)), tracer(d))
+
+function Base.convert(::Type{Dual{P1,T}}, d::Dual{P2,T}) where {P1,P2,T} 
+    return Dual(convert(P1, primal(d)), tracer(d))
+end
 
 ## Constants
 Base.zero(::Type{D})        where {P,T,D<:Dual{P,T}} = D(zero(P),        empty(T))
 Base.one(::Type{D})         where {P,T,D<:Dual{P,T}} = D(one(P),         empty(T))
+Base.oneunit(::Type{D})     where {P,T,D<:Dual{P,T}} = D(oneunit(P),     empty(T))
 Base.typemin(::Type{D})     where {P,T,D<:Dual{P,T}} = D(typemin(P),     empty(T))
 Base.typemax(::Type{D})     where {P,T,D<:Dual{P,T}} = D(typemax(P),     empty(T))
 Base.eps(::Type{D})         where {P,T,D<:Dual{P,T}} = D(eps(P),         empty(T))
@@ -81,6 +91,7 @@ Base.maxintfloat(::Type{D}) where {P,T,D<:Dual{P,T}} = D(maxintfloat(P), empty(T
 
 Base.zero(d::D)        where {P,T,D<:Dual{P,T}} = D(zero(primal(d)),        empty(T))
 Base.one(d::D)         where {P,T,D<:Dual{P,T}} = D(one(primal(d)),         empty(T))
+Base.oneunit(d::D)     where {P,T,D<:Dual{P,T}} = D(oneunit(primal(d)),     empty(T))
 Base.typemin(d::D)     where {P,T,D<:Dual{P,T}} = D(typemin(primal(d)),     empty(T))
 Base.typemax(d::D)     where {P,T,D<:Dual{P,T}} = D(typemax(primal(d)),     empty(T))
 Base.eps(d::D)         where {P,T,D<:Dual{P,T}} = D(eps(primal(d)),         empty(T))

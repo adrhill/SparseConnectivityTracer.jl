@@ -9,7 +9,6 @@ using Documenter
 
 using LinearAlgebra
 using Random
-using NNlib
 
 DocMeta.setdocmeta!(
     SparseConnectivityTracer,
@@ -70,8 +69,8 @@ DocMeta.setdocmeta!(
         @testset "Brusselator" begin
             include("brusselator.jl")
         end
-        @testset "NNlib" begin
-            include("nnlib.jl")
+        @testset "Flux.jl" begin
+            include("flux.jl")
         end
     end
 
