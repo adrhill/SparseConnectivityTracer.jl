@@ -24,7 +24,7 @@ julia> ]add SparseConnectivityTracer
 For functions `y = f(x)` and `f!(y, x)`, the sparsity pattern of the Jacobian of $f$ can be obtained
 by computing a single forward-pass through `f`:
 
-```julia-repl
+```jldoctest
 julia> using SparseConnectivityTracer
 
 julia> x = rand(3);
@@ -39,7 +39,7 @@ julia> jacobian_pattern(f, x)
 ```
 
 As a larger example, let's compute the sparsity pattern from a convolutional layer from [Flux.jl](https://github.com/FluxML/Flux.jl):
-```julia-repl
+```jldoctest
 julia> using SparseConnectivityTracer, Flux
 
 julia> x = rand(28, 28, 3, 1);
@@ -71,7 +71,7 @@ For high-dimensional functions, `Set{UInt64}` can be more efficient .
 For scalar functions `y = f(x)`, the sparsity pattern of the Hessian of $f$ can be obtained
 by computing a single forward-pass through `f`:
 
-```julia-repl
+```jldoctest
 julia> x = rand(5);
 
 julia> f(x) = x[1] + x[2]*x[3] + 1/x[4] + 1*x[5];
@@ -96,6 +96,32 @@ julia> hessian_pattern(g, x)
 ```
 
 For more detailled examples, take a look at the [documentation](https://adrianhill.de/SparseConnectivityTracer.jl/dev).
+
+### Global function tracing
+
+The functions `jacobian_pattern`, `hessian_pattern` and `connectivity_pattern` return conservative sparsity patterns over the entire input domain of `x`. 
+They are not compatible with functions that require information about the primal values of a computation (e.g. `iszero`, `>`, `==`).
+
+To compute a less conservative sparsity pattern at an input point `x`, use `local_jacobian_pattern`, `local_hessian_pattern` and `local_connectivity_pattern` instead.
+Note that these patterns depend on the input `x`:
+
+```jldoctest
+julia> f(x) = ifelse(x[2] < x[3], x[1] ^ x[2], x[3] * x[4]);
+
+julia> local_hessian_pattern(f, [1 2 3 4])
+4×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 4 stored entries:
+ 1  1  ⋅  ⋅
+ 1  1  ⋅  ⋅
+ ⋅  ⋅  ⋅  ⋅
+ ⋅  ⋅  ⋅  ⋅
+
+julia> local_hessian_pattern(f, [1 3 2 4])
+4×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 2 stored entries:
+ ⋅  ⋅  ⋅  ⋅
+ ⋅  ⋅  ⋅  ⋅
+ ⋅  ⋅  ⋅  1
+ ⋅  ⋅  1  ⋅
+```
 
 ## Related packages
 * [SparseDiffTools.jl](https://github.com/JuliaDiff/SparseDiffTools.jl): automatic sparsity detection via Symbolics.jl and Cassette.jl
