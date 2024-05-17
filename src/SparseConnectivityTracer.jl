@@ -20,7 +20,7 @@ include("overload_dual.jl")
 include("pattern.jl")
 include("adtypes.jl")
 
-export connectivity_pattern
+export connectivity_pattern, local_connectivity_pattern
 export jacobian_pattern, local_jacobian_pattern
 export hessian_pattern, local_hessian_pattern
 

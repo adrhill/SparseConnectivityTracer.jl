@@ -1,7 +1,10 @@
 const DEFAULT_VECTOR_TYPE = BitSet
 const DEFAULT_MATRIX_TYPE = Set{Tuple{Int,Int}}
 
-## Enumerate inputs
+#==================#
+# Enumerate inputs #
+#==================#
+
 """
     trace_input(T, x)
     trace_input(T, x)
@@ -20,7 +23,10 @@ function trace_input(::Type{T}, xs::AbstractArray, i) where {T<:AbstractTracer}
     return create_tracer.(T, xs, indices)
 end
 
-## Trace function
+#=========================#
+# Trace through functions #
+#=========================#
+
 function trace_function(::Type{T}, f, x) where {T<:AbstractTracer}
     xt = trace_input(T, x)
     yt = f(xt)
@@ -37,7 +43,14 @@ end
 to_array(x::Number) = [x]
 to_array(x::AbstractArray) = x
 
-## Construct sparsity pattern matrix
+# Utilities
+_tracer_or_number(x::Number) = x
+_tracer_or_number(d::Dual) = tracer(d)
+
+#====================#
+# ConnectivityTracer #
+#====================#
+
 """
     connectivity_pattern(f, x)
     connectivity_pattern(f, x, T)
@@ -80,6 +93,59 @@ function connectivity_pattern(f!, y, x, ::Type{C}=DEFAULT_VECTOR_TYPE) where {C}
     return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
+"""
+    local_connectivity_pattern(f, x)
+    local_connectivity_pattern(f, x, T)
+
+Enumerates inputs `x` and primal outputs `y = f(x)` and returns sparse matrix `C` of size `(m, n)`
+where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
+
+Unlike [`connectivity_pattern`](@ref), this function supports control flow and comparisons.
+
+The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
+
+## Example
+
+```jldoctest
+julia> f(x) = ifelse(x[2] < x[3], x[1] + x[2], x[3] * x[4]);
+
+julia> x = [1 2 3 4];
+
+julia> local_connectivity_pattern(f, x)
+1×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 2 stored entries:
+ 1  1  ⋅  ⋅
+
+julia> x = [1 3 2 4];
+
+julia> local_connectivity_pattern(f, x)
+1×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 2 stored entries:
+ ⋅  ⋅  1  1
+```
+"""
+function local_connectivity_pattern(f, x, ::Type{C}=DEFAULT_VECTOR_TYPE) where {C}
+    D = Dual{eltype(x),ConnectivityTracer{C}}
+    xt, yt = trace_function(D, f, x)
+    return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
+end
+
+"""
+    local_connectivity_pattern(f!, y, x)
+    local_connectivity_pattern(f!, y, x, T)
+
+Enumerates inputs `x` and primal outputs `y` after `f!(y, x)` and returns sparse matrix `C` of size `(m, n)`
+where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
+
+Unlike [`connectivity_pattern`](@ref), this function supports control flow and comparisons.
+
+
+The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
+"""
+function local_connectivity_pattern(f!, y, x, ::Type{C}=DEFAULT_VECTOR_TYPE) where {C}
+    D = Dual{eltype(x),ConnectivityTracer{C}}
+    xt, yt = trace_function(D, f!, y, x)
+    return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
+end
+
 function connectivity_pattern_to_mat(
     xt::AbstractArray{T}, yt::AbstractArray{<:Number}
 ) where {T<:ConnectivityTracer}
@@ -98,6 +164,16 @@ function connectivity_pattern_to_mat(
     end
     return sparse(I, J, V, m, n)
 end
+
+function connectivity_pattern_to_mat(
+    xt::AbstractArray{D}, yt::AbstractArray{<:Number}
+) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
+    return connectivity_pattern_to_mat(tracer.(xt), _tracer_or_number.(yt))
+end
+
+#================#
+# GradientTracer #
+#================#
 
 """
     jacobian_pattern(f, x)
@@ -127,6 +203,19 @@ function jacobian_pattern(f, x, ::Type{G}=DEFAULT_VECTOR_TYPE) where {G}
 end
 
 """
+    jacobian_pattern(f!, y, x)
+    jacobian_pattern(f!, y, x, T)
+
+Compute the sparsity pattern of the Jacobian of `f!(y, x)`.
+
+The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
+"""
+function jacobian_pattern(f!, y, x, ::Type{G}=DEFAULT_VECTOR_TYPE) where {G}
+    xt, yt = trace_function(GradientTracer{G}, f!, y, x)
+    return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
+end
+
+"""
     local_jacobian_pattern(f, x)
     local_jacobian_pattern(f, x, T)
 
@@ -151,19 +240,6 @@ julia> local_jacobian_pattern(f, x)
 function local_jacobian_pattern(f, x, ::Type{G}=DEFAULT_VECTOR_TYPE) where {G}
     D = Dual{eltype(x),GradientTracer{G}}
     xt, yt = trace_function(D, f, x)
-    return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
-end
-
-"""
-    jacobian_pattern(f!, y, x)
-    jacobian_pattern(f!, y, x, T)
-
-Compute the sparsity pattern of the Jacobian of `f!(y, x)`.
-
-The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
-"""
-function jacobian_pattern(f!, y, x, ::Type{G}=DEFAULT_VECTOR_TYPE) where {G}
-    xt, yt = trace_function(GradientTracer{G}, f!, y, x)
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
@@ -200,14 +276,15 @@ function jacobian_pattern_to_mat(
     return sparse(I, J, V, m, n)
 end
 
-_tracer_or_number(x::Number) = x
-_tracer_or_number(d::Dual) = tracer(d)
-
 function jacobian_pattern_to_mat(
     xt::AbstractArray{D}, yt::AbstractArray{<:Number}
 ) where {P,T<:GradientTracer,D<:Dual{P,T}}
     return jacobian_pattern_to_mat(tracer.(xt), _tracer_or_number.(yt))
 end
+
+#===============#
+# HessianTracer #
+#===============#
 
 """
     hessian_pattern(f, x)

@@ -12,9 +12,9 @@ sparse_vector(T, index) = T([index])
 
 ×(a::G, b::G) where {G<:AbstractSet} = Set((i, j) for i in a, j in b)
 
-#==============#
-# Connectivity #
-#==============#
+#====================#
+# ConnectivityTracer #
+#====================#
 
 """
 $(TYPEDEF)
@@ -65,9 +65,9 @@ end
 ConnectivityTracer{C}(t::ConnectivityTracer{C}) where {C<:AbstractSet{<:Integer}} = t
 ConnectivityTracer(t::ConnectivityTracer) = t
 
-#=================#
-# Gradient Tracer #
-#=================#
+#================#
+# GradientTracer #
+#================#
 
 """
 $(TYPEDEF)
@@ -114,9 +114,9 @@ end
 GradientTracer{G}(t::GradientTracer{G}) where {G<:AbstractSet{<:Integer}} = t
 GradientTracer(t::GradientTracer) = t
 
-#=========#
-# Hessian #
-#=========#
+#===============#
+# HessianTracer #
+#===============#
 
 """
 $(TYPEDEF)
@@ -196,7 +196,8 @@ Dual number type keeping track of the results of a primal computation as well as
 ## Fields
 $(TYPEDFIELDS)
 """
-struct Dual{P<:Number,T<:Union{GradientTracer,HessianTracer}} <: AbstractTracer
+struct Dual{P<:Number,T<:Union{ConnectivityTracer,GradientTracer,HessianTracer}} <:
+       AbstractTracer
     primal::P
     tracer::T
 end
