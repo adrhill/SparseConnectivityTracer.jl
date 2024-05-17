@@ -20,6 +20,7 @@ for TT in (GradientTracer, ConnectivityTracer, HessianTracer)
     Base.typemin(::Type{T})     where {T<:TT} = empty(T)
     Base.typemax(::Type{T})     where {T<:TT} = empty(T)
     Base.eps(::Type{T})         where {T<:TT} = empty(T)
+    Base.float(::Type{T})       where {T<:TT} = empty(T)
     Base.floatmin(::Type{T})    where {T<:TT} = empty(T)
     Base.floatmax(::Type{T})    where {T<:TT} = empty(T)
     Base.maxintfloat(::Type{T}) where {T<:TT} = empty(T)
@@ -29,6 +30,7 @@ for TT in (GradientTracer, ConnectivityTracer, HessianTracer)
     Base.typemin(::T)     where {T<:TT} = empty(T)
     Base.typemax(::T)     where {T<:TT} = empty(T)
     Base.eps(::T)         where {T<:TT} = empty(T)
+    Base.float(::T)       where {T<:TT} = empty(T)
     Base.floatmin(::T)    where {T<:TT} = empty(T)
     Base.floatmax(::T)    where {T<:TT} = empty(T)
     Base.maxintfloat(::T) where {T<:TT} = empty(T)
@@ -40,8 +42,12 @@ for TT in (GradientTracer, ConnectivityTracer, HessianTracer)
     Base.similar(a::Array{A,2}, ::Type{T})          where {T<:TT,A} = zeros(T, size(a, 1), size(a, 2))
     Base.similar(::Array{T}, m::Int)                where {T<:TT}   = zeros(T, m)
     Base.similar(::Array{T}, dims::Dims{N})         where {T<:TT,N} = zeros(T, dims)
-    Base.similar(::Array, ::Type{T}, dims::Dims{N}) where {T<:TT,N} = zeros(T, dims)
 end
+
+Base.similar(::Array, ::Type{ConnectivityTracer{C}}, dims::Dims{N}) where {C,N}   = zeros(T, dims)
+Base.similar(::Array, ::Type{GradientTracer{G}},     dims::Dims{N}) where {G,N}   = zeros(T, dims)
+Base.similar(::Array, ::Type{HessianTracer{G,H}},    dims::Dims{N}) where {G,H,N} = zeros(T, dims)
+
 
 ## Duals
 function Base.promote_rule(::Type{D}, ::Type{N}) where {P,T,D<:Dual{P,T},N<:Number}
@@ -68,6 +74,7 @@ Base.one(::Type{D})         where {P,T,D<:Dual{P,T}} = D(one(P),         empty(T
 Base.typemin(::Type{D})     where {P,T,D<:Dual{P,T}} = D(typemin(P),     empty(T))
 Base.typemax(::Type{D})     where {P,T,D<:Dual{P,T}} = D(typemax(P),     empty(T))
 Base.eps(::Type{D})         where {P,T,D<:Dual{P,T}} = D(eps(P),         empty(T))
+Base.float(::Type{D})       where {P,T,D<:Dual{P,T}} = D(float(P),       empty(T))
 Base.floatmin(::Type{D})    where {P,T,D<:Dual{P,T}} = D(floatmin(P),    empty(T))
 Base.floatmax(::Type{D})    where {P,T,D<:Dual{P,T}} = D(floatmax(P),    empty(T))
 Base.maxintfloat(::Type{D}) where {P,T,D<:Dual{P,T}} = D(maxintfloat(P), empty(T))
@@ -77,6 +84,7 @@ Base.one(d::D)         where {P,T,D<:Dual{P,T}} = D(one(primal(d)),         empt
 Base.typemin(d::D)     where {P,T,D<:Dual{P,T}} = D(typemin(primal(d)),     empty(T))
 Base.typemax(d::D)     where {P,T,D<:Dual{P,T}} = D(typemax(primal(d)),     empty(T))
 Base.eps(d::D)         where {P,T,D<:Dual{P,T}} = D(eps(primal(d)),         empty(T))
+Base.float(d::D)       where {P,T,D<:Dual{P,T}} = D(float(primal(d)),       empty(T))
 Base.floatmin(d::D)    where {P,T,D<:Dual{P,T}} = D(floatmin(primal(d)),    empty(T))
 Base.floatmax(d::D)    where {P,T,D<:Dual{P,T}} = D(floatmax(primal(d)),    empty(T))
 Base.maxintfloat(d::D) where {P,T,D<:Dual{P,T}} = D(maxintfloat(primal(d)), empty(T))
@@ -106,7 +114,7 @@ function Base.similar(a::Array{D}, dims::Dims{N}) where {P,T,D<:Dual{P,T}, N}
     p_out = similar(primal.(a), dims)
     return Dual.(p_out, empty(T))
 end
-function Base.similar(a::Array, ::Type{D}, dims::Dims{N}) where {P,T,D<:Dual{P,T},N}
+function Base.similar(a::Array, ::Type{Dual{P,T}}, dims::Dims{N}) where {P,T,N}
     p_out = similar(primal.(a), P, dims)
     return Dual.(p_out, empty(T))
 end
