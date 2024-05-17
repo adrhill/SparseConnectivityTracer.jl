@@ -1,6 +1,5 @@
 using SparseConnectivityTracer
 using Documenter
-using Flux: Conv, relu # used in README examples
 
 # Create index.md from README
 cp(joinpath(@__DIR__, "..", "README.md"), joinpath(@__DIR__, "src", "index.md"); force=true)

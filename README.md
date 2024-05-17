@@ -24,7 +24,7 @@ julia> ]add SparseConnectivityTracer
 For functions `y = f(x)` and `f!(y, x)`, the sparsity pattern of the Jacobian of $f$ can be obtained
 by computing a single forward-pass through `f`:
 
-```jldoctest
+```julia-repl
 julia> using SparseConnectivityTracer
 
 julia> x = rand(3);
@@ -39,7 +39,8 @@ julia> jacobian_pattern(f, x)
 ```
 
 As a larger example, let's compute the sparsity pattern from a convolutional layer from [Flux.jl](https://github.com/FluxML/Flux.jl):
-```jldoctest
+
+```julia-repl
 julia> using SparseConnectivityTracer, Flux
 
 julia> x = rand(28, 28, 3, 1);
@@ -71,7 +72,7 @@ For high-dimensional functions, `Set{Int64}` can be more efficient .
 For scalar functions `y = f(x)`, the sparsity pattern of the Hessian of $f$ can be obtained
 by computing a single forward-pass through `f`:
 
-```jldoctest
+```julia-repl
 julia> x = rand(5);
 
 julia> f(x) = x[1] + x[2]*x[3] + 1/x[4] + 1*x[5];
@@ -105,7 +106,7 @@ They are not compatible with functions that require information about the primal
 To compute a less conservative sparsity pattern at an input point `x`, use `local_jacobian_pattern`, `local_hessian_pattern` and `local_connectivity_pattern` instead.
 Note that these patterns depend on the input `x`:
 
-```jldoctest
+```julia-repl
 julia> f(x) = ifelse(x[2] < x[3], x[1] ^ x[2], x[3] * x[4]);
 
 julia> local_hessian_pattern(f, [1 2 3 4])
