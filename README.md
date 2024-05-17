@@ -32,7 +32,7 @@ julia> x = rand(3);
 julia> f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])];
 
 julia> jacobian_pattern(f, x)
-3×3 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 4 stored entries:
+3×3 SparseArrays.SparseMatrixCSC{Bool, Int64} with 4 stored entries:
  1  ⋅  ⋅
  1  1  ⋅
  ⋅  ⋅  1
@@ -47,7 +47,7 @@ julia> x = rand(28, 28, 3, 1);
 julia> layer = Conv((3, 3), 3 => 2);
 
 julia> jacobian_pattern(layer, x)
-1352×2352 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 36504 stored entries:
+1352×2352 SparseArrays.SparseMatrixCSC{Bool, Int64} with 36504 stored entries:
 ⎡⠙⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠻⣷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⎤
 ⎢⠀⠀⠙⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⎥
 ⎢⠀⠀⠀⠀⠙⢿⣦⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⎥
@@ -64,7 +64,7 @@ julia> jacobian_pattern(layer, x)
 ```
 
 The type of index set `S` that is internally used to keep track of connectivity can be specified via `jacobian_pattern(f, x, S)`, defaulting to `BitSet`. 
-For high-dimensional functions, `Set{UInt64}` can be more efficient .
+For high-dimensional functions, `Set{Int64}` can be more efficient .
 
 ### Hessian
 
@@ -77,7 +77,7 @@ julia> x = rand(5);
 julia> f(x) = x[1] + x[2]*x[3] + 1/x[4] + 1*x[5];
 
 julia> hessian_pattern(f, x)
-5×5 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 3 stored entries:
+5×5 SparseArrays.SparseMatrixCSC{Bool, Int64} with 3 stored entries:
  ⋅  ⋅  ⋅  ⋅  ⋅
  ⋅  ⋅  1  ⋅  ⋅
  ⋅  1  ⋅  ⋅  ⋅
@@ -87,7 +87,7 @@ julia> hessian_pattern(f, x)
 julia> g(x) = f(x) + x[2]^x[5];
 
 julia> hessian_pattern(g, x)
-5×5 SparseArrays.SparseMatrixCSC{Bool, UInt64} with 7 stored entries:
+5×5 SparseArrays.SparseMatrixCSC{Bool, Int64} with 7 stored entries:
  ⋅  ⋅  ⋅  ⋅  ⋅
  ⋅  1  1  ⋅  1
  ⋅  1  ⋅  ⋅  ⋅
