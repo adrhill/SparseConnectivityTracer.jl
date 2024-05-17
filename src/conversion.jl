@@ -44,9 +44,9 @@ for TT in (GradientTracer, ConnectivityTracer, HessianTracer)
     Base.similar(::Array{T}, dims::Dims{N})         where {T<:TT,N} = zeros(T, dims)
 end
 
-Base.similar(::Array, ::Type{ConnectivityTracer{C}}, dims::Dims{N}) where {C,N}   = zeros(T, dims)
-Base.similar(::Array, ::Type{GradientTracer{G}},     dims::Dims{N}) where {G,N}   = zeros(T, dims)
-Base.similar(::Array, ::Type{HessianTracer{G,H}},    dims::Dims{N}) where {G,H,N} = zeros(T, dims)
+Base.similar(::Array, ::Type{ConnectivityTracer{C}}, dims::Dims{N}) where {C,N}   = zeros(ConnectivityTracer{C}, dims)
+Base.similar(::Array, ::Type{GradientTracer{G}},     dims::Dims{N}) where {G,N}   = zeros(GradientTracer{G},     dims)
+Base.similar(::Array, ::Type{HessianTracer{G,H}},    dims::Dims{N}) where {G,H,N} = zeros(HessianTracer{G,H},    dims)
 
 
 ## Duals
