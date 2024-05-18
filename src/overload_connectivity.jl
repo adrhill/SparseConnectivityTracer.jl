@@ -1,5 +1,5 @@
 ## 1-to-1
-for fn in ops_1_to_1
+for fn in nameof.(ops_1_to_1)
     @eval Base.$fn(t::ConnectivityTracer) = t
     @eval function Base.$fn(d::D) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
         return Dual($fn(primal(d)), tracer(d))
@@ -7,7 +7,7 @@ for fn in ops_1_to_1
 end
 
 ## 2-to-1
-for fn in ops_2_to_1
+for fn in nameof.(ops_2_to_1)
     @eval Base.$fn(a::T, b::T) where {T<:ConnectivityTracer} = T(inputs(a) ∪ inputs(b))
     @eval function Base.$fn(da::D, db::D) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
         return Dual($fn(primal(da), primal(db)), $fn(tracer(da), tracer(db)))
@@ -23,7 +23,7 @@ for fn in ops_2_to_1
 end
 
 ## 1-to-2
-for fn in ops_1_to_2
+for fn in nameof.(ops_1_to_2)
     @eval Base.$fn(t::ConnectivityTracer) = (t, t)
     @eval function Base.$fn(d::D) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
         p1, p2 = $fn(primal(d))

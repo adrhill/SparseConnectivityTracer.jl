@@ -7,7 +7,7 @@ function gradient_tracer_1_to_1(t::T, is_firstder_zero::Bool) where {T<:Gradient
     end
 end
 
-for fn in ops_1_to_1
+for fn in nameof.(ops_1_to_1)
     @eval function Base.$fn(t::GradientTracer)
         return gradient_tracer_1_to_1(t, is_firstder_zero_global($fn))
     end
@@ -38,7 +38,7 @@ function gradient_tracer_2_to_1(
     end
 end
 
-for fn in ops_2_to_1
+for fn in nameof.(ops_2_to_1)
     @eval function Base.$fn(tx::T, ty::T) where {T<:GradientTracer}
         return gradient_tracer_2_to_1(
             tx, ty, is_firstder_arg1_zero_global($fn), is_firstder_arg2_zero_global($fn)
@@ -87,7 +87,7 @@ function gradient_tracer_1_to_2(
     return (t1, t2)
 end
 
-for fn in ops_1_to_2
+for fn in nameof.(ops_1_to_2)
     @eval function Base.$fn(t::GradientTracer)
         return gradient_tracer_1_to_2(
             t, is_firstder_out1_zero_global($fn), is_firstder_out2_zero_global($fn)
