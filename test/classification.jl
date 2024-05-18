@@ -42,8 +42,6 @@ random_input(::typeof(sincosd)) = 180 * rand()
 random_first_input(f) = random_input(f)
 random_second_input(f) = random_input(f)
 
-sym2fn(op::Symbol) = @eval Base.$op
-
 # Use enum as return type
 @enum Order begin
     zero_order   = 0
@@ -82,10 +80,9 @@ function classify_1_to_1(f, x; atol=DEFAULT_ATOL)
     return order
 end
 
-function classify_1_to_1(op::Symbol; atol=DEFAULT_ATOL, trials=100)
-    f = sym2fn(op)
+function classify_1_to_1(op; atol=DEFAULT_ATOL, trials=100)
     try
-        return maximum(classify_1_to_1(f, random_input(f); atol) for _ in 1:trials)
+        return maximum(classify_1_to_1(op, random_input(op); atol) for _ in 1:trials)
     catch e
         @warn "Classification of 1-to-1 operator $op failed" e
         return error_order
@@ -135,11 +132,10 @@ end
 classify_2_to_1(::typeof(max), x, y; atol) = (first_order, first_order, zero_order)
 classify_2_to_1(::typeof(min), x, y; atol) = (first_order, first_order, zero_order)
 
-function classify_2_to_1(op::Symbol; atol=1e-5, trials=100)
-    f = sym2fn(op)
+function classify_2_to_1(op; atol=1e-5, trials=100)
     try
         return maximum(
-            classify_2_to_1(f, random_first_input(f), random_second_input(f); atol) for
+            classify_2_to_1(op, random_first_input(op), random_second_input(op); atol) for
             _ in 1:trials
         )
     catch e
@@ -197,11 +193,10 @@ function classify_1_to_2(f, x; atol)
     return (first_out, second_out)
 end
 
-function classify_1_to_2(op::Symbol; atol=1e-5, trials=100)
-    f = sym2fn(op)
-    f_array(x) = [f(x)...]
+function classify_1_to_2(op; atol=1e-5, trials=100)
+    op_array(x) = [op(x)...]
     try
-        return maximum(classify_1_to_2(f_array, random_input(f); atol) for _ in 1:trials)
+        return maximum(classify_1_to_2(op_array, random_input(op); atol) for _ in 1:trials)
     catch e
         @warn "Classification of 1-to-2 operator `$op` failed" e
         return (error_order, error_order)

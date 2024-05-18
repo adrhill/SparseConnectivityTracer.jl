@@ -17,7 +17,7 @@ function hessian_tracer_1_to_1(
     end
 end
 
-for fn in ops_1_to_1
+for fn in nameof.(ops_1_to_1)
     @eval function Base.$fn(t::HessianTracer)
         return hessian_tracer_1_to_1(
             t, is_firstder_zero_global($fn), is_seconder_zero_global($fn)
@@ -65,7 +65,7 @@ function hessian_tracer_2_to_1(
     return T(grad, hess)
 end
 
-for fn in ops_2_to_1
+for fn in nameof.(ops_2_to_1)
     @eval function Base.$fn(tx::T, ty::T) where {T<:HessianTracer}
         return hessian_tracer_2_to_1(
             tx,
@@ -138,7 +138,7 @@ function hessian_tracer_1_to_2(
     t2 = hessian_tracer_1_to_1(t, is_firstder_out2_zero, is_seconder_out2_zero)
     return (t1, t2)
 end
-for fn in ops_1_to_2
+for fn in nameof.(ops_1_to_2)
     @eval function Base.$fn(t::HessianTracer)
         return hessian_tracer_1_to_2(
             t,
