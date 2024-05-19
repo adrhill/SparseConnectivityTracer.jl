@@ -46,6 +46,10 @@ ops_1_to_1_s = (
     abs2,
     # other
     inv,
+    # complex
+    conj, real,
+    # linalg
+    transpose, adjoint,
 )
 for op in ops_1_to_1_s
     T = typeof(op)
