@@ -46,10 +46,6 @@ ops_1_to_1_s = (
     abs2,
     # other
     inv,
-    # complex
-    conj, real,
-    # linalg
-    transpose, adjoint,
 )
 for op in ops_1_to_1_s
     T = typeof(op)
@@ -66,6 +62,10 @@ ops_1_to_1_f = (
     abs, hypot,
     deg2rad, rad2deg,
     mod2pi, prevfloat, nextfloat,
+    # complex
+    conj, real, imag,
+    # linalg
+    transpose, adjoint,
 )
 for op in ops_1_to_1_f
     T = typeof(op)
