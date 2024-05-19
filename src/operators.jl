@@ -63,7 +63,7 @@ ops_1_to_1_f = (
     deg2rad, rad2deg,
     mod2pi, prevfloat, nextfloat,
     # complex
-    conj, real, imag,
+    conj, real,
     # linalg
     transpose, adjoint,
 )
