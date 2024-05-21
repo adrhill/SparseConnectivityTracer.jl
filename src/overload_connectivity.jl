@@ -13,12 +13,12 @@ end
 function overload_connectivity_1_to_1(m::Module, fn::Function)
     ms, fns = nameof(m), nameof(fn)
     @eval function $ms.$fns(t::T) where {T<:ConnectivityTracer}
-        return connectivity_tracer_1_to_1(t, is_influence_zero_global($fns))
+        return connectivity_tracer_1_to_1(t, is_influence_zero_global($ms.$fns))
     end
     @eval function $ms.$fns(d::D) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
         x = primal(d)
         p_out = $ms.$fns(x)
-        t_out = connectivity_tracer_1_to_1(tracer(d), is_influence_zero_local($fns, x))
+        t_out = connectivity_tracer_1_to_1(tracer(d), is_influence_zero_local($ms.$fns, x))
         return Dual(p_out, t_out)
     end
 end
@@ -43,11 +43,14 @@ function connectivity_tracer_2_to_1(
     end
 end
 
-function overload_connectivity_1_to_2(m::Module, fn::Function)
+function overload_connectivity_2_to_1(m::Module, fn::Function)
     ms, fns = nameof(m), nameof(fn)
     @eval function $ms.$fns(tx::T, ty::T) where {T<:ConnectivityTracer}
         return connectivity_tracer_2_to_1(
-            tx, ty, is_influence_arg1_zero_global($fns), is_influence_arg2_zero_global($fns)
+            tx,
+            ty,
+            is_influence_arg1_zero_global($ms.$fns),
+            is_influence_arg2_zero_global($ms.$fns),
         )
     end
     @eval function $ms.$fns(dx::D, dy::D) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
@@ -57,8 +60,8 @@ function overload_connectivity_1_to_2(m::Module, fn::Function)
         t_out = connectivity_tracer_2_to_1(
             tracer(dx),
             tracer(dy),
-            is_influence_arg1_zero_local($fns, x, y),
-            is_influence_arg2_zero_local($fns, x, y),
+            is_influence_arg1_zero_local($ms.$fns, x, y),
+            is_influence_arg2_zero_local($ms.$fns, x, y),
         )
         return Dual(p_out, t_out)
     end
@@ -70,7 +73,7 @@ function overload_connectivity_1_to_2(m::Module, fn::Function)
         x = primal(dx)
         p_out = $ms.$fns(x, y)
         t_out = connectivity_tracer_1_to_1(
-            tracer(dx), is_influence_arg1_zero_local($fns, x, y)
+            tracer(dx), is_influence_arg1_zero_local($ms.$fns, x, y)
         )
         return Dual(p_out, t_out)
     end
@@ -82,7 +85,7 @@ function overload_connectivity_1_to_2(m::Module, fn::Function)
         y = primal(dy)
         p_out = $ms.$fns(x, y)
         t_out = connectivity_tracer_1_to_1(
-            tracer(dy), is_influence_arg2_zero_local($fns, x, y)
+            tracer(dy), is_influence_arg2_zero_local($ms.$fns, x, y)
         )
         return Dual(p_out, t_out)
     end
@@ -102,7 +105,9 @@ function overload_connectivity_1_to_2(m::Module, fn::Function)
     ms, fns = nameof(m), nameof(fn)
     @eval function $ms.$fns(t::ConnectivityTracer)
         return connectivity_tracer_1_to_2(
-            t, is_influence_out1_zero_global($fns), is_influence_out2_zero_global($fns)
+            t,
+            is_influence_out1_zero_global($ms.$fns),
+            is_influence_out2_zero_global($ms.$fns),
         )
     end
 
@@ -110,7 +115,9 @@ function overload_connectivity_1_to_2(m::Module, fn::Function)
         x = primal(d)
         p1_out, p2_out = $ms.$fns(x)
         t1_out, t2_out = connectivity_tracer_1_to_2(
-            t, is_influence_out1_zero_local($fns, x), is_influence_out2_zero_local($fns, x)
+            t,
+            is_influence_out1_zero_local($ms.$fns, x),
+            is_influence_out2_zero_local($ms.$fns, x),
         )
         return (Dual(p1_out, t1_out), Dual(p2_out, t2_out))
     end

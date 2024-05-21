@@ -66,8 +66,11 @@ ops_1_to_1_f = (
     +, -,
     identity,
     abs, hypot,
-    deg2rad, rad2deg,
-    mod2pi, prevfloat, nextfloat,
+    # angles
+    deg2rad, rad2deg, mod2pi,
+    # floats
+    float, prevfloat, nextfloat,
+    big, widen,
 )
 for op in ops_1_to_1_f
     T = typeof(op)
@@ -98,8 +101,7 @@ end
 ops_1_to_1_i = (
     zero, one, oneunit,
     typemin, typemax, eps,
-    float, floatmin, floatmax, maxintfloat,
-    big, widen,
+    floatmin, floatmax, maxintfloat,
 )
 for op in ops_1_to_1_i
     T = typeof(op)

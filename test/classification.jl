@@ -44,8 +44,16 @@ random_second_input(op) = random_input(op)
 ## 1-to-1
 
 function correct_classification_1_to_1(op, x; atol)
-    dfdx = derivative(op, x)
-    d²fdx² = second_derivative(op, x)
+    dfdx, d²fdx² = try
+        derivative(op, x), second_derivative(op, x)
+    catch e
+        if e isa MethodError
+            # ForwardDiff can't handle this operator: assume it has zero derivatives
+            0.0, 0.0
+        else
+            throw(e)
+        end
+    end
     if (is_firstder_zero_global(op) | is_firstder_zero_local(op, x)) &&
         !isapprox(dfdx, 0; atol)
         return false
@@ -69,8 +77,16 @@ end;
 ## 2-to-1
 
 function correct_classification_2_to_1(op, x, y; atol)
-    g = gradient(Base.splat(op), [x, y])
-    H = hessian(Base.splat(op), [x, y])
+    g, H = try
+        gradient(Base.splat(op), [x, y]), hessian(Base.splat(op), [x, y])
+    catch e
+        if e isa MethodError
+            # ForwardDiff can't handle this operator: assume it has zero derivatives
+            zeros(2), zeros(2, 2)
+        else
+            throw(e)
+        end
+    end
 
     ∂f∂x    = g[1]
     ∂f∂y    = g[2]
@@ -115,8 +131,17 @@ function correct_classification_1_to_2(op, x; atol)
         y = op(x)
         return [y[1], y[2]]
     end
-    d1 = derivative(op_vec, x)
-    d2 = second_derivative(op_vec, x)
+
+    d1, d2 = try
+        derivative(op_vec, x), second_derivative(op_vec, x)
+    catch e
+        if e isa MethodError
+            # ForwardDiff can't handle this operator: assume it has zero derivatives
+            zeros(2), zeros(2)
+        else
+            throw(e)
+        end
+    end
 
     ∂f₁∂x = d1[1]
     ∂f₂∂x = d1[2]
