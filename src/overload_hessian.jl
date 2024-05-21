@@ -176,20 +176,6 @@ function overload_hessian_1_to_2(m::Module, fn::Function)
     end
 end
 
-## Actual overloads
-
-for op in ops_1_to_1
-    overload_hessian_1_to_1(Base, op)
-end
-
-for op in ops_2_to_1
-    overload_hessian_2_to_1(Base, op)
-end
-
-for op in ops_1_to_2
-    overload_hessian_1_to_2(Base, op)
-end
-
 ## Special cases
 
 ## Exponent (requires extra types)

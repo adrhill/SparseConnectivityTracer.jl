@@ -8,11 +8,19 @@ ADTypes = "47edcb42-4c32-4615-8424-f2b9edc5f35b"
 Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Requires = "ae029012-a4dd-5104-9daa-d747884805df"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+
+[weakdeps]
+SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
+
+[extensions]
+SparseConnectivityTracerSpecialFunctionsExt = "SpecialFunctions"
 
 [compat]
 ADTypes = "1"
 Compat = "3,4"
 DocStringExtensions = "0.9"
 SparseArrays = "1"
+SpecialFunctions = "2.4"
 julia = "1.6"
