@@ -59,7 +59,7 @@ const FIRST_ORDER_SET_TYPES = (
         @test jacobian_pattern(x -> round(x, RoundNearestTiesUp), 1, G) ≈ [0;;]
 
         # Linear algebra
-        @test jacobian_pattern(x -> dot(x[1:2], x[4:5]), rand(5), G) ≈ [1 1 0 1 1]
+        @test jacobian_pattern(x -> dot(x[1:2], x[4:5]), rand(5), G) == [1 1 0 1 1]
     end
 end
 
@@ -102,7 +102,7 @@ end
         # Linear algebra
         @test local_jacobian_pattern(logdet, [1.0 -1.0; 2.0 2.0], G) ≈ [1 1 1 1]  # (#68)
         @test local_jacobian_pattern(x -> log(det(x)), [1.0 -1.0; 2.0 2.0], G) ≈ [1 1 1 1]
-        @test local_jacobian_pattern(x -> dot(x[1:2], x[4:5]), [0, 1, 0, 1, 0], G) ≈
+        @test local_jacobian_pattern(x -> dot(x[1:2], x[4:5]), [0, 1, 0, 1, 0], G) ==
             [1 0 0 0 1]
 
         ## ConnectivityTracer
