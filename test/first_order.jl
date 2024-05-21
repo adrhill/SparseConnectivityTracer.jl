@@ -3,7 +3,7 @@ using SparseConnectivityTracer:
     ConnectivityTracer, GradientTracer, MissingPrimalError, tracer, trace_input, empty
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 
-using LinearAlgebra: det, logdet
+using LinearAlgebra: det, dot, logdet
 using Test
 
 const FIRST_ORDER_SET_TYPES = (
@@ -57,6 +57,9 @@ const FIRST_ORDER_SET_TYPES = (
         @test jacobian_pattern(x -> x^ℯ, 1, G) ≈ [1;;]
         @test jacobian_pattern(x -> ℯ^x, 1, G) ≈ [1;;]
         @test jacobian_pattern(x -> round(x, RoundNearestTiesUp), 1, G) ≈ [0;;]
+
+        # Linear algebra
+        @test jacobian_pattern(x -> dot(x[1:2], x[4:5]), rand(5), G) ≈ [1 1 0 1 1]
     end
 end
 
