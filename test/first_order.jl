@@ -3,7 +3,7 @@ using SparseConnectivityTracer:
     ConnectivityTracer, GradientTracer, MissingPrimalError, tracer, trace_input, empty
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using ADTypes: jacobian_sparsity
-using LinearAlgebra: det, logdet
+using LinearAlgebra: det, dot, logdet
 using Test
 
 const FIRST_ORDER_SET_TYPES = (
@@ -74,6 +74,9 @@ end
         @test jacobian_sparsity(x -> x^ℯ, 1, method) ≈ [1;;]
         @test jacobian_sparsity(x -> ℯ^x, 1, method) ≈ [1;;]
         @test jacobian_sparsity(x -> round(x, RoundNearestTiesUp), 1, method) ≈ [0;;]
+    
+        # Linear Algebra
+        @test jacobian_sparsity(x -> dot(x[1:2], x[4:5]), rand(5), method) == [1 1 0 1 1]
 
         ## Error handling when applying non-dual tracers to "local" functions with control flow
         @test_throws MissingPrimalError jacobian_sparsity(
@@ -123,5 +126,7 @@ end
         # Linear algebra
         @test jacobian_sparsity(logdet, [1.0 -1.0; 2.0 2.0], method) ≈ [1 1 1 1]  # (#68)
         @test jacobian_sparsity(x -> log(det(x)), [1.0 -1.0; 2.0 2.0], method) ≈ [1 1 1 1]
+        @test jacobian_sparsity(x -> dot(x[1:2], x[4:5]), [0, 1, 0, 1, 0], method) ==
+            [1 0 0 0 1]
     end
 end
