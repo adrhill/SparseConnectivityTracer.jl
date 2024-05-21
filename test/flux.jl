@@ -57,11 +57,11 @@ const LAYER = Conv(WEIGHTS_FLUX, BIAS_FLUX) # Conv((2, 2), 2 => 1)
 const LAYER_RELU = Conv(WEIGHTS_FLUX, BIAS_FLUX, relu) # Conv((2, 2), 2 => 1, relu)
 
 function test_flux_conv(method::AbstractSparsityDetector)
-    J = jacobian_pattern(LAYER, INPUT_FLUX, method)
+    J = jacobian_sparsity(LAYER, INPUT_FLUX, method)
     @test_reference "references/pattern/jacobian/NNlib/conv.txt" BitMatrix(J)
 end
 function test_flux_conv_local(method::AbstractSparsityDetector)
-    J = local_jacobian_pattern(LAYER_RELU, INPUT_FLUX, method)
+    J = jacobian_sparsity(LAYER_RELU, INPUT_FLUX, method)
     @test_reference "references/pattern/jacobian/NNlib/conv_relu.txt" BitMatrix(J)
 end
 
