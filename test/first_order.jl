@@ -2,7 +2,7 @@ using SparseConnectivityTracer
 using SparseConnectivityTracer:
     ConnectivityTracer, GradientTracer, MissingPrimalError, tracer, trace_input, empty
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
-using ADTypes: jacobian_sparsity, hessian_sparsity
+using ADTypes: jacobian_sparsity
 using LinearAlgebra: det, logdet
 using Test
 
