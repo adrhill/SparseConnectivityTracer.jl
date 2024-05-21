@@ -1,5 +1,6 @@
 using SparseConnectivityTracer
 
+using Compat
 using Test
 using ReferenceTests
 using JuliaFormatter
@@ -19,21 +20,23 @@ DocMeta.setdocmeta!(
 
 @testset verbose = true "SparseConnectivityTracer.jl" begin
     @testset verbose = true "Formalities" begin
-        @testset "Code formatting" begin
-            @test JuliaFormatter.format(
-                SparseConnectivityTracer; verbose=false, overwrite=false
-            )
-        end
-        @testset "Aqua tests" begin
-            Aqua.test_all(
-                SparseConnectivityTracer;
-                ambiguities=false,
-                deps_compat=(ignore=[:Random, :SparseArrays], check_extras=false),
-                persistent_tasks=false,
-            )
-        end
-        @testset "JET tests" begin
-            JET.test_package(SparseConnectivityTracer; target_defined_modules=true)
+        if VERSION >= v"1.10"
+            @testset "Code formatting" begin
+                @test JuliaFormatter.format(
+                    SparseConnectivityTracer; verbose=false, overwrite=false
+                )
+            end
+            @testset "Aqua tests" begin
+                Aqua.test_all(
+                    SparseConnectivityTracer;
+                    ambiguities=false,
+                    deps_compat=(ignore=[:Random, :SparseArrays], check_extras=false),
+                    persistent_tasks=false,
+                )
+            end
+            @testset "JET tests" begin
+                JET.test_package(SparseConnectivityTracer; target_defined_modules=true)
+            end
         end
         @testset "Doctests" begin
             Documenter.doctest(SparseConnectivityTracer)

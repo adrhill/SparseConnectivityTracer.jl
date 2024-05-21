@@ -1,6 +1,7 @@
 module SparseConnectivityTracer
 
 using ADTypes: ADTypes
+using Compat: Returns
 import SparseArrays: sparse
 import Random: rand, AbstractRNG, SamplerType
 
