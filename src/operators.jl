@@ -71,6 +71,10 @@ ops_1_to_1_f = (
     # floats
     float, prevfloat, nextfloat,
     big, widen,
+    # linalg
+    transpose, adjoint,
+    # complex
+    conj, real,
 )
 for op in ops_1_to_1_f
     T = typeof(op)
