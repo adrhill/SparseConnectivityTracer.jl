@@ -28,5 +28,6 @@ export hessian_pattern, local_hessian_pattern
 
 # ADTypes interface
 export TracerSparsityDetector
+export TracerLocalSparsityDetector
 
 end # module

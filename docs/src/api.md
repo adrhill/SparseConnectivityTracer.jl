@@ -8,7 +8,21 @@ CollapsedDocStrings = true
 ```@index
 ```
 
-## Interface
+## ADTypes Interface
+
+For package developers, we recommend using the [ADTypes.jl](https://github.com/SciML/ADTypes.jl) interface.
+
+To compute global sparsity patterns of `f(x)` over the entire input domain `x`, use
+```@docs
+TracerSparsityDetector
+```
+
+To compute local sparsity patterns of `f(x)` at a specific input `x`, use
+```@docs
+TracerLocalSparsityDetector
+```
+
+## Legacy Interface
 
 ### Global sparsity 
 
@@ -20,10 +34,7 @@ jacobian_pattern
 hessian_pattern
 ```
 
-Alternatively, [ADTypes.jl](https://github.com/SciML/ADTypes.jl)'s interface can be used:
-```@docs
-TracerSparsityDetector
-```
+[`TracerSparsityDetector`](@ref) is the ADTypes equivalent of these functions.
 
 ### Local sparsity
 
@@ -36,7 +47,7 @@ local_jacobian_pattern
 local_hessian_pattern
 ```
 
-Note that [ADTypes.jl](https://github.com/SciML/ADTypes.jl) doesn't provide an interface for local sparsity detection.
+[`TracerLocalSparsityDetector`](@ref) is the ADTypes equivalent of these functions.
 
 ## Internals
 
