@@ -34,7 +34,7 @@ function connectivity_tracer_2_to_1(
         else
             return ty
         end
-    else # ∂f∂x ≠ 0 
+    else # x -> f ≠ 0 
         if is_influence_arg2_zero
             return tx
         else
