@@ -1,5 +1,6 @@
 using SparseConnectivityTracer
 
+using Compat
 using Test
 using ReferenceTests
 using JuliaFormatter
