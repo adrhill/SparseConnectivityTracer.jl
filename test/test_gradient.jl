@@ -40,6 +40,48 @@ NNLIB_ACTIVATIONS_F = (
 )
 NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
 
+@testset "Jacobian Global" begin
+    @testset "Set type $G" for G in FIRST_ORDER_SET_TYPES
+        method = TracerSparsityDetector(G)
+
+        f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])]
+        @test jacobian_sparsity(f, rand(3), method) == [1 0 0; 1 1 0; 0 0 1]
+        @test jacobian_sparsity(identity, rand(), method) ≈ [1;;]
+        @test jacobian_sparsity(Returns(1), 1, method) ≈ [0;;]
+
+        # Test GradientTracer on functions with zero derivatives
+        x = rand(2)
+        g(x) = [x[1] * x[2], ceil(x[1] * x[2]), x[1] * round(x[2])]
+        @test jacobian_sparsity(g, x, method) == [1 1; 0 0; 1 0]
+
+        # Code coverage
+        @test jacobian_sparsity(x -> [sincos(x)...], 1, method) ≈ [1; 1]
+        @test jacobian_sparsity(typemax, 1, method) ≈ [0;;]
+        @test jacobian_sparsity(x -> x^(2//3), 1, method) ≈ [1;;]
+        @test jacobian_sparsity(x -> (2//3)^x, 1, method) ≈ [1;;]
+        @test jacobian_sparsity(x -> x^ℯ, 1, method) ≈ [1;;]
+        @test jacobian_sparsity(x -> ℯ^x, 1, method) ≈ [1;;]
+        @test jacobian_sparsity(x -> round(x, RoundNearestTiesUp), 1, method) ≈ [0;;]
+
+        # Linear Algebra
+        @test jacobian_sparsity(x -> dot(x[1:2], x[4:5]), rand(5), method) == [1 1 0 1 1]
+
+        # SpecialFunctions extension
+        @test jacobian_sparsity(x -> erf(x[1]), rand(2), method) == [1 0]
+        @test jacobian_sparsity(x -> beta(x[1], x[2]), rand(3), method) == [1 1 0]
+
+        # NNlib extension
+        for f in NNLIB_ACTIVATIONS
+            @test jacobian_sparsity(f, 1, method) ≈ [1;;]
+        end
+
+        ## Error handling when applying non-dual tracers to "local" functions with control flow
+        @test_throws MissingPrimalError jacobian_sparsity(
+            x -> x[1] > x[2] ? x[3] : x[4], [1.0, 2.0, 3.0, 4.0], method
+        ) == [0 0 0 1;]
+    end
+end
+
 @testset "Jacobian Local" verbose = true begin
     @testset "Set type $G" for G in FIRST_ORDER_SET_TYPES
         method = TracerLocalSparsityDetector(G)
