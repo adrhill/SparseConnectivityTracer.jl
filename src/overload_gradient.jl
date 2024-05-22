@@ -10,16 +10,16 @@ end
 
 function overload_gradient_1_to_1(M, op)
     return quote
-        function $M.$op(t::$SCT.GradientTracer)
-            return $SCT.gradient_tracer_1_to_1(t, $SCT.is_firstder_zero_global($M.$op))
+        function $M.$op(t::SCT.GradientTracer)
+            return SCT.gradient_tracer_1_to_1(t, SCT.is_firstder_zero_global($M.$op))
         end
-        function $M.$op(d::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
-            x = $SCT.primal(d)
+        function $M.$op(d::D) where {P,T<:SCT.GradientTracer,D<:SCT.Dual{P,T}}
+            x = SCT.primal(d)
             p_out = $M.$op(x)
-            t_out = $SCT.gradient_tracer_1_to_1(
-                $SCT.tracer(d), $SCT.is_firstder_zero_local($op, x)
+            t_out = SCT.gradient_tracer_1_to_1(
+                SCT.tracer(d), SCT.is_firstder_zero_local($op, x)
             )
-            return $SCT.Dual(p_out, t_out)
+            return SCT.Dual(p_out, t_out)
         end
     end
 end
@@ -46,53 +46,49 @@ end
 
 function overload_gradient_2_to_1(M, op)
     return quote
-        function $M.$op(tx::T, ty::T) where {T<:$SCT.GradientTracer}
-            return $SCT.gradient_tracer_2_to_1(
+        function $M.$op(tx::T, ty::T) where {T<:SCT.GradientTracer}
+            return SCT.gradient_tracer_2_to_1(
                 tx,
                 ty,
-                $SCT.is_firstder_arg1_zero_global($M.$op),
-                $SCT.is_firstder_arg2_zero_global($M.$op),
+                SCT.is_firstder_arg1_zero_global($M.$op),
+                SCT.is_firstder_arg2_zero_global($M.$op),
             )
         end
-        function $M.$op(dx::D, dy::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
-            x = $SCT.primal(dx)
-            y = $SCT.primal(dy)
+        function $M.$op(dx::D, dy::D) where {P,T<:SCT.GradientTracer,D<:SCT.Dual{P,T}}
+            x = SCT.primal(dx)
+            y = SCT.primal(dy)
             p_out = $M.$op(x, y)
-            t_out = $SCT.gradient_tracer_2_to_1(
-                $SCT.tracer(dx),
-                $SCT.tracer(dy),
-                $SCT.is_firstder_arg1_zero_local($M.$op, x, y),
-                $SCT.is_firstder_arg2_zero_local($M.$op, x, y),
+            t_out = SCT.gradient_tracer_2_to_1(
+                SCT.tracer(dx),
+                SCT.tracer(dy),
+                SCT.is_firstder_arg1_zero_local($M.$op, x, y),
+                SCT.is_firstder_arg2_zero_local($M.$op, x, y),
             )
-            return $SCT.Dual(p_out, t_out)
+            return SCT.Dual(p_out, t_out)
         end
 
-        function $M.$op(tx::$SCT.GradientTracer, ::Number)
-            return $SCT.gradient_tracer_1_to_1(
-                tx, $SCT.is_firstder_arg1_zero_global($M.$op)
-            )
+        function $M.$op(tx::SCT.GradientTracer, ::Number)
+            return SCT.gradient_tracer_1_to_1(tx, SCT.is_firstder_arg1_zero_global($M.$op))
         end
-        function $M.$op(dx::D, y::Number) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
-            x = $SCT.primal(dx)
+        function $M.$op(dx::D, y::Number) where {P,T<:SCT.GradientTracer,D<:SCT.Dual{P,T}}
+            x = SCT.primal(dx)
             p_out = $M.$op(x, y)
-            t_out = $SCT.gradient_tracer_1_to_1(
-                $SCT.tracer(dx), $SCT.is_firstder_arg1_zero_local($M.$op, x, y)
+            t_out = SCT.gradient_tracer_1_to_1(
+                SCT.tracer(dx), SCT.is_firstder_arg1_zero_local($M.$op, x, y)
             )
-            return $SCT.Dual(p_out, t_out)
+            return SCT.Dual(p_out, t_out)
         end
 
-        function $M.$op(::Number, ty::$SCT.GradientTracer)
-            return $SCT.gradient_tracer_1_to_1(
-                ty, $SCT.is_firstder_arg2_zero_global($M.$op)
-            )
+        function $M.$op(::Number, ty::SCT.GradientTracer)
+            return SCT.gradient_tracer_1_to_1(ty, SCT.is_firstder_arg2_zero_global($M.$op))
         end
-        function $M.$op(x::Number, dy::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
-            y = $SCT.primal(dy)
+        function $M.$op(x::Number, dy::D) where {P,T<:SCT.GradientTracer,D<:SCT.Dual{P,T}}
+            y = SCT.primal(dy)
             p_out = $M.$op(x, y)
-            t_out = $SCT.gradient_tracer_1_to_1(
-                $SCT.tracer(dy), $SCT.is_firstder_arg2_zero_local($M.$op, x, y)
+            t_out = SCT.gradient_tracer_1_to_1(
+                SCT.tracer(dy), SCT.is_firstder_arg2_zero_local($M.$op, x, y)
             )
-            return $SCT.Dual(p_out, t_out)
+            return SCT.Dual(p_out, t_out)
         end
     end
 end
@@ -109,23 +105,23 @@ end
 
 function overload_gradient_1_to_2(M, op)
     return quote
-        function $M.$op(t::$SCT.GradientTracer)
-            return $SCT.gradient_tracer_1_to_2(
+        function $M.$op(t::SCT.GradientTracer)
+            return SCT.gradient_tracer_1_to_2(
                 t,
-                $SCT.is_firstder_out1_zero_global($M.$op),
-                $SCT.is_firstder_out2_zero_global($M.$op),
+                SCT.is_firstder_out1_zero_global($M.$op),
+                SCT.is_firstder_out2_zero_global($M.$op),
             )
         end
 
-        function $M.$op(d::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
-            x = $SCT.primal(d)
+        function $M.$op(d::D) where {P,T<:SCT.GradientTracer,D<:SCT.Dual{P,T}}
+            x = SCT.primal(d)
             p1_out, p2_out = $M.$op(x)
-            t1_out, t2_out = $SCT.gradient_tracer_1_to_2(
-                $SCT.tracer(d),
-                $SCT.is_firstder_out1_zero_local($M.$op, x),
-                $SCT.is_firstder_out2_zero_local($M.$op, x),
+            t1_out, t2_out = SCT.gradient_tracer_1_to_2(
+                SCT.tracer(d),
+                SCT.is_firstder_out1_zero_local($M.$op, x),
+                SCT.is_firstder_out2_zero_local($M.$op, x),
             )
-            return ($SCT.Dual(p1_out, t1_out), $SCT.Dual(p2_out, t2_out))  # TODO: this was wrong, add test
+            return (SCT.Dual(p1_out, t1_out), SCT.Dual(p2_out, t2_out))  # TODO: this was wrong, add test
         end
     end
 end
