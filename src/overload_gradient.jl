@@ -113,7 +113,7 @@ function overload_gradient_1_to_2(m::Module, fn::Function)
         x = primal(d)
         p1_out, p2_out = $ms.$fns(x)
         t1_out, t2_out = gradient_tracer_1_to_2(
-            t,
+            tracer(d),
             is_firstder_out1_zero_local($ms.$fns, x),
             is_firstder_out2_zero_local($ms.$fns, x),
         )
