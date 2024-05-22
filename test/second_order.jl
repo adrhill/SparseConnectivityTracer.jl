@@ -3,6 +3,7 @@ using SparseConnectivityTracer:
     HessianTracer, MissingPrimalError, tracer, trace_input, empty
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using ADTypes: hessian_sparsity
+using SpecialFunctions: erf, beta
 using Test
 
 const SECOND_ORDER_SET_TYPES = (
@@ -143,6 +144,14 @@ const SECOND_ORDER_SET_TYPES = (
             0 1 0 0 0
             0 0 0 1 0
             0 1 0 0 1
+        ]
+
+        # SpecialFunctions
+        @test hessian_sparsity(x -> erf(x), 1, method) == [1;;]
+        @test hessian_sparsity(x -> beta(x[1], x[2]), rand(3), method) == [
+            1 1 0
+            1 1 0
+            0 0 0
         ]
 
         ## Error handling when applying non-dual tracers to "local" functions with control flow

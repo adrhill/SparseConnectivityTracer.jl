@@ -4,6 +4,7 @@ using SparseConnectivityTracer:
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using ADTypes: jacobian_sparsity
 using LinearAlgebra: det, dot, logdet
+using SpecialFunctions: erf, beta
 using Test
 
 const FIRST_ORDER_SET_TYPES = (
@@ -33,6 +34,10 @@ const FIRST_ORDER_SET_TYPES = (
         @test connectivity_pattern(x -> x^ℯ, 1, G) ≈ [1;;]
         @test connectivity_pattern(x -> ℯ^x, 1, G) ≈ [1;;]
         @test connectivity_pattern(x -> round(x, RoundNearestTiesUp), 1, G) ≈ [1;;]
+
+        # SpecialFunctions
+        @test connectivity_pattern(x -> erf(x), 1, G) == [1;;]
+        @test connectivity_pattern(x -> beta(x[1], x[2]), rand(3), G) == [1 1 0]
 
         ## Error handling when applying non-dual tracers to "local" functions with control flow
         @test_throws MissingPrimalError connectivity_pattern(
@@ -77,6 +82,10 @@ end
 
         # Linear Algebra
         @test jacobian_sparsity(x -> dot(x[1:2], x[4:5]), rand(5), method) == [1 1 0 1 1]
+
+        # SpecialFunctions
+        @test jacobian_sparsity(x -> erf(x), 1, method) == [1;;]
+        @test jacobian_sparsity(x -> beta(x[1], x[2]), rand(3), method) == [1 1 0]
 
         ## Error handling when applying non-dual tracers to "local" functions with control flow
         @test_throws MissingPrimalError jacobian_sparsity(
