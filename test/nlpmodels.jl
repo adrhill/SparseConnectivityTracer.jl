@@ -59,6 +59,10 @@ end
 
 @testset "Jacobian comparison" begin
     @testset "$name" for name in Symbol.(OptimizationProblems.meta[!, :name])
+        if startswith(string(name), "triangle") || startswith(string(name), "tetra_")
+            # UndefVarError
+            continue
+        end
         J_sct = jac_sparsity_sct(name)
         J_ref = jac_sparsity_ref(name)
         @test J_sct == J_ref
@@ -67,6 +71,10 @@ end
 
 @testset "Hessian comparison" begin
     @testset "$name" for name in Symbol.(OptimizationProblems.meta[!, :name])
+        if startswith(string(name), "triangle") || startswith(string(name), "tetra_")
+            # UndefVarError
+            continue
+        end
         H_sct = hess_sparsity_sct(name)
         H_ref = hess_sparsity_ref(name)
         @test H_sct == H_ref
