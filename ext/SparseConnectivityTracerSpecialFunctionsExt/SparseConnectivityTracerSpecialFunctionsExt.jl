@@ -20,14 +20,11 @@ ops_1_to_1_s = (
     # Gamma Function
     gamma,
     loggamma,
-    logabsgamma,
-    logfactorial,
     digamma,
     invdigamma,
     trigamma,
     # Exponential and Trigonometric Integrals
     expinti,
-    expintx,
     sinint,
     cosint,
     # Error functions, Dawson's and Fresnel Integrals
@@ -38,7 +35,7 @@ ops_1_to_1_s = (
     logerfc,
     erfinv,
     # Airy and Related Functions
-    airy,
+    airyai,
     airyaiprime,
     airybi,
     airybiprime,
@@ -55,9 +52,6 @@ ops_1_to_1_s = (
     # Elliptic Integrals
     ellipk,
     ellipe,
-    # Zeta and Related Functions
-    eta,
-    zeta,
 )
 
 for op in ops_1_to_1_s
@@ -77,9 +71,9 @@ ops_2_to_1_ssc = (
     loggamma,
     beta,
     logbeta,
-    logabsbeta,
     # Exponential and Trigonometric Integrals
     expint,
+    expintx,
     # Error functions, Dawson's and Fresnel Integrals
     erf,
     # Bessel Functions
@@ -89,10 +83,6 @@ ops_2_to_1_ssc = (
     bessely,
     besselyx,
     sphericalbessely,
-    hankelh1,
-    hankelh1x,
-    hankelh2,
-    hankelh2x,
     besseli,
     besselix,
     besselk,
@@ -118,9 +108,8 @@ SCT.list_operators_1_to_1(::Val{:SpecialFunctions}) = ops_1_to_1
 SCT.list_operators_2_to_1(::Val{:SpecialFunctions}) = ops_2_to_1
 SCT.list_operators_1_to_2(::Val{:SpecialFunctions}) = ()
 
-function __init__()
-    SCT.overload_all(SpecialFunctions)
-    return nothing
-end
+## Overloads
+
+eval(SCT.overload_all(:SpecialFunctions))
 
 end
