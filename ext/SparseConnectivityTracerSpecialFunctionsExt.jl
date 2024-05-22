@@ -11,11 +11,16 @@ end
 #=
 Complex functions are ignored.
 Functions with more than 2 arguments are ignored.
-Functions with integer arguments are ignored.
+
+TODO: add functions with integer arguments.
 =#
 
 ## 1-to-1
 
+# ops_1_to_1_s: 
+# x -> f  != 0
+# ∂f/∂x   != 0
+# ∂²f/∂x² != 0
 ops_1_to_1_s = (
     # Gamma Function
     gamma,
@@ -65,6 +70,12 @@ ops_1_to_1 = ops_1_to_1_s
 
 ## 2-to-1
 
+# ops_2_to_1_ssc:
+# ∂f/∂x    != 0
+# ∂²f/∂x²  != 0
+# ∂f/∂y    != 0
+# ∂²f/∂y²  != 0
+# ∂²f/∂x∂y != 0
 ops_2_to_1_ssc = (
     # Gamma Function
     gamma,
