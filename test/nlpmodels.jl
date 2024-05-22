@@ -9,16 +9,23 @@ using LinearAlgebra
 using SparseArrays
 using Test
 
+function mycons(nlp, x)
+    c = similar(x, nlp.meta.ncon)
+    cons!(nlp, x, c)
+    return c
+end
+
 function jac_sparsity_sct(name::Symbol)
     nlp = OptimizationProblems.ADNLPProblems.eval(name)()
-    c(x) = cons(nlp, x)
-    return ADTypes.jacobian_sparsity(c, nlp.meta.x0, TracerLocalSparsityDetector())
+    return ADTypes.jacobian_sparsity(
+        x -> mycons(nlp, x), nlp.meta.x0, TracerLocalSparsityDetector()
+    )
 end
 
 function hess_sparsity_sct(name::Symbol)
     nlp = OptimizationProblems.ADNLPProblems.eval(name)()
-    f(x) = obj(nlp, x)
-    return ADTypes.hessian_sparsity(f, nlp.meta.x0, TracerLocalSparsityDetector())
+    lag(x) = obj(nlp, x) + sum(mycons(nlp, x))
+    return ADTypes.hessian_sparsity(lag, nlp.meta.x0, TracerLocalSparsityDetector())
 end
 
 function jac_sparsity_ref(name::Symbol)
