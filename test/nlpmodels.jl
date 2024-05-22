@@ -17,15 +17,24 @@ end
 
 function jac_sparsity_sct(name::Symbol)
     nlp = OptimizationProblems.ADNLPProblems.eval(name)()
-    return ADTypes.jacobian_sparsity(
-        x -> mycons(nlp, x), nlp.meta.x0, TracerLocalSparsityDetector()
-    )
+    f(x) = mycons(nlp, x)
+    try
+        return ADTypes.jacobian_sparsity(f, nlp.meta.x0, TracerSparsityDetector())
+    catch e
+        @warn "Global Jacobian sparsity failed" name typeof(e)
+        return ADTypes.jacobian_sparsity(f, nlp.meta.x0, TracerLocalSparsityDetector())
+    end
 end
 
 function hess_sparsity_sct(name::Symbol)
     nlp = OptimizationProblems.ADNLPProblems.eval(name)()
-    lag(x) = obj(nlp, x) + sum(mycons(nlp, x))
-    return ADTypes.hessian_sparsity(lag, nlp.meta.x0, TracerLocalSparsityDetector())
+    f(x) = obj(nlp, x) + sum(mycons(nlp, x))
+    try
+        return ADTypes.hessian_sparsity(f, nlp.meta.x0, TracerSparsityDetector())
+    catch e
+        @warn "Global Hessian sparsity failed" name typeof(e)
+        return ADTypes.hessian_sparsity(f, nlp.meta.x0, TracerLocalSparsityDetector())
+    end
 end
 
 function jac_sparsity_ref(name::Symbol)
@@ -44,6 +53,7 @@ function hess_sparsity_ref(name::Symbol)
     nnzh = length(hrows)
     hvals = ones(Bool, nnzh)
     H_L = sparse(hrows, hcols, hvals, nlp.meta.nvar, nlp.meta.nvar)
+    # only the lower triangular part is stored
     return sparse(Symmetric(H_L, :L))
 end
 
