@@ -10,7 +10,7 @@ using Test
 const FIRST_ORDER_SET_TYPES = (
     BitSet, Set{UInt64}, DuplicateVector{UInt64}, RecursiveSet{UInt64}, SortedVector{UInt64}
 )
-const NNLIB_ACTIVATIONS_S = (
+NNLIB_ACTIVATIONS_S = (
     NNlib.σ,
     NNlib.celu,
     NNlib.elu,
@@ -28,7 +28,7 @@ const NNLIB_ACTIVATIONS_S = (
     NNlib.tanhshrink,
     NNlib.tanh_fast,
 )
-const NNLIB_ACTIVATIONS_F = (
+NNLIB_ACTIVATIONS_F = (
     NNlib.hardσ,
     NNlib.hardtanh,
     NNlib.leakyrelu,
@@ -37,7 +37,7 @@ const NNLIB_ACTIVATIONS_F = (
     NNlib.softshrink,
     NNlib.trelu,
 )
-const NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
+NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
 
 @testset "Connectivity Global" begin
     @testset "Set type $G" for G in FIRST_ORDER_SET_TYPES
