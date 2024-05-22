@@ -123,6 +123,15 @@ end
             x -> x[1] < x[2] ? x[3] : x[4], [2.0, 1.0, 3.0, 4.0], method
         ) ≈ [0 0 0 1;]
 
+        # Code coverage
+        @test jacobian_sparsity(x -> [sincos(x)...], 1, method) ≈ [1; 1]
+        @test jacobian_sparsity(typemax, 1, method) ≈ [0;;]
+        @test jacobian_sparsity(x -> x^(2//3), 1, method) ≈ [1;;]
+        @test jacobian_sparsity(x -> (2//3)^x, 1, method) ≈ [1;;]
+        @test jacobian_sparsity(x -> x^ℯ, 1, method) ≈ [1;;]
+        @test jacobian_sparsity(x -> ℯ^x, 1, method) ≈ [1;;]
+        @test jacobian_sparsity(x -> round(x, RoundNearestTiesUp), 1, method) ≈ [0;;]
+
         # Linear algebra
         @test jacobian_sparsity(logdet, [1.0 -1.0; 2.0 2.0], method) ≈ [1 1 1 1]  # (#68)
         @test jacobian_sparsity(x -> log(det(x)), [1.0 -1.0; 2.0 2.0], method) ≈ [1 1 1 1]
