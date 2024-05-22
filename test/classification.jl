@@ -25,6 +25,7 @@ using SparseConnectivityTracer:
     is_firstder_out2_zero_local,
     is_seconder_out2_zero_local
 using SpecialFunctions: SpecialFunctions
+using NNlib: NNlib
 using Test
 using ForwardDiff: derivative, gradient, hessian
 
@@ -83,7 +84,7 @@ function correct_classification_1_to_1(op, x; atol)
 end
 
 @testset verbose = true "1-to-1" begin
-    @testset "$m" for m in (Base, SpecialFunctions)
+    @testset "$m" for m in (Base, SpecialFunctions, NNlib)
         @testset "$op" for op in list_operators_1_to_1(Val(Symbol(m)))
             @test all(
                 correct_classification_1_to_1(op, random_input(op); atol=DEFAULT_ATOL) for
@@ -125,7 +126,7 @@ function correct_classification_2_to_1(op, x, y; atol)
 end
 
 @testset verbose = true "2-to-1" begin
-    @testset "$m" for m in (Base, SpecialFunctions)
+    @testset "$m" for m in (Base, SpecialFunctions, NNlib)
         @testset "$op" for op in list_operators_2_to_1(Val(Symbol(m)))
             @test all(
                 correct_classification_2_to_1(
@@ -164,7 +165,7 @@ function correct_classification_1_to_2(op, x; atol)
 end
 
 @testset verbose = true "1-to-2" begin
-    @testset "$m" for m in (Base, SpecialFunctions)
+    @testset "$m" for m in (Base, SpecialFunctions, NNlib)
         @testset "$op" for op in list_operators_1_to_2(Val(Symbol(m)))
             @test all(
                 correct_classification_1_to_2(op, random_input(op); atol=DEFAULT_ATOL) for
