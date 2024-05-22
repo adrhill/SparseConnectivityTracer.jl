@@ -123,7 +123,7 @@ end
 
         # NNlib extension
         for f in NNLIB_ACTIVATIONS
-            @test connectivity_pattern(f, 1, method) == [1;;]
+            @test jacobian_sparsity(f, 1, method) == [1;;]
         end
 
         ## Error handling when applying non-dual tracers to "local" functions with control flow
@@ -187,26 +187,26 @@ end
             [1 0 0 0 1]
 
         # NNlib extension
-        @test connectivity_pattern(NNlib.relu, -1, method) == [0;;]
-        @test connectivity_pattern(NNlib.relu, 1, method) == [1;;]
+        @test jacobian_sparsity(NNlib.relu, -1, method) == [0;;]
+        @test jacobian_sparsity(NNlib.relu, 1, method) == [1;;]
 
-        @test connectivity_pattern(NNlib.relu6, -1, method) == [0;;]
-        @test connectivity_pattern(NNlib.relu6, 1, method) == [1;;]
-        @test connectivity_pattern(NNlib.relu6, 7, method) == [0;;]
+        @test jacobian_sparsity(NNlib.relu6, -1, method) == [0;;]
+        @test jacobian_sparsity(NNlib.relu6, 1, method) == [1;;]
+        @test jacobian_sparsity(NNlib.relu6, 7, method) == [0;;]
 
-        @test connectivity_pattern(NNlib.trelu, 0.9, method) == [0;;]
-        @test connectivity_pattern(NNlib.trelu, 1.1, method) == [1;;]
+        @test jacobian_sparsity(NNlib.trelu, 0.9, method) == [0;;]
+        @test jacobian_sparsity(NNlib.trelu, 1.1, method) == [1;;]
 
-        @test connectivity_pattern(NNlib.hardσ, -4, method) == [0;;]
-        @test connectivity_pattern(NNlib.hardσ, 0, method) == [1;;]
-        @test connectivity_pattern(NNlib.hardσ, 4, method) == [0;;]
+        @test jacobian_sparsity(NNlib.hardσ, -4, method) == [0;;]
+        @test jacobian_sparsity(NNlib.hardσ, 0, method) == [1;;]
+        @test jacobian_sparsity(NNlib.hardσ, 4, method) == [0;;]
 
-        @test connectivity_pattern(NNlib.hardtanh, -2, method) == [0;;]
-        @test connectivity_pattern(NNlib.hardtanh, 0, method) == [1;;]
-        @test connectivity_pattern(NNlib.hardtanh, 2, method) == [0;;]
+        @test jacobian_sparsity(NNlib.hardtanh, -2, method) == [0;;]
+        @test jacobian_sparsity(NNlib.hardtanh, 0, method) == [1;;]
+        @test jacobian_sparsity(NNlib.hardtanh, 2, method) == [0;;]
 
-        @test connectivity_pattern(NNlib.softshrink, -1, method) == [1;;]
-        @test connectivity_pattern(NNlib.softshrink, 0, method) == [0;;]
-        @test connectivity_pattern(NNlib.softshrink, 1, method) == [1;;]
+        @test jacobian_sparsity(NNlib.softshrink, -1, method) == [1;;]
+        @test jacobian_sparsity(NNlib.softshrink, 0, method) == [0;;]
+        @test jacobian_sparsity(NNlib.softshrink, 1, method) == [1;;]
     end
 end

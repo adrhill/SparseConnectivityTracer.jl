@@ -44,12 +44,12 @@ for op in ops_1_to_1_s
     @eval SCT.is_seconder_zero_global(::$T) = false
 end
 
-is_seconder_zero_local(::typeof(celu)) = x > 0
-is_seconder_zero_local(::typeof(elu)) = x > 0
-is_seconder_zero_local(::typeof(selu)) = x > 0
+SCT.is_seconder_zero_local(::typeof(celu)) = x > 0
+SCT.is_seconder_zero_local(::typeof(elu)) = x > 0
+SCT.is_seconder_zero_local(::typeof(selu)) = x > 0
 
-is_firstder_zero_local(::typeof(hardswish)) = x < -3
-is_seconder_zero_local(::typeof(hardswish)) = x < -3 || x > 3
+SCT.is_firstder_zero_local(::typeof(hardswish)) = x < -3
+SCT.is_seconder_zero_local(::typeof(hardswish)) = x < -3 || x > 3
 
 # ops_1_to_1_f:
 # x -> f  != 0
@@ -74,13 +74,13 @@ for op in ops_1_to_1_f
     @eval SCT.is_seconder_zero_global(::$T) = true
 end
 
-is_firstder_zero_local(::typeof(relu), x) = x < 0
-is_firstder_zero_local(::typeof(relu6), x) = x < 0 || x > 6
-is_firstder_zero_local(::typeof(trelu), x) = x < 1
+SCT.is_firstder_zero_local(::typeof(relu), x) = x < 0
+SCT.is_firstder_zero_local(::typeof(relu6), x) = x < 0 || x > 6
+SCT.is_firstder_zero_local(::typeof(trelu), x) = x < 1
 
-is_firstder_zero_local(::typeof(hardσ), x) = x < -3 || x > 3
-is_firstder_zero_local(::typeof(hardtanh), x) = x < -1 || x > 1
-is_firstder_zero_local(::typeof(softshrink), x) = x > -0.5 && x < 0.5
+SCT.is_firstder_zero_local(::typeof(hardσ), x) = x < -3 || x > 3
+SCT.is_firstder_zero_local(::typeof(hardtanh), x) = x < -1 || x > 1
+SCT.is_firstder_zero_local(::typeof(softshrink), x) = x > -0.5 && x < 0.5
 
 ops_1_to_1 = union(ops_1_to_1_s, ops_1_to_1_f)
 
