@@ -31,6 +31,7 @@ DocMeta.setdocmeta!(
                     SparseConnectivityTracer;
                     ambiguities=false,
                     deps_compat=(ignore=[:Random, :SparseArrays], check_extras=false),
+                    stale_deps=(ignore=[:Requires],),
                     persistent_tasks=false,
                 )
             end

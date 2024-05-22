@@ -8,16 +8,19 @@ function gradient_tracer_1_to_1(t::T, is_firstder_zero::Bool) where {T<:Gradient
     end
 end
 
-function overload_gradient_1_to_1(m::Module, fn::Function)
-    ms, fns = nameof(m), nameof(fn)
-    @eval function $ms.$fns(t::GradientTracer)
-        return gradient_tracer_1_to_1(t, is_firstder_zero_global($ms.$fns))
-    end
-    @eval function $ms.$fns(d::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
-        x = primal(d)
-        p_out = $ms.$fns(x)
-        t_out = gradient_tracer_1_to_1(tracer(d), is_firstder_zero_local($fns, x))
-        return Dual(p_out, t_out)
+function overload_gradient_1_to_1(M, op)
+    return quote
+        function $M.$op(t::$SCT.GradientTracer)
+            return $SCT.gradient_tracer_1_to_1(t, $SCT.is_firstder_zero_global($M.$op))
+        end
+        function $M.$op(d::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+            x = $SCT.primal(d)
+            p_out = $M.$op(x)
+            t_out = $SCT.gradient_tracer_1_to_1(
+                $SCT.tracer(d), $SCT.is_firstder_zero_local($op, x)
+            )
+            return $SCT.Dual(p_out, t_out)
+        end
     end
 end
 
@@ -41,51 +44,56 @@ function gradient_tracer_2_to_1(
     end
 end
 
-function overload_gradient_2_to_1(m::Module, fn::Function)
-    ms, fns = nameof(m), nameof(fn)
-    @eval function $ms.$fns(tx::T, ty::T) where {T<:GradientTracer}
-        return gradient_tracer_2_to_1(
-            tx,
-            ty,
-            is_firstder_arg1_zero_global($ms.$fns),
-            is_firstder_arg2_zero_global($ms.$fns),
-        )
-    end
-    @eval function $ms.$fns(dx::D, dy::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
-        x = primal(dx)
-        y = primal(dy)
-        p_out = $ms.$fns(x, y)
-        t_out = gradient_tracer_2_to_1(
-            tracer(dx),
-            tracer(dy),
-            is_firstder_arg1_zero_local($ms.$fns, x, y),
-            is_firstder_arg2_zero_local($ms.$fns, x, y),
-        )
-        return Dual(p_out, t_out)
-    end
+function overload_gradient_2_to_1(M, op)
+    return quote
+        function $M.$op(tx::T, ty::T) where {T<:$SCT.GradientTracer}
+            return $SCT.gradient_tracer_2_to_1(
+                tx,
+                ty,
+                $SCT.is_firstder_arg1_zero_global($M.$op),
+                $SCT.is_firstder_arg2_zero_global($M.$op),
+            )
+        end
+        function $M.$op(dx::D, dy::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+            x = $SCT.primal(dx)
+            y = $SCT.primal(dy)
+            p_out = $M.$op(x, y)
+            t_out = $SCT.gradient_tracer_2_to_1(
+                $SCT.tracer(dx),
+                $SCT.tracer(dy),
+                $SCT.is_firstder_arg1_zero_local($M.$op, x, y),
+                $SCT.is_firstder_arg2_zero_local($M.$op, x, y),
+            )
+            return $SCT.Dual(p_out, t_out)
+        end
 
-    @eval function $ms.$fns(tx::GradientTracer, ::Number)
-        return gradient_tracer_1_to_1(tx, is_firstder_arg1_zero_global($ms.$fns))
-    end
-    @eval function $ms.$fns(dx::D, y::Number) where {P,T<:GradientTracer,D<:Dual{P,T}}
-        x = primal(dx)
-        p_out = $ms.$fns(x, y)
-        t_out = gradient_tracer_1_to_1(
-            tracer(dx), is_firstder_arg1_zero_local($ms.$fns, x, y)
-        )
-        return Dual(p_out, t_out)
-    end
+        function $M.$op(tx::$SCT.GradientTracer, ::Number)
+            return $SCT.gradient_tracer_1_to_1(
+                tx, $SCT.is_firstder_arg1_zero_global($M.$op)
+            )
+        end
+        function $M.$op(dx::D, y::Number) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+            x = $SCT.primal(dx)
+            p_out = $M.$op(x, y)
+            t_out = $SCT.gradient_tracer_1_to_1(
+                $SCT.tracer(dx), $SCT.is_firstder_arg1_zero_local($M.$op, x, y)
+            )
+            return $SCT.Dual(p_out, t_out)
+        end
 
-    @eval function $ms.$fns(::Number, ty::GradientTracer)
-        return gradient_tracer_1_to_1(ty, is_firstder_arg2_zero_global($ms.$fns))
-    end
-    @eval function $ms.$fns(x::Number, dy::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
-        y = primal(dy)
-        p_out = $ms.$fns(x, y)
-        t_out = gradient_tracer_1_to_1(
-            tracer(dy), is_firstder_arg2_zero_local($ms.$fns, x, y)
-        )
-        return Dual(p_out, t_out)
+        function $M.$op(::Number, ty::$SCT.GradientTracer)
+            return $SCT.gradient_tracer_1_to_1(
+                ty, $SCT.is_firstder_arg2_zero_global($M.$op)
+            )
+        end
+        function $M.$op(x::Number, dy::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+            y = $SCT.primal(dy)
+            p_out = $M.$op(x, y)
+            t_out = $SCT.gradient_tracer_1_to_1(
+                $SCT.tracer(dy), $SCT.is_firstder_arg2_zero_local($M.$op, x, y)
+            )
+            return $SCT.Dual(p_out, t_out)
+        end
     end
 end
 
@@ -99,40 +107,27 @@ function gradient_tracer_1_to_2(
     return (t1, t2)
 end
 
-function overload_gradient_1_to_2(m::Module, fn::Function)
-    ms, fns = nameof(m), nameof(fn)
-    @eval function $ms.$fns(t::GradientTracer)
-        return gradient_tracer_1_to_2(
-            t,
-            is_firstder_out1_zero_global($ms.$fns),
-            is_firstder_out2_zero_global($ms.$fns),
-        )
+function overload_gradient_1_to_2(M, op)
+    return quote
+        function $M.$op(t::$SCT.GradientTracer)
+            return $SCT.gradient_tracer_1_to_2(
+                t,
+                $SCT.is_firstder_out1_zero_global($M.$op),
+                $SCT.is_firstder_out2_zero_global($M.$op),
+            )
+        end
+
+        function $M.$op(d::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+            x = $SCT.primal(d)
+            p1_out, p2_out = $M.$op(x)
+            t1_out, t2_out = $SCT.gradient_tracer_1_to_2(
+                $SCT.tracer(d),
+                $SCT.is_firstder_out1_zero_local($M.$op, x),
+                $SCT.is_firstder_out2_zero_local($M.$op, x),
+            )
+            return ($SCT.Dual(p1_out, t1_out), $SCT.Dual(p2_out, t2_out))  # TODO: this was wrong, add test
+        end
     end
-
-    @eval function $ms.$fns(d::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
-        x = primal(d)
-        p1_out, p2_out = $ms.$fns(x)
-        t1_out, t2_out = gradient_tracer_1_to_2(
-            tracer(d),
-            is_firstder_out1_zero_local($ms.$fns, x),
-            is_firstder_out2_zero_local($ms.$fns, x),
-        )
-        return (Dual(p1_out, t1_out), Dual(p2_out, t2_out))  # TODO: this was wrong, add test
-    end
-end
-
-## Actual overloads
-
-for op in ops_1_to_1
-    overload_gradient_1_to_1(Base, op)
-end
-
-for op in ops_2_to_1
-    overload_gradient_2_to_1(Base, op)
-end
-
-for op in ops_1_to_2
-    overload_gradient_1_to_2(Base, op)
 end
 
 ## Special cases

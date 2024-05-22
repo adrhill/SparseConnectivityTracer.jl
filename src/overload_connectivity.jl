@@ -10,16 +10,19 @@ function connectivity_tracer_1_to_1(
     end
 end
 
-function overload_connectivity_1_to_1(m::Module, fn::Function)
-    ms, fns = nameof(m), nameof(fn)
-    @eval function $ms.$fns(t::T) where {T<:ConnectivityTracer}
-        return connectivity_tracer_1_to_1(t, is_influence_zero_global($ms.$fns))
-    end
-    @eval function $ms.$fns(d::D) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
-        x = primal(d)
-        p_out = $ms.$fns(x)
-        t_out = connectivity_tracer_1_to_1(tracer(d), is_influence_zero_local($ms.$fns, x))
-        return Dual(p_out, t_out)
+function overload_connectivity_1_to_1(M, op)
+    return quote
+        function $M.$op(t::T) where {T<:$SCT.ConnectivityTracer}
+            return $SCT.connectivity_tracer_1_to_1(t, $SCT.is_influence_zero_global($M.$op))
+        end
+        function $M.$op(d::D) where {P,T<:$SCT.ConnectivityTracer,D<:$SCT.Dual{P,T}}
+            x = $SCT.primal(d)
+            p_out = $M.$op(x)
+            t_out = $SCT.connectivity_tracer_1_to_1(
+                $SCT.tracer(d), $SCT.is_influence_zero_local($M.$op, x)
+            )
+            return $SCT.Dual(p_out, t_out)
+        end
     end
 end
 
@@ -43,51 +46,60 @@ function connectivity_tracer_2_to_1(
     end
 end
 
-function overload_connectivity_2_to_1(m::Module, fn::Function)
-    ms, fns = nameof(m), nameof(fn)
-    @eval function $ms.$fns(tx::T, ty::T) where {T<:ConnectivityTracer}
-        return connectivity_tracer_2_to_1(
-            tx,
-            ty,
-            is_influence_arg1_zero_global($ms.$fns),
-            is_influence_arg2_zero_global($ms.$fns),
-        )
-    end
-    @eval function $ms.$fns(dx::D, dy::D) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
-        x = primal(dx)
-        y = primal(dy)
-        p_out = $ms.$fns(x, y)
-        t_out = connectivity_tracer_2_to_1(
-            tracer(dx),
-            tracer(dy),
-            is_influence_arg1_zero_local($ms.$fns, x, y),
-            is_influence_arg2_zero_local($ms.$fns, x, y),
-        )
-        return Dual(p_out, t_out)
-    end
+function overload_connectivity_2_to_1(M, op)
+    return quote
+        function $M.$op(tx::T, ty::T) where {T<:$SCT.ConnectivityTracer}
+            return $SCT.connectivity_tracer_2_to_1(
+                tx,
+                ty,
+                $SCT.is_influence_arg1_zero_global($M.$op),
+                $SCT.is_influence_arg2_zero_global($M.$op),
+            )
+        end
+        function $M.$op(dx::D, dy::D) where {P,T<:$SCT.ConnectivityTracer,D<:$SCT.Dual{P,T}}
+            x = $SCT.primal(dx)
+            y = $SCT.primal(dy)
+            p_out = $M.$op(x, y)
+            t_out = $SCT.connectivity_tracer_2_to_1(
+                $SCT.tracer(dx),
+                $SCT.tracer(dy),
+                $SCT.is_influence_arg1_zero_local($M.$op, x, y),
+                $SCT.is_influence_arg2_zero_local($M.$op, x, y),
+            )
+            return $SCT.Dual(p_out, t_out)
+        end
 
-    @eval function $ms.$fns(tx::ConnectivityTracer, ::Number)
-        return connectivity_tracer_1_to_1(tx, is_influence_arg1_zero_global($fns))
-    end
-    @eval function $ms.$fns(dx::D, y::Number) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
-        x = primal(dx)
-        p_out = $ms.$fns(x, y)
-        t_out = connectivity_tracer_1_to_1(
-            tracer(dx), is_influence_arg1_zero_local($ms.$fns, x, y)
-        )
-        return Dual(p_out, t_out)
-    end
+        function $M.$op(tx::$SCT.ConnectivityTracer, ::Number)
+            return $SCT.connectivity_tracer_1_to_1(
+                tx, $SCT.is_influence_arg1_zero_global($M.$op)
+            )
+        end
+        function $M.$op(
+            dx::D, y::Number
+        ) where {P,T<:$SCT.ConnectivityTracer,D<:$SCT.Dual{P,T}}
+            x = $SCT.primal(dx)
+            p_out = $M.$op(x, y)
+            t_out = $SCT.connectivity_tracer_1_to_1(
+                $SCT.tracer(dx), $SCT.is_influence_arg1_zero_local($M.$op, x, y)
+            )
+            return $SCT.Dual(p_out, t_out)
+        end
 
-    @eval function $ms.$fns(::Number, ty::ConnectivityTracer)
-        return connectivity_tracer_1_to_1(ty, is_influence_arg2_zero_global($fns))
-    end
-    @eval function $ms.$fns(x::Number, dy::D) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
-        y = primal(dy)
-        p_out = $ms.$fns(x, y)
-        t_out = connectivity_tracer_1_to_1(
-            tracer(dy), is_influence_arg2_zero_local($ms.$fns, x, y)
-        )
-        return Dual(p_out, t_out)
+        function $M.$op(::Number, ty::$SCT.ConnectivityTracer)
+            return $SCT.connectivity_tracer_1_to_1(
+                ty, $SCT.is_influence_arg2_zero_global($M.$op)
+            )
+        end
+        function $M.$op(
+            x::Number, dy::D
+        ) where {P,T<:$SCT.ConnectivityTracer,D<:$SCT.Dual{P,T}}
+            y = $SCT.primal(dy)
+            p_out = $M.$op(x, y)
+            t_out = $SCT.connectivity_tracer_1_to_1(
+                $SCT.tracer(dy), $SCT.is_influence_arg2_zero_local($M.$op, x, y)
+            )
+            return $SCT.Dual(p_out, t_out)
+        end
     end
 end
 
@@ -101,40 +113,27 @@ function connectivity_tracer_1_to_2(
     return (t1, t2)
 end
 
-function overload_connectivity_1_to_2(m::Module, fn::Function)
-    ms, fns = nameof(m), nameof(fn)
-    @eval function $ms.$fns(t::ConnectivityTracer)
-        return connectivity_tracer_1_to_2(
-            t,
-            is_influence_out1_zero_global($ms.$fns),
-            is_influence_out2_zero_global($ms.$fns),
-        )
+function overload_connectivity_1_to_2(M, op)
+    return quote
+        function $M.$op(t::$SCT.ConnectivityTracer)
+            return $SCT.connectivity_tracer_1_to_2(
+                t,
+                $SCT.is_influence_out1_zero_global($M.$op),
+                $SCT.is_influence_out2_zero_global($M.$op),
+            )
+        end
+
+        function $M.$op(d::D) where {P,T<:$SCT.ConnectivityTracer,D<:$SCT.Dual{P,T}}
+            x = $SCT.primal(d)
+            p1_out, p2_out = $M.$op(x)
+            t1_out, t2_out = $SCT.connectivity_tracer_1_to_2(
+                t,
+                $SCT.is_influence_out1_zero_local($M.$op, x),
+                $SCT.is_influence_out2_zero_local($M.$op, x),
+            )
+            return ($SCT.Dual(p1_out, t1_out), $SCT.Dual(p2_out, t2_out))
+        end
     end
-
-    @eval function $ms.$fns(d::D) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
-        x = primal(d)
-        p1_out, p2_out = $ms.$fns(x)
-        t1_out, t2_out = connectivity_tracer_1_to_2(
-            t,
-            is_influence_out1_zero_local($ms.$fns, x),
-            is_influence_out2_zero_local($ms.$fns, x),
-        )
-        return (Dual(p1_out, t1_out), Dual(p2_out, t2_out))
-    end
-end
-
-## Actual overloads
-
-for op in ops_1_to_1
-    overload_connectivity_1_to_1(Base, op)
-end
-
-for op in ops_2_to_1
-    overload_connectivity_2_to_1(Base, op)
-end
-
-for op in ops_1_to_2
-    overload_connectivity_1_to_2(Base, op)
 end
 
 ## Special cases

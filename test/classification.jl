@@ -1,10 +1,10 @@
 using SparseConnectivityTracer:
-    ops_1_to_1,
+    list_operators_1_to_1,
     is_firstder_zero_global,
     is_seconder_zero_global,
     is_firstder_zero_local,
     is_seconder_zero_local,
-    ops_2_to_1,
+    list_operators_2_to_1,
     is_firstder_arg1_zero_global,
     is_seconder_arg1_zero_global,
     is_firstder_arg2_zero_global,
@@ -15,7 +15,7 @@ using SparseConnectivityTracer:
     is_firstder_arg2_zero_local,
     is_seconder_arg2_zero_local,
     is_crossder_zero_local,
-    ops_1_to_2,
+    list_operators_1_to_2,
     is_firstder_out1_zero_global,
     is_seconder_out1_zero_global,
     is_firstder_out2_zero_global,
@@ -24,6 +24,7 @@ using SparseConnectivityTracer:
     is_firstder_out1_zero_local,
     is_firstder_out2_zero_local,
     is_seconder_out2_zero_local
+using SpecialFunctions: SpecialFunctions
 using Test
 using ForwardDiff: derivative, gradient, hessian
 
@@ -82,11 +83,13 @@ function correct_classification_1_to_1(op, x; atol)
 end
 
 @testset verbose = true "1-to-1" begin
-    @testset "$op" for op in ops_1_to_1
-        @test all(
-            correct_classification_1_to_1(op, random_input(op); atol=DEFAULT_ATOL) for
-            _ in 1:DEFAULT_TRIALS
-        )
+    @testset "$m" for m in (Base, SpecialFunctions)
+        @testset "$op" for op in list_operators_1_to_1(Val(Symbol(m)))
+            @test all(
+                correct_classification_1_to_1(op, random_input(op); atol=DEFAULT_ATOL) for
+                _ in 1:DEFAULT_TRIALS
+            )
+        end
     end
 end;
 
@@ -122,12 +125,14 @@ function correct_classification_2_to_1(op, x, y; atol)
 end
 
 @testset verbose = true "2-to-1" begin
-    @testset "$op" for op in ops_2_to_1
-        @test all(
-            correct_classification_2_to_1(
-                op, random_first_input(op), random_second_input(op); atol=DEFAULT_ATOL
-            ) for _ in 1:DEFAULT_TRIALS
-        )
+    @testset "$m" for m in (Base, SpecialFunctions)
+        @testset "$op" for op in list_operators_2_to_1(Val(Symbol(m)))
+            @test all(
+                correct_classification_2_to_1(
+                    op, random_first_input(op), random_second_input(op); atol=DEFAULT_ATOL
+                ) for _ in 1:DEFAULT_TRIALS
+            )
+        end
     end
 end;
 
@@ -159,10 +164,12 @@ function correct_classification_1_to_2(op, x; atol)
 end
 
 @testset verbose = true "1-to-2" begin
-    @testset "$op" for op in ops_1_to_2
-        @test all(
-            correct_classification_1_to_2(op, random_input(op); atol=DEFAULT_ATOL) for
-            _ in 1:DEFAULT_TRIALS
-        )
+    @testset "$m" for m in (Base, SpecialFunctions)
+        @testset "$op" for op in list_operators_1_to_2(Val(Symbol(m)))
+            @test all(
+                correct_classification_1_to_2(op, random_input(op); atol=DEFAULT_ATOL) for
+                _ in 1:DEFAULT_TRIALS
+            )
+        end
     end
 end;

@@ -18,22 +18,25 @@ function hessian_tracer_1_to_1(
     end
 end
 
-function overload_hessian_1_to_1(m::Module, fn::Function)
-    ms, fns = nameof(m), nameof(fn)
-    @eval function $ms.$fns(t::HessianTracer)
-        return hessian_tracer_1_to_1(
-            t, is_firstder_zero_global($ms.$fns), is_seconder_zero_global($ms.$fns)
-        )
-    end
-    @eval function $ms.$fns(d::D) where {P,T<:HessianTracer,D<:Dual{P,T}}
-        x = primal(d)
-        p_out = $ms.$fns(x)
-        t_out = hessian_tracer_1_to_1(
-            tracer(d),
-            is_firstder_zero_local($ms.$fns, x),
-            is_seconder_zero_local($ms.$fns, x),
-        )
-        return Dual(p_out, t_out)
+function overload_hessian_1_to_1(M, op)
+    return quote
+        function $M.$op(t::$SCT.HessianTracer)
+            return $SCT.hessian_tracer_1_to_1(
+                t,
+                $SCT.is_firstder_zero_global($M.$op),
+                $SCT.is_seconder_zero_global($M.$op),
+            )
+        end
+        function $M.$op(d::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
+            x = $SCT.primal(d)
+            p_out = $M.$op(x)
+            t_out = $SCT.hessian_tracer_1_to_1(
+                $SCT.tracer(d),
+                $SCT.is_firstder_zero_local($M.$op, x),
+                $SCT.is_seconder_zero_local($M.$op, x),
+            )
+            return $SCT.Dual(p_out, t_out)
+        end
     end
 end
 
@@ -70,69 +73,70 @@ function hessian_tracer_2_to_1(
     return T(grad, hess)
 end
 
-function overload_hessian_2_to_1(m::Module, fn::Function)
-    ms, fns = nameof(m), nameof(fn)
-    @eval function $ms.$fns(tx::T, ty::T) where {T<:HessianTracer}
-        return hessian_tracer_2_to_1(
-            tx,
-            ty,
-            is_firstder_arg1_zero_global($ms.$fns),
-            is_seconder_arg1_zero_global($ms.$fns),
-            is_firstder_arg2_zero_global($ms.$fns),
-            is_seconder_arg2_zero_global($ms.$fns),
-            is_crossder_zero_global($ms.$fns),
-        )
-    end
-    @eval function $ms.$fns(dx::D, dy::D) where {P,T<:HessianTracer,D<:Dual{P,T}}
-        x = primal(dx)
-        y = primal(dy)
-        p_out = $ms.$fns(x, y)
-        t_out = hessian_tracer_2_to_1(
-            tracer(dx),
-            tracer(dy),
-            is_firstder_arg1_zero_local($ms.$fns, x, y),
-            is_seconder_arg1_zero_local($ms.$fns, x, y),
-            is_firstder_arg2_zero_local($ms.$fns, x, y),
-            is_seconder_arg2_zero_local($ms.$fns, x, y),
-            is_crossder_zero_local($ms.$fns, x, y),
-        )
-        return Dual(p_out, t_out)
-    end
+function overload_hessian_2_to_1(M, op)
+    return quote
+        function $M.$op(tx::T, ty::T) where {T<:$SCT.HessianTracer}
+            return $SCT.hessian_tracer_2_to_1(
+                tx,
+                ty,
+                $SCT.is_firstder_arg1_zero_global($M.$op),
+                $SCT.is_seconder_arg1_zero_global($M.$op),
+                $SCT.is_firstder_arg2_zero_global($M.$op),
+                $SCT.is_seconder_arg2_zero_global($M.$op),
+                $SCT.is_crossder_zero_global($M.$op),
+            )
+        end
+        function $M.$op(dx::D, dy::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
+            x = $SCT.primal(dx)
+            y = $SCT.primal(dy)
+            p_out = $M.$op(x, y)
+            t_out = $SCT.hessian_tracer_2_to_1(
+                $SCT.tracer(dx),
+                $SCT.tracer(dy),
+                $SCT.is_firstder_arg1_zero_local($M.$op, x, y),
+                $SCT.is_seconder_arg1_zero_local($M.$op, x, y),
+                $SCT.is_firstder_arg2_zero_local($M.$op, x, y),
+                $SCT.is_seconder_arg2_zero_local($M.$op, x, y),
+                $SCT.is_crossder_zero_local($M.$op, x, y),
+            )
+            return $SCT.Dual(p_out, t_out)
+        end
 
-    @eval function $ms.$fns(tx::HessianTracer, y::Number)
-        return hessian_tracer_1_to_1(
-            tx,
-            is_firstder_arg1_zero_global($ms.$fns),
-            is_seconder_arg1_zero_global($ms.$fns),
-        )
-    end
-    @eval function $ms.$fns(x::Number, ty::HessianTracer)
-        return hessian_tracer_1_to_1(
-            ty,
-            is_firstder_arg2_zero_global($ms.$fns),
-            is_seconder_arg2_zero_global($ms.$fns),
-        )
-    end
+        function $M.$op(tx::$SCT.HessianTracer, y::Number)
+            return $SCT.hessian_tracer_1_to_1(
+                tx,
+                $SCT.is_firstder_arg1_zero_global($M.$op),
+                $SCT.is_seconder_arg1_zero_global($M.$op),
+            )
+        end
+        function $M.$op(x::Number, ty::$SCT.HessianTracer)
+            return $SCT.hessian_tracer_1_to_1(
+                ty,
+                $SCT.is_firstder_arg2_zero_global($M.$op),
+                $SCT.is_seconder_arg2_zero_global($M.$op),
+            )
+        end
 
-    @eval function $ms.$fns(dx::D, y::Number) where {P,T<:HessianTracer,D<:Dual{P,T}}
-        x = primal(dx)
-        p_out = $ms.$fns(x, y)
-        t_out = hessian_tracer_1_to_1(
-            tracer(dx),
-            is_firstder_arg1_zero_local($ms.$fns, x, y),
-            is_seconder_arg1_zero_local($ms.$fns, x, y),
-        )
-        return Dual(p_out, t_out)
-    end
-    @eval function $ms.$fns(x::Number, dy::D) where {P,T<:HessianTracer,D<:Dual{P,T}}
-        y = primal(dy)
-        p_out = $ms.$fns(x, y)
-        t_out = hessian_tracer_1_to_1(
-            tracer(dy),
-            is_firstder_arg2_zero_local($ms.$fns, x, y),
-            is_seconder_arg2_zero_local($ms.$fns, x, y),
-        )
-        return Dual(p_out, t_out)
+        function $M.$op(dx::D, y::Number) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
+            x = $SCT.primal(dx)
+            p_out = $M.$op(x, y)
+            t_out = $SCT.hessian_tracer_1_to_1(
+                $SCT.tracer(dx),
+                $SCT.is_firstder_arg1_zero_local($M.$op, x, y),
+                $SCT.is_seconder_arg1_zero_local($M.$op, x, y),
+            )
+            return $SCT.Dual(p_out, t_out)
+        end
+        function $M.$op(x::Number, dy::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
+            y = $SCT.primal(dy)
+            p_out = $M.$op(x, y)
+            t_out = $SCT.hessian_tracer_1_to_1(
+                $SCT.tracer(dy),
+                $SCT.is_firstder_arg2_zero_local($M.$op, x, y),
+                $SCT.is_seconder_arg2_zero_local($M.$op, x, y),
+            )
+            return $SCT.Dual(p_out, t_out)
+        end
     end
 end
 
@@ -150,44 +154,31 @@ function hessian_tracer_1_to_2(
     return (t1, t2)
 end
 
-function overload_hessian_1_to_2(m::Module, fn::Function)
-    ms, fns = nameof(m), nameof(fn)
-    @eval function $ms.$fns(t::HessianTracer)
-        return hessian_tracer_1_to_2(
-            t,
-            is_firstder_out1_zero_global($ms.$fns),
-            is_seconder_out1_zero_global($ms.$fns),
-            is_firstder_out2_zero_global($ms.$fns),
-            is_seconder_out2_zero_global($ms.$fns),
-        )
+function overload_hessian_1_to_2(M, op)
+    return quote
+        function $M.$op(t::$SCT.HessianTracer)
+            return $SCT.hessian_tracer_1_to_2(
+                t,
+                $SCT.is_firstder_out1_zero_global($M.$op),
+                $SCT.is_seconder_out1_zero_global($M.$op),
+                $SCT.is_firstder_out2_zero_global($M.$op),
+                $SCT.is_seconder_out2_zero_global($M.$op),
+            )
+        end
+
+        function $M.$op(d::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
+            x = $SCT.primal(d)
+            p1_out, p2_out = $M.$op(x)
+            t1_out, t2_out = $SCT.hessian_tracer_1_to_2(
+                d,
+                $SCT.is_firstder_out1_zero_local($M.$op, x),
+                $SCT.is_seconder_out1_zero_local($M.$op, x),
+                $SCT.is_firstder_out2_zero_local($M.$op, x),
+                $SCT.is_seconder_out2_zero_local($M.$op, x),
+            )
+            return ($SCT.Dual(p1_out, t1_out), $SCT.Dual(p2_out, t2_out))
+        end
     end
-
-    @eval function $ms.$fns(d::D) where {P,T<:HessianTracer,D<:Dual{P,T}}
-        x = primal(d)
-        p1_out, p2_out = $ms.$fns(x)
-        t1_out, t2_out = hessian_tracer_1_to_2(
-            d,
-            is_firstder_out1_zero_local($ms.$fns, x),
-            is_seconder_out1_zero_local($ms.$fns, x),
-            is_firstder_out2_zero_local($ms.$fns, x),
-            is_seconder_out2_zero_local($ms.$fns, x),
-        )
-        return (Dual(p1_out, t1_out), Dual(p2_out, t2_out))
-    end
-end
-
-## Actual overloads
-
-for op in ops_1_to_1
-    overload_hessian_1_to_1(Base, op)
-end
-
-for op in ops_2_to_1
-    overload_hessian_2_to_1(Base, op)
-end
-
-for op in ops_1_to_2
-    overload_hessian_1_to_2(Base, op)
 end
 
 ## Special cases
