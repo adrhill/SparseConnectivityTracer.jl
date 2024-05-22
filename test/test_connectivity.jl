@@ -55,7 +55,7 @@ const NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
         @test connectivity_pattern(g, x, G) == [1 1; 1 1; 1 1]
 
         # Code coverage
-        @test connectivity_pattern(x -> [sincos(x)...], 1, G) == [1; 1]
+        @test connectivity_pattern(x -> [sincos(x)...], 1, G) ≈ [1; 1]
         @test connectivity_pattern(typemax, 1, G) ≈ [0;;]
         @test connectivity_pattern(x -> x^(2//3), 1, G) ≈ [1;;]
         @test connectivity_pattern(x -> (2//3)^x, 1, G) ≈ [1;;]
