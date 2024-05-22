@@ -36,7 +36,7 @@ const FIRST_ORDER_SET_TYPES = (
         @test connectivity_pattern(x -> round(x, RoundNearestTiesUp), 1, G) ≈ [1;;]
 
         # SpecialFunctions
-        @test connectivity_pattern(x -> erf(x), 1, G) == [1;;]
+        @test connectivity_pattern(x -> erf(x[1]), rand(2), G) == [1 0]
         @test connectivity_pattern(x -> beta(x[1], x[2]), rand(3), G) == [1 1 0]
 
         ## Error handling when applying non-dual tracers to "local" functions with control flow
@@ -84,7 +84,7 @@ end
         @test jacobian_sparsity(x -> dot(x[1:2], x[4:5]), rand(5), method) == [1 1 0 1 1]
 
         # SpecialFunctions
-        @test jacobian_sparsity(x -> erf(x), 1, method) == [1;;]
+        @test jacobian_sparsity(x -> erf(x[1]), rand(2), method) == [1 0]
         @test jacobian_sparsity(x -> beta(x[1], x[2]), rand(3), method) == [1 1 0]
 
         ## Error handling when applying non-dual tracers to "local" functions with control flow
