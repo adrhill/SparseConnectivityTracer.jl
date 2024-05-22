@@ -61,11 +61,14 @@ DocMeta.setdocmeta!(
     end
 
     @testset verbose = true "Simple examples" begin
-        @testset "First order" begin
-            include("first_order.jl")
+        @testset "ConnectivityTracer" begin
+            include("test_connectivity.jl")
         end
-        @testset "Second order" begin
-            include("second_order.jl")
+        @testset "GradientTracer" begin
+            include("test_gradient.jl")
+        end
+        @testset "HessianTracer" begin
+            include("test_hessian.jl")
         end
     end
 
