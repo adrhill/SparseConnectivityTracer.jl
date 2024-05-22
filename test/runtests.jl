@@ -76,6 +76,9 @@ DocMeta.setdocmeta!(
         @testset "Flux.jl" begin
             include("flux.jl")
         end
+        @testset "NLPModels" begin
+            include("nlpmodels.jl")
+        end
     end
 
     @testset "ADTypes integration" begin
