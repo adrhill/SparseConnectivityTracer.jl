@@ -145,6 +145,15 @@ const SECOND_ORDER_SET_TYPES = (
             0 0 0 1 0
             0 1 0 0 1
         ]
+        
+        # ifelse
+        h = hessian_pattern(x -> ifelse(x[1], x[1]^x[2], x[3] * x[4]), rand(5), method)
+        @test h == [
+            1  1  0  0
+            1  1  0  0
+            0  0  0  1
+            0  0  1  0
+        ]
 
         # SpecialFunctions
         @test hessian_sparsity(x -> erf(x[1]), rand(2), method) == [
