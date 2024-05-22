@@ -37,6 +37,7 @@ export hessian_pattern, local_hessian_pattern
 
 # ADTypes interface
 export TracerSparsityDetector
+export TracerLocalSparsityDetector
 
 function __init__()
     @static if !isdefined(Base, :get_extension)
