@@ -184,14 +184,23 @@ end
 ## Special cases
 
 ## Exponent (requires extra types)
-# TODO: support Dual tracers for these.
-
 for S in (Real, Integer, Rational, Irrational{:ℯ})
-    function Base.:^(t::T, ::S) where {T<:HessianTracer}
-        return T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))
+    function Base.:^(tx::T, y::S) where {T<:HessianTracer}
+        return T(gradient(tx), hessian(tx) ∪ (gradient(tx) × gradient(tx)))
     end
-    function Base.:^(::S, t::T) where {T<:HessianTracer}
-        return T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))
+    function Base.:^(x::S, ty::T) where {T<:HessianTracer}
+        return T(gradient(ty), hessian(ty) ∪ (gradient(ty) × gradient(ty)))
+    end
+
+    function Base.:^(dx::D, y::S) where {P,T<:HessianTracer,D<:Dual{P,T}}
+        return Dual(
+            primal(dx)^y, T(gradient(dx), hessian(dx) ∪ (gradient(dx) × gradient(dx)))
+        )
+    end
+    function Base.:^(x::S, dy::D) where {P,T<:HessianTracer,D<:Dual{P,T}}
+        return Dual(
+            x^primal(dy), T(gradient(dy), hessian(dy) ∪ (gradient(dy) × gradient(dy)))
+        )
     end
 end
 
