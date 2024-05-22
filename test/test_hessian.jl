@@ -147,7 +147,7 @@ const SECOND_ORDER_SET_TYPES = (
         ]
 
         # ifelse
-        h = hessian_sparsity(x -> ifelse(x[1], x[1]^x[2], x[3] * x[4]), rand(5), method)
+        h = hessian_sparsity(x -> ifelse(x[1], x[1]^x[2], x[3] * x[4]), rand(4), method)
         @test h == [
             1  1  0  0
             1  1  0  0
