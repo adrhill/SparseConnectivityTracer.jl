@@ -42,7 +42,10 @@ export TracerLocalSparsityDetector
 function __init__()
     @static if !isdefined(Base, :get_extension)
         @require SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b" include(
-            "../ext/SparseConnectivityTracerSpecialFunctionsExt/SparseConnectivityTracerSpecialFunctionsExt.jl",
+            "../ext/SparseConnectivityTracerSpecialFunctionsExt.jl"
+        )
+        @require NNlib = "872c559c-99b0-510c-b3b7-b6c96a88d5cd" include(
+            "../ext/SparseConnectivityTracerNNlibExt.jl"
         )
     end
 end
