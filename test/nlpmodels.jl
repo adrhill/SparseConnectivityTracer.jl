@@ -62,10 +62,11 @@ end
         if startswith(string(name), "triangle") || startswith(string(name), "tetra_")
             # UndefVarError
             continue
+        else
+            J_sct = jac_sparsity_sct(name)
+            J_ref = jac_sparsity_ref(name)
+            @test J_sct == J_ref
         end
-        J_sct = jac_sparsity_sct(name)
-        J_ref = jac_sparsity_ref(name)
-        @test J_sct == J_ref
     end
 end
 
@@ -74,9 +75,10 @@ end
         if startswith(string(name), "triangle") || startswith(string(name), "tetra_")
             # UndefVarError
             continue
+        else
+            H_sct = hess_sparsity_sct(name)
+            H_ref = hess_sparsity_ref(name)
+            @test H_sct == H_ref
         end
-        H_sct = hess_sparsity_sct(name)
-        H_ref = hess_sparsity_ref(name)
-        @test H_sct == H_ref
     end
 end
