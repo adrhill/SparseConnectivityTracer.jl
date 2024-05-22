@@ -4,8 +4,8 @@ const SCT = SparseConnectivityTracer
 
 using ADTypes: ADTypes
 using Compat: Returns
-import SparseArrays: sparse
-import Random: rand, AbstractRNG, SamplerType
+using SparseArrays: sparse
+using Random: AbstractRNG, SamplerType
 
 using DocStringExtensions
 
