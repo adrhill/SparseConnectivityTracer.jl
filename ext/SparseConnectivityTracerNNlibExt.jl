@@ -17,22 +17,24 @@ end
 # ∂f/∂x   != 0
 # ∂²f/∂x² != 0
 ops_1_to_1_s = (
-    # Activation functions
-    σ, # sigmoid
-    logσ,
-    swish,
-    hardswish,
-    lisht,
-    softsign,
-    softplus,
-    logcosh,
-    mish,
-    tanhshrink,
     # ReLU-like activation functions
+    celu,
     elu,
     gelu,
     selu,
-    celu,
+    # Other activation functions
+    σ, # sigmoid
+    hardswish,
+    lisht,
+    logσ,
+    logcosh,
+    mish,
+    sigmoid_fast,
+    softplus,
+    softsign,
+    swish,
+    tanh_fast,
+    tanhshrink,
 )
 
 for op in ops_1_to_1_s
@@ -54,10 +56,10 @@ is_seconder_zero_local(::typeof(hardswish)) = x < -3 || x > 3
 # ∂²f/∂x² == 0
 ops_1_to_1_f = (
     # ReLU-like activation functions
+    leakyrelu,
     relu,
     relu6,
     trelu,
-    leakyrelu,
     # Other activation functions
     hardσ,
     hardtanh,
