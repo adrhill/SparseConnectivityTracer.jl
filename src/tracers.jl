@@ -1,4 +1,4 @@
-abstract type AbstractTracer <: Number end
+abstract type AbstractTracer <: Real end
 
 # Convenience constructor for empty tracers
 empty(tracer::T) where {T<:AbstractTracer} = empty(T)
@@ -19,7 +19,7 @@ sparse_vector(T, index) = T([index])
 """
 $(TYPEDEF)
 
-`Number` type keeping track of input indices of previous computations.
+`Real` number type keeping track of input indices of previous computations.
 
 For a higher-level interface, refer to [`connectivity_pattern`](@ref).
 
@@ -72,7 +72,7 @@ ConnectivityTracer(t::ConnectivityTracer) = t
 """
 $(TYPEDEF)
 
-`Number` type keeping track of non-zero gradient entries.
+`Real` number type keeping track of non-zero gradient entries.
 
 For a higher-level interface, refer to [`jacobian_pattern`](@ref).
 
@@ -121,7 +121,7 @@ GradientTracer(t::GradientTracer) = t
 """
 $(TYPEDEF)
 
-`Number` type keeping track of non-zero gradient and Hessian entries.
+`Real` number type keeping track of non-zero gradient and Hessian entries.
 
 For a higher-level interface, refer to [`hessian_pattern`](@ref).
 
