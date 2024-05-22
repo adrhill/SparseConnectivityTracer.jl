@@ -147,7 +147,10 @@ const SECOND_ORDER_SET_TYPES = (
         ]
 
         # SpecialFunctions
-        @test hessian_sparsity(x -> erf(x[1]), rand(2), method) == [1 0]
+        @test hessian_sparsity(x -> erf(x[1]), rand(2), method) == [
+            1 0
+            0 0
+        ]
         @test hessian_sparsity(x -> beta(x[1], x[2]), rand(3), method) == [
             1 1 0
             1 1 0
