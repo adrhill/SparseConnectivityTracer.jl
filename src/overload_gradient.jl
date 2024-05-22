@@ -121,7 +121,7 @@ function overload_gradient_1_to_2(M, op)
             x = $SCT.primal(d)
             p1_out, p2_out = $M.$op(x)
             t1_out, t2_out = $SCT.gradient_tracer_1_to_2(
-                t,
+                $SCT.tracer(d),
                 $SCT.is_firstder_out1_zero_local($M.$op, x),
                 $SCT.is_firstder_out2_zero_local($M.$op, x),
             )
