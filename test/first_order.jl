@@ -5,11 +5,40 @@ using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using ADTypes: jacobian_sparsity
 using LinearAlgebra: det, dot, logdet
 using SpecialFunctions: erf, beta
+using NNlib: NNlib
 using Test
 
 const FIRST_ORDER_SET_TYPES = (
     BitSet, Set{UInt64}, DuplicateVector{UInt64}, RecursiveSet{UInt64}, SortedVector{UInt64}
 )
+const NNLIB_ACTIVATIONS_S = (
+    NNlib.σ,
+    NNlib.celu,
+    NNlib.elu,
+    NNlib.gelu,
+    NNlib.hardswish,
+    NNlib.lisht,
+    NNlib.logσ,
+    NNlib.logcosh,
+    NNlib.mish,
+    NNlib.selu,
+    NNlib.softplus,
+    NNlib.softsign,
+    NNlib.swish,
+    NNlib.sigmoid_fast,
+    NNlib.tanhshrink,
+    NNlib.tanh_fast,
+)
+const NNLIB_ACTIVATIONS_F = (
+    NNlib.hardσ,
+    NNlib.hardtanh,
+    NNlib.leakyrelu,
+    NNlib.relu,
+    NNlib.relu6,
+    NNlib.softshrink,
+    NNlib.trelu,
+)
+const NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
 
 @testset "Connectivity Global" begin
     @testset "Set type $G" for G in FIRST_ORDER_SET_TYPES
@@ -35,11 +64,16 @@ const FIRST_ORDER_SET_TYPES = (
         @test connectivity_pattern(x -> ℯ^x, 1, G) ≈ [1;;]
         @test connectivity_pattern(x -> round(x, RoundNearestTiesUp), 1, G) ≈ [1;;]
 
-        # SpecialFunctions
+        # SpecialFunctions extension
         @test connectivity_pattern(x -> erf(x[1]), rand(2), G) == [1 0]
         @test connectivity_pattern(x -> beta(x[1], x[2]), rand(3), G) == [1 1 0]
 
-        ## Error handling when applying non-dual tracers to "local" functions with control flow
+        # NNlib extension
+        for f in NNLIB_ACTIVATIONS
+            @test connectivity_pattern(f, 1, G) ≈ [1;;]
+        end
+
+        # Error handling when applying non-dual tracers to "local" functions with control flow
         @test_throws MissingPrimalError connectivity_pattern(
             x -> ifelse(x[2] < x[3], x[1] + x[2], x[3] * x[4]), [1 2 3 4], G
         ) ≈ [1 1 0 0]
@@ -83,9 +117,14 @@ end
         # Linear Algebra
         @test jacobian_sparsity(x -> dot(x[1:2], x[4:5]), rand(5), method) == [1 1 0 1 1]
 
-        # SpecialFunctions
+        # SpecialFunctions extension
         @test jacobian_sparsity(x -> erf(x[1]), rand(2), method) == [1 0]
         @test jacobian_sparsity(x -> beta(x[1], x[2]), rand(3), method) == [1 1 0]
+
+        # NNlib extension
+        for f in NNLIB_ACTIVATIONS
+            @test connectivity_pattern(f, 1, method) == [1;;]
+        end
 
         ## Error handling when applying non-dual tracers to "local" functions with control flow
         @test_throws MissingPrimalError jacobian_sparsity(
@@ -146,5 +185,28 @@ end
         @test jacobian_sparsity(x -> log(det(x)), [1.0 -1.0; 2.0 2.0], method) ≈ [1 1 1 1]
         @test jacobian_sparsity(x -> dot(x[1:2], x[4:5]), [0, 1, 0, 1, 0], method) ==
             [1 0 0 0 1]
+
+        # NNlib extension
+        @test connectivity_pattern(NNlib.relu, -1, method) == [0;;]
+        @test connectivity_pattern(NNlib.relu, 1, method) == [1;;]
+
+        @test connectivity_pattern(NNlib.relu6, -1, method) == [0;;]
+        @test connectivity_pattern(NNlib.relu6, 1, method) == [1;;]
+        @test connectivity_pattern(NNlib.relu6, 7, method) == [0;;]
+
+        @test connectivity_pattern(NNlib.trelu, 0.9, method) == [0;;]
+        @test connectivity_pattern(NNlib.trelu, 1.1, method) == [1;;]
+
+        @test connectivity_pattern(NNlib.hardσ, -4, method) == [0;;]
+        @test connectivity_pattern(NNlib.hardσ, 0, method) == [1;;]
+        @test connectivity_pattern(NNlib.hardσ, 4, method) == [0;;]
+
+        @test connectivity_pattern(NNlib.hardtanh, -2, method) == [0;;]
+        @test connectivity_pattern(NNlib.hardtanh, 0, method) == [1;;]
+        @test connectivity_pattern(NNlib.hardtanh, 2, method) == [0;;]
+
+        @test connectivity_pattern(NNlib.softshrink, -1, method) == [1;;]
+        @test connectivity_pattern(NNlib.softshrink, 0, method) == [0;;]
+        @test connectivity_pattern(NNlib.softshrink, 1, method) == [1;;]
     end
 end

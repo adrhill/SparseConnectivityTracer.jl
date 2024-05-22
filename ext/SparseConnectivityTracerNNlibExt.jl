@@ -43,9 +43,10 @@ for op in ops_1_to_1_s
     @eval SCT.is_firstder_zero_global(::$T) = false
     @eval SCT.is_seconder_zero_global(::$T) = false
 end
+
+is_seconder_zero_local(::typeof(celu)) = x > 0
 is_seconder_zero_local(::typeof(elu)) = x > 0
 is_seconder_zero_local(::typeof(selu)) = x > 0
-is_seconder_zero_local(::typeof(celu)) = x > 0
 
 is_firstder_zero_local(::typeof(hardswish)) = x < -3
 is_seconder_zero_local(::typeof(hardswish)) = x < -3 || x > 3
@@ -65,6 +66,7 @@ ops_1_to_1_f = (
     hardtanh,
     softshrink,
 )
+
 for op in ops_1_to_1_f
     T = typeof(op)
     @eval SCT.is_influence_zero_global(::$T) = false
