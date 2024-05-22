@@ -57,7 +57,7 @@ function hess_sparsity_ref(name::Symbol)
     return sparse(Symmetric(H_L, :L))
 end
 
-@testset verbose = true "Jacobian comparison" begin
+@testset verbose = false "Jacobian comparison" begin
     @testset "$name" for name in Symbol.(OptimizationProblems.meta[!, :name])
         if startswith(string(name), "triangle") || startswith(string(name), "tetra_")
             # UndefVarError
@@ -74,7 +74,7 @@ end
     end
 end
 
-@testset verbose = true "Hessian comparison" begin
+@testset verbose = false "Hessian comparison" begin
     @testset "$name" for name in Symbol.(OptimizationProblems.meta[!, :name])
         if startswith(string(name), "triangle") || startswith(string(name), "tetra_")
             # UndefVarError
