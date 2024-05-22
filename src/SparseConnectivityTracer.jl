@@ -1,7 +1,5 @@
 module SparseConnectivityTracer
 
-const SCT = SparseConnectivityTracer
-
 using ADTypes: ADTypes
 using Compat: Returns
 using SparseArrays: sparse

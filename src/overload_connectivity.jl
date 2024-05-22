@@ -11,17 +11,18 @@ function connectivity_tracer_1_to_1(
 end
 
 function overload_connectivity_1_to_1(M, op)
+    SCT = SparseConnectivityTracer
     return quote
-        function $M.$op(t::T) where {T<:SCT.ConnectivityTracer}
-            return SCT.connectivity_tracer_1_to_1(t, SCT.is_influence_zero_global($M.$op))
+        function $M.$op(t::T) where {T<:$SCT.ConnectivityTracer}
+            return $SCT.connectivity_tracer_1_to_1(t, $SCT.is_influence_zero_global($M.$op))
         end
-        function $M.$op(d::D) where {P,T<:SCT.ConnectivityTracer,D<:SCT.Dual{P,T}}
-            x = SCT.primal(d)
+        function $M.$op(d::D) where {P,T<:$SCT.ConnectivityTracer,D<:$SCT.Dual{P,T}}
+            x = $SCT.primal(d)
             p_out = $M.$op(x)
-            t_out = SCT.connectivity_tracer_1_to_1(
-                SCT.tracer(d), SCT.is_influence_zero_local($M.$op, x)
+            t_out = $SCT.connectivity_tracer_1_to_1(
+                $SCT.tracer(d), $SCT.is_influence_zero_local($M.$op, x)
             )
-            return SCT.Dual(p_out, t_out)
+            return $SCT.Dual(p_out, t_out)
         end
     end
 end
@@ -47,58 +48,59 @@ function connectivity_tracer_2_to_1(
 end
 
 function overload_connectivity_2_to_1(M, op)
+    SCT = SparseConnectivityTracer
     return quote
-        function $M.$op(tx::T, ty::T) where {T<:SCT.ConnectivityTracer}
-            return SCT.connectivity_tracer_2_to_1(
+        function $M.$op(tx::T, ty::T) where {T<:$SCT.ConnectivityTracer}
+            return $SCT.connectivity_tracer_2_to_1(
                 tx,
                 ty,
-                SCT.is_influence_arg1_zero_global($M.$op),
-                SCT.is_influence_arg2_zero_global($M.$op),
+                $SCT.is_influence_arg1_zero_global($M.$op),
+                $SCT.is_influence_arg2_zero_global($M.$op),
             )
         end
-        function $M.$op(dx::D, dy::D) where {P,T<:SCT.ConnectivityTracer,D<:SCT.Dual{P,T}}
-            x = SCT.primal(dx)
-            y = SCT.primal(dy)
+        function $M.$op(dx::D, dy::D) where {P,T<:$SCT.ConnectivityTracer,D<:$SCT.Dual{P,T}}
+            x = $SCT.primal(dx)
+            y = $SCT.primal(dy)
             p_out = $M.$op(x, y)
-            t_out = SCT.connectivity_tracer_2_to_1(
-                SCT.tracer(dx),
-                SCT.tracer(dy),
-                SCT.is_influence_arg1_zero_local($M.$op, x, y),
-                SCT.is_influence_arg2_zero_local($M.$op, x, y),
+            t_out = $SCT.connectivity_tracer_2_to_1(
+                $SCT.tracer(dx),
+                $SCT.tracer(dy),
+                $SCT.is_influence_arg1_zero_local($M.$op, x, y),
+                $SCT.is_influence_arg2_zero_local($M.$op, x, y),
             )
-            return SCT.Dual(p_out, t_out)
+            return $SCT.Dual(p_out, t_out)
         end
 
-        function $M.$op(tx::SCT.ConnectivityTracer, ::Number)
-            return SCT.connectivity_tracer_1_to_1(
-                tx, SCT.is_influence_arg1_zero_global($M.$op)
+        function $M.$op(tx::$SCT.ConnectivityTracer, ::Number)
+            return $SCT.connectivity_tracer_1_to_1(
+                tx, $SCT.is_influence_arg1_zero_global($M.$op)
             )
         end
         function $M.$op(
             dx::D, y::Number
-        ) where {P,T<:SCT.ConnectivityTracer,D<:SCT.Dual{P,T}}
-            x = SCT.primal(dx)
+        ) where {P,T<:$SCT.ConnectivityTracer,D<:$SCT.Dual{P,T}}
+            x = $SCT.primal(dx)
             p_out = $M.$op(x, y)
-            t_out = SCT.connectivity_tracer_1_to_1(
-                SCT.tracer(dx), SCT.is_influence_arg1_zero_local($M.$op, x, y)
+            t_out = $SCT.connectivity_tracer_1_to_1(
+                $SCT.tracer(dx), $SCT.is_influence_arg1_zero_local($M.$op, x, y)
             )
-            return SCT.Dual(p_out, t_out)
+            return $SCT.Dual(p_out, t_out)
         end
 
-        function $M.$op(::Number, ty::SCT.ConnectivityTracer)
-            return SCT.connectivity_tracer_1_to_1(
-                ty, SCT.is_influence_arg2_zero_global($M.$op)
+        function $M.$op(::Number, ty::$SCT.ConnectivityTracer)
+            return $SCT.connectivity_tracer_1_to_1(
+                ty, $SCT.is_influence_arg2_zero_global($M.$op)
             )
         end
         function $M.$op(
             x::Number, dy::D
-        ) where {P,T<:SCT.ConnectivityTracer,D<:SCT.Dual{P,T}}
-            y = SCT.primal(dy)
+        ) where {P,T<:$SCT.ConnectivityTracer,D<:$SCT.Dual{P,T}}
+            y = $SCT.primal(dy)
             p_out = $M.$op(x, y)
-            t_out = SCT.connectivity_tracer_1_to_1(
-                SCT.tracer(dy), SCT.is_influence_arg2_zero_local($M.$op, x, y)
+            t_out = $SCT.connectivity_tracer_1_to_1(
+                $SCT.tracer(dy), $SCT.is_influence_arg2_zero_local($M.$op, x, y)
             )
-            return SCT.Dual(p_out, t_out)
+            return $SCT.Dual(p_out, t_out)
         end
     end
 end
@@ -114,24 +116,25 @@ function connectivity_tracer_1_to_2(
 end
 
 function overload_connectivity_1_to_2(M, op)
+    SCT = SparseConnectivityTracer
     return quote
-        function $M.$op(t::SCT.ConnectivityTracer)
-            return SCT.connectivity_tracer_1_to_2(
+        function $M.$op(t::$SCT.ConnectivityTracer)
+            return $SCT.connectivity_tracer_1_to_2(
                 t,
-                SCT.is_influence_out1_zero_global($M.$op),
-                SCT.is_influence_out2_zero_global($M.$op),
+                $SCT.is_influence_out1_zero_global($M.$op),
+                $SCT.is_influence_out2_zero_global($M.$op),
             )
         end
 
-        function $M.$op(d::D) where {P,T<:SCT.ConnectivityTracer,D<:SCT.Dual{P,T}}
-            x = SCT.primal(d)
+        function $M.$op(d::D) where {P,T<:$SCT.ConnectivityTracer,D<:$SCT.Dual{P,T}}
+            x = $SCT.primal(d)
             p1_out, p2_out = $M.$op(x)
-            t1_out, t2_out = SCT.connectivity_tracer_1_to_2(
+            t1_out, t2_out = $SCT.connectivity_tracer_1_to_2(
                 t,
-                SCT.is_influence_out1_zero_local($M.$op, x),
-                SCT.is_influence_out2_zero_local($M.$op, x),
+                $SCT.is_influence_out1_zero_local($M.$op, x),
+                $SCT.is_influence_out2_zero_local($M.$op, x),
             )
-            return (SCT.Dual(p1_out, t1_out), SCT.Dual(p2_out, t2_out))
+            return ($SCT.Dual(p1_out, t1_out), $SCT.Dual(p2_out, t2_out))
         end
     end
 end
