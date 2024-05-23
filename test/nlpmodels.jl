@@ -61,7 +61,7 @@ function hess_sparsity_ref(name::Symbol)
     return sparse(Symmetric(H_L, :L))
 end
 
-@testset verbose = false "Jacobian comparison" begin
+@testset verbose = true "Jacobian comparison" begin
     @testset "$name" for name in Symbol.(OptimizationProblems.meta[!, :name])
         @info "Testing Jacobian sparsity for $name"
         J_sct = jac_sparsity_sct(name)
@@ -73,9 +73,9 @@ end
             @test J_sct == J_ref
         end
     end
-end
+end;
 
-@testset verbose = false "Hessian comparison" begin
+@testset verbose = true "Hessian comparison" begin
     @testset "$name" for name in Symbol.(OptimizationProblems.meta[!, :name])
         @info "Testing Hessian sparsity for $name"
         if startswith(string(name), "tetra_")
@@ -95,4 +95,4 @@ end
             end
         end
     end
-end
+end;
