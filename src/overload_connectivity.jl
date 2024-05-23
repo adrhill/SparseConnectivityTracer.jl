@@ -142,7 +142,7 @@ end
 ## Special cases
 
 ## Exponent (requires extra types)
-for S in (Real, Integer, Rational, Complex, Irrational{:ℯ})
+for S in (Real, Integer, Rational, Irrational{:ℯ})
     Base.:^(t::ConnectivityTracer, ::S) = t
     function Base.:^(dx::D, y::S) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
         return Dual(primal(dx)^y, tracer(dx))

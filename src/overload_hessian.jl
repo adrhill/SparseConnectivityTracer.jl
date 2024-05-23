@@ -187,7 +187,7 @@ end
 ## Special cases
 
 ## Exponent (requires extra types)
-for S in (Real, Integer, Rational, Complex, Irrational{:ℯ})
+for S in (Real, Integer, Rational, Irrational{:ℯ})
     function Base.:^(tx::T, y::S) where {T<:HessianTracer}
         return T(gradient(tx), hessian(tx) ∪ (gradient(tx) × gradient(tx)))
     end

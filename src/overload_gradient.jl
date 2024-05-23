@@ -136,7 +136,7 @@ end
 ## Special cases
 
 ## Exponent (requires extra types)
-for S in (Real, Integer, Rational, Complex, Irrational{:ℯ})
+for S in (Real, Integer, Rational, Irrational{:ℯ})
     Base.:^(t::GradientTracer, ::S) = t
     Base.:^(::S, t::GradientTracer) = t
 
