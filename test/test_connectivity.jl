@@ -62,6 +62,7 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
         @test connectivity_pattern(x -> x^ℯ, 1, G) ≈ [1;;]
         @test connectivity_pattern(x -> ℯ^x, 1, G) ≈ [1;;]
         @test connectivity_pattern(x -> round(x, RoundNearestTiesUp), 1, G) ≈ [1;;]
+        @test connectivity_pattern(x -> 0, 1, G) ≈ [0;;]
 
         # SpecialFunctions extension
         @test connectivity_pattern(x -> erf(x[1]), rand(2), G) == [1 0]
@@ -87,5 +88,6 @@ end
         @test local_connectivity_pattern(
             x -> ifelse(x[2] < x[3], x[1] + x[2], x[3] * x[4]), [1 3 2 4], G
         ) == [0 0 1 1]
+        @test local_connectivity_pattern(x -> 0, 1, G) ≈ [0;;]
     end
 end

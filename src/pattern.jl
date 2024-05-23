@@ -389,3 +389,13 @@ function hessian_pattern_to_mat(
 ) where {P1,P2,T<:HessianTracer,D1<:Dual{P1,T},D2<:Dual{P2,T}}
     return hessian_pattern_to_mat(tracer.(xt), tracer(yt))
 end
+
+function hessian_pattern_to_mat(xt::AbstractArray{T}, yt::Number) where {T<:HessianTracer}
+    return hessian_pattern_to_mat(tracer.(xt), empty(T))
+end
+
+function hessian_pattern_to_mat(
+    xt::AbstractArray{D1}, yt::Number
+) where {P1,T<:HessianTracer,D1<:Dual{P1,T}}
+    return hessian_pattern_to_mat(tracer.(xt), empty(T))
+end
