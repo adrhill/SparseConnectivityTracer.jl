@@ -64,7 +64,7 @@ end
 @testset verbose = true "Jacobian comparison" begin
     @testset "$name" for name in Symbol.(OptimizationProblems.meta[!, :name])
         @info "Testing Jacobian sparsity for $name"
-        J_sct = jac_sparsity_sct(name)
+        J_sct = @time jac_sparsity_sct(name)
         J_ref = jac_sparsity_ref(name)
         if name == :lincon
             # we have two more nonzeros but their stored values are 0.0 in the Hessian
@@ -78,21 +78,21 @@ end;
 @testset verbose = true "Hessian comparison" begin
     @testset "$name" for name in Symbol.(OptimizationProblems.meta[!, :name])
         @info "Testing Hessian sparsity for $name"
-        if startswith(string(name), "tetra_")
+        # if startswith(string(name), "tetra_")
+        #     # TODO: investigate
+        #     @warn "Skipping $name because it takes too long"
+        #     @test_broken false
+        #     continue
+        # end
+        H_sct = @time hess_sparsity_sct(name)
+        H_ref = hess_sparsity_ref(name)
+        H_diff = H_ref - H_sct
+        # usually the difference is on the diagonal and ref has more nonzeros than SCT
+        if name in (:britgas, :channel, :hs114, :marine)
             # TODO: investigate
-            @warn "Skipping $name because it takes too long"
-            @test_broken false
+            @test_broken H_diff == Diagonal(H_diff) && all(H_diff .>= 0)
         else
-            H_sct = hess_sparsity_sct(name)
-            H_ref = hess_sparsity_ref(name)
-            H_diff = H_ref - H_sct
-            # usually the difference is on the diagonal and ref has more nonzeros than SCT
-            if name in (:britgas, :channel, :hs114, :marine)
-                # TODO: investigate
-                @test_broken H_diff == Diagonal(H_diff) && all(H_diff .>= 0)
-            else
-                @test H_diff == Diagonal(H_diff) && all(H_diff .>= 0)
-            end
+            @test H_diff == Diagonal(H_diff) && all(H_diff .>= 0)
         end
     end
 end;
