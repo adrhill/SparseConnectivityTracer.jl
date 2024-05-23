@@ -155,6 +155,14 @@ const SECOND_ORDER_SET_TYPES = (
             0  0  1  0
         ]
 
+        function f_ampgo07(x)
+            return (x[1] <= 0) * convert(eltype(x), Inf) +
+                   sin(x[1]) +
+                   sin(10//3 * x[1]) +
+                   log(abs(x[1])) - 84//100 * x[1] + 3
+        end
+        @test hessian_sparsity(f_ampgo07, [1.0], method) ≈ [1;;]
+
         # SpecialFunctions
         @test hessian_sparsity(x -> erf(x[1]), rand(2), method) == [
             1 0
