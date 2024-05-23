@@ -36,6 +36,6 @@ for fn in (:isequal, :isapprox, :isless, :(==), :(<), :(>), :(<=), :(>=))
         return H(gradient(tx) ∪ gradient(ty), hessian(tx) ∪ hessian(ty))
     end
 
-    @eval Base.$fn(tx::T, y::Number) where {T<:SimpleTracer} = tx
-    @eval Base.$fn(x::Number, ty::T) where {T<:SimpleTracer} = ty
+    @eval Base.$fn(tx::T, y::Real) where {T<:SimpleTracer} = tx
+    @eval Base.$fn(x::Real, ty::T) where {T<:SimpleTracer} = ty
 end
