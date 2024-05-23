@@ -26,3 +26,16 @@ end
 function output_union(x::AbstractArray, ty::AbstractArray{T}) where {T<:SimpleTracer}
     return ty
 end
+
+## Overload comparisons
+# We don't return empty tracers since the resulting Bool could be used as a Number. 
+for fn in (:isequal, :isapprox, :isless, :(==), :(<), :(>), :(<=), :(>=))
+    @eval Base.$fn(tx::C, ty::C) where {C<:ConnectivityTracer} = C(inputs(tx) ∪ inputs(ty))
+    @eval Base.$fn(tx::G, ty::G) where {G<:GradientTracer} = G(gradient(tx) ∪ gradient(ty))
+    @eval function Base.$fn(tx::H, ty::H) where {H<:HessianTracer}
+        return H(gradient(tx) ∪ gradient(ty), hessian(tx) ∪ hessian(ty))
+    end
+
+    @eval Base.$fn(tx::T, y::Number) where {T<:SimpleTracer} = tx
+    @eval Base.$fn(x::Number, ty::T) where {T<:SimpleTracer} = ty
+end
