@@ -196,14 +196,11 @@ Dual `Real` number type keeping track of the results of a primal computation as 
 ## Fields
 $(TYPEDFIELDS)
 """
-struct Dual{P<:Real,T<:Union{ConnectivityTracer,GradientTracer,HessianTracer}} <:
-       AbstractTracer
+struct Dual{P<:Real,T<:AbstractTracer} <: Real
     primal::P
     tracer::T
 
-    function Dual{P,T}(
-        primal::P, tracer::T
-    ) where {P<:Number,T<:Union{ConnectivityTracer,GradientTracer,HessianTracer}}
+    function Dual{P,T}(primal::P, tracer::T) where {P<:Number,T<:AbstractTracer}
         if P <: AbstractTracer
             error("Primal value of Dual tracer can't be an AbstractTracer.")
         end
@@ -211,8 +208,6 @@ struct Dual{P<:Real,T<:Union{ConnectivityTracer,GradientTracer,HessianTracer}} <
     end
 end
 Dual(primal::P, tracer::T) where {P,T} = Dual{P,T}(primal, tracer)
-
-# TODO: support ConnectivityTracer
 
 primal(d::Dual) = d.primal
 tracer(d::Dual) = d.tracer
