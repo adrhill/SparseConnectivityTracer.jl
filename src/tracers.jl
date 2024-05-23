@@ -191,12 +191,12 @@ HessianTracer(t::HessianTracer) = t
 """
 $(TYPEDEF)
 
-Dual number type keeping track of the results of a primal computation as well as a tracer.
+Dual `Real` number type keeping track of the results of a primal computation as well as a tracer.
 
 ## Fields
 $(TYPEDFIELDS)
 """
-struct Dual{P<:Number,T<:Union{ConnectivityTracer,GradientTracer,HessianTracer}} <:
+struct Dual{P<:Real,T<:Union{ConnectivityTracer,GradientTracer,HessianTracer}} <:
        AbstractTracer
     primal::P
     tracer::T
