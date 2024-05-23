@@ -391,7 +391,7 @@ function hessian_pattern_to_mat(
 end
 
 function hessian_pattern_to_mat(xt::AbstractArray{T}, yt::Number) where {T<:HessianTracer}
-    return hessian_pattern_to_mat(tracer.(xt), empty(T))
+    return hessian_pattern_to_mat(xt, empty(T))
 end
 
 function hessian_pattern_to_mat(
