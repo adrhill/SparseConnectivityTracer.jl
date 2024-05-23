@@ -200,7 +200,18 @@ struct Dual{P<:Number,T<:Union{ConnectivityTracer,GradientTracer,HessianTracer}}
        AbstractTracer
     primal::P
     tracer::T
+
+    function Dual{P,T}(
+        primal::P, tracer::T
+    ) where {P<:Number,T<:Union{ConnectivityTracer,GradientTracer,HessianTracer}}
+        if P <: AbstractTracer
+            error("Primal value of Dual tracer can't be an AbstractTracer.")
+        end
+        return new{P,T}(primal, tracer)
+    end
 end
+Dual(primal::P, tracer::T) where {P,T} = Dual{P,T}(primal, tracer)
+
 # TODO: support ConnectivityTracer
 
 primal(d::Dual) = d.primal
