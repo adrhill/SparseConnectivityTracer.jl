@@ -34,6 +34,8 @@ const SECOND_ORDER_SET_TYPES = (
 
         # Code coverage
         @test hessian_sparsity(typemax, 1, method) ≈ [0;;]
+        @test hessian_sparsity(x -> real(x^(2im)), 1, method) ≈ [1;;]
+        @test hessian_sparsity(x -> real((2im)^x), 1, method) ≈ [1;;]
         @test hessian_sparsity(x -> x^(2//3), 1, method) ≈ [1;;]
         @test hessian_sparsity(x -> (2//3)^x, 1, method) ≈ [1;;]
         @test hessian_sparsity(x -> x^ℯ, 1, method) ≈ [1;;]
@@ -203,6 +205,8 @@ end
 
         # Code coverage
         @test hessian_sparsity(typemax, 1, method) ≈ [0;;]
+        @test hessian_sparsity(x -> real(x^(2im)), 1, method) ≈ [1;;]
+        @test hessian_sparsity(x -> real((2im)^x), 1, method) ≈ [1;;]
         @test hessian_sparsity(x -> x^(2//3), 1, method) ≈ [1;;]
         @test hessian_sparsity(x -> (2//3)^x, 1, method) ≈ [1;;]
         @test hessian_sparsity(x -> x^ℯ, 1, method) ≈ [1;;]
