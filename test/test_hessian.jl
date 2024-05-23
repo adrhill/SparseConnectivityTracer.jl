@@ -13,7 +13,7 @@ const SECOND_ORDER_SET_TYPES = (
 @testset "Global Hessian" begin
     @testset "Default hessian_pattern" begin
         h = hessian_pattern(x -> x[1] / x[2] + x[3] / 1 + 1 / x[4], rand(4))
-        @test h ≈ [
+        @test h == [
             0 1 0 0
             1 1 0 0
             0 0 0 0
@@ -43,7 +43,7 @@ const SECOND_ORDER_SET_TYPES = (
         @test hessian_sparsity(x -> round(x, RoundNearestTiesUp), 1, method) ≈ [0;;]
 
         h = hessian_sparsity(x -> x[1] / x[2] + x[3] / 1 + 1 / x[4], rand(4), method)
-        @test h ≈ [
+        @test h == [
             0 1 0 0
             1 1 0 0
             0 0 0 0
@@ -51,7 +51,7 @@ const SECOND_ORDER_SET_TYPES = (
         ]
 
         h = hessian_sparsity(x -> x[1] * x[2] + x[3] * 1 + 1 * x[4], rand(4), method)
-        @test h ≈ [
+        @test h == [
             0 1 0 0
             1 0 0 0
             0 0 0 0
@@ -59,7 +59,7 @@ const SECOND_ORDER_SET_TYPES = (
         ]
 
         h = hessian_sparsity(x -> (x[1] * x[2]) * (x[3] * x[4]), rand(4), method)
-        @test h ≈ [
+        @test h == [
             0 1 1 1
             1 0 1 1
             1 1 0 1
@@ -67,7 +67,7 @@ const SECOND_ORDER_SET_TYPES = (
         ]
 
         h = hessian_sparsity(x -> (x[1] + x[2]) * (x[3] + x[4]), rand(4), method)
-        @test h ≈ [
+        @test h == [
             0 0 1 1
             0 0 1 1
             1 1 0 0
@@ -75,7 +75,7 @@ const SECOND_ORDER_SET_TYPES = (
         ]
 
         h = hessian_sparsity(x -> (x[1] + x[2] + x[3] + x[4])^2, rand(4), method)
-        @test h ≈ [
+        @test h == [
             1 1 1 1
             1 1 1 1
             1 1 1 1
@@ -83,7 +83,7 @@ const SECOND_ORDER_SET_TYPES = (
         ]
 
         h = hessian_sparsity(x -> 1 / (x[1] + x[2] + x[3] + x[4]), rand(4), method)
-        @test h ≈ [
+        @test h == [
             1 1 1 1
             1 1 1 1
             1 1 1 1
@@ -91,7 +91,7 @@ const SECOND_ORDER_SET_TYPES = (
         ]
 
         h = hessian_sparsity(x -> (x[1] - x[2]) + (x[3] - 1) + (1 - x[4]), rand(4), method)
-        @test h ≈ [
+        @test h == [
             0 0 0 0
             0 0 0 0
             0 0 0 0
@@ -99,7 +99,7 @@ const SECOND_ORDER_SET_TYPES = (
         ]
 
         h = hessian_sparsity(x -> copysign(x[1] * x[2], x[3] * x[4]), rand(4), method)
-        @test h ≈ [
+        @test h == [
             0 1 0 0
             1 0 0 0
             0 0 0 0
@@ -107,7 +107,7 @@ const SECOND_ORDER_SET_TYPES = (
         ]
 
         h = hessian_sparsity(x -> div(x[1] * x[2], x[3] * x[4]), rand(4), method)
-        @test h ≈ [
+        @test h == [
             0 0 0 0
             0 0 0 0
             0 0 0 0
@@ -118,7 +118,7 @@ const SECOND_ORDER_SET_TYPES = (
         @test h ≈ [1;;]
 
         h = hessian_sparsity(x -> sum(diff(x) .^ 3), rand(4), method)
-        @test h ≈ [
+        @test h == [
             1 1 0 0
             1 1 1 0
             0 1 1 1
@@ -128,7 +128,7 @@ const SECOND_ORDER_SET_TYPES = (
         x = rand(5)
         foo(x) = x[1] + x[2] * x[3] + 1 / x[4] + 1 * x[5]
         h = hessian_sparsity(foo, x, method)
-        @test h ≈ [
+        @test h == [
             0 0 0 0 0
             0 0 1 0 0
             0 1 0 0 0
@@ -138,7 +138,7 @@ const SECOND_ORDER_SET_TYPES = (
 
         bar(x) = foo(x) + x[2]^x[5]
         h = hessian_sparsity(bar, x, method)
-        @test h ≈ [
+        @test h == [
             0 0 0 0 0
             0 1 1 0 1
             0 1 0 0 0
@@ -171,7 +171,7 @@ end
 
         f1(x) = x[1] + x[2] * x[3] + 1 / x[4] + x[2] * max(x[1], x[5])
         h = hessian_sparsity(f1, [1.0 3.0 5.0 1.0 2.0], method)
-        @test h ≈ [
+        @test h == [
             0  0  0  0  0
             0  0  1  0  1
             0  1  0  0  0
@@ -179,7 +179,7 @@ end
             0  1  0  0  0
         ]
         h = hessian_sparsity(f1, [4.0 3.0 5.0 1.0 2.0], method)
-        @test h ≈ [
+        @test h == [
             0  1  0  0  0
             1  0  1  0  0
             0  1  0  0  0
@@ -189,14 +189,14 @@ end
 
         f2(x) = ifelse(x[2] < x[3], x[1] * x[2], x[3] * x[4])
         h = hessian_sparsity(f2, [1 2 3 4], method)
-        @test h ≈ [
+        @test h == [
             0  1  0  0
             1  0  0  0
             0  0  0  0
             0  0  0  0
         ]
         h = hessian_sparsity(f2, [1 3 2 4], method)
-        @test h ≈ [
+        @test h == [
             0  0  0  0
             0  0  0  0
             0  0  0  1

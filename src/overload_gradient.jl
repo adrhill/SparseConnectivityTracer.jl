@@ -9,6 +9,7 @@ function gradient_tracer_1_to_1(t::T, is_firstder_zero::Bool) where {T<:Gradient
 end
 
 function overload_gradient_1_to_1(M, op)
+    SCT = SparseConnectivityTracer
     return quote
         function $M.$op(t::$SCT.GradientTracer)
             return $SCT.gradient_tracer_1_to_1(t, $SCT.is_firstder_zero_global($M.$op))
@@ -45,6 +46,7 @@ function gradient_tracer_2_to_1(
 end
 
 function overload_gradient_2_to_1(M, op)
+    SCT = SparseConnectivityTracer
     return quote
         function $M.$op(tx::T, ty::T) where {T<:$SCT.GradientTracer}
             return $SCT.gradient_tracer_2_to_1(
@@ -108,6 +110,7 @@ function gradient_tracer_1_to_2(
 end
 
 function overload_gradient_1_to_2(M, op)
+    SCT = SparseConnectivityTracer
     return quote
         function $M.$op(t::$SCT.GradientTracer)
             return $SCT.gradient_tracer_1_to_2(
@@ -133,8 +136,7 @@ end
 ## Special cases
 
 ## Exponent (requires extra types)
-
-for S in (Real, Integer, Rational, Irrational{:ℯ})
+for S in (Real, Integer, Rational, Complex, Irrational{:ℯ})
     Base.:^(t::GradientTracer, ::S) = t
     Base.:^(::S, t::GradientTracer) = t
 

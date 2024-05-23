@@ -19,6 +19,7 @@ function hessian_tracer_1_to_1(
 end
 
 function overload_hessian_1_to_1(M, op)
+    SCT = SparseConnectivityTracer
     return quote
         function $M.$op(t::$SCT.HessianTracer)
             return $SCT.hessian_tracer_1_to_1(
@@ -74,6 +75,7 @@ function hessian_tracer_2_to_1(
 end
 
 function overload_hessian_2_to_1(M, op)
+    SCT = SparseConnectivityTracer
     return quote
         function $M.$op(tx::T, ty::T) where {T<:$SCT.HessianTracer}
             return $SCT.hessian_tracer_2_to_1(
@@ -155,6 +157,7 @@ function hessian_tracer_1_to_2(
 end
 
 function overload_hessian_1_to_2(M, op)
+    SCT = SparseConnectivityTracer
     return quote
         function $M.$op(t::$SCT.HessianTracer)
             return $SCT.hessian_tracer_1_to_2(
@@ -184,7 +187,7 @@ end
 ## Special cases
 
 ## Exponent (requires extra types)
-for S in (Real, Integer, Rational, Irrational{:ℯ})
+for S in (Real, Integer, Rational, Complex, Irrational{:ℯ})
     function Base.:^(tx::T, y::S) where {T<:HessianTracer}
         return T(gradient(tx), hessian(tx) ∪ (gradient(tx) × gradient(tx)))
     end

@@ -11,6 +11,7 @@ function connectivity_tracer_1_to_1(
 end
 
 function overload_connectivity_1_to_1(M, op)
+    SCT = SparseConnectivityTracer
     return quote
         function $M.$op(t::T) where {T<:$SCT.ConnectivityTracer}
             return $SCT.connectivity_tracer_1_to_1(t, $SCT.is_influence_zero_global($M.$op))
@@ -47,6 +48,7 @@ function connectivity_tracer_2_to_1(
 end
 
 function overload_connectivity_2_to_1(M, op)
+    SCT = SparseConnectivityTracer
     return quote
         function $M.$op(tx::T, ty::T) where {T<:$SCT.ConnectivityTracer}
             return $SCT.connectivity_tracer_2_to_1(
@@ -114,6 +116,7 @@ function connectivity_tracer_1_to_2(
 end
 
 function overload_connectivity_1_to_2(M, op)
+    SCT = SparseConnectivityTracer
     return quote
         function $M.$op(t::$SCT.ConnectivityTracer)
             return $SCT.connectivity_tracer_1_to_2(
@@ -139,8 +142,7 @@ end
 ## Special cases
 
 ## Exponent (requires extra types)
-
-for S in (Real, Integer, Rational, Irrational{:ℯ})
+for S in (Real, Integer, Rational, Complex, Irrational{:ℯ})
     Base.:^(t::ConnectivityTracer, ::S) = t
     function Base.:^(dx::D, y::S) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
         return Dual(primal(dx)^y, tracer(dx))
