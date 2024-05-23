@@ -174,9 +174,14 @@ const SECOND_ORDER_SET_TYPES = (
             0 0 0
         ]
 
-        ## Error handling when applying non-dual tracers to "local" functions with control flow
         f2(x) = ifelse(x[2] < x[3], x[1] * x[2], x[3] * x[4])
-        @test_throws MissingPrimalError hessian_sparsity(f2, [1 3 2 4], method)
+        h = hessian_sparsity(f2, [1 3 2 4], method)
+        @test h == [
+            0  1  0  0
+            1  0  0  0
+            0  0  0  1
+            0  0  1  0
+        ]
     end
 end
 

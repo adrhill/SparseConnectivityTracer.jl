@@ -72,10 +72,9 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
             @test connectivity_pattern(f, 1, G) ≈ [1;;]
         end
 
-        # Error handling when applying non-dual tracers to "local" functions with control flow
-        @test_throws MissingPrimalError connectivity_pattern(
+        @test connectivity_pattern(
             x -> ifelse(x[2] < x[3], x[1] + x[2], x[3] * x[4]), [1 2 3 4], G
-        ) == [1 1 0 0]
+        ) == [1 1 1 1]
     end
 end
 

@@ -95,7 +95,8 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
         end
 
         ## Error handling when applying non-dual tracers to "local" functions with control flow
-        @test_throws MissingPrimalError jacobian_sparsity(
+        # TypeError: non-boolean (SparseConnectivityTracer.GradientTracer{BitSet}) used in boolean context
+        @test_throws TypeError jacobian_sparsity(
             x -> x[1] > x[2] ? x[3] : x[4], [1.0, 2.0, 3.0, 4.0], method
         ) == [0 0 0 1;]
     end
