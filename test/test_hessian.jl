@@ -21,10 +21,10 @@ const SECOND_ORDER_SET_TYPES = (
         ]
     end
 
-    @testset "Set type $G" for G in SECOND_ORDER_SET_TYPES
-        I = eltype(G)
+    @testset "Set type $S" for S in SECOND_ORDER_SET_TYPES
+        I = eltype(S)
         H = Set{Tuple{I,I}}
-        method = TracerSparsityDetector(G, H)
+        method = TracerSparsityDetector(S, H)
 
         @test hessian_sparsity(identity, rand(), method) ≈ [0;;]
         @test hessian_sparsity(sqrt, rand(), method) ≈ [1;;]
@@ -165,10 +165,10 @@ const SECOND_ORDER_SET_TYPES = (
 end
 
 @testset "Local Hessian" begin
-    @testset "Set type $G" for G in SECOND_ORDER_SET_TYPES
-        I = eltype(G)
+    @testset "Set type $S" for S in SECOND_ORDER_SET_TYPES
+        I = eltype(S)
         H = Set{Tuple{I,I}}
-        method = TracerLocalSparsityDetector(G, H)
+        method = TracerLocalSparsityDetector(S, H)
 
         f1(x) = x[1] + x[2] * x[3] + 1 / x[4] + x[2] * max(x[1], x[5])
         h = hessian_sparsity(f1, [1.0 3.0 5.0 1.0 2.0], method)
@@ -213,5 +213,10 @@ end
         @test hessian_sparsity(x -> x^ℯ, 1, method) ≈ [1;;]
         @test hessian_sparsity(x -> ℯ^x, 1, method) ≈ [1;;]
         @test hessian_sparsity(x -> 0, 1, method) ≈ [0;;]
+
+        # Putting Duals into Duals is prohibited
+        H = empty(HessianTracer{S,Set{Tuple{Int,Int}}})
+        D1 = Dual(1.0, H)
+        @test_throws ErrorException D2 = Dual(D1, H)
     end
 end

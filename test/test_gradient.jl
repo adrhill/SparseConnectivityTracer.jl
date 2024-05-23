@@ -1,6 +1,6 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer:
-    GradientTracer, MissingPrimalError, tracer, trace_input, empty
+    GradientTracer, Dual, MissingPrimalError, tracer, trace_input, empty
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using ADTypes: jacobian_sparsity
 using LinearAlgebra: det, dot, logdet
@@ -41,8 +41,8 @@ NNLIB_ACTIVATIONS_F = (
 NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
 
 @testset "Jacobian Global" begin
-    @testset "Set type $G" for G in FIRST_ORDER_SET_TYPES
-        method = TracerSparsityDetector(G)
+    @testset "Set type $S" for S in FIRST_ORDER_SET_TYPES
+        method = TracerSparsityDetector(S)
 
         f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])]
         @test jacobian_sparsity(f, rand(3), method) == [1 0 0; 1 1 0; 0 0 1]
@@ -84,8 +84,8 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
 end
 
 @testset "Jacobian Local" verbose = true begin
-    @testset "Set type $G" for G in FIRST_ORDER_SET_TYPES
-        method = TracerLocalSparsityDetector(G)
+    @testset "Set type $S" for S in FIRST_ORDER_SET_TYPES
+        method = TracerLocalSparsityDetector(S)
 
         # Multiplication
         @test jacobian_sparsity(x -> x[1] * x[2], [1.0, 1.0], method) == [1 1;]
@@ -159,5 +159,10 @@ end
         @test jacobian_sparsity(NNlib.softshrink, -1, method) ≈ [1;;]
         @test jacobian_sparsity(NNlib.softshrink, 0, method) ≈ [0;;]
         @test jacobian_sparsity(NNlib.softshrink, 1, method) ≈ [1;;]
+
+        # Putting Duals into Duals is prohibited
+        G = empty(GradientTracer{S})
+        D1 = Dual(1.0, G)
+        @test_throws ErrorException D2 = Dual(D1, G)
     end
 end
