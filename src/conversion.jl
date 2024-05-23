@@ -2,15 +2,15 @@
 
 ## Type conversions (non-dual)
 for TT in (GradientTracer, ConnectivityTracer, HessianTracer)
-    Base.promote_rule(::Type{T}, ::Type{N}) where {T<:TT,N<:Number} = T
-    Base.promote_rule(::Type{N}, ::Type{T}) where {T<:TT,N<:Number} = T
+    Base.promote_rule(::Type{T}, ::Type{N}) where {T<:TT,N<:Real} = T
+    Base.promote_rule(::Type{N}, ::Type{T}) where {T<:TT,N<:Real} = T
 
     Base.big(::Type{T})   where {T<:TT} = T
     Base.widen(::Type{T}) where {T<:TT} = T
 
-    Base.convert(::Type{T}, x::Number)   where {T<:TT} = empty(T)
+    Base.convert(::Type{T}, x::Real)   where {T<:TT} = empty(T)
     Base.convert(::Type{T}, t::T)        where {T<:TT} = t
-    Base.convert(::Type{<:Number}, t::T) where {T<:TT} = t
+    Base.convert(::Type{<:Real}, t::T) where {T<:TT} = t
 
     ## Constants
     Base.zero(::Type{T})        where {T<:TT} = empty(T)
@@ -42,11 +42,11 @@ function Base.promote_rule(::Type{Dual{P1, T}}, ::Type{Dual{P2, T}}) where {P1,P
     PP = Base.promote_type(P1, P2) # TODO: possible method call error?
     return Dual{PP,T}
 end
-function Base.promote_rule(::Type{Dual{P, T}}, ::Type{N}) where {P,T,N<:Number}
+function Base.promote_rule(::Type{Dual{P, T}}, ::Type{N}) where {P,T,N<:Real}
     PP = Base.promote_type(P, N) # TODO: possible method call error?
     return Dual{PP,T}
 end
-function Base.promote_rule(::Type{N}, ::Type{Dual{P, T}}) where {P,T,N<:Number}
+function Base.promote_rule(::Type{N}, ::Type{Dual{P, T}}) where {P,T,N<:Real}
     PP = Base.promote_type(P, N) # TODO: possible method call error?
     return Dual{PP,T}
 end
@@ -54,9 +54,9 @@ end
 Base.big(::Type{D})   where {P,T,D<:Dual{P,T}} = Dual{big(P),T}
 Base.widen(::Type{D}) where {P,T,D<:Dual{P,T}} = Dual{widen(P),T}
 
-Base.convert(::Type{D}, x::Number) where {P,T,D<:Dual{P,T}}           = Dual(x, empty(T))
+Base.convert(::Type{D}, x::Real) where {P,T,D<:Dual{P,T}}           = Dual(x, empty(T))
 Base.convert(::Type{D}, d::D)      where {P,T,D<:Dual{P,T}}           = d
-Base.convert(::Type{N}, d::D)      where {N<:Number,P,T,D<:Dual{P,T}} = Dual(convert(T, primal(d)), tracer(d))
+Base.convert(::Type{N}, d::D)      where {N<:Real,P,T,D<:Dual{P,T}} = Dual(convert(T, primal(d)), tracer(d))
 
 function Base.convert(::Type{Dual{P1,T}}, d::Dual{P2,T}) where {P1,P2,T} 
     return Dual(convert(P1, primal(d)), tracer(d))
