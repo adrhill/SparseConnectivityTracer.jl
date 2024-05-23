@@ -15,7 +15,7 @@ Supports [`ConnectivityTracer`](@ref), [`GradientTracer`](@ref) and [`HessianTra
 """
 trace_input(::Type{T}, x) where {T<:AbstractTracer} = trace_input(T, x, 1)
 
-function trace_input(::Type{T}, x::Number, i::Integer) where {T<:AbstractTracer}
+function trace_input(::Type{T}, x::Real, i::Integer) where {T<:AbstractTracer}
     return create_tracer(T, x, i)
 end
 function trace_input(::Type{T}, xs::AbstractArray, i) where {T<:AbstractTracer}
@@ -40,11 +40,11 @@ function trace_function(::Type{T}, f!, y, x) where {T<:AbstractTracer}
     return xt, yt
 end
 
-to_array(x::Number) = [x]
+to_array(x::Real) = [x]
 to_array(x::AbstractArray) = x
 
 # Utilities
-_tracer_or_number(x::Number) = x
+_tracer_or_number(x::Real) = x
 _tracer_or_number(d::Dual) = tracer(d)
 
 #====================#
@@ -147,7 +147,7 @@ function local_connectivity_pattern(f!, y, x, ::Type{C}=DEFAULT_VECTOR_TYPE) whe
 end
 
 function connectivity_pattern_to_mat(
-    xt::AbstractArray{T}, yt::AbstractArray{<:Number}
+    xt::AbstractArray{T}, yt::AbstractArray{<:Real}
 ) where {T<:ConnectivityTracer}
     n, m = length(xt), length(yt)
     I = Int[] # row indices
@@ -166,7 +166,7 @@ function connectivity_pattern_to_mat(
 end
 
 function connectivity_pattern_to_mat(
-    xt::AbstractArray{D}, yt::AbstractArray{<:Number}
+    xt::AbstractArray{D}, yt::AbstractArray{<:Real}
 ) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
     return connectivity_pattern_to_mat(tracer.(xt), _tracer_or_number.(yt))
 end
@@ -258,7 +258,7 @@ function local_jacobian_pattern(f!, y, x, ::Type{G}=DEFAULT_VECTOR_TYPE) where {
 end
 
 function jacobian_pattern_to_mat(
-    xt::AbstractArray{T}, yt::AbstractArray{<:Number}
+    xt::AbstractArray{T}, yt::AbstractArray{<:Real}
 ) where {T<:GradientTracer}
     n, m = length(xt), length(yt)
     I = Int[] # row indices
@@ -277,7 +277,7 @@ function jacobian_pattern_to_mat(
 end
 
 function jacobian_pattern_to_mat(
-    xt::AbstractArray{D}, yt::AbstractArray{<:Number}
+    xt::AbstractArray{D}, yt::AbstractArray{<:Real}
 ) where {P,T<:GradientTracer,D<:Dual{P,T}}
     return jacobian_pattern_to_mat(tracer.(xt), _tracer_or_number.(yt))
 end

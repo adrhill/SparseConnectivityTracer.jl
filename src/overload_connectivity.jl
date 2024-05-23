@@ -71,13 +71,13 @@ function overload_connectivity_2_to_1(M, op)
             return $SCT.Dual(p_out, t_out)
         end
 
-        function $M.$op(tx::$SCT.ConnectivityTracer, ::Number)
+        function $M.$op(tx::$SCT.ConnectivityTracer, ::Real)
             return $SCT.connectivity_tracer_1_to_1(
                 tx, $SCT.is_influence_arg1_zero_global($M.$op)
             )
         end
         function $M.$op(
-            dx::D, y::Number
+            dx::D, y::Real
         ) where {P,T<:$SCT.ConnectivityTracer,D<:$SCT.Dual{P,T}}
             x = $SCT.primal(dx)
             p_out = $M.$op(x, y)
@@ -87,13 +87,13 @@ function overload_connectivity_2_to_1(M, op)
             return $SCT.Dual(p_out, t_out)
         end
 
-        function $M.$op(::Number, ty::$SCT.ConnectivityTracer)
+        function $M.$op(::Real, ty::$SCT.ConnectivityTracer)
             return $SCT.connectivity_tracer_1_to_1(
                 ty, $SCT.is_influence_arg2_zero_global($M.$op)
             )
         end
         function $M.$op(
-            x::Number, dy::D
+            x::Real, dy::D
         ) where {P,T<:$SCT.ConnectivityTracer,D<:$SCT.Dual{P,T}}
             y = $SCT.primal(dy)
             p_out = $M.$op(x, y)
