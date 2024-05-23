@@ -41,6 +41,7 @@ const SECOND_ORDER_SET_TYPES = (
         @test hessian_sparsity(x -> x^ℯ, 1, method) ≈ [1;;]
         @test hessian_sparsity(x -> ℯ^x, 1, method) ≈ [1;;]
         @test hessian_sparsity(x -> round(x, RoundNearestTiesUp), 1, method) ≈ [0;;]
+        @test hessian_sparsity(x -> 0, 1, method) ≈ [0;;]
 
         h = hessian_sparsity(x -> x[1] / x[2] + x[3] / 1 + 1 / x[4], rand(4), method)
         @test h == [
@@ -211,5 +212,6 @@ end
         @test hessian_sparsity(x -> (2//3)^x, 1, method) ≈ [1;;]
         @test hessian_sparsity(x -> x^ℯ, 1, method) ≈ [1;;]
         @test hessian_sparsity(x -> ℯ^x, 1, method) ≈ [1;;]
+        @test hessian_sparsity(x -> 0, 1, method) ≈ [0;;]
     end
 end
