@@ -104,14 +104,14 @@ function overload_hessian_2_to_1(M, op)
             return $SCT.Dual(p_out, t_out)
         end
 
-        function $M.$op(tx::$SCT.HessianTracer, y::Number)
+        function $M.$op(tx::$SCT.HessianTracer, y::Real)
             return $SCT.hessian_tracer_1_to_1(
                 tx,
                 $SCT.is_firstder_arg1_zero_global($M.$op),
                 $SCT.is_seconder_arg1_zero_global($M.$op),
             )
         end
-        function $M.$op(x::Number, ty::$SCT.HessianTracer)
+        function $M.$op(x::Real, ty::$SCT.HessianTracer)
             return $SCT.hessian_tracer_1_to_1(
                 ty,
                 $SCT.is_firstder_arg2_zero_global($M.$op),
@@ -119,7 +119,7 @@ function overload_hessian_2_to_1(M, op)
             )
         end
 
-        function $M.$op(dx::D, y::Number) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
+        function $M.$op(dx::D, y::Real) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
             x = $SCT.primal(dx)
             p_out = $M.$op(x, y)
             t_out = $SCT.hessian_tracer_1_to_1(
@@ -129,7 +129,7 @@ function overload_hessian_2_to_1(M, op)
             )
             return $SCT.Dual(p_out, t_out)
         end
-        function $M.$op(x::Number, dy::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
+        function $M.$op(x::Real, dy::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
             y = $SCT.primal(dy)
             p_out = $M.$op(x, y)
             t_out = $SCT.hessian_tracer_1_to_1(
@@ -187,7 +187,7 @@ end
 ## Special cases
 
 ## Exponent (requires extra types)
-for S in (Real, Integer, Rational, Irrational{:ℯ})
+for S in (Integer, Rational, Irrational{:ℯ})
     function Base.:^(tx::T, y::S) where {T<:HessianTracer}
         return T(gradient(tx), hessian(tx) ∪ (gradient(tx) × gradient(tx)))
     end

@@ -69,12 +69,12 @@ function overload_gradient_2_to_1(M, op)
             return $SCT.Dual(p_out, t_out)
         end
 
-        function $M.$op(tx::$SCT.GradientTracer, ::Number)
+        function $M.$op(tx::$SCT.GradientTracer, ::Real)
             return $SCT.gradient_tracer_1_to_1(
                 tx, $SCT.is_firstder_arg1_zero_global($M.$op)
             )
         end
-        function $M.$op(dx::D, y::Number) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+        function $M.$op(dx::D, y::Real) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
             x = $SCT.primal(dx)
             p_out = $M.$op(x, y)
             t_out = $SCT.gradient_tracer_1_to_1(
@@ -83,12 +83,12 @@ function overload_gradient_2_to_1(M, op)
             return $SCT.Dual(p_out, t_out)
         end
 
-        function $M.$op(::Number, ty::$SCT.GradientTracer)
+        function $M.$op(::Real, ty::$SCT.GradientTracer)
             return $SCT.gradient_tracer_1_to_1(
                 ty, $SCT.is_firstder_arg2_zero_global($M.$op)
             )
         end
-        function $M.$op(x::Number, dy::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+        function $M.$op(x::Real, dy::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
             y = $SCT.primal(dy)
             p_out = $M.$op(x, y)
             t_out = $SCT.gradient_tracer_1_to_1(
@@ -136,8 +136,7 @@ end
 ## Special cases
 
 ## Exponent (requires extra types)
-
-for S in (Real, Integer, Rational, Irrational{:ℯ})
+for S in (Integer, Rational, Irrational{:ℯ})
     Base.:^(t::GradientTracer, ::S) = t
     Base.:^(::S, t::GradientTracer) = t
 

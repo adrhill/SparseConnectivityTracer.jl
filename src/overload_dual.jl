@@ -22,6 +22,6 @@ end
 
 for fn in (:isequal, :isapprox, :isless, :(==), :(<), :(>), :(<=), :(>=))
     @eval Base.$fn(dx::D, dy::D) where {D<:Dual} = $fn(primal(dx), primal(dy))
-    @eval Base.$fn(dx::D, y::Number) where {D<:Dual} = $fn(primal(dx), y)
-    @eval Base.$fn(x::Number, dy::D) where {D<:Dual} = $fn(x, primal(dy))
+    @eval Base.$fn(dx::D, y::Real) where {D<:Dual} = $fn(primal(dx), y)
+    @eval Base.$fn(x::Real, dy::D) where {D<:Dual} = $fn(x, primal(dy))
 end

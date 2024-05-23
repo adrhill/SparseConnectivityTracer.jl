@@ -54,7 +54,7 @@ local_hessian_pattern
 !!! warning
     Internals may change without warning in a future release of SparseConnectivityTracer.
 
-SparseConnectivityTracer works by pushing `Number` types called tracers through generic functions.
+SparseConnectivityTracer works by pushing `Real` number types called tracers through generic functions.
 Currently, three tracer types are provided:
 
 ```@docs
