@@ -32,8 +32,8 @@ end
 for fn in (:isequal, :isapprox, :isless, :(==), :(<), :(>), :(<=), :(>=))
     @eval Base.$fn(tx::C, ty::C) where {C<:ConnectivityTracer} = C(inputs(tx) ∪ inputs(ty))
     @eval Base.$fn(tx::G, ty::G) where {G<:GradientTracer} = G(gradient(tx) ∪ gradient(ty))
-    @eval function Base.$fn(tx::H, ty::H) where {H<:HessianTracer}
-        return H(gradient(tx) ∪ gradient(ty), hessian(tx) ∪ hessian(ty))
+    @eval function Base.$fn(tx::T, ty::T) where {G,H,T<:HessianTracer{G,H}}
+        return T(gradient(tx) ∪ gradient(ty), empty(H))
     end
 
     @eval Base.$fn(tx::T, y::Real) where {T<:SimpleTracer} = tx
