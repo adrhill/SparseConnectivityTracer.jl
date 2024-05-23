@@ -201,7 +201,7 @@ struct Dual{P<:Real,T<:AbstractTracer} <: Real
     tracer::T
 
     function Dual{P,T}(primal::P, tracer::T) where {P<:Number,T<:AbstractTracer}
-        if P <: AbstractTracer
+        if P <: AbstractTracer || P <: Dual
             error("Primal value of Dual tracer can't be an AbstractTracer.")
         end
         return new{P,T}(primal, tracer)
