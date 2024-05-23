@@ -154,6 +154,12 @@ const SECOND_ORDER_SET_TYPES = (
             0  0  1  0
         ]
 
+        # Error handling when applying non-dual tracers to "local" functions with control flow
+        # TypeError: non-boolean (SparseConnectivityTracer.GradientTracer{BitSet}) used in boolean context
+        @test_throws TypeError hessian_sparsity(
+            x -> x[1] > x[2] ? x[1]^x[2] : x[3] * x[4], rand(4), method
+        )
+
         function f_ampgo07(x)
             return (x[1] <= 0) * convert(eltype(x), Inf) +
                    sin(x[1]) +

@@ -95,11 +95,16 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
             @test jacobian_sparsity(f, 1, method) ≈ [1;;]
         end
 
+        # ifelse
+        @test jacobian_sparsity(
+            x -> ifelse(x[2] < x[3], x[1] + x[2], x[3] * x[4]), [1 2 3 4], method
+        ) == [1 1 1 1]
+
         ## Error handling when applying non-dual tracers to "local" functions with control flow
         # TypeError: non-boolean (SparseConnectivityTracer.GradientTracer{BitSet}) used in boolean context
         @test_throws TypeError jacobian_sparsity(
             x -> x[1] > x[2] ? x[3] : x[4], [1.0, 2.0, 3.0, 4.0], method
-        ) == [0 0 0 1;]
+        ) == [0 0 1 1;]
     end
 end
 
