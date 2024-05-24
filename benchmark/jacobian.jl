@@ -7,11 +7,11 @@ using SparseArrays: sprand
 using SimpleDiffEq: ODEProblem, solve, SimpleEuler
 using Flux: Conv
 
-function jacbench(::Type{S}) where {S}
+function jacbench(method)
     suite = BenchmarkGroup()
-    suite["SparseMul"] = jacbench_sparsemul(S)
-    suite["Brusselator"] = jacbench_brusselator(S)
-    suite["Conv"] = jacbench_conv(S)
+    suite["SparseMul"] = jacbench_sparsemul(method)
+    suite["Brusselator"] = jacbench_brusselator(method)
+    suite["Conv"] = jacbench_conv(method)
     return suite
 end
 
@@ -27,7 +27,7 @@ function IteratedSparseMul(; n::Integer, p::Real=0.1, depth::Integer=5)
 end
 
 function (ism::IteratedSparseMul)(x::AbstractVector)
-    @assert length(x) == size(As[1], 1)
+    @assert length(x) == size(ism.As[1], 1)
     y = copy(x)
     for l in eachindex(ism.As)
         y = ism.As[l] * y
@@ -35,8 +35,7 @@ function (ism::IteratedSparseMul)(x::AbstractVector)
     return y
 end
 
-function jacbench_sparsemul(::Type{S}) where {S}
-    method = TracerSparsityDetector(S)
+function jacbench_sparsemul(method)
     suite = BenchmarkGroup()
     for n in [50], p in [0.01, 0.05, 0.1, 0.25], depth in [5]
         x = rand(n)
@@ -52,8 +51,7 @@ end
 
 include("../test/brusselator_definition.jl")
 
-function jacbench_brusselator(::Type{S}) where {S}
-    method = TracerSparsityDetector(S)
+function jacbench_brusselator(method)
     suite = BenchmarkGroup()
     for N in (6, 24, 100)
         f! = Brusselator!(N)
@@ -74,9 +72,8 @@ end
 
 ## Convolution
 
-function jacbench_conv(::Type{S}) where {S}
+function jacbench_conv(method)
     # TODO: benchmark local sparsity tracers on LeNet-5 CNN
-    method = TracerSparsityDetector(S)
     layer = Conv((5, 5), 3 => 2)
     suite = BenchmarkGroup()
     for N in (28, 128)
