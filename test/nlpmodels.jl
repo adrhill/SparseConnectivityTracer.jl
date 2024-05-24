@@ -19,16 +19,25 @@ function mycons(nlp, x)
     return c
 end
 
+function mylag(nlp, x)
+    o = obj(nlp, x)
+    c = mycons(nlp, x)
+    λ = randn(length(c))
+    return o + dot(λ, c)
+end
+
 function jac_sparsity_sct(name::Symbol)
     nlp = OptimizationProblems.ADNLPProblems.eval(name)()
-    f(x) = mycons(nlp, x)
-    return ADTypes.jacobian_sparsity(f, nlp.meta.x0, TracerSparsityDetector())
+    f = Base.Fix1(mycons, nlp)
+    x = nlp.meta.x0
+    return ADTypes.jacobian_sparsity(f, x, TracerSparsityDetector())
 end
 
 function hess_sparsity_sct(name::Symbol)
     nlp = OptimizationProblems.ADNLPProblems.eval(name)()
-    f(x) = obj(nlp, x) + sum(mycons(nlp, x))
-    return ADTypes.hessian_sparsity(f, nlp.meta.x0, TracerSparsityDetector())
+    f = Base.Fix1(mylag, nlp)
+    x = nlp.meta.x0
+    return ADTypes.hessian_sparsity(f, x, TracerSparsityDetector())
 end
 
 function jac_sparsity_ref(name::Symbol)
@@ -54,8 +63,8 @@ end
 @testset verbose = true "Jacobian comparison" begin
     @testset "$name" for name in Symbol.(OptimizationProblems.meta[!, :name])
         @info "Testing Jacobian sparsity for $name"
-        J_sct = @time jac_sparsity_sct(name)
-        J_ref = jac_sparsity_ref(name)
+        J_sct = @time "SCT" jac_sparsity_sct(name)
+        J_ref = @time "JuMP" jac_sparsity_ref(name)
         if name == :lincon
             # we have two more nonzeros but their stored values are 0.0 in the Hessian
             @test_broken J_sct == J_ref
@@ -69,13 +78,13 @@ end;
     @testset "$name" for name in Symbol.(OptimizationProblems.meta[!, :name])
         @info "Testing Hessian sparsity for $name"
         if startswith(string(name), "tetra_")
-        #     # TODO: investigate
+            #     # TODO: investigate
             @warn "Skipping $name because it takes too long"
             @test_broken false
             continue
         end
-        H_sct = @time hess_sparsity_sct(name)
-        H_ref = hess_sparsity_ref(name)
+        H_sct = @time "SCT" hess_sparsity_sct(name)
+        H_ref = @time "JuMP" hess_sparsity_ref(name)
         H_diff = H_ref - H_sct
         # usually the difference is on the diagonal and ref has more nonzeros than SCT
         if name in (:britgas, :channel, :hs114, :marine)
