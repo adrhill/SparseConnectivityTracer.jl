@@ -211,7 +211,7 @@ end
         @test hessian_sparsity(x -> 0, 1, method) ≈ [0;;]
 
         # Putting Duals into Duals is prohibited
-        H = empty(HessianTracer{S,Set{Tuple{Int,Int}}})
+        H = myempty(HessianTracer{S,Set{Tuple{Int,Int}}})
         D1 = Dual(1.0, H)
         @test_throws ErrorException D2 = Dual(D1, H)
     end

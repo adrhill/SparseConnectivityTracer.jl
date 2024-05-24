@@ -161,7 +161,7 @@ end
         @test jacobian_sparsity(NNlib.softshrink, 1, method) ≈ [1;;]
 
         # Putting Duals into Duals is prohibited
-        G = empty(GradientTracer{S})
+        G = myempty(GradientTracer{S})
         D1 = Dual(1.0, G)
         @test_throws ErrorException D2 = Dual(D1, G)
     end
