@@ -1,6 +1,9 @@
-function Base.ifelse(::T, x, y) where {T<:AbstractTracer}
-    size(x) != size(y) &&
-        throw(DimensionMismatch("Outputs sizes of `ifelse` arguments don't match in size."))
+function Base.ifelse(::AbstractTracer, x, y)
+    size(x) != size(y) && throw(
+        DimensionMismatch(
+            "Output sizes of x and y in `ifelse(condition, x, y)` don't match in size."
+        ),
+    )
     return output_union(x, y)
 end
 
@@ -11,8 +14,8 @@ function output_union(tx::H, ty::H) where {H<:HessianTracer}
     return H(gradient(tx) ∪ gradient(ty), hessian(tx) ∪ hessian(ty))
 end
 
-output_union(tx::T, y) where {T<:AbstractTracer} = tx
-output_union(x, ty::T) where {T<:AbstractTracer} = ty
+output_union(tx::AbstractTracer, y) = tx
+output_union(x, ty::AbstractTracer) = ty
 
 ## output union on AbstractArray outputs
 function output_union(tx::AbstractArray{T}, ty::AbstractArray{T}) where {T<:AbstractTracer}
