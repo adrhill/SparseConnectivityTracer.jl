@@ -13,6 +13,7 @@ for TT in (GradientTracer, ConnectivityTracer, HessianTracer)
     Base.convert(::Type{<:Real}, t::T) where {T<:TT} = t
 
     ## Constants
+    # These are methods defined on types. Methods on variables are in operators.jl 
     Base.zero(::Type{T})        where {T<:TT} = myempty(T)
     Base.one(::Type{T})         where {T<:TT} = myempty(T)
     Base.oneunit(::Type{T})     where {T<:TT} = myempty(T)
@@ -63,13 +64,13 @@ function Base.convert(::Type{Dual{P1,T}}, d::Dual{P2,T}) where {P1,P2,T}
 end
 
 ## Constants
+# These are methods defined on types. Methods on variables are in operators.jl 
 Base.zero(::Type{D})        where {P,T,D<:Dual{P,T}} = D(zero(P),        myempty(T))
 Base.one(::Type{D})         where {P,T,D<:Dual{P,T}} = D(one(P),         myempty(T))
 Base.oneunit(::Type{D})     where {P,T,D<:Dual{P,T}} = D(oneunit(P),     myempty(T))
 Base.typemin(::Type{D})     where {P,T,D<:Dual{P,T}} = D(typemin(P),     myempty(T))
 Base.typemax(::Type{D})     where {P,T,D<:Dual{P,T}} = D(typemax(P),     myempty(T))
 Base.eps(::Type{D})         where {P,T,D<:Dual{P,T}} = D(eps(P),         myempty(T))
-Base.float(::Type{D})       where {P,T,D<:Dual{P,T}} = D(float(P),       myempty(T))
 Base.floatmin(::Type{D})    where {P,T,D<:Dual{P,T}} = D(floatmin(P),    myempty(T))
 Base.floatmax(::Type{D})    where {P,T,D<:Dual{P,T}} = D(floatmax(P),    myempty(T))
 Base.maxintfloat(::Type{D}) where {P,T,D<:Dual{P,T}} = D(maxintfloat(P), myempty(T))
