@@ -215,6 +215,7 @@ Dual(primal::P, tracer::T) where {P,T} = Dual{P,T}(primal, tracer)
 # TODO: support ConnectivityTracer
 
 primal(d::Dual) = d.primal
+primal(p::Real) = p  # TODO: should this be needed?
 tracer(d::Dual) = d.tracer
 
 inputs(d::Dual{P,T}) where {P,T<:ConnectivityTracer} = inputs(d.tracer)
