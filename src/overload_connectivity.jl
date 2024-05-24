@@ -4,7 +4,7 @@ function connectivity_tracer_1_to_1(
     t::T, is_influence_zero::Bool
 ) where {T<:ConnectivityTracer}
     if is_influence_zero
-        return empty(T)
+        return myempty(T)
     else
         return t
     end
@@ -34,7 +34,7 @@ function connectivity_tracer_2_to_1(
 ) where {T<:ConnectivityTracer}
     if is_influence_arg1_zero
         if is_influence_arg2_zero
-            return empty(T)
+            return myempty(T)
         else
             return ty
         end
@@ -158,4 +158,4 @@ end
 Base.round(t::ConnectivityTracer, ::RoundingMode; kwargs...) = t
 
 ## Random numbers
-Base.rand(::AbstractRNG, ::SamplerType{T}) where {T<:ConnectivityTracer} = empty(T)  # TODO: was missing Base, add tests
+Base.rand(::AbstractRNG, ::SamplerType{T}) where {T<:ConnectivityTracer} = myempty(T)  # TODO: was missing Base, add tests
