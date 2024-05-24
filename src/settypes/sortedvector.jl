@@ -3,7 +3,7 @@
 
 Sorted vector without duplicates, designed for fast set unions with merging.
 """
-struct SortedVector{T<:Number} <: AbstractSet{T}
+struct SortedVector{T} <: AbstractSet{T}
     data::Vector{T}
 
     function SortedVector{T}(data::AbstractVector; sorted=false) where {T}
@@ -15,7 +15,7 @@ struct SortedVector{T<:Number} <: AbstractSet{T}
         return new{T}(convert(Vector{T}, sorted_data))
     end
 
-    function SortedVector{T}(x::Number) where {T}
+    function SortedVector{T}(x) where {T}
         return new{T}([convert(T, x)])
     end
 
@@ -34,9 +34,8 @@ Base.getindex(v::SortedVector, i) = v.data[i]
 Base.IndexStyle(::Type{SortedVector{T}}) where {T} = IndexStyle(Vector{T})
 Base.show(io::IO, v::SortedVector) = print(io, "SortedVector($(v.data))")
 
-function Base.union(v1::SortedVector{T}, v2::SortedVector{T}) where {T}
-    left, right = v1.data, v2.data
-    result = similar(left, length(left) + length(right))
+function Base.union!(v::SortedVector{T}, v1::SortedVector{T}, v2::SortedVector{T}) where {T}
+    result, left, right = v.data, v1.data, v2.data
     left_index, right_index, result_index = 1, 1, 1
     # common part of left and right
     @inbounds while (
@@ -66,7 +65,14 @@ function Base.union(v1::SortedVector{T}, v2::SortedVector{T}) where {T}
         result_index += 1
     end
     resize!(result, result_index - 1)
-    return SortedVector{T}(result; sorted=true)
+    return result
+end
+
+function Base.union(v1::SortedVector{T}, v2::SortedVector{T}) where {T}
+    result = similar(v1.data, length(v1) + length(v2))
+    v = SortedVector{T}(result; sorted=false)
+    union!(v, v1, v2)
+    return v
 end
 
 Base.iterate(v::SortedVector)             = iterate(v.data)

@@ -3,16 +3,16 @@
 
 Lazy union of sets.
 """
-struct RecursiveSet{T<:Number} <: AbstractSet{T}
+struct RecursiveSet{T} <: AbstractSet{T}
     s::Union{Nothing,Set{T}}
     child1::Union{Nothing,RecursiveSet{T}}
     child2::Union{Nothing,RecursiveSet{T}}
 
-    function RecursiveSet{T}(s) where {T}
+    function RecursiveSet{T}(s::Union{AbstractSet,AbstractVector}) where {T}
         return new{T}(Set{T}(s), nothing, nothing)
     end
 
-    function RecursiveSet{T}(x::Number) where {T}
+    function RecursiveSet{T}(x) where {T}
         return new{T}(Set{T}(convert(T, x)), nothing, nothing)
     end
 

@@ -6,8 +6,12 @@ using ADTypes: hessian_sparsity
 using SpecialFunctions: erf, beta
 using Test
 
-const SECOND_ORDER_SET_TYPES = (
-    BitSet, Set{UInt64}, DuplicateVector{UInt64}, RecursiveSet{UInt64}, SortedVector{UInt64}
+SECOND_ORDER_SET_TYPE_TUPLES = (
+    (BitSet, Set{Tuple{Int,Int}}),  #
+    (Set{UInt64}, Set{Tuple{UInt64,UInt64}}),
+    (DuplicateVector{UInt64}, DuplicateVector{Tuple{UInt64,UInt64}}),
+    (RecursiveSet{UInt64}, RecursiveSet{Tuple{UInt64,UInt64}}),
+    (SortedVector{UInt64}, SortedVector{Tuple{UInt64,UInt64}}),
 )
 
 @testset "Global Hessian" begin
@@ -21,10 +25,8 @@ const SECOND_ORDER_SET_TYPES = (
         ]
     end
 
-    @testset "Set type $S" for S in SECOND_ORDER_SET_TYPES
-        I = eltype(S)
-        H = Set{Tuple{I,I}}
-        method = TracerSparsityDetector(S, H)
+    @testset "Set type $((G,H))" for (G, H) in SECOND_ORDER_SET_TYPE_TUPLES
+        method = TracerSparsityDetector(G, H)
 
         @test hessian_sparsity(identity, rand(), method) ≈ [0;;]
         @test hessian_sparsity(sqrt, rand(), method) ≈ [1;;]
@@ -163,10 +165,8 @@ const SECOND_ORDER_SET_TYPES = (
 end
 
 @testset "Local Hessian" begin
-    @testset "Set type $S" for S in SECOND_ORDER_SET_TYPES
-        I = eltype(S)
-        H = Set{Tuple{I,I}}
-        method = TracerLocalSparsityDetector(S, H)
+    @testset "Set type $((G, H))" for (G, H) in SECOND_ORDER_SET_TYPE_TUPLES
+        method = TracerLocalSparsityDetector(G, H)
 
         f1(x) = x[1] + x[2] * x[3] + 1 / x[4] + x[2] * max(x[1], x[5])
         h = hessian_sparsity(f1, [1.0 3.0 5.0 1.0 2.0], method)
