@@ -144,6 +144,31 @@ const SECOND_ORDER_SET_TYPES = (
             0 1 0 0 1
         ]
 
+        # ifelse and comparisons
+        if VERSION >= v"1.8"
+            h = hessian_sparsity(x -> ifelse(x[1], x[1]^x[2], x[3] * x[4]), rand(4), method)
+            @test h == [
+                1  1  0  0
+                1  1  0  0
+                0  0  0  1
+                0  0  1  0
+            ]
+        end
+
+        function f_ampgo07(x)
+            return (x[1] <= 0) * convert(eltype(x), Inf) +
+                   sin(x[1]) +
+                   sin(10//3 * x[1]) +
+                   log(abs(x[1])) - 84//100 * x[1] + 3
+        end
+        @test hessian_sparsity(f_ampgo07, [1.0], method) ≈ [1;;]
+
+        # Error handling when applying non-dual tracers to "local" functions with control flow
+        # TypeError: non-boolean (SparseConnectivityTracer.GradientTracer{BitSet}) used in boolean context
+        @test_throws TypeError hessian_sparsity(
+            x -> x[1] > x[2] ? x[1]^x[2] : x[3] * x[4], rand(4), method
+        )
+
         # SpecialFunctions
         @test hessian_sparsity(x -> erf(x[1]), rand(2), method) == [
             1 0
@@ -154,10 +179,6 @@ const SECOND_ORDER_SET_TYPES = (
             1 1 0
             0 0 0
         ]
-
-        ## Error handling when applying non-dual tracers to "local" functions with control flow
-        f2(x) = ifelse(x[2] < x[3], x[1] * x[2], x[3] * x[4])
-        @test_throws MissingPrimalError hessian_sparsity(f2, [1 3 2 4], method)
     end
 end
 

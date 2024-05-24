@@ -13,12 +13,12 @@ const DEFAULT_MATRIX_TYPE = Set{Tuple{Int,Int}}
 Enumerates input indices and constructs the specified type `T` of tracer.
 Supports [`ConnectivityTracer`](@ref), [`GradientTracer`](@ref) and [`HessianTracer`](@ref).
 """
-trace_input(::Type{T}, x) where {T<:AbstractTracer} = trace_input(T, x, 1)
+trace_input(::Type{T}, x) where {T<:Union{AbstractTracer,Dual}} = trace_input(T, x, 1)
 
-function trace_input(::Type{T}, x::Real, i::Integer) where {T<:AbstractTracer}
+function trace_input(::Type{T}, x::Real, i::Integer) where {T<:Union{AbstractTracer,Dual}}
     return create_tracer(T, x, i)
 end
-function trace_input(::Type{T}, xs::AbstractArray, i) where {T<:AbstractTracer}
+function trace_input(::Type{T}, xs::AbstractArray, i) where {T<:Union{AbstractTracer,Dual}}
     indices = reshape(1:length(xs), size(xs)) .+ (i - 1)
     return create_tracer.(T, xs, indices)
 end
@@ -27,13 +27,13 @@ end
 # Trace through functions #
 #=========================#
 
-function trace_function(::Type{T}, f, x) where {T<:AbstractTracer}
+function trace_function(::Type{T}, f, x) where {T<:Union{AbstractTracer,Dual}}
     xt = trace_input(T, x)
     yt = f(xt)
     return xt, yt
 end
 
-function trace_function(::Type{T}, f!, y, x) where {T<:AbstractTracer}
+function trace_function(::Type{T}, f!, y, x) where {T<:Union{AbstractTracer,Dual}}
     xt = trace_input(T, x)
     yt = similar(y, T)
     f!(yt, xt)
