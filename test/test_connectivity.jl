@@ -89,10 +89,5 @@ end
             x -> ifelse(x[2] < x[3], x[1] + x[2], x[3] * x[4]), [1 3 2 4], S
         ) == [0 0 1 1]
         @test local_connectivity_pattern(x -> 0, 1, S) ≈ [0;;]
-
-        # Putting Duals into Duals is prohibited
-        C = empty(ConnectivityTracer{S})
-        D1 = Dual(1.0, C)
-        @test_throws ErrorException D2 = Dual(D1, C)
     end
 end

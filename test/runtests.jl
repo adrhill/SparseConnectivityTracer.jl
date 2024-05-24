@@ -61,6 +61,9 @@ DocMeta.setdocmeta!(
     end
 
     @testset verbose = true "Simple examples" begin
+        @testset "Tracer Construction" begin
+            include("test_connectivity.jl")
+        end
         @testset "ConnectivityTracer" begin
             include("test_connectivity.jl")
         end
