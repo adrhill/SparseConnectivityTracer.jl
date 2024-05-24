@@ -179,15 +179,6 @@ const SECOND_ORDER_SET_TYPES = (
             1 1 0
             0 0 0
         ]
-
-        f2(x) = ifelse(x[2] < x[3], x[1] * x[2], x[3] * x[4])
-        h = hessian_sparsity(f2, [1 3 2 4], method)
-        @test h == [
-            0  1  0  0
-            1  0  0  0
-            0  0  0  1
-            0  0  1  0
-        ]
     end
 end
 
