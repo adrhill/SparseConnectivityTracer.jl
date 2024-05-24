@@ -21,10 +21,10 @@ const SECOND_ORDER_SET_TYPES = (
         ]
     end
 
-    @testset "Set type $G" for G in SECOND_ORDER_SET_TYPES
-        I = eltype(G)
+    @testset "Set type $S" for S in SECOND_ORDER_SET_TYPES
+        I = eltype(S)
         H = Set{Tuple{I,I}}
-        method = TracerSparsityDetector(G, H)
+        method = TracerSparsityDetector(S, H)
 
         @test hessian_sparsity(identity, rand(), method) ≈ [0;;]
         @test hessian_sparsity(sqrt, rand(), method) ≈ [1;;]
@@ -145,6 +145,29 @@ const SECOND_ORDER_SET_TYPES = (
             0 1 0 0 1
         ]
 
+        # ifelse
+        h = hessian_sparsity(x -> ifelse(x[1], x[1]^x[2], x[3] * x[4]), rand(4), method)
+        @test h == [
+            1  1  0  0
+            1  1  0  0
+            0  0  0  1
+            0  0  1  0
+        ]
+
+        # Error handling when applying non-dual tracers to "local" functions with control flow
+        # TypeError: non-boolean (SparseConnectivityTracer.GradientTracer{BitSet}) used in boolean context
+        @test_throws TypeError hessian_sparsity(
+            x -> x[1] > x[2] ? x[1]^x[2] : x[3] * x[4], rand(4), method
+        )
+
+        function f_ampgo07(x)
+            return (x[1] <= 0) * convert(eltype(x), Inf) +
+                   sin(x[1]) +
+                   sin(10//3 * x[1]) +
+                   log(abs(x[1])) - 84//100 * x[1] + 3
+        end
+        @test hessian_sparsity(f_ampgo07, [1.0], method) ≈ [1;;]
+
         # SpecialFunctions
         @test hessian_sparsity(x -> erf(x[1]), rand(2), method) == [
             1 0
@@ -156,17 +179,22 @@ const SECOND_ORDER_SET_TYPES = (
             0 0 0
         ]
 
-        ## Error handling when applying non-dual tracers to "local" functions with control flow
         f2(x) = ifelse(x[2] < x[3], x[1] * x[2], x[3] * x[4])
-        @test_throws MissingPrimalError hessian_sparsity(f2, [1 3 2 4], method)
+        h = hessian_sparsity(f2, [1 3 2 4], method)
+        @test h == [
+            0  1  0  0
+            1  0  0  0
+            0  0  0  1
+            0  0  1  0
+        ]
     end
 end
 
 @testset "Local Hessian" begin
-    @testset "Set type $G" for G in SECOND_ORDER_SET_TYPES
-        I = eltype(G)
+    @testset "Set type $S" for S in SECOND_ORDER_SET_TYPES
+        I = eltype(S)
         H = Set{Tuple{I,I}}
-        method = TracerLocalSparsityDetector(G, H)
+        method = TracerLocalSparsityDetector(S, H)
 
         f1(x) = x[1] + x[2] * x[3] + 1 / x[4] + x[2] * max(x[1], x[5])
         h = hessian_sparsity(f1, [1.0 3.0 5.0 1.0 2.0], method)
@@ -209,5 +237,10 @@ end
         @test hessian_sparsity(x -> x^ℯ, 1, method) ≈ [1;;]
         @test hessian_sparsity(x -> ℯ^x, 1, method) ≈ [1;;]
         @test hessian_sparsity(x -> 0, 1, method) ≈ [0;;]
+
+        # Putting Duals into Duals is prohibited
+        H = empty(HessianTracer{S,Set{Tuple{Int,Int}}})
+        D1 = Dual(1.0, H)
+        @test_throws ErrorException D2 = Dual(D1, H)
     end
 end
