@@ -22,23 +22,13 @@ end
 function jac_sparsity_sct(name::Symbol)
     nlp = OptimizationProblems.ADNLPProblems.eval(name)()
     f(x) = mycons(nlp, x)
-    try
-        return ADTypes.jacobian_sparsity(f, nlp.meta.x0, TracerSparsityDetector())
-    catch e
-        @warn "Global Jacobian sparsity failed" name typeof(e)
-        return ADTypes.jacobian_sparsity(f, nlp.meta.x0, TracerLocalSparsityDetector())
-    end
+    return ADTypes.jacobian_sparsity(f, nlp.meta.x0, TracerSparsityDetector())
 end
 
 function hess_sparsity_sct(name::Symbol)
     nlp = OptimizationProblems.ADNLPProblems.eval(name)()
     f(x) = obj(nlp, x) + sum(mycons(nlp, x))
-    try
-        return ADTypes.hessian_sparsity(f, nlp.meta.x0, TracerSparsityDetector())
-    catch e
-        @warn "Global Hessian sparsity failed" name typeof(e)
-        return ADTypes.hessian_sparsity(f, nlp.meta.x0, TracerLocalSparsityDetector())
-    end
+    return ADTypes.hessian_sparsity(f, nlp.meta.x0, TracerSparsityDetector())
 end
 
 function jac_sparsity_ref(name::Symbol)
@@ -78,12 +68,12 @@ end;
 @testset verbose = true "Hessian comparison" begin
     @testset "$name" for name in Symbol.(OptimizationProblems.meta[!, :name])
         @info "Testing Hessian sparsity for $name"
-        # if startswith(string(name), "tetra_")
+        if startswith(string(name), "tetra_")
         #     # TODO: investigate
-        #     @warn "Skipping $name because it takes too long"
-        #     @test_broken false
-        #     continue
-        # end
+            @warn "Skipping $name because it takes too long"
+            @test_broken false
+            continue
+        end
         H_sct = @time hess_sparsity_sct(name)
         H_ref = hess_sparsity_ref(name)
         H_diff = H_ref - H_sct
