@@ -1,17 +1,17 @@
-using Pkg
-# TODO: remove once a new release > 0.7.3 has been tagged
-Pkg.add(; url="https://github.com/JuliaSmoothOptimizers/OptimizationProblems.jl")
-
-using ADNLPModels
 using ADTypes: ADTypes
 using LinearAlgebra
-using NLPModels
-using NLPModelsJuMP
-using OptimizationProblems
 using SparseArrays
 using SparseConnectivityTracer
 import SparseConnectivityTracer as SCT
 using Test
+
+using Pkg
+Pkg.add(["ADNLPModels", "OptimizationProblems", "NLPModels", "NLPModelsJuMP"])
+
+using ADNLPModels
+using NLPModels
+using NLPModelsJuMP
+using OptimizationProblems
 
 function mycons(nlp, x)
     c = similar(x, nlp.meta.ncon)
