@@ -10,7 +10,11 @@ sparse_vector(T, index) = T([index])
 # Elementwise OR #
 #================#
 
-×(a::G, b::G) where {G<:AbstractSet} = Set((i, j) for i in a, j in b)
+function ×(::Type{H}, a::G, b::G) where {I,G<:AbstractSet{I},H<:AbstractSet{Tuple{I,I}}}
+    return H((i, j) for i in a, j in b)
+end
+
+×(a::G, b::G) where {I,G<:AbstractSet{I}} = ×(Set{Tuple{I,I}}, a, b)
 
 #====================#
 # ConnectivityTracer #

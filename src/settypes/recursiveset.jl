@@ -37,7 +37,11 @@ function print_recursiveset(io::IO, rs::RecursiveSet{T}; offset) where {T}
     end
 end
 
-function Base.show(io::IO, rs::RecursiveSet{T}) where {T}
+function Base.show(io::IO, rs::RecursiveSet)
+    return print_recursiveset(io, rs; offset=0)
+end
+
+function Base.show(io::IO, ::MIME"text/plain", rs::RecursiveSet)
     return print_recursiveset(io, rs; offset=0)
 end
 
@@ -66,6 +70,13 @@ end
 Base.iterate(rs::RecursiveSet)             = iterate(collect(rs))
 Base.iterate(rs::RecursiveSet, i::Integer) = iterate(collect(rs), i)
 
-# TODO: required by `Base.Iterators.ProductIterator` called in method `×` in src/tracers.jl.
-# This is very slow and should be replaced by a custom `×` on `RecursiveSet`s.
-Base.length(rs::RecursiveSet) = length(collect(rs))
+function ×(
+    ::Type{RecursiveSet{Tuple{T,T}}}, a::RecursiveSet{T}, b::RecursiveSet{T}
+) where {T}
+    # TODO: slow
+    return RecursiveSet{Tuple{T,T}}(vec(collect(Iterators.product(collect(a), collect(b)))))
+end
+
+function ×(a::RecursiveSet{T}, b::RecursiveSet{T}) where {T}
+    return ×(RecursiveSet{Tuple{T,T}}, a, b)
+end

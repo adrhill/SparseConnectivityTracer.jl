@@ -45,6 +45,12 @@ DocMeta.setdocmeta!(
     end
 
     @testset verbose = true "Set types" begin
+        @testset "BitSet" begin
+            include("settypes/bitset.jl")
+        end
+        @testset "Set" begin
+            include("settypes/set.jl")
+        end
         @testset "DuplicateVector" begin
             include("settypes/duplicatevector.jl")
         end

@@ -11,9 +11,9 @@ function hessian_tracer_1_to_1(
         end
     else
         if is_firstder_zero
-            return T(empty(G), gradient(t) × gradient(t))
+            return T(empty(G), ×(H, gradient(t), gradient(t)))
         else
-            return T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))
+            return T(gradient(t), hessian(t) ∪ ×(H, gradient(t), gradient(t)))
         end
     end
 end
@@ -63,13 +63,14 @@ function hessian_tracer_2_to_1(
         union!(hess, hessian(b))
     end
     if !is_seconder_arg1_zero
-        union!(hess, gradient(a) × gradient(a))
+        union!(hess, ×(H, gradient(a), gradient(a)))
     end
     if !is_seconder_arg2_zero
-        union!(hess, gradient(b) × gradient(b))
+        union!(hess, ×(H, gradient(b), gradient(b)))
     end
     if !is_crossder_zero
-        union!(hess, (gradient(a) × gradient(b)) ∪ (gradient(b) × gradient(a)))
+        union!(hess, ×(H, gradient(a), gradient(b)))
+        union!(hess, ×(H, gradient(b), gradient(a)))
     end
     return T(grad, hess)
 end
@@ -188,21 +189,43 @@ end
 
 ## Exponent (requires extra types)
 for S in (Integer, Rational, Irrational{:ℯ})
-    function Base.:^(tx::T, y::S) where {T<:HessianTracer}
-        return T(gradient(tx), hessian(tx) ∪ (gradient(tx) × gradient(tx)))
+    function Base.:^(
+        tx::T, y::S
+    ) where {I<:Integer,G<:AbstractSet{I},H<:AbstractSet{Tuple{I,I}},T<:HessianTracer{G,H}}
+        return T(gradient(tx), hessian(tx) ∪ ×(H, gradient(tx), gradient(tx)))
     end
-    function Base.:^(x::S, ty::T) where {T<:HessianTracer}
-        return T(gradient(ty), hessian(ty) ∪ (gradient(ty) × gradient(ty)))
+    function Base.:^(
+        x::S, ty::T
+    ) where {I<:Integer,G<:AbstractSet{I},H<:AbstractSet{Tuple{I,I}},T<:HessianTracer{G,H}}
+        return T(gradient(ty), hessian(ty) ∪ ×(H, gradient(ty), gradient(ty)))
     end
 
-    function Base.:^(dx::D, y::S) where {P,T<:HessianTracer,D<:Dual{P,T}}
+    function Base.:^(
+        dx::D, y::S
+    ) where {
+        P,
+        I<:Integer,
+        G<:AbstractSet{I},
+        H<:AbstractSet{Tuple{I,I}},
+        T<:HessianTracer{G,H},
+        D<:Dual{P,T},
+    }
         return Dual(
-            primal(dx)^y, T(gradient(dx), hessian(dx) ∪ (gradient(dx) × gradient(dx)))
+            primal(dx)^y, T(gradient(dx), hessian(dx) ∪ ×(H, gradient(dx), gradient(dx)))
         )
     end
-    function Base.:^(x::S, dy::D) where {P,T<:HessianTracer,D<:Dual{P,T}}
+    function Base.:^(
+        x::S, dy::D
+    ) where {
+        P,
+        I<:Integer,
+        G<:AbstractSet{I},
+        H<:AbstractSet{Tuple{I,I}},
+        T<:HessianTracer{G,H},
+        D<:Dual{P,T},
+    }
         return Dual(
-            x^primal(dy), T(gradient(dy), hessian(dy) ∪ (gradient(dy) × gradient(dy)))
+            x^primal(dy), T(gradient(dy), hessian(dy) ∪ ×(H, gradient(dy), gradient(dy)))
         )
     end
 end

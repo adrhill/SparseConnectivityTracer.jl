@@ -68,6 +68,12 @@ function Base.union!(v::SortedVector{T}, v1::SortedVector{T}, v2::SortedVector{T
     return result
 end
 
+function Base.union!(v1::SortedVector{T}, v2::SortedVector{T}) where {T}
+    resize!(v1.data, length(v1) + length(v2))
+    union!(v1, v1, v2)
+    return v1
+end
+
 function Base.union(v1::SortedVector{T}, v2::SortedVector{T}) where {T}
     result = similar(v1.data, length(v1) + length(v2))
     v = SortedVector{T}(result; sorted=false)
@@ -77,3 +83,18 @@ end
 
 Base.iterate(v::SortedVector)             = iterate(v.data)
 Base.iterate(v::SortedVector, i::Integer) = iterate(v.data, i)
+
+function ×(
+    ::Type{SortedVector{Tuple{T,T}}}, a::SortedVector{T}, b::SortedVector{T}
+) where {T}
+    prod_data = Tuple{T,T}[]
+    sizehint!(prod_data, length(a) * length(b))
+    for i in a.data, j in b.data
+        push!(prod_data, (i, j))
+    end
+    return SortedVector{Tuple{T,T}}(prod_data; sorted=false)
+end
+
+function ×(a::SortedVector{T}, b::SortedVector{T}) where {T}
+    return ×(SortedVector{Tuple{T,T}}, a, b)
+end

@@ -11,6 +11,14 @@ struct DuplicateVector{T} <: AbstractSet{T}
     DuplicateVector{T}() where {T} = new{T}(T[])
 end
 
+function Base.show(io::IO, dv::DuplicateVector)
+    return print(io, "DuplicateVector($(dv.data))")
+end
+
+function Base.show(io::IO, ::MIME"text/plain", dv::DuplicateVector)
+    return print(io, "DuplicateVector($(dv.data))")
+end
+
 Base.eltype(::Type{DuplicateVector{T}}) where {T} = T
 
 Base.collect(dv::DuplicateVector) = unique!(dv.data)
@@ -27,6 +35,12 @@ end
 Base.iterate(dv::DuplicateVector)             = iterate(collect(dv))
 Base.iterate(dv::DuplicateVector, i::Integer) = iterate(collect(dv), i)
 
-# TODO: required by `Base.Iterators.ProductIterator` called in method `×` in src/tracers.jl.
-# This is very slow and should be replaced by a custom `×` on `DuplicateVector`s.
-Base.length(dv::DuplicateVector) = length(unique!(dv.data))
+function ×(
+    ::Type{DuplicateVector{Tuple{T,T}}}, a::DuplicateVector{T}, b::DuplicateVector{T}
+) where {T}
+    return DuplicateVector{Tuple{T,T}}(vec(collect(Iterators.product(a.data, b.data))))
+end
+
+function ×(a::DuplicateVector{T}, b::DuplicateVector{T}) where {T}
+    return ×(DuplicateVector{Tuple{T,T}}, a, b)
+end

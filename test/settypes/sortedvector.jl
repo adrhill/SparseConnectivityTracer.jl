@@ -4,7 +4,7 @@ using SparseConnectivityTracer
 using SparseConnectivityTracer: SortedVector
 using Test
 
-@testset "Correctness" begin
+@testset "Merging" begin
     @testset "$T - ($k1, $k2)" for T in (Int32, Int64),
         k1 in (0, 10, 100, 1000),
         k2 in (0, 10, 100, 1000)
@@ -27,3 +27,11 @@ using Test
         end
     end
 end;
+
+x = SortedVector{Int}.(1:10)
+y = (x[1] ∪ x[3]) ∪ (x[3] ∪ ((x[5] ∪ x[7]) ∪ x[1]))
+
+@test startswith(string(y), "SortedVector(")
+@test sort(collect(y)) == [1, 3, 5, 7]
+@test y × y isa SortedVector
+@test length(collect(y × y)) == 16
