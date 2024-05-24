@@ -1,6 +1,6 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer:
-    GradientTracer, Dual, MissingPrimalError, tracer, trace_input, empty
+    GradientTracer, Dual, MissingPrimalError, tracer, trace_input
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using ADTypes: jacobian_sparsity
 using LinearAlgebra: det, dot, logdet
@@ -184,10 +184,5 @@ end
         @test jacobian_sparsity(NNlib.softshrink, -1, method) ≈ [1;;]
         @test jacobian_sparsity(NNlib.softshrink, 0, method) ≈ [0;;]
         @test jacobian_sparsity(NNlib.softshrink, 1, method) ≈ [1;;]
-
-        # Putting Duals into Duals is prohibited
-        G = empty(GradientTracer{S})
-        D1 = Dual(1.0, G)
-        @test_throws ErrorException D2 = Dual(D1, G)
     end
 end

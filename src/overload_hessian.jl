@@ -5,13 +5,13 @@ function hessian_tracer_1_to_1(
 ) where {G,H,T<:HessianTracer{G,H}}
     if is_seconder_zero
         if is_firstder_zero
-            return empty(T)
+            return myempty(T)
         else
             return t
         end
     else
         if is_firstder_zero
-            return T(empty(G), gradient(t) × gradient(t))
+            return T(myempty(G), gradient(t) × gradient(t))
         else
             return T(gradient(t), hessian(t) ∪ (gradient(t) × gradient(t)))
         end
@@ -58,8 +58,8 @@ function hessian_tracer_2_to_1(
     is_seconder_arg2_zero::Bool,
     is_crossder_zero::Bool,
 ) where {G,H,T<:HessianTracer{G,H}}
-    grad = empty(G)
-    hess = empty(H)
+    grad = myempty(G)
+    hess = myempty(H)
     if !is_firstder_arg1_zero
         grad = union(grad, gradient(a)) # TODO: use union!
         union!(hess, hessian(a))
@@ -227,7 +227,7 @@ for S in (Integer, Rational, Irrational{:ℯ})
 end
 
 ## Rounding
-Base.round(t::T, ::RoundingMode; kwargs...) where {T<:HessianTracer} = empty(T)
+Base.round(t::T, ::RoundingMode; kwargs...) where {T<:HessianTracer} = myempty(T)
 
 ## Random numbers
-Base.rand(::AbstractRNG, ::SamplerType{T}) where {T<:HessianTracer} = empty(T)  # TODO: was missing Base, add tests
+Base.rand(::AbstractRNG, ::SamplerType{T}) where {T<:HessianTracer} = myempty(T)  # TODO: was missing Base, add tests

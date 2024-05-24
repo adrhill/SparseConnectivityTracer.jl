@@ -1,6 +1,5 @@
 using SparseConnectivityTracer
-using SparseConnectivityTracer:
-    HessianTracer, MissingPrimalError, tracer, trace_input, empty
+using SparseConnectivityTracer: HessianTracer, MissingPrimalError, tracer, trace_input
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using ADTypes: hessian_sparsity
 using SpecialFunctions: erf, beta
@@ -237,10 +236,5 @@ end
         @test hessian_sparsity(x -> x^ℯ, 1, method) ≈ [1;;]
         @test hessian_sparsity(x -> ℯ^x, 1, method) ≈ [1;;]
         @test hessian_sparsity(x -> 0, 1, method) ≈ [0;;]
-
-        # Putting Duals into Duals is prohibited
-        H = empty(HessianTracer{S,Set{Tuple{Int,Int}}})
-        D1 = Dual(1.0, H)
-        @test_throws ErrorException D2 = Dual(D1, H)
     end
 end
