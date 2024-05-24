@@ -24,8 +24,10 @@ include("overload_connectivity.jl")
 include("overload_gradient.jl")
 include("overload_hessian.jl")
 include("overload_dual.jl")
-include("overload_ifelse.jl")
 include("overload_all.jl")
+@static if VERSION >= v"1.8"
+    include("overload_ifelse.jl")
+end
 
 include("pattern.jl")
 include("adtypes.jl")

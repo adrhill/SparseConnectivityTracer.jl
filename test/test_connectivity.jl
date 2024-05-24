@@ -74,23 +74,25 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
         end
 
         # ifelse and comparisons
-        @test connectivity_pattern(
-            x -> ifelse(x[2] < x[3], x[1] + x[2], x[3] * x[4]), [1 2 3 4], S
-        ) == [1 1 1 1]
+        if VERSION >= v"1.8"
+            @test connectivity_pattern(
+                x -> ifelse(x[2] < x[3], x[1] + x[2], x[3] * x[4]), [1 2 3 4], S
+            ) == [1 1 1 1]
 
-        function f_ampgo07(x)
-            return (x[1] <= 0) * convert(eltype(x), Inf) +
-                   sin(x[1]) +
-                   sin(10//3 * x[1]) +
-                   log(abs(x[1])) - 84//100 * x[1] + 3
+            function f_ampgo07(x)
+                return (x[1] <= 0) * convert(eltype(x), Inf) +
+                       sin(x[1]) +
+                       sin(10//3 * x[1]) +
+                       log(abs(x[1])) - 84//100 * x[1] + 3
+            end
+            @test connectivity_pattern(f_ampgo07, [1.0], S) ≈ [1;;]
+
+            # Error handling when applying non-dual tracers to "local" functions with control flow
+            # TypeError: non-boolean (SparseConnectivityTracer.GradientTracer{BitSet}) used in boolean context
+            @test_throws TypeError connectivity_pattern(
+                x -> x[1] > x[2] ? x[3] : x[4], [1.0, 2.0, 3.0, 4.0], S
+            ) == [0 0 1 1;]
         end
-        @test connectivity_pattern(f_ampgo07, [1.0], S) ≈ [1;;]
-
-        # Error handling when applying non-dual tracers to "local" functions with control flow
-        # TypeError: non-boolean (SparseConnectivityTracer.GradientTracer{BitSet}) used in boolean context
-        @test_throws TypeError connectivity_pattern(
-            x -> x[1] > x[2] ? x[3] : x[4], [1.0, 2.0, 3.0, 4.0], S
-        ) == [0 0 1 1;]
     end
 end
 

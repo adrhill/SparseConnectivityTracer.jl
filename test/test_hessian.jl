@@ -145,27 +145,29 @@ const SECOND_ORDER_SET_TYPES = (
         ]
 
         # ifelse and comparisons
-        h = hessian_sparsity(x -> ifelse(x[1], x[1]^x[2], x[3] * x[4]), rand(4), method)
-        @test h == [
-            1  1  0  0
-            1  1  0  0
-            0  0  0  1
-            0  0  1  0
-        ]
+        if VERSION >= v"1.8"
+            h = hessian_sparsity(x -> ifelse(x[1], x[1]^x[2], x[3] * x[4]), rand(4), method)
+            @test h == [
+                1  1  0  0
+                1  1  0  0
+                0  0  0  1
+                0  0  1  0
+            ]
 
-        function f_ampgo07(x)
-            return (x[1] <= 0) * convert(eltype(x), Inf) +
-                   sin(x[1]) +
-                   sin(10//3 * x[1]) +
-                   log(abs(x[1])) - 84//100 * x[1] + 3
+            function f_ampgo07(x)
+                return (x[1] <= 0) * convert(eltype(x), Inf) +
+                       sin(x[1]) +
+                       sin(10//3 * x[1]) +
+                       log(abs(x[1])) - 84//100 * x[1] + 3
+            end
+            @test hessian_sparsity(f_ampgo07, [1.0], method) ≈ [1;;]
+
+            # Error handling when applying non-dual tracers to "local" functions with control flow
+            # TypeError: non-boolean (SparseConnectivityTracer.GradientTracer{BitSet}) used in boolean context
+            @test_throws TypeError hessian_sparsity(
+                x -> x[1] > x[2] ? x[1]^x[2] : x[3] * x[4], rand(4), method
+            )
         end
-        @test hessian_sparsity(f_ampgo07, [1.0], method) ≈ [1;;]
-
-        # Error handling when applying non-dual tracers to "local" functions with control flow
-        # TypeError: non-boolean (SparseConnectivityTracer.GradientTracer{BitSet}) used in boolean context
-        @test_throws TypeError hessian_sparsity(
-            x -> x[1] > x[2] ? x[1]^x[2] : x[3] * x[4], rand(4), method
-        )
 
         # SpecialFunctions
         @test hessian_sparsity(x -> erf(x[1]), rand(2), method) == [
