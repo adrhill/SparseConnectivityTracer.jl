@@ -1,6 +1,6 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer:
-    ConnectivityTracer, Dual, MissingPrimalError, tracer, trace_input, empty
+    ConnectivityTracer, Dual, MissingPrimalError, tracer, trace_input
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using LinearAlgebra: det, dot, logdet
 using SpecialFunctions: erf, beta

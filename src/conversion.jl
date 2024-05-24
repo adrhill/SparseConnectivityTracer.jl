@@ -7,22 +7,22 @@ Base.promote_rule(::Type{N}, ::Type{T}) where {T<:AbstractTracer,N<:Real} = T
 Base.big(::Type{T})   where {T<:AbstractTracer} = T
 Base.widen(::Type{T}) where {T<:AbstractTracer} = T
 
-Base.convert(::Type{T}, x::Real)   where {T<:AbstractTracer} = empty(T)
+Base.convert(::Type{T}, x::Real)   where {T<:AbstractTracer} = myempty(T)
 Base.convert(::Type{T}, t::T)      where {T<:AbstractTracer} = t
 Base.convert(::Type{<:Real}, t::T) where {T<:AbstractTracer} = t
 
 ## Constants
 # These are methods defined on types. Methods on variables are in operators.jl 
-Base.zero(::Type{T})        where {T<:AbstractTracer} = empty(T)
-Base.one(::Type{T})         where {T<:AbstractTracer} = empty(T)
-Base.oneunit(::Type{T})     where {T<:AbstractTracer} = empty(T)
-Base.typemin(::Type{T})     where {T<:AbstractTracer} = empty(T)
-Base.typemax(::Type{T})     where {T<:AbstractTracer} = empty(T)
-Base.eps(::Type{T})         where {T<:AbstractTracer} = empty(T)
-Base.float(::Type{T})       where {T<:AbstractTracer} = empty(T)
-Base.floatmin(::Type{T})    where {T<:AbstractTracer} = empty(T)
-Base.floatmax(::Type{T})    where {T<:AbstractTracer} = empty(T)
-Base.maxintfloat(::Type{T}) where {T<:AbstractTracer} = empty(T)
+Base.zero(::Type{T})        where {T<:AbstractTracer} = myempty(T)
+Base.one(::Type{T})         where {T<:AbstractTracer} = myempty(T)
+Base.oneunit(::Type{T})     where {T<:AbstractTracer} = myempty(T)
+Base.typemin(::Type{T})     where {T<:AbstractTracer} = myempty(T)
+Base.typemax(::Type{T})     where {T<:AbstractTracer} = myempty(T)
+Base.eps(::Type{T})         where {T<:AbstractTracer} = myempty(T)
+Base.float(::Type{T})       where {T<:AbstractTracer} = myempty(T)
+Base.floatmin(::Type{T})    where {T<:AbstractTracer} = myempty(T)
+Base.floatmax(::Type{T})    where {T<:AbstractTracer} = myempty(T)
+Base.maxintfloat(::Type{T}) where {T<:AbstractTracer} = myempty(T)
 
 ## Array constructors
 Base.similar(a::Array{T,1})             where {T<:AbstractTracer}   = zeros(T, size(a, 1))
