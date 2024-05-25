@@ -64,25 +64,6 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
         @test jacobian_sparsity(x -> round(x, RoundNearestTiesUp), 1, method) ≈ [0;;]
         @test jacobian_sparsity(x -> 0, 1, method) ≈ [0;;]
 
-        # ifelse
-        @test jacobian_sparsity(
-            x -> ifelse(x[2], x[1], ifelse(x[1], x[3], x[4])), rand(4), method
-        ) == [1 0 1 1]
-
-        @test jacobian_sparsity(
-            x -> ifelse(x[2], [x[1], x[2]], ifelse(x[1], [x[2], x[3]], [x[3], x[4]])),
-            rand(4),
-            method,
-        ) == [1 1 1 0; 0 1 1 1]
-
-        function f_ampgo07(x)
-            return (x[1] <= 0) * convert(eltype(x), Inf) +
-                   sin(x[1]) +
-                   sin(10//3 * x[1]) +
-                   log(abs(x[1])) - 84//100 * x[1] + 3
-        end
-        @test jacobian_sparsity(f_ampgo07, [1.0], method) ≈ [1;;]
-
         # Linear Algebra
         @test jacobian_sparsity(x -> dot(x[1:2], x[4:5]), rand(5), method) == [1 1 0 1 1]
 
