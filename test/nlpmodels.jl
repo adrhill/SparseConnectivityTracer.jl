@@ -152,6 +152,8 @@ end
     end
 end;
 
+jac_inconsistencies = []
+
 @testset verbose = true "Jacobian comparison" begin
     @testset "$name" for name in Symbol.(OptimizationProblems.meta[!, :name])
         @info "Testing Jacobian sparsity for $name"
@@ -162,13 +164,17 @@ end;
         else
             @test_broken J_sct == J_jump
             J_diff = J_jump - J_sct
-            @warn "Inconsistency for Jacobian of $name: $(compare_patterns(sct=J_sct, jump=J_jump))"
+            message = compare_patterns(; sct=J_sct, jump=J_jump)
+            @warn "Inconsistency for Jacobian of $name: $message"
+            push!(jac_inconsistencies, (name, message))
             @test all(zip(findnz(J_diff)...)) do (i, j, _)
                 iszero(jac_coeff(name, i, j))
             end
         end
     end
 end;
+
+hess_inconsistencies = []
 
 @testset verbose = true "Hessian comparison" begin
     @testset "$name" for name in Symbol.(OptimizationProblems.meta[!, :name])
@@ -179,7 +185,9 @@ end;
             @test H_sct == H_jump
         else
             @test_broken H_sct == H_jump
-            @warn "Inconsistency for Hessian of $name: $(compare_patterns(sct=H_sct, jump=H_jump))"
+            message = compare_patterns(; sct=H_sct, jump=H_jump)
+            @warn "Inconsistency for Hessian of $name: $message"
+            push!(hess_inconsistencies, (name, message))
             H_diff = H_jump - H_sct
             @test all(zip(findnz(H_diff)...)) do (i, j, _)
                 iszero(hess_coeff(name, i, j))
@@ -187,3 +195,5 @@ end;
         end
     end
 end;
+
+@warn "The following inconsistencies were detected" jac_inconsistencies hess_inconsistencies
