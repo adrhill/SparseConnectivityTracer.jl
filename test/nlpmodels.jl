@@ -77,12 +77,6 @@ end;
 @testset verbose = true "Hessian comparison" begin
     @testset "$name" for name in Symbol.(OptimizationProblems.meta[!, :name])
         @info "Testing Hessian sparsity for $name"
-        if startswith(string(name), "tetra_")
-            #     # TODO: investigate
-            @warn "Skipping $name because it takes too long"
-            @test_broken false
-            continue
-        end
         H_sct = @time "SCT" hess_sparsity_sct(name)
         H_ref = @time "JuMP" hess_sparsity_ref(name)
         H_diff = H_ref - H_sct
