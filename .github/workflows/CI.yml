@@ -28,9 +28,6 @@ jobs:
         group:
           - Core
           - NLPModels
-        exclude:
-          - version: '1.6'
-            group: NLPModels
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
