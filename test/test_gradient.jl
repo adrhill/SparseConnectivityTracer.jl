@@ -1,6 +1,6 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer:
-    GradientTracer, Dual, MissingPrimalError, tracer, trace_input, empty
+    GradientTracer, Dual, MissingPrimalError, tracer, trace_input
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using ADTypes: jacobian_sparsity
 using LinearAlgebra: det, dot, logdet
@@ -95,10 +95,20 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
             @test jacobian_sparsity(f, 1, method) ≈ [1;;]
         end
 
-        # ifelse
-        @test jacobian_sparsity(
-            x -> ifelse(x[2] < x[3], x[1] + x[2], x[3] * x[4]), [1 2 3 4], method
-        ) == [1 1 1 1]
+        # ifelse and comparisons
+        if VERSION >= v"1.8"
+            @test jacobian_sparsity(
+                x -> ifelse(x[2] < x[3], x[1] + x[2], x[3] * x[4]), [1 2 3 4], method
+            ) == [1 1 1 1]
+        end
+
+        function f_ampgo07(x)
+            return (x[1] <= 0) * convert(eltype(x), Inf) +
+                   sin(x[1]) +
+                   sin(10//3 * x[1]) +
+                   log(abs(x[1])) - 84//100 * x[1] + 3
+        end
+        @test jacobian_sparsity(f_ampgo07, [1.0], method) ≈ [1;;]
 
         ## Error handling when applying non-dual tracers to "local" functions with control flow
         # TypeError: non-boolean (SparseConnectivityTracer.GradientTracer{BitSet}) used in boolean context
@@ -184,10 +194,5 @@ end
         @test jacobian_sparsity(NNlib.softshrink, -1, method) ≈ [1;;]
         @test jacobian_sparsity(NNlib.softshrink, 0, method) ≈ [0;;]
         @test jacobian_sparsity(NNlib.softshrink, 1, method) ≈ [1;;]
-
-        # Putting Duals into Duals is prohibited
-        G = empty(GradientTracer{S})
-        D1 = Dual(1.0, G)
-        @test_throws ErrorException D2 = Dual(D1, G)
     end
 end

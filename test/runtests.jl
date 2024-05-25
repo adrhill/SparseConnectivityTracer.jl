@@ -70,6 +70,9 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "All")
 
     @testset verbose = true "Simple examples" begin
         if GROUP in ("Core", "All")
+            @testset "Tracer Construction" begin
+                include("test_connectivity.jl")
+            end
             @testset "ConnectivityTracer" begin
                 include("test_connectivity.jl")
             end

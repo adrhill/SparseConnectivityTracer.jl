@@ -2,7 +2,7 @@
 
 function gradient_tracer_1_to_1(t::T, is_firstder_zero::Bool) where {T<:GradientTracer}
     if is_firstder_zero
-        return empty(T)
+        return myempty(T)
     else
         return t
     end
@@ -38,7 +38,7 @@ function gradient_tracer_2_to_1(
 ) where {T<:GradientTracer}
     if is_firstder_arg1_zero
         if is_firstder_arg2_zero
-            return empty(T)
+            return myempty(T)
         else
             return ty
         end
@@ -167,12 +167,12 @@ for S in (Integer, Rational, Irrational{:ℯ})
 end
 
 ## Rounding
-Base.round(t::T, ::RoundingMode; kwargs...) where {T<:GradientTracer} = empty(T)
+Base.round(t::T, ::RoundingMode; kwargs...) where {T<:GradientTracer} = myempty(T)
 function Base.round(
     d::D, mode::RoundingMode; kwargs...
 ) where {P,T<:GradientTracer,D<:Dual{P,T}}
-    return Dual(round(primal(d), mode; kwargs...), empty(T))
+    return Dual(round(primal(d), mode; kwargs...), myempty(T))
 end
 
 ## Random numbers 
-Base.rand(::AbstractRNG, ::SamplerType{T}) where {T<:GradientTracer} = empty(T)  # TODO: was missing Base, add tests
+Base.rand(::AbstractRNG, ::SamplerType{T}) where {T<:GradientTracer} = myempty(T)  # TODO: was missing Base, add tests
