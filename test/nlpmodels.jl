@@ -6,12 +6,44 @@ import SparseConnectivityTracer as SCT
 using Test
 
 using Pkg
-Pkg.add(["ADNLPModels", "OptimizationProblems", "NLPModels", "NLPModelsJuMP"])
+Pkg.add([
+    "ADNLPModels", "ForwardDiff", "OptimizationProblems", "NLPModels", "NLPModelsJuMP"
+])
 
 using ADNLPModels
+using ForwardDiff: derivative
 using NLPModels
 using NLPModelsJuMP
 using OptimizationProblems
+
+## ForwardDiff reference
+
+function directional_derivative(f, x::AbstractVector, d::AbstractVector)
+    return derivative(t -> f(x + t * d), zero(eltype(x)))
+end
+
+function second_directional_derivative(
+    f, x::AbstractVector, din::AbstractVector, dout::AbstractVector
+)
+    f_din(x) = directional_derivative(f, x, din)
+    return directional_derivative(f_din, x, dout)
+end
+
+function jac_coeff(f, x::AbstractVector, i::Integer, j::Integer)
+    d = zero(x)
+    d[j] = 1
+    return directional_derivative(f, x, d)[i]
+end
+
+function hess_coeff(f, x::AbstractVector, i::Integer, j::Integer)
+    din = zero(x)
+    din[i] = 1
+    dout = zero(x)
+    dout[j] = 1
+    return second_directional_derivative(f, x, din, dout)
+end
+
+## Function wrappers
 
 function mycons(nlp, x)
     c = similar(x, nlp.meta.ncon)
@@ -26,11 +58,38 @@ function mylag(nlp, x)
     return o + dot(λ, c)
 end
 
+## Jacobian sparsity
+
+function jac_coeff(name::Symbol, i::Integer, j::Integer)
+    nlp = OptimizationProblems.ADNLPProblems.eval(name)()
+    f = Base.Fix1(mycons, nlp)
+    x = nlp.meta.x0
+    return jac_coeff(f, x, i, j)
+end
+
 function jac_sparsity_sct(name::Symbol)
     nlp = OptimizationProblems.ADNLPProblems.eval(name)()
     f = Base.Fix1(mycons, nlp)
     x = nlp.meta.x0
     return ADTypes.jacobian_sparsity(f, x, TracerSparsityDetector())
+end
+
+function jac_sparsity_jump(name::Symbol)
+    jump_model = OptimizationProblems.PureJuMP.eval(name)()
+    nlp = MathOptNLPModel(jump_model)
+    jrows, jcols = jac_structure(nlp)
+    nnzj = length(jrows)
+    jvals = ones(Bool, nnzj)
+    return sparse(jrows, jcols, jvals, nlp.meta.ncon, nlp.meta.nvar)
+end
+
+## Hessian sparsity
+
+function hess_coeff(name::Symbol, i::Integer, j::Integer)
+    nlp = OptimizationProblems.ADNLPProblems.eval(name)()
+    f = Base.Fix1(mylag, nlp)
+    x = nlp.meta.x0
+    return hess_coeff(f, x, i, j)
 end
 
 function hess_sparsity_sct(name::Symbol)
@@ -40,16 +99,7 @@ function hess_sparsity_sct(name::Symbol)
     return ADTypes.hessian_sparsity(f, x, TracerSparsityDetector())
 end
 
-function jac_sparsity_ref(name::Symbol)
-    jump_model = OptimizationProblems.PureJuMP.eval(name)()
-    nlp = MathOptNLPModel(jump_model)
-    jrows, jcols = jac_structure(nlp)
-    nnzj = length(jrows)
-    jvals = ones(Bool, nnzj)
-    return sparse(jrows, jcols, jvals, nlp.meta.ncon, nlp.meta.nvar)
-end
-
-function hess_sparsity_ref(name::Symbol)
+function hess_sparsity_jump(name::Symbol)
     jump_model = OptimizationProblems.PureJuMP.eval(name)()
     nlp = MathOptNLPModel(jump_model)
     hrows, hcols = hess_structure(nlp)
@@ -60,16 +110,62 @@ function hess_sparsity_ref(name::Symbol)
     return sparse(Symmetric(H_L, :L))
 end
 
+## Comparison
+
+function compare_patterns(; sct, jump)
+    A_diff = jump - sct
+    nnz_sct = nnz(sct)
+    nnz_jump = nnz(jump)
+
+    diagonal = if A_diff == Diagonal(A_diff)
+        "[diagonal difference only]"
+    else
+        ""
+    end
+    message = if all(>(0), nonzeros(A_diff))
+        "SCT ($nnz_sct nz) ⊂ JuMP ($nnz_jump nz) $diagonal"
+    elseif all(<(0), nonzeros(A_diff))
+        "SCT ($nnz_sct nz) ⊃ JuMP ($nnz_jump nz) $diagonal"
+    else
+        "SCT ($nnz_sct nz) ≠ JuMP ($nnz_jump nz) $diagonal"
+    end
+    return message
+end
+
+## Actual tests
+
+@testset verbose = true "ForwardDiff reference" begin
+    f(x) = sin.(x) .* cos.(reverse(x)) .* exp(x[1]) .* log(x[end])
+    g(x) = sum(f(x))
+    x = rand(6)
+    @testset "Jacobian" begin
+        J = ForwardDiff.jacobian(f, x)
+        for i in axes(J, 1), j in axes(J, 2)
+            @test J[i, j] == jac_coeff(f, x, i, j)
+        end
+    end
+    @testset "Hessian" begin
+        H = ForwardDiff.hessian(g, x)
+        for i in axes(H, 1), j in axes(H, 2)
+            @test H[i, j] == hess_coeff(g, x, i, j)
+        end
+    end
+end;
+
 @testset verbose = true "Jacobian comparison" begin
     @testset "$name" for name in Symbol.(OptimizationProblems.meta[!, :name])
         @info "Testing Jacobian sparsity for $name"
-        J_sct = @time "SCT" jac_sparsity_sct(name)
-        J_ref = @time "JuMP" jac_sparsity_ref(name)
-        if name == :lincon
-            # we have two more nonzeros but their stored values are 0.0 in the Hessian
-            @test_broken J_sct == J_ref
+        J_sct = jac_sparsity_sct(name)
+        J_jump = jac_sparsity_jump(name)
+        if J_sct == J_jump
+            @test J_sct == J_jump
         else
-            @test J_sct == J_ref
+            @test_broken J_sct == J_jump
+            J_diff = J_jump - J_sct
+            @warn "Inconsistency for Jacobian of $name: $(compare_patterns(sct=J_sct, jump=J_jump))"
+            @test all(zip(findnz(J_diff)...)) do (i, j, _)
+                iszero(jac_coeff(name, i, j))
+            end
         end
     end
 end;
@@ -77,15 +173,17 @@ end;
 @testset verbose = true "Hessian comparison" begin
     @testset "$name" for name in Symbol.(OptimizationProblems.meta[!, :name])
         @info "Testing Hessian sparsity for $name"
-        H_sct = @time "SCT" hess_sparsity_sct(name)
-        H_ref = @time "JuMP" hess_sparsity_ref(name)
-        H_diff = H_ref - H_sct
-        # usually the difference is on the diagonal and ref has more nonzeros than SCT
-        if name in (:britgas, :channel, :hs114, :marine)
-            # TODO: investigate
-            @test_broken H_diff == Diagonal(H_diff) && all(H_diff .>= 0)
+        H_sct = hess_sparsity_sct(name)
+        H_jump = hess_sparsity_jump(name)
+        if H_sct == H_jump
+            @test H_sct == H_jump
         else
-            @test H_diff == Diagonal(H_diff) && all(H_diff .>= 0)
+            @test_broken H_sct == H_jump
+            @warn "Inconsistency for Hessian of $name: $(compare_patterns(sct=H_sct, jump=H_jump))"
+            H_diff = H_jump - H_sct
+            @test all(zip(findnz(H_diff)...)) do (i, j, _)
+                iszero(hess_coeff(name, i, j))
+            end
         end
     end
 end;
