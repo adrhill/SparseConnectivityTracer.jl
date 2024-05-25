@@ -11,7 +11,7 @@ Pkg.add([
 ])
 
 using ADNLPModels
-using ForwardDiff: derivative
+using ForwardDiff: ForwardDiff
 using NLPModels
 using NLPModelsJuMP
 using OptimizationProblems
@@ -19,7 +19,7 @@ using OptimizationProblems
 ## ForwardDiff reference
 
 function directional_derivative(f, x::AbstractVector, d::AbstractVector)
-    return derivative(t -> f(x + t * d), zero(eltype(x)))
+    return ForwardDiff.derivative(t -> f(x + t * d), zero(eltype(x)))
 end
 
 function second_directional_derivative(
@@ -165,7 +165,7 @@ jac_inconsistencies = []
             @test_broken J_sct == J_jump
             J_diff = J_jump - J_sct
             message = compare_patterns(; sct=J_sct, jump=J_jump)
-            @warn "Inconsistency for Jacobian of $name: $message"
+            # @warn "Inconsistency for Jacobian of $name: $message"
             push!(jac_inconsistencies, (name, message))
             @test all(zip(findnz(J_diff)...)) do (i, j, _)
                 iszero(jac_coeff(name, i, j))
@@ -186,7 +186,7 @@ hess_inconsistencies = []
         else
             @test_broken H_sct == H_jump
             message = compare_patterns(; sct=H_sct, jump=H_jump)
-            @warn "Inconsistency for Hessian of $name: $message"
+            # @warn "Inconsistency for Hessian of $name: $message"
             push!(hess_inconsistencies, (name, message))
             H_diff = H_jump - H_sct
             @test all(zip(findnz(H_diff)...)) do (i, j, _)
@@ -196,4 +196,12 @@ hess_inconsistencies = []
     end
 end;
 
-@warn "The following inconsistencies were detected" jac_inconsistencies hess_inconsistencies
+if !isempty(jac_inconsistencies) || !isempty(hess_inconsistencies)
+    @warn "Inconsistencies were detected"
+    for (name, message) in jac_inconsistencies
+        @warn "Inconsistency for Jacobian of $name: $message"
+    end
+    for (name, message) in hess_inconsistencies
+        @warn "Inconsistency for Hessian of $name: $message"
+    end
+end
