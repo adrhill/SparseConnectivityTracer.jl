@@ -25,6 +25,7 @@ include("overload_gradient.jl")
 include("overload_hessian.jl")
 include("overload_dual.jl")
 include("overload_all.jl")
+include("overload_ifelse.jl")
 
 include("pattern.jl")
 include("adtypes.jl")

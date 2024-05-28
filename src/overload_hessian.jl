@@ -5,7 +5,7 @@ function hessian_tracer_1_to_1(
 ) where {G,H,T<:HessianTracer{G,H}}
     if is_seconder_zero
         if is_firstder_zero
-            return empty(T)
+            return myempty(T)
         else
             return t
         end
@@ -28,6 +28,12 @@ function overload_hessian_1_to_1(M, op)
                 $SCT.is_seconder_zero_global($M.$op),
             )
         end
+    end
+end
+
+function overload_hessian_1_to_1_dual(M, op)
+    SCT = SparseConnectivityTracer
+    return quote
         function $M.$op(d::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
             x = $SCT.primal(d)
             p_out = $M.$op(x)
@@ -52,8 +58,8 @@ function hessian_tracer_2_to_1(
     is_seconder_arg2_zero::Bool,
     is_crossder_zero::Bool,
 ) where {G,H,T<:HessianTracer{G,H}}
-    grad = empty(G)
-    hess = empty(H)
+    grad = myempty(G)
+    hess = myempty(H)
     if !is_firstder_arg1_zero
         grad = union(grad, gradient(a)) # TODO: use union!
         union!(hess, hessian(a))
@@ -89,6 +95,28 @@ function overload_hessian_2_to_1(M, op)
                 $SCT.is_crossder_zero_global($M.$op),
             )
         end
+
+        function $M.$op(tx::$SCT.HessianTracer, y::Real)
+            return $SCT.hessian_tracer_1_to_1(
+                tx,
+                $SCT.is_firstder_arg1_zero_global($M.$op),
+                $SCT.is_seconder_arg1_zero_global($M.$op),
+            )
+        end
+
+        function $M.$op(x::Real, ty::$SCT.HessianTracer)
+            return $SCT.hessian_tracer_1_to_1(
+                ty,
+                $SCT.is_firstder_arg2_zero_global($M.$op),
+                $SCT.is_seconder_arg2_zero_global($M.$op),
+            )
+        end
+    end
+end
+
+function overload_hessian_2_to_1_dual(M, op)
+    SCT = SparseConnectivityTracer
+    return quote
         function $M.$op(dx::D, dy::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
             x = $SCT.primal(dx)
             y = $SCT.primal(dy)
@@ -105,21 +133,6 @@ function overload_hessian_2_to_1(M, op)
             return $SCT.Dual(p_out, t_out)
         end
 
-        function $M.$op(tx::$SCT.HessianTracer, y::Real)
-            return $SCT.hessian_tracer_1_to_1(
-                tx,
-                $SCT.is_firstder_arg1_zero_global($M.$op),
-                $SCT.is_seconder_arg1_zero_global($M.$op),
-            )
-        end
-        function $M.$op(x::Real, ty::$SCT.HessianTracer)
-            return $SCT.hessian_tracer_1_to_1(
-                ty,
-                $SCT.is_firstder_arg2_zero_global($M.$op),
-                $SCT.is_seconder_arg2_zero_global($M.$op),
-            )
-        end
-
         function $M.$op(dx::D, y::Real) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
             x = $SCT.primal(dx)
             p_out = $M.$op(x, y)
@@ -130,6 +143,7 @@ function overload_hessian_2_to_1(M, op)
             )
             return $SCT.Dual(p_out, t_out)
         end
+
         function $M.$op(x::Real, dy::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
             y = $SCT.primal(dy)
             p_out = $M.$op(x, y)
@@ -169,7 +183,12 @@ function overload_hessian_1_to_2(M, op)
                 $SCT.is_seconder_out2_zero_global($M.$op),
             )
         end
+    end
+end
 
+function overload_hessian_1_to_2_dual(M, op)
+    SCT = SparseConnectivityTracer
+    return quote
         function $M.$op(d::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
             x = $SCT.primal(d)
             p1_out, p2_out = $M.$op(x)
@@ -231,7 +250,7 @@ for S in (Integer, Rational, Irrational{:ℯ})
 end
 
 ## Rounding
-Base.round(t::T, ::RoundingMode; kwargs...) where {T<:HessianTracer} = empty(T)
+Base.round(t::T, ::RoundingMode; kwargs...) where {T<:HessianTracer} = myempty(T)
 
 ## Random numbers
-Base.rand(::AbstractRNG, ::SamplerType{T}) where {T<:HessianTracer} = empty(T)  # TODO: was missing Base, add tests
+Base.rand(::AbstractRNG, ::SamplerType{T}) where {T<:HessianTracer} = myempty(T)  # TODO: was missing Base, add tests

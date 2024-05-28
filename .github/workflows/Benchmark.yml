@@ -1,8 +1,13 @@
 name: Run benchmarks
 on:
   pull_request:
+    # Only trigger the benchmark job when you add `run benchmark` label to the PR
     types: [labeled, opened, synchronize, reopened]
-# Only trigger the benchmark job when you add `run benchmark` label to the PR
+concurrency:
+  # Skip intermediate builds: always.
+  # Cancel intermediate builds: only if it is a pull request build.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
 jobs:
   Benchmark:
     runs-on: ubuntu-latest

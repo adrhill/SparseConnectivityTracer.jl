@@ -4,7 +4,7 @@ function connectivity_tracer_1_to_1(
     t::T, is_influence_zero::Bool
 ) where {T<:ConnectivityTracer}
     if is_influence_zero
-        return empty(T)
+        return myempty(T)
     else
         return t
     end
@@ -16,6 +16,12 @@ function overload_connectivity_1_to_1(M, op)
         function $M.$op(t::T) where {T<:$SCT.ConnectivityTracer}
             return $SCT.connectivity_tracer_1_to_1(t, $SCT.is_influence_zero_global($M.$op))
         end
+    end
+end
+
+function overload_connectivity_1_to_1_dual(M, op)
+    SCT = SparseConnectivityTracer
+    return quote
         function $M.$op(d::D) where {P,T<:$SCT.ConnectivityTracer,D<:$SCT.Dual{P,T}}
             x = $SCT.primal(d)
             p_out = $M.$op(x)
@@ -34,7 +40,7 @@ function connectivity_tracer_2_to_1(
 ) where {T<:ConnectivityTracer}
     if is_influence_arg1_zero
         if is_influence_arg2_zero
-            return empty(T)
+            return myempty(T)
         else
             return ty
         end
@@ -58,6 +64,24 @@ function overload_connectivity_2_to_1(M, op)
                 $SCT.is_influence_arg2_zero_global($M.$op),
             )
         end
+
+        function $M.$op(tx::$SCT.ConnectivityTracer, ::Real)
+            return $SCT.connectivity_tracer_1_to_1(
+                tx, $SCT.is_influence_arg1_zero_global($M.$op)
+            )
+        end
+
+        function $M.$op(::Real, ty::$SCT.ConnectivityTracer)
+            return $SCT.connectivity_tracer_1_to_1(
+                ty, $SCT.is_influence_arg2_zero_global($M.$op)
+            )
+        end
+    end
+end
+
+function overload_connectivity_2_to_1_dual(M, op)
+    SCT = SparseConnectivityTracer
+    return quote
         function $M.$op(dx::D, dy::D) where {P,T<:$SCT.ConnectivityTracer,D<:$SCT.Dual{P,T}}
             x = $SCT.primal(dx)
             y = $SCT.primal(dy)
@@ -71,11 +95,6 @@ function overload_connectivity_2_to_1(M, op)
             return $SCT.Dual(p_out, t_out)
         end
 
-        function $M.$op(tx::$SCT.ConnectivityTracer, ::Real)
-            return $SCT.connectivity_tracer_1_to_1(
-                tx, $SCT.is_influence_arg1_zero_global($M.$op)
-            )
-        end
         function $M.$op(
             dx::D, y::Real
         ) where {P,T<:$SCT.ConnectivityTracer,D<:$SCT.Dual{P,T}}
@@ -87,11 +106,6 @@ function overload_connectivity_2_to_1(M, op)
             return $SCT.Dual(p_out, t_out)
         end
 
-        function $M.$op(::Real, ty::$SCT.ConnectivityTracer)
-            return $SCT.connectivity_tracer_1_to_1(
-                ty, $SCT.is_influence_arg2_zero_global($M.$op)
-            )
-        end
         function $M.$op(
             x::Real, dy::D
         ) where {P,T<:$SCT.ConnectivityTracer,D<:$SCT.Dual{P,T}}
@@ -125,7 +139,12 @@ function overload_connectivity_1_to_2(M, op)
                 $SCT.is_influence_out2_zero_global($M.$op),
             )
         end
+    end
+end
 
+function overload_connectivity_1_to_2_dual(M, op)
+    SCT = SparseConnectivityTracer
+    return quote
         function $M.$op(d::D) where {P,T<:$SCT.ConnectivityTracer,D<:$SCT.Dual{P,T}}
             x = $SCT.primal(d)
             p1_out, p2_out = $M.$op(x)
@@ -158,4 +177,4 @@ end
 Base.round(t::ConnectivityTracer, ::RoundingMode; kwargs...) = t
 
 ## Random numbers
-Base.rand(::AbstractRNG, ::SamplerType{T}) where {T<:ConnectivityTracer} = empty(T)  # TODO: was missing Base, add tests
+Base.rand(::AbstractRNG, ::SamplerType{T}) where {T<:ConnectivityTracer} = myempty(T)  # TODO: was missing Base, add tests

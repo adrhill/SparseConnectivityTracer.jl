@@ -1,8 +1,8 @@
 abstract type AbstractTracer <: Real end
 
 # Convenience constructor for empty tracers
-empty(tracer::T) where {T<:AbstractTracer} = empty(T)
-empty(T) = T()
+myempty(tracer::T) where {T<:AbstractTracer} = myempty(T)
+myempty(T) = T()
 
 sparse_vector(T, index) = T([index])
 
@@ -54,8 +54,8 @@ function Base.show(io::IO, t::ConnectivityTracer)
     )
 end
 
-function empty(::Type{ConnectivityTracer{C}}) where {C}
-    return ConnectivityTracer{C}(empty(C))
+function myempty(::Type{ConnectivityTracer{C}}) where {C}
+    return ConnectivityTracer{C}(myempty(C))
 end
 
 # We have to be careful when defining constructors:
@@ -63,7 +63,7 @@ end
 # by calling `T(x)` (instead of `convert(T, x)`), where `T` can be `ConnectivityTracer`.
 # When this happens, we create a new empty tracer with no input pattern.
 function ConnectivityTracer{C}(::Real) where {C<:AbstractSet{<:Integer}}
-    return empty(ConnectivityTracer{C})
+    return myempty(ConnectivityTracer{C})
 end
 
 ConnectivityTracer{C}(t::ConnectivityTracer{C}) where {C<:AbstractSet{<:Integer}} = t
@@ -107,12 +107,12 @@ function Base.show(io::IO, t::GradientTracer)
     )
 end
 
-function empty(::Type{GradientTracer{G}}) where {G}
-    return GradientTracer{G}(empty(G))
+function myempty(::Type{GradientTracer{G}}) where {G}
+    return GradientTracer{G}(myempty(G))
 end
 
 function GradientTracer{G}(::Real) where {G<:AbstractSet{<:Integer}}
-    return empty(GradientTracer{G})
+    return myempty(GradientTracer{G})
 end
 
 GradientTracer{G}(t::GradientTracer{G}) where {G<:AbstractSet{<:Integer}} = t
@@ -171,14 +171,14 @@ function Base.show(io::IO, t::HessianTracer)
     return nothing
 end
 
-function empty(::Type{HessianTracer{G,H}}) where {G,H}
-    return HessianTracer{G,H}(empty(G), empty(H))
+function myempty(::Type{HessianTracer{G,H}}) where {G,H}
+    return HessianTracer{G,H}(myempty(G), myempty(H))
 end
 
 function HessianTracer{G,H}(
     ::Real
 ) where {G<:AbstractSet{<:Integer},H<:AbstractSet{<:Tuple{Integer,Integer}}}
-    return empty(HessianTracer{G,H})
+    return myempty(HessianTracer{G,H})
 end
 
 function HessianTracer{G,H}(
@@ -200,23 +200,18 @@ Dual `Real` number type keeping track of the results of a primal computation as 
 ## Fields
 $(TYPEDFIELDS)
 """
-struct Dual{P<:Real,T<:Union{ConnectivityTracer,GradientTracer,HessianTracer}} <:
-       AbstractTracer
+struct Dual{P<:Real,T<:AbstractTracer} <: Real
     primal::P
     tracer::T
 
-    function Dual{P,T}(
-        primal::P, tracer::T
-    ) where {P<:Number,T<:Union{ConnectivityTracer,GradientTracer,HessianTracer}}
-        if P <: AbstractTracer
+    function Dual{P,T}(primal::P, tracer::T) where {P<:Number,T<:AbstractTracer}
+        if P <: AbstractTracer || P <: Dual
             error("Primal value of Dual tracer can't be an AbstractTracer.")
         end
         return new{P,T}(primal, tracer)
     end
 end
 Dual(primal::P, tracer::T) where {P,T} = Dual{P,T}(primal, tracer)
-
-# TODO: support ConnectivityTracer
 
 primal(d::Dual) = d.primal
 tracer(d::Dual) = d.tracer
@@ -227,7 +222,7 @@ gradient(d::Dual{P,T}) where {P,T<:HessianTracer} = gradient(d.tracer)
 hessian(d::Dual{P,T}) where {P,T<:HessianTracer} = hessian(d.tracer)
 
 function Dual{P,T}(x::Real) where {P<:Real,T<:AbstractTracer}
-    return Dual(convert(P, x), empty(T))
+    return Dual(convert(P, x), myempty(T))
 end
 
 #===========#
@@ -250,5 +245,5 @@ function create_tracer(::Type{ConnectivityTracer{C}}, ::Real, index::Integer) wh
     return ConnectivityTracer{C}(sparse_vector(C, index))
 end
 function create_tracer(::Type{HessianTracer{G,H}}, ::Real, index::Integer) where {G,H}
-    return HessianTracer{G,H}(sparse_vector(G, index), empty(H))
+    return HessianTracer{G,H}(sparse_vector(G, index), myempty(H))
 end
