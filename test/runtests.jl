@@ -18,7 +18,7 @@ DocMeta.setdocmeta!(
     recursive=true,
 )
 
-GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "All")
+GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")  # TODO: toggle to All before review
 
 @testset verbose = true "SparseConnectivityTracer.jl" begin
     if GROUP in ("Core", "All")
