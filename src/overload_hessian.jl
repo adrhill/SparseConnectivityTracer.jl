@@ -1,21 +1,27 @@
 ## 1-to-1
 
 function hessian_tracer_1_to_1(
-    t::T, is_firstder_zero::Bool, is_seconder_zero::Bool
-) where {G,H,T<:HessianTracer{G,H}}
-    if is_seconder_zero
-        if is_firstder_zero
-            return myempty(T)
-        else
-            return t
-        end
+    t::T, is_firstder_zero::Bool, is_secondder_zero::Bool
+) where {T<:HessianTracer}
+    sg, sh = gradient(t), hessian(t)
+    sg_out, sh_out = hessian_tracer_1_to_1(sg, sh, is_firstder_zero, is_secondder_zero)
+    return T(sg_out, sh_out)
+end
+
+function hessian_tracer_1_to_1(
+    sg::SG, sh::SH, is_firstder_zero::Bool, is_secondder_zero::Bool
+) where {I,SG<:AbstractSet{I},SH<:AbstractSet{Tuple{I,I}}}
+    sg_out = gradient_tracer_1_to_1(sg, is_firstder_zero)
+    sh_out = if is_firstder_zero && is_secondder_zero
+        myempty(SH)
+    elseif !is_firstder_zero && is_secondder_zero
+        sh
+    elseif is_firstder_zero && !is_secondder_zero
+        sg × sg
     else
-        if is_firstder_zero
-            return T(empty(G), ×(H, gradient(t), gradient(t)))
-        else
-            return T(gradient(t), hessian(t) ∪ ×(H, gradient(t), gradient(t)))
-        end
+        union(sh, sg × sg)
     end
+    return (sg_out, sh_out)
 end
 
 function overload_hessian_1_to_1(M, op)
@@ -50,35 +56,50 @@ end
 ## 2-to-1
 
 function hessian_tracer_2_to_1(
-    a::T,
-    b::T,
+    tx::T,
+    ty::T,
     is_firstder_arg1_zero::Bool,
-    is_seconder_arg1_zero::Bool,
+    is_secondder_arg1_zero::Bool,
     is_firstder_arg2_zero::Bool,
-    is_seconder_arg2_zero::Bool,
+    is_secondder_arg2_zero::Bool,
     is_crossder_zero::Bool,
-) where {G,H,T<:HessianTracer{G,H}}
-    grad = myempty(G)
-    hess = myempty(H)
-    if !is_firstder_arg1_zero
-        grad = union(grad, gradient(a)) # TODO: use union!
-        union!(hess, hessian(a))
-    end
-    if !is_firstder_arg2_zero
-        grad = union(grad, gradient(b)) # TODO: use union!
-        union!(hess, hessian(b))
-    end
-    if !is_seconder_arg1_zero
-        union!(hess, ×(H, gradient(a), gradient(a)))
-    end
-    if !is_seconder_arg2_zero
-        union!(hess, ×(H, gradient(b), gradient(b)))
-    end
-    if !is_crossder_zero
-        union!(hess, ×(H, gradient(a), gradient(b)))
-        union!(hess, ×(H, gradient(b), gradient(a)))
-    end
-    return T(grad, hess)
+) where {T<:HessianTracer}
+    sgx, shx = gradient(tx), hessian(tx)
+    sgy, shy = gradient(ty), hessian(ty)
+    sg_out, sh_out = hessian_tracer_2_to_1(
+        sgx,
+        shx,
+        sgy,
+        shy,
+        is_firstder_arg1_zero,
+        is_secondder_arg1_zero,
+        is_firstder_arg2_zero,
+        is_secondder_arg2_zero,
+        is_crossder_zero,
+    )
+    return T(sg_out, sh_out)
+end
+
+function hessian_tracer_2_to_1(
+    sgx::SG,
+    shx::SH,
+    sgy::SG,
+    shy::SH,
+    is_firstder_arg1_zero::Bool,
+    is_secondder_arg1_zero::Bool,
+    is_firstder_arg2_zero::Bool,
+    is_secondder_arg2_zero::Bool,
+    is_crossder_zero::Bool,
+) where {I,SG<:AbstractSet{I},SH<:AbstractSet{Tuple{I,I}}}
+    sg_out = gradient_tracer_2_to_1(sgx, sgy, is_firstder_arg1_zero, is_firstder_arg1_zero)
+    sh_out = myempty(SH)
+    !is_firstder_arg1_zero && union!(sh_out, shx)  # hessian alpha
+    !is_firstder_arg2_zero && union!(sh_out, shy)  # hessian beta
+    !is_secondder_arg1_zero && union_product!(sh_out, sgx, sgx)  # product alpha
+    !is_secondder_arg2_zero && union_product!(sh_out, sgy, sgy)  # product beta
+    !is_crossder_zero && union_product!(sh_out, sgx, sgy)  # cross product 1
+    !is_crossder_zero && union_product!(sh_out, sgy, sgx)  # cross product 2
+    return (sg_out, sh_out)
 end
 
 function overload_hessian_2_to_1(M, op)
@@ -166,9 +187,33 @@ function hessian_tracer_1_to_2(
     is_firstder_out2_zero::Bool,
     is_seconder_out2_zero::Bool,
 ) where {T<:HessianTracer}
-    t1 = hessian_tracer_1_to_1(t, is_firstder_out1_zero, is_seconder_out1_zero)
-    t2 = hessian_tracer_1_to_1(t, is_firstder_out2_zero, is_seconder_out2_zero)
-    return (t1, t2)
+    sg, sh = gradient(t), hessian(t)
+    (sg_out1, sh_out1), (sg_out2, sh_out2) = hessian_tracer_1_to_2(
+        sg,
+        sh,
+        is_firstder_out1_zero,
+        is_seconder_out1_zero,
+        is_firstder_out2_zero,
+        is_seconder_out2_zero,
+    )
+    return (T(sg_out1, sh_out1), T(sg_out2, sh_out2))
+end
+
+function hessian_tracer_1_to_2(
+    sg::SG,
+    sh::SH,
+    is_firstder_out1_zero::Bool,
+    is_secondder_out1_zero::Bool,
+    is_firstder_out2_zero::Bool,
+    is_secondder_out2_zero::Bool,
+) where {I,SG<:AbstractSet{I},SH<:AbstractSet{Tuple{I,I}}}
+    sg_out1, sh_out1 = hessian_tracer_1_to_1(
+        sg, sh, is_firstder_out1_zero, is_secondder_out1_zero
+    )
+    sg_out2, sh_out2 = hessian_tracer_1_to_1(
+        sg, sh, is_firstder_out2_zero, is_secondder_out2_zero
+    )
+    return ((sg_out1, sh_out1), (sg_out2, sh_out2))
 end
 
 function overload_hessian_1_to_2(M, op)
@@ -208,43 +253,21 @@ end
 
 ## Exponent (requires extra types)
 for S in (Integer, Rational, Irrational{:ℯ})
-    function Base.:^(
-        tx::T, y::S
-    ) where {I<:Integer,G<:AbstractSet{I},H<:AbstractSet{Tuple{I,I}},T<:HessianTracer{G,H}}
-        return T(gradient(tx), hessian(tx) ∪ ×(H, gradient(tx), gradient(tx)))
+    function Base.:^(tx::T, y::S) where {T<:HessianTracer}
+        return T(gradient(tx), hessian(tx) ∪ ×(gradient(tx), gradient(tx)))
     end
-    function Base.:^(
-        x::S, ty::T
-    ) where {I<:Integer,G<:AbstractSet{I},H<:AbstractSet{Tuple{I,I}},T<:HessianTracer{G,H}}
-        return T(gradient(ty), hessian(ty) ∪ ×(H, gradient(ty), gradient(ty)))
+    function Base.:^(x::S, ty::T) where {T<:HessianTracer}
+        return T(gradient(ty), hessian(ty) ∪ ×(gradient(ty), gradient(ty)))
     end
 
-    function Base.:^(
-        dx::D, y::S
-    ) where {
-        P,
-        I<:Integer,
-        G<:AbstractSet{I},
-        H<:AbstractSet{Tuple{I,I}},
-        T<:HessianTracer{G,H},
-        D<:Dual{P,T},
-    }
+    function Base.:^(dx::D, y::S) where {P,T<:HessianTracer,D<:Dual{P,T}}
         return Dual(
-            primal(dx)^y, T(gradient(dx), hessian(dx) ∪ ×(H, gradient(dx), gradient(dx)))
+            primal(dx)^y, T(gradient(dx), hessian(dx) ∪ ×(gradient(dx), gradient(dx)))
         )
     end
-    function Base.:^(
-        x::S, dy::D
-    ) where {
-        P,
-        I<:Integer,
-        G<:AbstractSet{I},
-        H<:AbstractSet{Tuple{I,I}},
-        T<:HessianTracer{G,H},
-        D<:Dual{P,T},
-    }
+    function Base.:^(x::S, dy::D) where {P,T<:HessianTracer,D<:Dual{P,T}}
         return Dual(
-            x^primal(dy), T(gradient(dy), hessian(dy) ∪ ×(H, gradient(dy), gradient(dy)))
+            x^primal(dy), T(gradient(dy), hessian(dy) ∪ ×(gradient(dy), gradient(dy)))
         )
     end
 end

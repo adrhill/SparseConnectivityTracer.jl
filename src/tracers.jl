@@ -1,20 +1,24 @@
 abstract type AbstractTracer <: Real end
 
-# Convenience constructor for empty tracers
-myempty(tracer::T) where {T<:AbstractTracer} = myempty(T)
-myempty(T) = T()
+myempty(::T) where {T<:AbstractTracer} = myempty(T)
+myempty(::Type{T}) where {T<:AbstractTracer} = T()
 
-sparse_vector(T, index) = T([index])
+myempty(::S) where {S<:AbstractSet} = myempty(S)
+myempty(::Type{S}) where {S<:AbstractSet} = S()
 
-#================#
-# Elementwise OR #
-#================#
+sparse_vector(T, index::Integer) = T([index])
 
-function ×(::Type{H}, a::G, b::G) where {I,G<:AbstractSet{I},H<:AbstractSet{Tuple{I,I}}}
-    return H((i, j) for i in a, j in b)
+#===================#
+# Cartesian product #
+#===================#
+
+×(a, b) = Set((i, j) for i in a, j in b)
+
+function union_product!(
+    sh::SH, sgx::SG, sgy::SG
+) where {I,SG<:AbstractSet{I},SH<:AbstractSet{Tuple{I,I}}}
+    return union!(sh, ×(sgx, sgy))
 end
-
-×(a::G, b::G) where {I,G<:AbstractSet{I}} = ×(Set{Tuple{I,I}}, a, b)
 
 #====================#
 # ConnectivityTracer #

@@ -4,7 +4,7 @@ using SparseConnectivityTracer: inputs, gradient, hessian, primal, tracer, myemp
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
-const FIRST_ORDER_SET_TYPES = (
+FIRST_ORDER_SET_TYPES = (
     BitSet, Set{UInt64}, DuplicateVector{UInt64}, RecursiveSet{UInt64}, SortedVector{UInt64}
 )
 
