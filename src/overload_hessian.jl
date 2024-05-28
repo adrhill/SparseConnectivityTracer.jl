@@ -91,7 +91,7 @@ function hessian_tracer_2_to_1(
     is_secondder_arg2_zero::Bool,
     is_crossder_zero::Bool,
 ) where {I,SG<:AbstractSet{I},SH<:AbstractSet{Tuple{I,I}}}
-    sg_out = gradient_tracer_2_to_1(sgx, sgy, is_firstder_arg1_zero, is_firstder_arg1_zero)
+    sg_out = gradient_tracer_2_to_1(sgx, sgy, is_firstder_arg1_zero, is_firstder_arg2_zero)
     sh_out = myempty(SH)
     !is_firstder_arg1_zero && union!(sh_out, shx)  # hessian alpha
     !is_firstder_arg2_zero && union!(sh_out, shy)  # hessian beta
