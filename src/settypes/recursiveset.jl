@@ -47,6 +47,10 @@ end
 
 Base.eltype(::Type{RecursiveSet{T}}) where {T} = T
 
+function Base.length(rs::RecursiveSet)
+    return length(collect(rs))  # TODO: very slow, used in `union!` with `Set`
+end
+
 function Base.union(rs1::RecursiveSet{T}, rs2::RecursiveSet{T}) where {T}
     return RecursiveSet{T}(rs1, rs2)
 end
