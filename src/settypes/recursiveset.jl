@@ -46,9 +46,14 @@ function Base.show(io::IO, ::MIME"text/plain", rs::RecursiveSet)
 end
 
 Base.eltype(::Type{RecursiveSet{T}}) where {T} = T
+Base.length(rs::RecursiveSet) = length(collect(rs))  # TODO: slow
 
-function Base.length(rs::RecursiveSet)
-    return length(collect(rs))  # TODO: very slow, used in `union!` with `Set`
+function Base.copy(rs::RecursiveSet{T}) where {T}
+    if !isnothing(rs.s)
+        return RecursiveSet{T}(copy(rs.s))
+    else
+        return RecursiveSet{T}(rs.child1, rs.child2)
+    end
 end
 
 function Base.union(rs1::RecursiveSet{T}, rs2::RecursiveSet{T}) where {T}
@@ -66,12 +71,6 @@ function Base.union!(rs1::RecursiveSet{T}, rs2::RecursiveSet{T}) where {T}
     return rs1
 end
 
-function Base.collect(rs::RecursiveSet{T}) where {T}
-    accumulator = Set{T}()
-    collect_aux!(accumulator, rs)
-    return collect(accumulator)
-end
-
 function collect_aux!(accumulator::Set{T}, rs::RecursiveSet{T})::Nothing where {T}
     if !isnothing(rs.s)
         union!(accumulator, rs.s::Set{T})
@@ -80,6 +79,12 @@ function collect_aux!(accumulator::Set{T}, rs::RecursiveSet{T})::Nothing where {
         collect_aux!(accumulator, rs.child2::RecursiveSet{T})
     end
     return nothing
+end
+
+function Base.collect(rs::RecursiveSet{T}) where {T}
+    accumulator = Set{T}()
+    collect_aux!(accumulator, rs)
+    return collect(accumulator)
 end
 
 Base.iterate(rs::RecursiveSet)             = iterate(collect(rs))

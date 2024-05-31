@@ -18,8 +18,8 @@ function Base.show(io::IO, ::MIME"text/plain", dv::DuplicateVector)
 end
 
 Base.eltype(::Type{DuplicateVector{T}}) where {T} = T
-
-Base.collect(dv::DuplicateVector) = unique!(dv.data)
+Base.length(dv::DuplicateVector) = length(collect(dv))  # TODO: slow
+Base.copy(dv::DuplicateVector{T}) where {T} = DuplicateVector{T}(dv.data)
 
 function Base.union!(a::S, b::S) where {S<:DuplicateVector}
     append!(a.data, b.data)
@@ -29,6 +29,8 @@ end
 function Base.union(a::S, b::S) where {S<:DuplicateVector}
     return S(vcat(a.data, b.data))
 end
+
+Base.collect(dv::DuplicateVector) = unique!(dv.data)
 
 Base.iterate(dv::DuplicateVector)             = iterate(collect(dv))
 Base.iterate(dv::DuplicateVector, i::Integer) = iterate(collect(dv), i)
