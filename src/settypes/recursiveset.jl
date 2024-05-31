@@ -3,16 +3,16 @@
 
 Lazy union of sets.
 """
-struct RecursiveSet{T<:Number} <: AbstractSet{T}
+mutable struct RecursiveSet{T} <: AbstractSet{T}
     s::Union{Nothing,Set{T}}
     child1::Union{Nothing,RecursiveSet{T}}
     child2::Union{Nothing,RecursiveSet{T}}
 
-    function RecursiveSet{T}(s) where {T}
+    function RecursiveSet{T}(s::Union{AbstractSet,AbstractVector}) where {T}
         return new{T}(Set{T}(s), nothing, nothing)
     end
 
-    function RecursiveSet{T}(x::Number) where {T}
+    function RecursiveSet{T}(x) where {T}
         return new{T}(Set{T}(convert(T, x)), nothing, nothing)
     end
 
@@ -37,7 +37,7 @@ function print_recursiveset(io::IO, rs::RecursiveSet{T}; offset) where {T}
     end
 end
 
-function Base.show(io::IO, rs::RecursiveSet{T}) where {T}
+function Base.show(io::IO, rs::RecursiveSet)
     return print_recursiveset(io, rs; offset=0)
 end
 
@@ -45,6 +45,17 @@ Base.eltype(::Type{RecursiveSet{T}}) where {T} = T
 
 function Base.union(rs1::RecursiveSet{T}, rs2::RecursiveSet{T}) where {T}
     return RecursiveSet{T}(rs1, rs2)
+end
+
+function Base.union!(rs1::RecursiveSet{T}, rs2::RecursiveSet{T}) where {T}
+    new_rs1 = if isnothing(rs1.s)
+        RecursiveSet{T}(rs1.child1, rs1.child2)
+    else
+        RecursiveSet{T}(rs1.s)
+    end
+    rs1.child1 = new_rs1
+    rs1.child2 = rs2
+    return rs1
 end
 
 function Base.collect(rs::RecursiveSet{T}) where {T}
@@ -66,6 +77,7 @@ end
 Base.iterate(rs::RecursiveSet)             = iterate(collect(rs))
 Base.iterate(rs::RecursiveSet, i::Integer) = iterate(collect(rs), i)
 
-# TODO: required by `Base.Iterators.ProductIterator` called in method `×` in src/tracers.jl.
-# This is very slow and should be replaced by a custom `×` on `RecursiveSet`s.
-Base.length(rs::RecursiveSet) = length(collect(rs))
+function product(a::RecursiveSet{T}, b::RecursiveSet{T}) where {T}
+    # TODO: slow
+    return RecursiveSet{Tuple{T,T}}(vec(collect(Iterators.product(collect(a), collect(b)))))
+end

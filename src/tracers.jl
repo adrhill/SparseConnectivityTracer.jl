@@ -1,16 +1,38 @@
 abstract type AbstractTracer <: Real end
 
-# Convenience constructor for empty tracers
-myempty(tracer::T) where {T<:AbstractTracer} = myempty(T)
-myempty(T) = T()
+sparse_vector(T, index::Integer) = T([index])
 
-sparse_vector(T, index) = T([index])
+#===================#
+# Set operations    #
+#===================#
 
-#================#
-# Elementwise OR #
-#================#
+myempty(::S) where {S<:AbstractSet} = myempty(S)
+myempty(::Type{S}) where {S<:AbstractSet} = S()
 
-×(a::G, b::G) where {G<:AbstractSet} = Set((i, j) for i in a, j in b)
+function clever_union(a::AbstractSet{I}, b::AbstractSet{I}) where {I}
+    if isempty(a)
+        return b
+    elseif isempty(b)
+        return a
+    else
+        return union(a, b)
+    end
+end
+
+product(a::AbstractSet{I}, b::AbstractSet{I}) where {I} = Set((i, j) for i in a, j in b)
+
+function union_product(
+    sh::SH, sgx::SG, sgy::SG
+) where {I,SG<:AbstractSet{I},SH<:AbstractSet{Tuple{I,I}}}
+    return clever_union(sh, product(sgx, sgy))
+end
+
+function union_product!(
+    sh::SH, sgx::SG, sgy::SG
+) where {I,SG<:AbstractSet{I},SH<:AbstractSet{Tuple{I,I}}}
+    shxy = product(sgx, sgy)
+    return union!(sh, shxy)
+end
 
 #====================#
 # ConnectivityTracer #

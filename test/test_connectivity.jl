@@ -10,6 +10,7 @@ using Test
 const FIRST_ORDER_SET_TYPES = (
     BitSet, Set{Int}, DuplicateVector{Int}, RecursiveSet{Int}, SortedVector{Int}
 )
+
 NNLIB_ACTIVATIONS_S = (
     NNlib.σ,
     NNlib.celu,

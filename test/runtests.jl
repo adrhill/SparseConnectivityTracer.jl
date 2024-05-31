@@ -51,12 +51,8 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
 
     if GROUP in ("Core", "All")
         @testset verbose = true "Set types" begin
-            @info "Testing set types..."
-            @testset "DuplicateVector" begin
-                include("settypes/duplicatevector.jl")
-            end
-            @testset "RecursiveSet" begin
-                include("settypes/recursiveset.jl")
+            @testset "Correctness" begin
+                include("settypes/correctness.jl")
             end
             @testset "SortedVector" begin
                 include("settypes/sortedvector.jl")
