@@ -6,6 +6,7 @@ Base.promote_rule(::Type{N}, ::Type{T}) where {T<:AbstractTracer,N<:Real} = T
 
 Base.big(::Type{T})   where {T<:AbstractTracer} = T
 Base.widen(::Type{T}) where {T<:AbstractTracer} = T
+Base.float(::Type{T}) where {T<:AbstractTracer} = T
 
 Base.convert(::Type{T}, x::Real)   where {T<:AbstractTracer} = myempty(T)
 Base.convert(::Type{T}, t::T)      where {T<:AbstractTracer} = t
@@ -19,7 +20,6 @@ Base.oneunit(::Type{T})     where {T<:AbstractTracer} = myempty(T)
 Base.typemin(::Type{T})     where {T<:AbstractTracer} = myempty(T)
 Base.typemax(::Type{T})     where {T<:AbstractTracer} = myempty(T)
 Base.eps(::Type{T})         where {T<:AbstractTracer} = myempty(T)
-Base.float(::Type{T})       where {T<:AbstractTracer} = myempty(T)
 Base.floatmin(::Type{T})    where {T<:AbstractTracer} = myempty(T)
 Base.floatmax(::Type{T})    where {T<:AbstractTracer} = myempty(T)
 Base.maxintfloat(::Type{T}) where {T<:AbstractTracer} = myempty(T)
@@ -52,6 +52,7 @@ end
 
 Base.big(::Type{D})   where {P,T,D<:Dual{P,T}} = Dual{big(P),T}
 Base.widen(::Type{D}) where {P,T,D<:Dual{P,T}} = Dual{widen(P),T}
+Base.float(::Type{D}) where {P,T,D<:Dual{P,T}} = Dual{float(P),T}
 
 Base.convert(::Type{D}, x::Real) where {P,T,D<:Dual{P,T}}           = Dual(x, myempty(T))
 Base.convert(::Type{D}, d::D)    where {P,T,D<:Dual{P,T}}           = d
