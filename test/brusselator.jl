@@ -19,10 +19,10 @@ end
 
 @testset "$method" for method in (
     TracerSparsityDetector(BitSet),
-    TracerSparsityDetector(Set{UInt64}),
-    TracerSparsityDetector(DuplicateVector{UInt64}),
-    TracerSparsityDetector(RecursiveSet{UInt64}),
-    TracerSparsityDetector(SortedVector{UInt64}),
+    TracerSparsityDetector(Set{Int}),
+    TracerSparsityDetector(DuplicateVector{Int}),
+    TracerSparsityDetector(RecursiveSet{Int}),
+    TracerSparsityDetector(SortedVector{Int}),
 )
     test_brusselator(method)
 end

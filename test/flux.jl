@@ -7,7 +7,7 @@ using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
 const SET_TYPES = (
-    BitSet, Set{UInt64}, DuplicateVector{UInt64}, RecursiveSet{UInt64}, SortedVector{UInt64}
+    BitSet, Set{Int}, DuplicateVector{Int}, RecursiveSet{Int}, SortedVector{Int}
 )
 const INPUT_FLUX = reshape(
     [
