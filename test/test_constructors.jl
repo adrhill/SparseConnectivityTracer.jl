@@ -86,7 +86,7 @@ is_tracer_empty(d::Dual)               = is_tracer_empty(tracer(d))
     end
 
     # Constant constructors by type
-    @testset "$f" for f in (
+    @testset "Constant construction with $f" for f in (
         zero, one, oneunit, typemin, typemax, eps, floatmin, floatmax, maxintfloat
     )
         @testset "$T" for T in (C, G, H, DC, DG, DH)
@@ -96,6 +96,21 @@ is_tracer_empty(d::Dual)               = is_tracer_empty(tracer(d))
             if T <: Dual
                 @test primal(t) == f(TD)
             end
+        end
+    end
+
+    # Test type conversions
+    @testset "Type conversion with $f" for f in (big, widen, float)
+        @testset "First order $T" for T in (C, G, H)
+            @test f(T) == T
+        end
+    end
+    @testset "Dual with $T" for T in (C, G, H)
+        @testset "$N" for N in (Int, Float32, Irrational)
+            N_OUT = f(N)
+            D_IN = Dual{N,T}
+            D_OUT = Dual{N_OUT,T}
+            @test f(D_IN) == D_OUT
         end
     end
 end
