@@ -6,7 +6,6 @@ sparse_vector(T, index::Integer) = T([index])
 # Set operations    #
 #===================#
 
-myempty(::S) where {S<:AbstractSet} = myempty(S)
 myempty(::Type{S}) where {S<:AbstractSet} = S()
 
 function clever_union(a::AbstractSet{I}, b::AbstractSet{I}) where {I}
