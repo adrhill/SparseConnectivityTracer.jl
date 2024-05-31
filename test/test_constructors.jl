@@ -5,7 +5,7 @@ using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
 const FIRST_ORDER_SET_TYPES = (
-    BitSet, Set{UInt64}, DuplicateVector{UInt64}, RecursiveSet{UInt64}, SortedVector{UInt64}
+    BitSet, Set{Int}, DuplicateVector{Int}, RecursiveSet{Int}, SortedVector{Int}
 )
 
 is_tracer_empty(t::ConnectivityTracer) = isempty(inputs(t))
