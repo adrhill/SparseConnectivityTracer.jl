@@ -18,11 +18,12 @@ DocMeta.setdocmeta!(
     recursive=true,
 )
 
-GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "All")
+GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
 
 @testset verbose = true "SparseConnectivityTracer.jl" begin
     if GROUP in ("Core", "All")
         @testset verbose = true "Formalities" begin
+            @info "Testing formalities..."
             if VERSION >= v"1.10"
                 @testset "Code formatting" begin
                     @test JuliaFormatter.format(
@@ -48,8 +49,9 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "All")
         end
     end
 
-    @testset verbose = true "Set types" begin
-        if GROUP in ("Core", "All")
+    if GROUP in ("Core", "All")
+        @testset verbose = true "Set types" begin
+            @info "Testing set types..."
             @testset "DuplicateVector" begin
                 include("settypes/duplicatevector.jl")
             end
@@ -62,16 +64,18 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "All")
         end
     end
 
-    @testset "Classification of operators by diff'ability" begin
-        if GROUP in ("Core", "All")
+    if GROUP in ("Core", "All")
+        @info "Testing operator classification..."
+        @testset "Classification of operators by diff'ability" begin
             include("classification.jl")
         end
     end
 
-    @testset verbose = true "Simple examples" begin
-        if GROUP in ("Core", "All")
+    if GROUP in ("Core", "All")
+        @info "Testing simple examples..."
+        @testset verbose = true "Simple examples" begin
             @testset "Tracer Construction" begin
-                include("test_connectivity.jl")
+                include("test_constructors.jl")
             end
             @testset "ConnectivityTracer" begin
                 include("test_connectivity.jl")
@@ -85,8 +89,9 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "All")
         end
     end
 
-    @testset verbose = true "Real-world examples" begin
-        if GROUP in ("Core", "All")
+    if GROUP in ("Core", "All")
+        @info "Testing real-world examples..."
+        @testset verbose = true "Real-world examples" begin
             @testset "Brusselator" begin
                 include("brusselator.jl")
             end
@@ -94,14 +99,19 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "All")
                 include("flux.jl")
             end
         end
-        if GROUP in ("NLPModels", "All")
-            @testset "NLPModels" begin
-                include("nlpmodels.jl")
-            end
+    end
+
+    if GROUP in ("Core", "All")
+        @info "Testing ADTypes integration..."
+        @testset "ADTypes integration" begin
+            include("adtypes.jl")
         end
     end
 
-    @testset "ADTypes integration" begin
-        GROUP in ("Core", "All") && include("adtypes.jl")
+    if GROUP in ("NLPModels", "All")
+        @info "Testing NLPModels..."
+        @testset "NLPModels" begin
+            include("nlpmodels.jl")
+        end
     end
 end
