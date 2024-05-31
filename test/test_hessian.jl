@@ -174,6 +174,22 @@ SECOND_ORDER_SET_TYPE_TUPLES = (
                 0  0  0  1
                 0  0  1  0
             ]
+
+            h = hessian_sparsity(x -> ifelse(x[1], x[1]^x[2], 1.0), rand(4), method)
+            @test h == [
+                1  1  0  0
+                1  1  0  0
+                0  0  0  0
+                0  0  0  0
+            ]
+
+            h = hessian_sparsity(x -> ifelse(x[1], 1.0, x[3] * x[4]), rand(4), method)
+            @test h == [
+                0  0  0  0
+                0  0  0  0
+                0  0  0  1
+                0  0  1  0
+            ]
         end
 
         function f_ampgo07(x)

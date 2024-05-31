@@ -96,6 +96,14 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
             @test connectivity_pattern(
                 x -> ifelse(x[2] < x[3], x[1] + x[2], x[3] * x[4]), [1 2 3 4], S
             ) == [1 1 1 1]
+
+            @test connectivity_pattern(
+                x -> ifelse(x[2] < x[3], x[1] + x[2], 1.0), [1 2 3 4], S
+            ) == [1 1 0 0]
+
+            @test connectivity_pattern(
+                x -> ifelse(x[2] < x[3], 1.0, x[3] * x[4]), [1 2 3 4], S
+            ) == [0 0 1 1]
         end
 
         function f_ampgo07(x)
