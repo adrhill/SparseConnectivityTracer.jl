@@ -1,6 +1,6 @@
 # Test construction and conversions of internal tracer types
 using SparseConnectivityTracer: ConnectivityTracer, GradientTracer, HessianTracer, Dual
-using SparseConnectivityTracer: inputs, gradient, hessian, primal, tracer, myempty
+using SparseConnectivityTracer: inputs, primal, tracer, myempty
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
@@ -9,8 +9,8 @@ const FIRST_ORDER_SET_TYPES = (
 )
 
 is_tracer_empty(t::ConnectivityTracer) = isempty(inputs(t))
-is_tracer_empty(t::GradientTracer)     = isempty(gradient(t))
-is_tracer_empty(t::HessianTracer)      = isempty(gradient(t)) && isempty(hessian(t))
+is_tracer_empty(t::GradientTracer)     = isempty(SparseConnectivityTracer.gradient(t))
+is_tracer_empty(t::HessianTracer)      = isempty(SparseConnectivityTracer.gradient(t)) && isempty(SparseConnectivityTracer.hessian(t))
 is_tracer_empty(d::Dual)               = is_tracer_empty(tracer(d))
 
 @testset "Set type $S1" for S1 in FIRST_ORDER_SET_TYPES
