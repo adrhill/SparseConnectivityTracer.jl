@@ -113,4 +113,12 @@ is_tracer_empty(d::Dual)               = is_tracer_empty(tracer(d))
             end
         end
     end
+
+    # Type casting
+    f_cast(x::T) where {T} = T(x)
+    @testset "Type casting on $T" for T in (C, G, H)
+        t_in = myempty(T)
+        t_out = f_cast(t_in)
+        @test isa(t_out, T)
+    end
 end
