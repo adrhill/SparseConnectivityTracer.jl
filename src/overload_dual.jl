@@ -12,7 +12,6 @@ for fn in (
     :isone,
     :isreal,
     :iszero,
-    :real,
 )
     @eval Base.$fn(d::D) where {D<:Dual} = $fn(primal(d))
     @eval function Base.$fn(t::T) where {T<:AbstractTracer}

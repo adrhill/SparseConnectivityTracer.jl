@@ -72,6 +72,23 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
         @test jacobian_sparsity(x -> erf(x[1]), rand(2), method) == [1 0]
         @test jacobian_sparsity(x -> beta(x[1], x[2]), rand(3), method) == [1 1 0]
 
+        # Missing primal errors
+        @testset "MissingPrimalError on $f" for f in (
+            iseven,
+            isfinite,
+            isinf,
+            isinteger,
+            ismissing,
+            isnan,
+            isnothing,
+            isodd,
+            isone,
+            isreal,
+            iszero,
+        )
+            @test_throws MissingPrimalError jacobian_sparsity(f, rand(), method)
+        end
+
         # NNlib extension
         for f in NNLIB_ACTIVATIONS
             @test jacobian_sparsity(f, 1, method) ≈ [1;;]
@@ -82,6 +99,14 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
             @test jacobian_sparsity(
                 x -> ifelse(x[2] < x[3], x[1] + x[2], x[3] * x[4]), [1 2 3 4], method
             ) == [1 1 1 1]
+
+            @test jacobian_sparsity(
+                x -> ifelse(x[2] < x[3], x[1] + x[2], 1.0), [1 2 3 4], method
+            ) == [1 1 0 0]
+
+            @test jacobian_sparsity(
+                x -> ifelse(x[2] < x[3], 1.0, x[3] * x[4]), [1 2 3 4], method
+            ) == [0 0 1 1]
         end
 
         function f_ampgo07(x)
@@ -100,7 +125,7 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
     end
 end
 
-@testset "Jacobian Local" verbose = true begin
+@testset "Jacobian Local" begin
     @testset "Set type $S" for S in FIRST_ORDER_SET_TYPES
         method = TracerLocalSparsityDetector(S)
 
@@ -137,6 +162,51 @@ end
         @test jacobian_sparsity(
             x -> x[1] < x[2] ? x[3] : x[4], [2.0, 1.0, 3.0, 4.0], method
         ) == [0 0 0 1;]
+
+        @test jacobian_sparsity(x -> x[1] >= x[2] ? x[1] : x[2], [1.0, 2.0], method) ==
+            [0 1;]
+        @test jacobian_sparsity(x -> x[1] >= x[2] ? x[1] : x[2], [2.0, 1.0], method) ==
+            [1 0;]
+        @test jacobian_sparsity(x -> x[1] >= x[2] ? x[1] : x[2], [1.0, 1.0], method) ==
+            [1 0;]
+
+        @test jacobian_sparsity(x -> x[1] >= x[2] ? x[1] : x[2], [1.0, 2.0], method) ==
+            [0 1;]
+        @test jacobian_sparsity(x -> x[1] >= x[2] ? x[1] : x[2], [2.0, 1.0], method) ==
+            [1 0;]
+        @test jacobian_sparsity(x -> x[1] >= x[2] ? x[1] : x[2], [1.0, 1.0], method) ==
+            [1 0;]
+
+        @test jacobian_sparsity(x -> x[1] <= x[2] ? x[1] : x[2], [1.0, 2.0], method) ==
+            [1 0;]
+        @test jacobian_sparsity(x -> x[1] <= x[2] ? x[1] : x[2], [2.0, 1.0], method) ==
+            [0 1;]
+        @test jacobian_sparsity(x -> x[1] <= x[2] ? x[1] : x[2], [1.0, 1.0], method) ==
+            [1 0;]
+
+        @test jacobian_sparsity(x -> x[1] == x[2] ? x[1] : x[2], [1.0, 2.0], method) ==
+            [0 1;]
+        @test jacobian_sparsity(x -> x[1] == x[2] ? x[1] : x[2], [2.0, 1.0], method) ==
+            [0 1;]
+        @test jacobian_sparsity(x -> x[1] == x[2] ? x[1] : x[2], [1.0, 1.0], method) ==
+            [1 0;]
+
+        @test jacobian_sparsity(x -> x[1] > 1 ? x[1] : x[2], [0.0, 2.0], method) == [0 1;]
+        @test jacobian_sparsity(x -> x[1] > 1 ? x[1] : x[2], [2.0, 0.0], method) == [1 0;]
+        @test jacobian_sparsity(x -> x[1] >= 1 ? x[1] : x[2], [0.0, 2.0], method) == [0 1;]
+        @test jacobian_sparsity(x -> x[1] >= 1 ? x[1] : x[2], [2.0, 0.0], method) == [1 0;]
+        @test jacobian_sparsity(x -> x[1] < 1 ? x[1] : x[2], [0.0, 2.0], method) == [1 0;]
+        @test jacobian_sparsity(x -> x[1] < 1 ? x[1] : x[2], [2.0, 0.0], method) == [0 1;]
+        @test jacobian_sparsity(x -> x[1] <= 1 ? x[1] : x[2], [0.0, 2.0], method) == [1 0;]
+        @test jacobian_sparsity(x -> x[1] <= 1 ? x[1] : x[2], [2.0, 0.0], method) == [0 1;]
+        @test jacobian_sparsity(x -> 1 > x[2] ? x[1] : x[2], [0.0, 2.0], method) == [0 1;]
+        @test jacobian_sparsity(x -> 1 > x[2] ? x[1] : x[2], [2.0, 0.0], method) == [1 0;]
+        @test jacobian_sparsity(x -> 1 >= x[2] ? x[1] : x[2], [0.0, 2.0], method) == [0 1;]
+        @test jacobian_sparsity(x -> 1 >= x[2] ? x[1] : x[2], [2.0, 0.0], method) == [1 0;]
+        @test jacobian_sparsity(x -> 1 < x[2] ? x[1] : x[2], [0.0, 2.0], method) == [1 0;]
+        @test jacobian_sparsity(x -> 1 < x[2] ? x[1] : x[2], [2.0, 0.0], method) == [0 1;]
+        @test jacobian_sparsity(x -> 1 <= x[2] ? x[1] : x[2], [0.0, 2.0], method) == [1 0;]
+        @test jacobian_sparsity(x -> 1 <= x[2] ? x[1] : x[2], [2.0, 0.0], method) == [0 1;]
 
         # Code coverage
         @test jacobian_sparsity(x -> [sincos(x)...], 1, method) ≈ [1; 1]

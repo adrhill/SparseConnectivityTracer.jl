@@ -148,12 +148,45 @@ SECOND_ORDER_SET_TYPE_TUPLES = (
             0 1 0 0 1
         ]
 
+        # Missing primal errors
+        @testset "MissingPrimalError on $f" for f in (
+            iseven,
+            isfinite,
+            isinf,
+            isinteger,
+            ismissing,
+            isnan,
+            isnothing,
+            isodd,
+            isone,
+            isreal,
+            iszero,
+        )
+            @test_throws MissingPrimalError hessian_sparsity(f, rand(), method)
+        end
+
         # ifelse and comparisons
         if VERSION >= v"1.8"
             h = hessian_sparsity(x -> ifelse(x[1], x[1]^x[2], x[3] * x[4]), rand(4), method)
             @test h == [
                 1  1  0  0
                 1  1  0  0
+                0  0  0  1
+                0  0  1  0
+            ]
+
+            h = hessian_sparsity(x -> ifelse(x[1], x[1]^x[2], 1.0), rand(4), method)
+            @test h == [
+                1  1  0  0
+                1  1  0  0
+                0  0  0  0
+                0  0  0  0
+            ]
+
+            h = hessian_sparsity(x -> ifelse(x[1], 1.0, x[3] * x[4]), rand(4), method)
+            @test h == [
+                0  0  0  0
+                0  0  0  0
                 0  0  0  1
                 0  0  1  0
             ]

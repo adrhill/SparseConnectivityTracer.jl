@@ -48,7 +48,16 @@ is_tracer_empty(d::Dual)               = is_tracer_empty(tracer(d))
             @test all(d -> eltype(primal(d)) == TD, B)
         end
 
-        # From matrix of tracers
+        # 1-arg
+        BO = similar(B)
+        @test eltype(B) == T
+        @test size(B) == (2, 3)
+        @test all(is_tracer_empty, B)
+        if T <: Dual
+            @test all(d -> eltype(primal(d)) == TD, B)
+        end
+
+        # 2-arg from matrix of tracers
         BD = similar(B, T)
         @test eltype(BD) == T
         @test size(BD) == (2, 3)
@@ -57,7 +66,7 @@ is_tracer_empty(d::Dual)               = is_tracer_empty(tracer(d))
             @test all(d -> eltype(primal(d)) == TD, BD)
         end
 
-        # From matrix of tracers, custom size
+        # 2-arg from matrix of tracers, custom size
         BD2 = similar(B, 4, 5)
         @test eltype(BD2) == T
         @test size(BD2) == (4, 5)
@@ -112,5 +121,13 @@ is_tracer_empty(d::Dual)               = is_tracer_empty(tracer(d))
                 @test f(D_IN) == D_OUT
             end
         end
+    end
+
+    # Type casting
+    f_cast(x::T) where {T} = T(x)
+    @testset "Type casting on $T" for T in (C, G, H)
+        t_in = myempty(T)
+        t_out = f_cast(t_in)
+        @test isa(t_out, T)
     end
 end
