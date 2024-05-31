@@ -43,6 +43,8 @@ jobs:
         env:
           JULIA_SCT_TEST_GROUP: ${{ matrix.group }}
       - uses: julia-actions/julia-processcoverage@v1
+        with:
+          directories: src,ext,test      
       - uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
