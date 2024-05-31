@@ -74,6 +74,23 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
             @test connectivity_pattern(f, 1, S) ≈ [1;;]
         end
 
+        # Missing primal errors
+        @testset "MissingPrimalError on $f" for f in (
+            iseven,
+            isfinite,
+            isinf,
+            isinteger,
+            ismissing,
+            isnan,
+            isnothing,
+            isodd,
+            isone,
+            isreal,
+            iszero,
+        )
+            @test_throws MissingPrimalError connectivity_pattern(f, rand(), S)
+        end
+
         # ifelse and comparisons
         if VERSION >= v"1.8"
             @test connectivity_pattern(

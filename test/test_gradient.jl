@@ -72,6 +72,23 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
         @test jacobian_sparsity(x -> erf(x[1]), rand(2), method) == [1 0]
         @test jacobian_sparsity(x -> beta(x[1], x[2]), rand(3), method) == [1 1 0]
 
+        # Missing primal errors
+        @testset "MissingPrimalError on $f" for f in (
+            iseven,
+            isfinite,
+            isinf,
+            isinteger,
+            ismissing,
+            isnan,
+            isnothing,
+            isodd,
+            isone,
+            isreal,
+            iszero,
+        )
+            @test_throws MissingPrimalError jacobian_sparsity(f, rand(), method)
+        end
+
         # NNlib extension
         for f in NNLIB_ACTIVATIONS
             @test jacobian_sparsity(f, 1, method) ≈ [1;;]
@@ -100,7 +117,7 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
     end
 end
 
-@testset "Jacobian Local" verbose = true begin
+@testset "Jacobian Local" begin
     @testset "Set type $S" for S in FIRST_ORDER_SET_TYPES
         method = TracerLocalSparsityDetector(S)
 
