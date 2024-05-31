@@ -20,12 +20,6 @@ end
 
 product(a::AbstractSet{I}, b::AbstractSet{I}) where {I} = Set((i, j) for i in a, j in b)
 
-function union_product(
-    sh::SH, sgx::SG, sgy::SG
-) where {I,SG<:AbstractSet{I},SH<:AbstractSet{Tuple{I,I}}}
-    return clever_union(sh, product(sgx, sgy))
-end
-
 function union_product!(
     sh::SH, sgx::SG, sgy::SG
 ) where {I,SG<:AbstractSet{I},SH<:AbstractSet{Tuple{I,I}}}

@@ -17,9 +17,9 @@ function hessian_tracer_1_to_1(
     elseif !is_firstder_zero && is_secondder_zero
         sh
     elseif is_firstder_zero && !is_secondder_zero
-        product(sg, sg)
+        union_product!(myempty(SH), sg, sg)
     else
-        union_product(sh, sg, sg)
+        union_product!(copy(sh), sg, sg)
     end
     return (sg_out, sh_out)
 end
@@ -254,22 +254,26 @@ end
 ## Exponent (requires extra types)
 for S in (Integer, Rational, Irrational{:ℯ})
     function Base.:^(tx::T, y::S) where {T<:HessianTracer}
-        return T(gradient(tx), union_product(hessian(tx), gradient(tx), gradient(tx)))
+        return T(
+            gradient(tx), union_product!(copy(hessian(tx)), gradient(tx), gradient(tx))
+        )
     end
     function Base.:^(x::S, ty::T) where {T<:HessianTracer}
-        return T(gradient(ty), union_product(hessian(ty), gradient(ty), gradient(ty)))
+        return T(
+            gradient(ty), union_product!(copy(hessian(ty)), gradient(ty), gradient(ty))
+        )
     end
 
     function Base.:^(dx::D, y::S) where {P,T<:HessianTracer,D<:Dual{P,T}}
         return Dual(
             primal(dx)^y,
-            T(gradient(dx), union_product(hessian(dx), gradient(dx), gradient(dx))),
+            T(gradient(dx), union_product!(copy(hessian(dx)), gradient(dx), gradient(dx))),
         )
     end
     function Base.:^(x::S, dy::D) where {P,T<:HessianTracer,D<:Dual{P,T}}
         return Dual(
             x^primal(dy),
-            T(gradient(dy), union_product(hessian(dy), gradient(dy), gradient(dy))),
+            T(gradient(dy), union_product!(copy(hessian(dy)), gradient(dy), gradient(dy))),
         )
     end
 end

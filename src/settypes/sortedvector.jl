@@ -28,11 +28,15 @@ function Base.convert(::Type{SortedVector{T}}, v::Vector{T}) where {T}
     return SortedVector{T}(v; sorted=false)
 end
 
-Base.length(v::SortedVector) = length(v.data)
-Base.size(v::SortedVector) = size(v.data)
-Base.getindex(v::SortedVector, i) = v.data[i]
-Base.IndexStyle(::Type{SortedVector{T}}) where {T} = IndexStyle(Vector{T})
 Base.show(io::IO, v::SortedVector) = print(io, "SortedVector($(v.data))")
+
+function Base.show(io::IO, ::MIME"text/plain", dv::SortedVector)
+    return print(io, "SortedVector($(dv.data))")
+end
+
+Base.eltype(::Type{SortedVector{T}}) where {T} = T
+Base.length(v::SortedVector) = length(v.data)
+Base.copy(v::SortedVector{T}) where {T} = SortedVector{T}(copy(v.data); sorted=true)
 
 function merge_sorted!(result::Vector{T}, left::Vector{T}, right::Vector{T}) where {T}
     resize!(result, length(left) + length(right))
@@ -82,6 +86,8 @@ function Base.union!(v1::SortedVector{T}, v2::SortedVector{T}) where {T}
     merge_sorted!(v1.data, v2.data)
     return v1
 end
+
+Base.collect(v::SortedVector) = v.data
 
 Base.iterate(v::SortedVector)             = iterate(v.data)
 Base.iterate(v::SortedVector, i::Integer) = iterate(v.data, i)

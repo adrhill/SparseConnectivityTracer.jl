@@ -11,13 +11,15 @@ struct DuplicateVector{T} <: AbstractSet{T}
     DuplicateVector{T}() where {T} = new{T}(T[])
 end
 
-function Base.show(io::IO, dv::DuplicateVector)
+Base.show(io::IO, dv::DuplicateVector) = print(io, "DuplicateVector($(dv.data))")
+
+function Base.show(io::IO, ::MIME"text/plain", dv::DuplicateVector)
     return print(io, "DuplicateVector($(dv.data))")
 end
 
 Base.eltype(::Type{DuplicateVector{T}}) where {T} = T
-
-Base.collect(dv::DuplicateVector) = unique!(dv.data)
+Base.length(dv::DuplicateVector) = length(collect(dv))  # TODO: slow
+Base.copy(dv::DuplicateVector{T}) where {T} = DuplicateVector{T}(dv.data)
 
 function Base.union!(a::S, b::S) where {S<:DuplicateVector}
     append!(a.data, b.data)
@@ -27,6 +29,8 @@ end
 function Base.union(a::S, b::S) where {S<:DuplicateVector}
     return S(vcat(a.data, b.data))
 end
+
+Base.collect(dv::DuplicateVector) = unique!(dv.data)
 
 Base.iterate(dv::DuplicateVector)             = iterate(collect(dv))
 Base.iterate(dv::DuplicateVector, i::Integer) = iterate(collect(dv), i)
