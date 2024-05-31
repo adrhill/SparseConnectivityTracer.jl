@@ -59,7 +59,7 @@ function gradient_tracer_2_to_1(
     elseif is_firstder_arg1_zero && !is_firstder_arg2_zero
         return sy
     else
-        return union(sx, sy)
+        return clever_union(sx, sy)
     end
 end
 

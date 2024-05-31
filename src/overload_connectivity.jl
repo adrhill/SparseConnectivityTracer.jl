@@ -63,7 +63,7 @@ function connectivity_tracer_2_to_1(
     elseif is_influence_arg1_zero && !is_influence_arg2_zero
         return sy
     else
-        return union(sx, sy)
+        return clever_union(sx, sy)
     end
 end
 

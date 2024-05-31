@@ -15,10 +15,6 @@ function Base.show(io::IO, dv::DuplicateVector)
     return print(io, "DuplicateVector($(dv.data))")
 end
 
-function Base.show(io::IO, ::MIME"text/plain", dv::DuplicateVector)
-    return print(io, "DuplicateVector($(dv.data))")
-end
-
 Base.eltype(::Type{DuplicateVector{T}}) where {T} = T
 
 Base.collect(dv::DuplicateVector) = unique!(dv.data)
@@ -35,6 +31,6 @@ end
 Base.iterate(dv::DuplicateVector)             = iterate(collect(dv))
 Base.iterate(dv::DuplicateVector, i::Integer) = iterate(collect(dv), i)
 
-function ×(a::DuplicateVector{T}, b::DuplicateVector{T}) where {T}
+function product(a::DuplicateVector{T}, b::DuplicateVector{T}) where {T}
     return DuplicateVector{Tuple{T,T}}(vec(collect(Iterators.product(a.data, b.data))))
 end

@@ -1,23 +1,37 @@
 abstract type AbstractTracer <: Real end
 
-myempty(::T) where {T<:AbstractTracer} = myempty(T)
-myempty(::Type{T}) where {T<:AbstractTracer} = T()
+sparse_vector(T, index::Integer) = T([index])
+
+#===================#
+# Set operations    #
+#===================#
 
 myempty(::S) where {S<:AbstractSet} = myempty(S)
 myempty(::Type{S}) where {S<:AbstractSet} = S()
 
-sparse_vector(T, index::Integer) = T([index])
+function clever_union(a::AbstractSet{I}, b::AbstractSet{I}) where {I}
+    if isempty(a)
+        return b
+    elseif isempty(b)
+        return a
+    else
+        return union(a, b)
+    end
+end
 
-#===================#
-# Cartesian product #
-#===================#
+product(a::AbstractSet{I}, b::AbstractSet{I}) where {I} = Set((i, j) for i in a, j in b)
 
-×(a, b) = Set((i, j) for i in a, j in b)
+function union_product(
+    sh::SH, sgx::SG, sgy::SG
+) where {I,SG<:AbstractSet{I},SH<:AbstractSet{Tuple{I,I}}}
+    return clever_union(sh, product(sgx, sgy))
+end
 
 function union_product!(
     sh::SH, sgx::SG, sgy::SG
 ) where {I,SG<:AbstractSet{I},SH<:AbstractSet{Tuple{I,I}}}
-    return union!(sh, ×(sgx, sgy))
+    shxy = product(sgx, sgy)
+    return union!(sh, shxy)
 end
 
 #====================#

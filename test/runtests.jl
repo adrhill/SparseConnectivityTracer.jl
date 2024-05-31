@@ -50,20 +50,8 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")  # TODO: toggle to All before r
 
     @testset verbose = true "Set types" begin
         if GROUP in ("Core", "All")
-            @testset "BitSet" begin
-                include("settypes/bitset.jl")
-            end
-            @testset "Set" begin
-                include("settypes/set.jl")
-            end
-            @testset "SortedVector" begin
-                include("settypes/sortedvector.jl")
-            end
-            @testset "DuplicateVector" begin
-                include("settypes/duplicatevector.jl")
-            end
-            @testset "RecursiveSet" begin
-                include("settypes/recursiveset.jl")
+            @testset "Correctness" begin
+                include("settypes/correctness.jl")
             end
             @testset "SortedVector" begin
                 include("settypes/sortedvector.jl")

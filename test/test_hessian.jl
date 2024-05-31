@@ -10,8 +10,8 @@ SECOND_ORDER_SET_TYPE_TUPLES = (
     (BitSet, Set{Tuple{Int,Int}}),  #
     (Set{UInt64}, Set{Tuple{UInt64,UInt64}}),
     (DuplicateVector{UInt64}, DuplicateVector{Tuple{UInt64,UInt64}}),
-    # (RecursiveSet{UInt64}, RecursiveSet{Tuple{UInt64,UInt64}}),  # TODO: code union!
-    # (SortedVector{UInt64}, SortedVector{Tuple{UInt64,UInt64}}),  # TODO: fix bug
+    (SortedVector{UInt64}, SortedVector{Tuple{UInt64,UInt64}}),
+    # (RecursiveSet{UInt64}, RecursiveSet{Tuple{UInt64,UInt64}}),  # TODO: buggy
 )
 
 @testset "Global Hessian" begin
