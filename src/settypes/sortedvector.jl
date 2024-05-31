@@ -28,11 +28,12 @@ function Base.convert(::Type{SortedVector{T}}, v::Vector{T}) where {T}
     return SortedVector{T}(v; sorted=false)
 end
 
+Base.show(io::IO, v::SortedVector) = print(io, "SortedVector($(v.data))")
+
 Base.length(v::SortedVector) = length(v.data)
 Base.size(v::SortedVector) = size(v.data)
 Base.getindex(v::SortedVector, i) = v.data[i]
 Base.IndexStyle(::Type{SortedVector{T}}) where {T} = IndexStyle(Vector{T})
-Base.show(io::IO, v::SortedVector) = print(io, "SortedVector($(v.data))")
 
 function merge_sorted!(result::Vector{T}, left::Vector{T}, right::Vector{T}) where {T}
     resize!(result, length(left) + length(right))

@@ -11,7 +11,9 @@ struct DuplicateVector{T} <: AbstractSet{T}
     DuplicateVector{T}() where {T} = new{T}(T[])
 end
 
-function Base.show(io::IO, dv::DuplicateVector)
+Base.show(io::IO, dv::DuplicateVector) = print(io, "DuplicateVector($(dv.data))")
+
+function Base.show(io::IO, ::MIME"text/plain", dv::DuplicateVector)
     return print(io, "DuplicateVector($(dv.data))")
 end
 

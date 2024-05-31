@@ -41,6 +41,10 @@ function Base.show(io::IO, rs::RecursiveSet)
     return print_recursiveset(io, rs; offset=0)
 end
 
+function Base.show(io::IO, ::MIME"text/plain", rs::RecursiveSet)
+    return print_recursiveset(io, rs; offset=0)
+end
+
 Base.eltype(::Type{RecursiveSet{T}}) where {T} = T
 
 function Base.union(rs1::RecursiveSet{T}, rs2::RecursiveSet{T}) where {T}
