@@ -7,8 +7,8 @@ using SpecialFunctions: erf, beta
 using NNlib: NNlib
 using Test
 
-FIRST_ORDER_SET_TYPES = (
-    BitSet, Set{UInt64}, DuplicateVector{UInt64}, RecursiveSet{UInt64}, SortedVector{UInt64}
+const FIRST_ORDER_SET_TYPES = (
+    BitSet, Set{Int}, DuplicateVector{Int}, RecursiveSet{Int}, SortedVector{Int}
 )
 
 NNLIB_ACTIVATIONS_S = (

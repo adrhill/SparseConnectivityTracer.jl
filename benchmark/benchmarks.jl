@@ -2,9 +2,7 @@ using BenchmarkTools
 using SparseConnectivityTracer
 using SparseConnectivityTracer: DuplicateVector, SortedVector, RecursiveSet
 
-SET_TYPES = (
-    BitSet, Set{UInt64}, DuplicateVector{UInt64}, RecursiveSet{UInt64}, SortedVector{UInt64}
-)
+SET_TYPES = (BitSet, Set{Int}, DuplicateVector{Int}, RecursiveSet{Int}, SortedVector{Int})
 
 include("jacobian.jl")
 include("hessian.jl")
