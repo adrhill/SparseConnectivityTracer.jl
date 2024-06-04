@@ -4,7 +4,7 @@
 Singleton struct for integration with the sparsity detection framework of [ADTypes.jl](https://github.com/SciML/ADTypes.jl).
 
 Computes global sparsity patterns over the entire input domain.
-For local sparsity patterns at a specific input point, use [`TracerSparsityDetector`](@ref).
+For local sparsity patterns at a specific input point, use [`TracerLocalSparsityDetector`](@ref).
 
 # Example
 
