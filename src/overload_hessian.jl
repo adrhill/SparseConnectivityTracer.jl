@@ -3,9 +3,20 @@
 function hessian_tracer_1_to_1(
     t::T, is_firstder_zero::Bool, is_secondder_zero::Bool
 ) where {T<:HessianTracer}
-    sg, sh = gradient(t), hessian(t)
+    if t.isempty
+        return t
+    else
+        pattern = hessian_tracer_1_to_1(t.pattern, is_firstder_zero, is_secondder_zero)
+        return T(pattern)
+    end
+end
+
+function hessian_tracer_1_to_1(
+    p::P, is_firstder_zero::Bool, is_secondder_zero::Bool
+) where {P<:DualSetHessianPattern}
+    sg, sh = gradient(p), hessian(p)
     sg_out, sh_out = hessian_tracer_1_to_1(sg, sh, is_firstder_zero, is_secondder_zero)
-    return T(sg_out, sh_out)
+    return HessianTracer{P}(P(sg_out, sh_out))
 end
 
 function hessian_tracer_1_to_1(
@@ -64,8 +75,30 @@ function hessian_tracer_2_to_1(
     is_secondder_arg2_zero::Bool,
     is_crossder_zero::Bool,
 ) where {T<:HessianTracer}
-    sgx, shx = gradient(tx), hessian(tx)
-    sgy, shy = gradient(ty), hessian(ty)
+    # TODO: make use of `isempty` field
+    pattern = hessian_tracer_2_to_1(
+        tx.pattern,
+        ty.pattern,
+        is_firstder_arg1_zero,
+        is_secondder_arg1_zero,
+        is_firstder_arg2_zero,
+        is_secondder_arg2_zero,
+        is_crossder_zero,
+    )
+    return T(pattern)
+end
+
+function hessian_tracer_2_to_1(
+    px::P,
+    py::P,
+    is_firstder_arg1_zero::Bool,
+    is_secondder_arg1_zero::Bool,
+    is_firstder_arg2_zero::Bool,
+    is_secondder_arg2_zero::Bool,
+    is_crossder_zero::Bool,
+) where {P<:DualSetHessianPattern}
+    sgx, shx = gradient(px), hessian(px)
+    sgy, shy = gradient(py), hessian(py)
     sg_out, sh_out = hessian_tracer_2_to_1(
         sgx,
         shx,
@@ -77,7 +110,7 @@ function hessian_tracer_2_to_1(
         is_secondder_arg2_zero,
         is_crossder_zero,
     )
-    return T(sg_out, sh_out)
+    return P(sg_out, sh_out)
 end
 
 function hessian_tracer_2_to_1(
@@ -187,7 +220,28 @@ function hessian_tracer_1_to_2(
     is_firstder_out2_zero::Bool,
     is_seconder_out2_zero::Bool,
 ) where {T<:HessianTracer}
-    sg, sh = gradient(t), hessian(t)
+    if t.isempty
+        return t
+    else
+        pattern1, pattern2 = hessian_tracer_1_to_2(
+            t.pattern,
+            is_firstder_out1_zero,
+            is_seconder_out1_zero,
+            is_firstder_out2_zero,
+            is_seconder_out2_zero,
+        )
+        return (T(pattern1), T(pattern2))
+    end
+end
+
+function hessian_tracer_1_to_2(
+    p::P,
+    is_firstder_out1_zero::Bool,
+    is_seconder_out1_zero::Bool,
+    is_firstder_out2_zero::Bool,
+    is_seconder_out2_zero::Bool,
+) where {P<:DualSetHessianPattern}
+    sg, sh = gradient(p), hessian(p)
     (sg_out1, sh_out1), (sg_out2, sh_out2) = hessian_tracer_1_to_2(
         sg,
         sh,
@@ -196,7 +250,7 @@ function hessian_tracer_1_to_2(
         is_firstder_out2_zero,
         is_seconder_out2_zero,
     )
-    return (T(sg_out1, sh_out1), T(sg_out2, sh_out2))
+    return (P(sg_out1, sh_out1), P(sg_out2, sh_out2))
 end
 
 function hessian_tracer_1_to_2(
@@ -254,27 +308,21 @@ end
 ## Exponent (requires extra types)
 for S in (Integer, Rational, Irrational{:ℯ})
     function Base.:^(tx::T, y::S) where {T<:HessianTracer}
-        return T(
-            gradient(tx), union_product!(copy(hessian(tx)), gradient(tx), gradient(tx))
-        )
+        return T(hessian_tracer_1_to_1(tx.pattern, false, false))
     end
     function Base.:^(x::S, ty::T) where {T<:HessianTracer}
-        return T(
-            gradient(ty), union_product!(copy(hessian(ty)), gradient(ty), gradient(ty))
-        )
+        return T(hessian_tracer_1_to_1(ty.pattern, false, false))
     end
 
     function Base.:^(dx::D, y::S) where {P,T<:HessianTracer,D<:Dual{P,T}}
-        return Dual(
-            primal(dx)^y,
-            T(gradient(dx), union_product!(copy(hessian(dx)), gradient(dx), gradient(dx))),
-        )
+        x = primal(dx)
+        t = tracer(dx)
+        return Dual(x^y, T(hessian_tracer_1_to_1(t.pattern, false, false)))
     end
     function Base.:^(x::S, dy::D) where {P,T<:HessianTracer,D<:Dual{P,T}}
-        return Dual(
-            x^primal(dy),
-            T(gradient(dy), union_product!(copy(hessian(dy)), gradient(dy), gradient(dy))),
-        )
+        y = primal(dy)
+        t = tracer(dy)
+        return Dual(x^y, T(hessian_tracer_1_to_1(t.pattern, false, false)))
     end
 end
 
