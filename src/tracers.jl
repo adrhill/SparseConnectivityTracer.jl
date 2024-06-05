@@ -1,4 +1,4 @@
-abstract type AbstractTracer{I<:AbstractPattern} <: Real end
+abstract type AbstractTracer{I<:AbstractSparsityPattern} <: Real end
 
 #===================#
 # Set operations    #

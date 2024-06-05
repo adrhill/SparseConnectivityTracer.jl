@@ -1,4 +1,4 @@
-abstract type AbstractPattern end
+abstract type AbstractSparsityPattern end
 #=
 Expected interface:
   * myempty(::Type{MyPattern}): return an empty pattern
@@ -16,12 +16,13 @@ myempty(::Type{S}) where {S<:AbstractSet} = S()
 seed(::Type{S}, i::Integer) where {S<:AbstractSet} = S([i])
 
 ## First order
-abstract type AbstractFirstOrderPattern <: AbstractPattern end
+abstract type AbstractFirstOrderPattern <: AbstractSparsityPattern end
 
 """
 $(TYPEDEF)
 
-Index set represented by an `AbstractSet` of integer indices.
+First order sparsity pattern represented by an index set of non-zero values.
+Represented by an `AbstractSet` of integer indices.
 
 ## Fields
 $(TYPEDFIELDS)
@@ -40,12 +41,13 @@ inputs(s::SetIndexset) = s.inds
 gradient(s::SetIndexset) = s.inds
 
 ## Second order
-abstract type AbstractSecondOrderPattern <: AbstractPattern end
+abstract type AbstractSecondOrderPattern <: AbstractSparsityPattern end
 
 """
 $(TYPEDEF)
 
-Index set represented by an `AbstractSet` of integer indices.
+Second order sparsity pattern represented by index sets of non-zero values.
+Represented by two `AbstractSet`s of integer indices ``i`` and tuples ``(i, j)``.
 
 ## Fields
 $(TYPEDFIELDS)
