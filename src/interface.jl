@@ -75,7 +75,8 @@ julia> connectivity_pattern(f, x)
 ```
 """
 function connectivity_pattern(f, x, ::Type{C}=DEFAULT_FIRST_ORDER_SET_TYPE) where {C}
-    xt, yt = trace_function(ConnectivityTracer{C}, f, x)
+    P = SetIndexset{C}
+    xt, yt = trace_function(ConnectivityTracer{P}, f, x)
     return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
@@ -89,7 +90,8 @@ where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to
 The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
 """
 function connectivity_pattern(f!, y, x, ::Type{C}=DEFAULT_FIRST_ORDER_SET_TYPE) where {C}
-    xt, yt = trace_function(ConnectivityTracer{C}, f!, y, x)
+    P = SetIndexset{C}
+    xt, yt = trace_function(ConnectivityTracer{P}, f!, y, x)
     return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
 end
 

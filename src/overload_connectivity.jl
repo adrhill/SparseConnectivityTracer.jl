@@ -3,18 +3,28 @@
 function connectivity_tracer_1_to_1(
     t::T, is_influence_zero::Bool
 ) where {T<:ConnectivityTracer}
-    s = inputs(t)
-    s_out = connectivity_tracer_1_to_1(s, is_influence_zero)
-    return T(s_out)
+    if t.isempty
+        return t
+    else
+        pattern = connectivity_tracer_1_to_1_pattern(t.pattern, is_influence_zero)
+        return T(pattern) # return tracer
+    end
 end
 
-function connectivity_tracer_1_to_1(
+function connectivity_tracer_1_to_1_pattern(
+    p::P, is_influence_zero::Bool
+) where {P<:SetIndexset}
+    set = connectivity_tracer_1_to_1_set(inputs(p), is_influence_zero)
+    return P(set) # return pattern
+end
+
+function connectivity_tracer_1_to_1_set(
     s::S, is_influence_zero::Bool
 ) where {S<:AbstractSet{<:Integer}}
     if is_influence_zero
         return myempty(S)
     else
-        return s
+        return s # return set
     end
 end
 
@@ -46,14 +56,23 @@ end
 function connectivity_tracer_2_to_1(
     tx::T, ty::T, is_influence_arg1_zero::Bool, is_influence_arg2_zero::Bool
 ) where {T<:ConnectivityTracer}
-    sx, sy = inputs(tx), inputs(ty)
-    s_out = connectivity_tracer_2_to_1(
-        sx, sy, is_influence_arg1_zero, is_influence_arg2_zero
+    # TODO: make use of `isempty` field
+    pattern = connectivity_tracer_2_to_1_pattern(
+        tx.pattern, ty.pattern, is_influence_arg1_zero, is_influence_arg2_zero
     )
-    return T(s_out)
+    return T(pattern) # return tracer 
 end
 
-function connectivity_tracer_2_to_1(
+function connectivity_tracer_2_to_1_pattern(
+    px::P, py::P, is_influence_arg1_zero::Bool, is_influence_arg2_zero::Bool
+) where {P<:SetIndexset}
+    set = connectivity_tracer_2_to_1_set(
+        inputs(px), inputs(py), is_influence_arg1_zero, is_influence_arg2_zero
+    )
+    return P(set) # return pattern
+end
+
+function connectivity_tracer_2_to_1_set(
     sx::S, sy::S, is_influence_arg1_zero::Bool, is_influence_arg2_zero::Bool
 ) where {S<:AbstractSet{<:Integer}}
     if is_influence_arg1_zero && is_influence_arg2_zero
@@ -63,7 +82,7 @@ function connectivity_tracer_2_to_1(
     elseif is_influence_arg1_zero && !is_influence_arg2_zero
         return sy
     else
-        return clever_union(sx, sy)
+        return clever_union(sx, sy) # return set
     end
 end
 
@@ -138,19 +157,27 @@ end
 function connectivity_tracer_1_to_2(
     t::T, is_influence_out1_zero::Bool, is_influence_out2_zero::Bool
 ) where {T<:ConnectivityTracer}
-    s = inputs(t)
-    (s_out1, s_out2) = connectivity_tracer_1_to_2(
-        s, is_influence_out1_zero, is_influence_out2_zero
+    pattern1, pattern2 = connectivity_tracer_1_to_2_pattern(
+        t.pattern, is_influence_out1_zero, is_influence_out2_zero
     )
-    return (T(s_out1), T(s_out2))
+    return (T(pattern1), T(pattern2)) # return tracers 
 end
 
-function connectivity_tracer_1_to_2(
+function connectivity_tracer_1_to_2_pattern(
+    p::P, is_influence_out1_zero::Bool, is_influence_out2_zero::Bool
+) where {P<:SetIndexset}
+    set1, set2 = connectivity_tracer_1_to_2_set(
+        inputs(p), is_influence_out1_zero, is_influence_out2_zero
+    )
+    return (P(set1), P(set2)) # return pattern
+end
+
+function connectivity_tracer_1_to_2_set(
     s::S, is_influence_out1_zero::Bool, is_influence_out2_zero::Bool
 ) where {S<:AbstractSet{<:Integer}}
-    s1 = connectivity_tracer_1_to_1(s, is_influence_out1_zero)
-    s2 = connectivity_tracer_1_to_1(s, is_influence_out2_zero)
-    return (s1, s2)
+    s1 = connectivity_tracer_1_to_1_set(s, is_influence_out1_zero)
+    s2 = connectivity_tracer_1_to_1_set(s, is_influence_out2_zero)
+    return (s1, s2) # return sets
 end
 
 function overload_connectivity_1_to_2(M, op)
@@ -187,11 +214,10 @@ end
 ## Exponent (requires extra types)
 for S in (Integer, Rational, Irrational{:ℯ})
     Base.:^(t::ConnectivityTracer, ::S) = t
+    Base.:^(::S, t::ConnectivityTracer) = t
     function Base.:^(dx::D, y::S) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
         return Dual(primal(dx)^y, tracer(dx))
     end
-
-    Base.:^(::S, t::ConnectivityTracer) = t
     function Base.:^(x::S, dy::D) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
         return Dual(x^primal(dy), tracer(dy))
     end

@@ -75,6 +75,8 @@ end
 ConnectivityTracer{P}(t::ConnectivityTracer{P}) where {P<:AbstractFirstOrderPattern} = t
 ConnectivityTracer(t::ConnectivityTracer) = t
 
+inputs(t::ConnectivityTracer) = inputs(t.pattern)
+
 #================#
 # GradientTracer #
 #================#
@@ -110,8 +112,6 @@ function GradientTracer{P}(pattern::P) where {P<:AbstractFirstOrderPattern}
     return GradientTracer{P}(pattern, false)
 end
 
-gradient(t::GradientTracer) = gradient(t.pattern)
-
 function Base.show(io::IO, t::GradientTracer)
     return Base.show_delim_array(
         io, convert.(Int, sort(collect(gradient(t)))), "$(typeof(t))(", ',', ')', true
@@ -121,6 +121,8 @@ end
 GradientTracer{P}(::Real) where {P<:AbstractFirstOrderPattern} = myempty(GradientTracer{P})
 GradientTracer{P}(t::GradientTracer{P}) where {P<:AbstractFirstOrderPattern} = t
 GradientTracer(t::GradientTracer) = t
+
+gradient(t::GradientTracer) = gradient(t.pattern)
 
 #===============#
 # HessianTracer #
