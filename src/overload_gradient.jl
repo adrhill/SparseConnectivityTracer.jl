@@ -1,7 +1,7 @@
 ## 1-to-1
 
 function gradient_tracer_1_to_1(t::T, is_firstder_zero::Bool) where {T<:GradientTracer}
-    if t.isempty
+    if t.isempty # TODO: add test
         return t
     else
         pattern = gradient_tracer_1_to_1_pattern(t.pattern, is_firstder_zero)
@@ -149,8 +149,8 @@ end
 function gradient_tracer_1_to_2(
     t::T, is_firstder_out1_zero::Bool, is_firstder_out2_zero::Bool
 ) where {T<:GradientTracer}
-    if t.isempty
-        return t
+    if t.isempty # TODO: add test
+        return (t, t)
     else
         pattern1, pattern2 = gradient_tracer_1_to_2_pattern(
             t.pattern, is_firstder_out1_zero, is_firstder_out2_zero

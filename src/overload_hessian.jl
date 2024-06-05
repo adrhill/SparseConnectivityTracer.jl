@@ -3,7 +3,7 @@
 function hessian_tracer_1_to_1(
     t::T, is_firstder_zero::Bool, is_secondder_zero::Bool
 ) where {T<:HessianTracer}
-    if t.isempty
+    if t.isempty # TODO: add test
         return t
     else
         pattern = hessian_tracer_1_to_1_pattern(
@@ -223,8 +223,8 @@ function hessian_tracer_1_to_2(
     is_firstder_out2_zero::Bool,
     is_seconder_out2_zero::Bool,
 ) where {T<:HessianTracer}
-    if t.isempty
-        return t
+    if t.isempty # TODO: add test
+        return (t, t)
     else
         pattern1, pattern2 = hessian_tracer_1_to_2_pattern(
             t.pattern,

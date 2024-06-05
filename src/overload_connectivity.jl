@@ -3,7 +3,7 @@
 function connectivity_tracer_1_to_1(
     t::T, is_influence_zero::Bool
 ) where {T<:ConnectivityTracer}
-    if t.isempty
+    if t.isempty # TODO: add test
         return t
     else
         pattern = connectivity_tracer_1_to_1_pattern(t.pattern, is_influence_zero)
@@ -157,10 +157,14 @@ end
 function connectivity_tracer_1_to_2(
     t::T, is_influence_out1_zero::Bool, is_influence_out2_zero::Bool
 ) where {T<:ConnectivityTracer}
-    pattern1, pattern2 = connectivity_tracer_1_to_2_pattern(
-        t.pattern, is_influence_out1_zero, is_influence_out2_zero
-    )
-    return (T(pattern1), T(pattern2)) # return tracers 
+    if t.isempty # TODO: add test
+        return (t, t)
+    else
+        pattern1, pattern2 = connectivity_tracer_1_to_2_pattern(
+            t.pattern, is_influence_out1_zero, is_influence_out2_zero
+        )
+        return (T(pattern1), T(pattern2)) # return tracers 
+    end
 end
 
 function connectivity_tracer_1_to_2_pattern(
