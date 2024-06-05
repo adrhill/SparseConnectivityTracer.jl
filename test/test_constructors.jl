@@ -1,6 +1,7 @@
 # Test construction and conversions of internal tracer types
 using SparseConnectivityTracer: ConnectivityTracer, GradientTracer, HessianTracer, Dual
 using SparseConnectivityTracer: inputs, primal, tracer, myempty
+using SparseConnectivityTracer: SetIndexset, DualSetIndexset
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
@@ -8,18 +9,21 @@ const FIRST_ORDER_SET_TYPES = (
     BitSet, Set{Int}, DuplicateVector{Int}, RecursiveSet{Int}, SortedVector{Int}
 )
 
-is_tracer_empty(t::ConnectivityTracer) = isempty(inputs(t))
-is_tracer_empty(t::GradientTracer)     = isempty(SparseConnectivityTracer.gradient(t))
-is_tracer_empty(t::HessianTracer)      = isempty(SparseConnectivityTracer.gradient(t)) && isempty(SparseConnectivityTracer.hessian(t))
+is_pattern_empty(p::SetIndexset)     = isempty(p.inds)
+is_pattern_empty(p::DualSetIndexset) = isempty(p.first_order) && isempty(p.second_order)
+
+is_tracer_empty(t::ConnectivityTracer) = isempty(inputs(t)) && t.isempty
+is_tracer_empty(t::GradientTracer)     = isempty(SparseConnectivityTracer.gradient(t)) && t.isempty
+is_tracer_empty(t::HessianTracer)      = isempty(SparseConnectivityTracer.gradient(t)) && isempty(SparseConnectivityTracer.hessian(t)) && t.isempty
 is_tracer_empty(d::Dual)               = is_tracer_empty(tracer(d))
 
 @testset "Set type $S1" for S1 in FIRST_ORDER_SET_TYPES
     I = eltype(S1)
     S2 = Set{Tuple{I,I}}
 
-    C = ConnectivityTracer{S1}
-    G = GradientTracer{S1}
-    H = HessianTracer{S1,S2}
+    C = ConnectivityTracer{SetIndexset{S1}}
+    G = GradientTracer{SetIndexset{S1}}
+    H = HessianTracer{DualSetIndexset{S1,S2}}
 
     TD = Float32
     DC = Dual{TD,C}

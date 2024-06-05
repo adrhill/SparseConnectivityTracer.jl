@@ -61,8 +61,8 @@ struct DualSetIndexset{
     second_order::S
 end
 function Base.show(io::IO, s::DualSetIndexset)
-    println(io, "First order:  ", s.inds)
-    println(io, "Second order: ", s.inds)
+    println(io, "First  order: ", s.first_order)
+    println(io, "Second order: ", s.second_order)
     return nothing
 end
 

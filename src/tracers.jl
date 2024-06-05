@@ -44,8 +44,10 @@ Set{Int64} with 2 elements:
   3
   1
 
-julia> SparseConnectivityTracer.ConnectivityTracer(inputs)
-SparseConnectivityTracer.ConnectivityTracer{Set{Int64}}(1, 3)
+julia> pattern = SparseConnectivityTracer.SetIndexset(inputs);
+
+julia> SparseConnectivityTracer.ConnectivityTracer(pattern, false)
+SparseConnectivityTracer.ConnectivityTracer{SparseConnectivityTracer.SetIndexset{Set{Int64}}}(1, 3)
 ```
 """
 struct ConnectivityTracer{P<:AbstractFirstOrderPattern} <: AbstractTracer{P}
@@ -98,8 +100,10 @@ Set{Int64} with 2 elements:
   3
   1
 
-julia> SparseConnectivityTracer.GradientTracer(grad)
-SparseConnectivityTracer.GradientTracer{Set{Int64}}(1, 3)
+julia> pattern = SparseConnectivityTracer.SetIndexset(grad);
+
+julia> SparseConnectivityTracer.GradientTracer(pattern, false)
+SparseConnectivityTracer.GradientTracer{SparseConnectivityTracer.SetIndexset{Set{Int64}}}(1, 3)
 ```
 """
 struct GradientTracer{P<:AbstractFirstOrderPattern} <: AbstractTracer{P}
@@ -151,10 +155,12 @@ Set{Tuple{Int64, Int64}} with 3 elements:
   (1, 1)
   (2, 3)
 
-julia> SparseConnectivityTracer.HessianTracer(grad, hess)
-SparseConnectivityTracer.HessianTracer{Set{Int64}, Set{Tuple{Int64, Int64}}}(
-  Gradient: Set([3, 1]),
-  Hessian:  Set([(3, 2), (1, 1), (2, 3)])
+julia> pattern = SparseConnectivityTracer.DualSetIndexset(grad, hess);
+
+julia> SparseConnectivityTracer.HessianTracer(pattern, false)
+SparseConnectivityTracer.HessianTracer{SparseConnectivityTracer.DualSetIndexset{Set{Int64}, Set{Tuple{Int64, Int64}}}}(
+First  order: Set([3, 1])
+Second order: Set([(3, 2), (1, 1), (2, 3)])
 )
 ```
 """
@@ -170,8 +176,7 @@ end
 
 function Base.show(io::IO, t::HessianTracer)
     println(io, "$(eltype(t))(")
-    println(io, "  Gradient: ", gradient(t), ",")
-    println(io, "  Hessian:  ", hessian(t))
+    print(io, t.pattern)
     print(io, ")")
     return nothing
 end
