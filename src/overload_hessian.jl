@@ -78,17 +78,25 @@ function hessian_tracer_2_to_1(
     is_secondder_arg2_zero::Bool,
     is_crossder_zero::Bool,
 ) where {T<:HessianTracer}
-    # TODO: make use of `isempty` field
-    pattern = hessian_tracer_2_to_1_pattern(
-        tx.pattern,
-        ty.pattern,
-        is_firstder_arg1_zero,
-        is_secondder_arg1_zero,
-        is_firstder_arg2_zero,
-        is_secondder_arg2_zero,
-        is_crossder_zero,
-    )
-    return T(pattern) # return tracer
+    # TODO: add tests for isempty
+    if tx.isempty && ty.isempty
+        return tx # empty tracer
+    elseif ty.isempty
+        hessian_tracer_1_to_1(tx, is_firstder_arg1_zero, is_secondder_arg1_zero)
+    elseif tx.isempty
+        hessian_tracer_1_to_1(ty, is_firstder_arg2_zero, is_secondder_arg2_zero)
+    else
+        pattern = hessian_tracer_2_to_1_pattern(
+            tx.pattern,
+            ty.pattern,
+            is_firstder_arg1_zero,
+            is_secondder_arg1_zero,
+            is_firstder_arg2_zero,
+            is_secondder_arg2_zero,
+            is_crossder_zero,
+        )
+        return T(pattern) # return tracer
+    end
 end
 
 function hessian_tracer_2_to_1_pattern(
