@@ -20,7 +20,7 @@
         return G(union(gradient(tx), gradient(ty)))
     end
 
-    function output_union(px::P, py::P) where {P<:DualSetHessianPattern}
+    function output_union(px::P, py::P) where {P<:DualSetIndexset}
         return P(union(gradient(px), gradient(py)), union(hessian(px), hessian(py)))
     end
 

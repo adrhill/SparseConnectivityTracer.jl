@@ -32,9 +32,9 @@ Base.similar(a::Array{A,2}, ::Type{T})  where {T<:AbstractTracer,A} = zeros(T, s
 Base.similar(::Array{T}, m::Int)        where {T<:AbstractTracer}   = zeros(T, m)
 Base.similar(::Array{T}, dims::Dims{N}) where {T<:AbstractTracer,N} = zeros(T, dims)
 
-Base.similar(::Array, ::Type{ConnectivityTracer{C}}, dims::Dims{N}) where {C,N}   = zeros(ConnectivityTracer{C}, dims)
-Base.similar(::Array, ::Type{GradientTracer{G}},     dims::Dims{N}) where {G,N}   = zeros(GradientTracer{G},     dims)
-Base.similar(::Array, ::Type{HessianTracer{G,H}},    dims::Dims{N}) where {G,H,N} = zeros(HessianTracer{G,H},    dims)
+Base.similar(::Array, ::Type{ConnectivityTracer{P}}, dims::Dims{N}) where {P,N}   = zeros(ConnectivityTracer{P}, dims)
+Base.similar(::Array, ::Type{GradientTracer{P}},     dims::Dims{N}) where {P,N}   = zeros(GradientTracer{P},     dims)
+Base.similar(::Array, ::Type{HessianTracer{P}},      dims::Dims{N}) where {P,N}   = zeros(HessianTracer{P},      dims)
 
 ## Duals
 function Base.promote_rule(::Type{Dual{P1, T}}, ::Type{Dual{P2, T}}) where {P1,P2,T}

@@ -13,10 +13,10 @@ end
 
 function hessian_tracer_1_to_1(
     p::P, is_firstder_zero::Bool, is_secondder_zero::Bool
-) where {P<:DualSetHessianPattern}
+) where {P<:DualSetIndexset}
     sg, sh = gradient(p), hessian(p)
     sg_out, sh_out = hessian_tracer_1_to_1(sg, sh, is_firstder_zero, is_secondder_zero)
-    return HessianTracer{P}(P(sg_out, sh_out))
+    return P(sg_out, sh_out)
 end
 
 function hessian_tracer_1_to_1(
@@ -96,7 +96,7 @@ function hessian_tracer_2_to_1(
     is_firstder_arg2_zero::Bool,
     is_secondder_arg2_zero::Bool,
     is_crossder_zero::Bool,
-) where {P<:DualSetHessianPattern}
+) where {P<:DualSetIndexset}
     sgx, shx = gradient(px), hessian(px)
     sgy, shy = gradient(py), hessian(py)
     sg_out, sh_out = hessian_tracer_2_to_1(
@@ -240,7 +240,7 @@ function hessian_tracer_1_to_2(
     is_seconder_out1_zero::Bool,
     is_firstder_out2_zero::Bool,
     is_seconder_out2_zero::Bool,
-) where {P<:DualSetHessianPattern}
+) where {P<:DualSetIndexset}
     sg, sh = gradient(p), hessian(p)
     (sg_out1, sh_out1), (sg_out2, sh_out2) = hessian_tracer_1_to_2(
         sg,
