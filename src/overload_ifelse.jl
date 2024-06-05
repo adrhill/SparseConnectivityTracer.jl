@@ -13,13 +13,9 @@
         return T(output_union(tx.pattern, ty.pattern))
     end
 
-    function output_union(tx::C, ty::C) where {C<:ConnectivityTracer}
-        return C(union(inputs(tx), inputs(ty)))
+    function output_union(px::P, py::P) where {P<:SetIndexset}
+        return P(union(px.inds, py.inds))
     end
-    function output_union(tx::G, ty::G) where {G<:GradientTracer}
-        return G(union(gradient(tx), gradient(ty)))
-    end
-
     function output_union(px::P, py::P) where {P<:DualSetIndexset}
         return P(union(gradient(px), gradient(py)), union(hessian(px), hessian(py)))
     end

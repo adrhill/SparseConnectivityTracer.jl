@@ -6,23 +6,26 @@ function hessian_tracer_1_to_1(
     if t.isempty
         return t
     else
-        pattern = hessian_tracer_1_to_1(t.pattern, is_firstder_zero, is_secondder_zero)
-        return T(pattern)
+        pattern = hessian_tracer_1_to_1_pattern(
+            t.pattern, is_firstder_zero, is_secondder_zero
+        )
+        return T(pattern) # return tracer
     end
 end
 
-function hessian_tracer_1_to_1(
+function hessian_tracer_1_to_1_pattern(
     p::P, is_firstder_zero::Bool, is_secondder_zero::Bool
 ) where {P<:DualSetIndexset}
-    sg, sh = gradient(p), hessian(p)
-    sg_out, sh_out = hessian_tracer_1_to_1(sg, sh, is_firstder_zero, is_secondder_zero)
-    return P(sg_out, sh_out)
+    set_grad, set_hessian = hessian_tracer_1_to_1_set(
+        gradient(p), hessian(p), is_firstder_zero, is_secondder_zero
+    )
+    return P(set_grad, set_hessian) # return pattern
 end
 
-function hessian_tracer_1_to_1(
+function hessian_tracer_1_to_1_set(
     sg::SG, sh::SH, is_firstder_zero::Bool, is_secondder_zero::Bool
 ) where {I,SG<:AbstractSet{<:I},SH<:AbstractSet{<:Tuple{I,I}}}
-    sg_out = gradient_tracer_1_to_1(sg, is_firstder_zero)
+    sg_out = gradient_tracer_1_to_1_set(sg, is_firstder_zero)
     sh_out = if is_firstder_zero && is_secondder_zero
         myempty(SH)
     elseif !is_firstder_zero && is_secondder_zero
@@ -32,7 +35,7 @@ function hessian_tracer_1_to_1(
     else
         union_product!(copy(sh), sg, sg)
     end
-    return (sg_out, sh_out)
+    return (sg_out, sh_out) # return sets
 end
 
 function overload_hessian_1_to_1(M, op)
@@ -76,7 +79,7 @@ function hessian_tracer_2_to_1(
     is_crossder_zero::Bool,
 ) where {T<:HessianTracer}
     # TODO: make use of `isempty` field
-    pattern = hessian_tracer_2_to_1(
+    pattern = hessian_tracer_2_to_1_pattern(
         tx.pattern,
         ty.pattern,
         is_firstder_arg1_zero,
@@ -85,10 +88,10 @@ function hessian_tracer_2_to_1(
         is_secondder_arg2_zero,
         is_crossder_zero,
     )
-    return T(pattern)
+    return T(pattern) # return tracer
 end
 
-function hessian_tracer_2_to_1(
+function hessian_tracer_2_to_1_pattern(
     px::P,
     py::P,
     is_firstder_arg1_zero::Bool,
@@ -97,23 +100,21 @@ function hessian_tracer_2_to_1(
     is_secondder_arg2_zero::Bool,
     is_crossder_zero::Bool,
 ) where {P<:DualSetIndexset}
-    sgx, shx = gradient(px), hessian(px)
-    sgy, shy = gradient(py), hessian(py)
-    sg_out, sh_out = hessian_tracer_2_to_1(
-        sgx,
-        shx,
-        sgy,
-        shy,
+    set_grad, set_hessian = hessian_tracer_2_to_1_set(
+        gradient(px),
+        hessian(px),
+        gradient(py),
+        hessian(py),
         is_firstder_arg1_zero,
         is_secondder_arg1_zero,
         is_firstder_arg2_zero,
         is_secondder_arg2_zero,
         is_crossder_zero,
     )
-    return P(sg_out, sh_out)
+    return P(set_grad, set_hessian) # return pattern
 end
 
-function hessian_tracer_2_to_1(
+function hessian_tracer_2_to_1_set(
     sgx::SG,
     shx::SH,
     sgy::SG,
@@ -124,7 +125,9 @@ function hessian_tracer_2_to_1(
     is_secondder_arg2_zero::Bool,
     is_crossder_zero::Bool,
 ) where {I,SG<:AbstractSet{I},SH<:AbstractSet{<:Tuple{I,I}}}
-    sg_out = gradient_tracer_2_to_1(sgx, sgy, is_firstder_arg1_zero, is_firstder_arg2_zero)
+    sg_out = gradient_tracer_2_to_1_set(
+        sgx, sgy, is_firstder_arg1_zero, is_firstder_arg2_zero
+    )
     sh_out = myempty(SH)
     !is_firstder_arg1_zero && union!(sh_out, shx)  # hessian alpha
     !is_firstder_arg2_zero && union!(sh_out, shy)  # hessian beta
@@ -132,7 +135,7 @@ function hessian_tracer_2_to_1(
     !is_secondder_arg2_zero && union_product!(sh_out, sgy, sgy)  # product beta
     !is_crossder_zero && union_product!(sh_out, sgx, sgy)  # cross product 1
     !is_crossder_zero && union_product!(sh_out, sgy, sgx)  # cross product 2
-    return (sg_out, sh_out)
+    return (sg_out, sh_out) # return sets
 end
 
 function overload_hessian_2_to_1(M, op)
@@ -223,37 +226,38 @@ function hessian_tracer_1_to_2(
     if t.isempty
         return t
     else
-        pattern1, pattern2 = hessian_tracer_1_to_2(
+        pattern1, pattern2 = hessian_tracer_1_to_2_pattern(
             t.pattern,
             is_firstder_out1_zero,
             is_seconder_out1_zero,
             is_firstder_out2_zero,
             is_seconder_out2_zero,
         )
-        return (T(pattern1), T(pattern2))
+        return (T(pattern1), T(pattern2)) # return tracers
     end
 end
 
-function hessian_tracer_1_to_2(
+function hessian_tracer_1_to_2_pattern(
     p::P,
     is_firstder_out1_zero::Bool,
     is_seconder_out1_zero::Bool,
     is_firstder_out2_zero::Bool,
     is_seconder_out2_zero::Bool,
 ) where {P<:DualSetIndexset}
-    sg, sh = gradient(p), hessian(p)
-    (sg_out1, sh_out1), (sg_out2, sh_out2) = hessian_tracer_1_to_2(
-        sg,
-        sh,
+    (set_grad1, set_hessian1), (set_grad2, set_hessian2) = hessian_tracer_1_to_2_set(
+        gradient(p),
+        hessian(p),
         is_firstder_out1_zero,
         is_seconder_out1_zero,
         is_firstder_out2_zero,
         is_seconder_out2_zero,
     )
-    return (P(sg_out1, sh_out1), P(sg_out2, sh_out2))
+    pattern1 = P(set_grad1, set_hessian1)
+    pattern2 = P(set_grad2, set_hessian2)
+    return (pattern1, pattern2) # return patterns
 end
 
-function hessian_tracer_1_to_2(
+function hessian_tracer_1_to_2_set(
     sg::SG,
     sh::SH,
     is_firstder_out1_zero::Bool,
@@ -261,13 +265,13 @@ function hessian_tracer_1_to_2(
     is_firstder_out2_zero::Bool,
     is_secondder_out2_zero::Bool,
 ) where {I,SG<:AbstractSet{I},SH<:AbstractSet{<:Tuple{I,I}}}
-    sg_out1, sh_out1 = hessian_tracer_1_to_1(
+    sg_out1, sh_out1 = hessian_tracer_1_to_1_set(
         sg, sh, is_firstder_out1_zero, is_secondder_out1_zero
     )
-    sg_out2, sh_out2 = hessian_tracer_1_to_1(
+    sg_out2, sh_out2 = hessian_tracer_1_to_1_set(
         sg, sh, is_firstder_out2_zero, is_secondder_out2_zero
     )
-    return ((sg_out1, sh_out1), (sg_out2, sh_out2))
+    return ((sg_out1, sh_out1), (sg_out2, sh_out2)) # return sets
 end
 
 function overload_hessian_1_to_2(M, op)
@@ -307,22 +311,26 @@ end
 
 ## Exponent (requires extra types)
 for S in (Integer, Rational, Irrational{:ℯ})
-    function Base.:^(tx::T, y::S) where {T<:HessianTracer}
-        return T(hessian_tracer_1_to_1(tx.pattern, false, false))
+    function Base.:^(t::T, ::S) where {T<:HessianTracer}
+        pattern = hessian_tracer_1_to_1_pattern(t.pattern, false, false)
+        return T(pattern)
     end
-    function Base.:^(x::S, ty::T) where {T<:HessianTracer}
-        return T(hessian_tracer_1_to_1(ty.pattern, false, false))
+    function Base.:^(::S, t::T) where {T<:HessianTracer}
+        pattern = hessian_tracer_1_to_1_pattern(t.pattern, false, false)
+        return T(pattern)
     end
 
-    function Base.:^(dx::D, y::S) where {P,T<:HessianTracer,D<:Dual{P,T}}
-        x = primal(dx)
-        t = tracer(dx)
-        return Dual(x^y, T(hessian_tracer_1_to_1(t.pattern, false, false)))
+    function Base.:^(d::D, y::S) where {P,T<:HessianTracer,D<:Dual{P,T}}
+        x = primal(d)
+        t = tracer(d)
+        pattern = hessian_tracer_1_to_1_pattern(t.pattern, false, false)
+        return Dual(x^y, T(pattern))
     end
-    function Base.:^(x::S, dy::D) where {P,T<:HessianTracer,D<:Dual{P,T}}
-        y = primal(dy)
-        t = tracer(dy)
-        return Dual(x^y, T(hessian_tracer_1_to_1(t.pattern, false, false)))
+    function Base.:^(x::S, d::D) where {P,T<:HessianTracer,D<:Dual{P,T}}
+        y = primal(d)
+        t = tracer(d)
+        pattern = hessian_tracer_1_to_1_pattern(t.pattern, false, false)
+        return Dual(x^y, T(pattern))
     end
 end
 

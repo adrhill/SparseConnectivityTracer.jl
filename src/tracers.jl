@@ -54,6 +54,9 @@ struct ConnectivityTracer{P<:AbstractFirstOrderPattern} <: AbstractTracer{P}
     "Indicator whether pattern in tracer contains only zeros."
     isempty::Bool
 end
+function ConnectivityTracer{P}(pattern::P) where {P<:AbstractFirstOrderPattern}
+    return ConnectivityTracer{P}(pattern, false)
+end
 
 function Base.show(io::IO, t::ConnectivityTracer)
     return Base.show_delim_array(
@@ -102,6 +105,9 @@ struct GradientTracer{P<:AbstractFirstOrderPattern} <: AbstractTracer{P}
     pattern::P
     "Indicator whether pattern in tracer contains only zeros."
     isempty::Bool
+end
+function GradientTracer{P}(pattern::P) where {P<:AbstractFirstOrderPattern}
+    return GradientTracer{P}(pattern, false)
 end
 
 gradient(t::GradientTracer) = gradient(t.pattern)
@@ -156,7 +162,7 @@ struct HessianTracer{P<:AbstractSecondOrderPattern} <: AbstractTracer{P}
     "Indicator whether pattern in tracer contains only zeros."
     isempty::Bool
 end
-function HessianTracer{P}(pattern) where {P<:AbstractSecondOrderPattern}
+function HessianTracer{P}(pattern::P) where {P<:AbstractSecondOrderPattern}
     return HessianTracer{P}(pattern, false)
 end
 

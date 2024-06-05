@@ -1,18 +1,26 @@
 ## 1-to-1
 
 function gradient_tracer_1_to_1(t::T, is_firstder_zero::Bool) where {T<:GradientTracer}
-    s = gradient(t)
-    s_out = gradient_tracer_1_to_1(s, is_firstder_zero)
-    return T(s_out)
+    if t.isempty
+        return t
+    else
+        pattern = gradient_tracer_1_to_1_pattern(t.pattern, is_firstder_zero)
+        return T(pattern) # return tracer
+    end
 end
 
-function gradient_tracer_1_to_1(
+function gradient_tracer_1_to_1_pattern(p::P, is_firstder_zero::Bool) where {P<:SetIndexset}
+    set = gradient_tracer_1_to_1_set(gradient(p), is_firstder_zero)
+    return P(set) # return pattern
+end
+
+function gradient_tracer_1_to_1_set(
     s::S, is_firstder_zero::Bool
 ) where {S<:AbstractSet{<:Integer}}
     if is_firstder_zero
         return myempty(S)
     else
-        return s
+        return s # return set
     end
 end
 
@@ -44,12 +52,23 @@ end
 function gradient_tracer_2_to_1(
     tx::T, ty::T, is_firstder_arg1_zero::Bool, is_firstder_arg2_zero::Bool
 ) where {T<:GradientTracer}
-    sx, sy = gradient(tx), gradient(ty)
-    s_out = gradient_tracer_2_to_1(sx, sy, is_firstder_arg1_zero, is_firstder_arg2_zero)
-    return T(s_out)
+    # TODO: make use of `isempty` field
+    pattern = gradient_tracer_2_to_1_pattern(
+        tx.pattern, ty.pattern, is_firstder_arg1_zero, is_firstder_arg2_zero
+    )
+    return T(pattern) # return tracer
 end
 
-function gradient_tracer_2_to_1(
+function gradient_tracer_2_to_1_pattern(
+    px::P, py::P, is_firstder_arg1_zero::Bool, is_firstder_arg2_zero::Bool
+) where {P<:SetIndexset}
+    set = gradient_tracer_2_to_1_set(
+        gradient(px), gradient(py), is_firstder_arg1_zero, is_firstder_arg2_zero
+    )
+    return P(set) # return pattern
+end
+
+function gradient_tracer_2_to_1_set(
     sx::S, sy::S, is_firstder_arg1_zero::Bool, is_firstder_arg2_zero::Bool
 ) where {S<:AbstractSet{<:Integer}}
     if is_firstder_arg1_zero && is_firstder_arg2_zero
@@ -59,7 +78,7 @@ function gradient_tracer_2_to_1(
     elseif is_firstder_arg1_zero && !is_firstder_arg2_zero
         return sy
     else
-        return clever_union(sx, sy)
+        return clever_union(sx, sy) # return set
     end
 end
 
@@ -130,17 +149,30 @@ end
 function gradient_tracer_1_to_2(
     t::T, is_firstder_out1_zero::Bool, is_firstder_out2_zero::Bool
 ) where {T<:GradientTracer}
-    s = gradient(t)
-    s_out1, s_out2 = gradient_tracer_1_to_2(s, is_firstder_out1_zero, is_firstder_out2_zero)
-    return (T(s_out1), T(s_out2))
+    if t.isempty
+        return t
+    else
+        pattern1, pattern2 = gradient_tracer_1_to_2_pattern(
+            t.pattern, is_firstder_out1_zero, is_firstder_out2_zero
+        )
+        return (T(pattern1), T(pattern2)) # return tracers
+    end
 end
 
-function gradient_tracer_1_to_2(
+function gradient_tracer_1_to_2_pattern(
+    p::P, is_firstder_out1_zero::Bool, is_firstder_out2_zero::Bool
+) where {P<:SetIndexset}
+    s = gradient(p)
+    set1, set2 = gradient_tracer_1_to_2_set(s, is_firstder_out1_zero, is_firstder_out2_zero)
+    return (P(set1), P(set2)) # return patterns
+end
+
+function gradient_tracer_1_to_2_set(
     s::S, is_firstder_out1_zero::Bool, is_firstder_out2_zero::Bool
 ) where {S<:AbstractSet{<:Integer}}
-    s_out1 = gradient_tracer_1_to_1(s, is_firstder_out1_zero)
-    s_out2 = gradient_tracer_1_to_1(s, is_firstder_out2_zero)
-    return (s_out1, s_out2)
+    set1 = gradient_tracer_1_to_1_set(s, is_firstder_out1_zero)
+    set2 = gradient_tracer_1_to_1_set(s, is_firstder_out2_zero)
+    return (set1, set2)
 end
 
 function overload_gradient_1_to_2(M, op)
@@ -176,14 +208,25 @@ end
 
 ## Exponent (requires extra types)
 for S in (Integer, Rational, Irrational{:ℯ})
-    Base.:^(t::GradientTracer, ::S) = t
-    Base.:^(::S, t::GradientTracer) = t
-
-    function Base.:^(dx::D, y::S) where {P,T<:GradientTracer,D<:Dual{P,T}}
-        return Dual(primal(dx)^y, tracer(dx))
+    function Base.:^(t::T, ::S) where {T<:GradientTracer}
+        pattern = gradient_tracer_1_to_1_pattern(t.pattern, false)
+        return T(pattern)
     end
-    function Base.:^(x::S, dy::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
-        return Dual(x^primal(dy), tracer(dy))
+    function Base.:^(::S, t::T) where {T<:GradientTracer}
+        pattern = gradient_tracer_1_to_1_pattern(t.pattern, false)
+        return T(pattern)
+    end
+    function Base.:^(d::D, y::S) where {P,T<:GradientTracer,D<:Dual{P,T}}
+        x = primal(d)
+        t = tracer(d)
+        pattern = gradient_tracer_1_to_1_pattern(t.pattern, false)
+        return Dual(x^y, T(pattern))
+    end
+    function Base.:^(x::S, d::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
+        y = primal(d)
+        t = tracer(d)
+        pattern = gradient_tracer_1_to_1_pattern(t.pattern, false)
+        return Dual(x^y, T(pattern))
     end
 end
 
