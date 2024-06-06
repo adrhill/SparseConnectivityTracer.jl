@@ -68,18 +68,18 @@ Refer to the individual documentation of each function for more information.
 ## Fields
 $(TYPEDFIELDS)
 """
-struct SetIndexset{S} <: AbstractFirstOrderPattern
+struct SimpleIndexSet{S} <: AbstractFirstOrderPattern
     "Set of indices represting non-zero entries ``i``."
     inds::S
 end
-Base.show(io::IO, s::SetIndexset) = Base.show(io, s.inds)
+Base.show(io::IO, s::SimpleIndexSet) = Base.show(io, s.inds)
 
-myempty(::Type{SetIndexset{S}}) where {S} = SetIndexset{S}(myempty(S))
-seed(::Type{SetIndexset{S}}, i) where {S} = SetIndexset{S}(seed(S, i))
+myempty(::Type{SimpleIndexSet{S}}) where {S} = SimpleIndexSet{S}(myempty(S))
+seed(::Type{SimpleIndexSet{S}}, i) where {S} = SimpleIndexSet{S}(seed(S, i))
 
 # Tracer compatibility
-inputs(s::SetIndexset) = s.inds
-gradient(s::SetIndexset) = s.inds
+inputs(s::SimpleIndexSet) = s.inds
+gradient(s::SimpleIndexSet) = s.inds
 
 ## Second order
 abstract type AbstractSecondOrderPattern <: AbstractSparsityPattern end
@@ -117,25 +117,25 @@ Refer to the individual documentation of each function for more information.
 ## Fields
 $(TYPEDFIELDS)
 """
-struct DualSetIndexset{F,S} <: AbstractSecondOrderPattern
+struct SimpleSecondOrderIndexSet{F,S} <: AbstractSecondOrderPattern
     "Set of indices represting non-zero entries ``i``."
     first_order::F
     "Set of index tuples represting non-zero entries ``(i, j)``."
     second_order::S
 end
-function Base.show(io::IO, s::DualSetIndexset)
+function Base.show(io::IO, s::SimpleSecondOrderIndexSet)
     println(io, "First  order: ", s.first_order)
     println(io, "Second order: ", s.second_order)
     return nothing
 end
 
-function myempty(::Type{DualSetIndexset{F,S}}) where {F,S}
-    return DualSetIndexset{F,S}(myempty(F), myempty(S))
+function myempty(::Type{SimpleSecondOrderIndexSet{F,S}}) where {F,S}
+    return SimpleSecondOrderIndexSet{F,S}(myempty(F), myempty(S))
 end
-function seed(::Type{DualSetIndexset{F,S}}, index) where {F,S}
-    return DualSetIndexset{F,S}(seed(F, index), myempty(S))
+function seed(::Type{SimpleSecondOrderIndexSet{F,S}}, index) where {F,S}
+    return SimpleSecondOrderIndexSet{F,S}(seed(F, index), myempty(S))
 end
 
 # Tracer compatibility
-gradient(s::DualSetIndexset) = s.first_order
-hessian(s::DualSetIndexset) = s.second_order
+gradient(s::SimpleSecondOrderIndexSet) = s.first_order
+hessian(s::SimpleSecondOrderIndexSet) = s.second_order

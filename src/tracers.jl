@@ -4,7 +4,6 @@ abstract type AbstractTracer{P<:AbstractSparsityPattern} <: Real end
 # Set operations    #
 #===================#
 
-
 function union_product!(
     sh::SH, sgx::SG, sgy::SG
 ) where {I,SG<:AbstractSet{I},SH<:AbstractSet{Tuple{I,I}}}
@@ -33,10 +32,10 @@ Set{Int64} with 2 elements:
   3
   1
 
-julia> pattern = SparseConnectivityTracer.SetIndexset(inputs);
+julia> pattern = SparseConnectivityTracer.SimpleIndexSet(inputs);
 
 julia> SparseConnectivityTracer.ConnectivityTracer(pattern, false)
-SparseConnectivityTracer.ConnectivityTracer{SparseConnectivityTracer.SetIndexset{Set{Int64}}}(1, 3)
+SparseConnectivityTracer.ConnectivityTracer{SparseConnectivityTracer.SimpleIndexSet{Set{Int64}}}(1, 3)
 ```
 """
 struct ConnectivityTracer{P<:AbstractFirstOrderPattern} <: AbstractTracer{P}
@@ -89,10 +88,10 @@ Set{Int64} with 2 elements:
   3
   1
 
-julia> pattern = SparseConnectivityTracer.SetIndexset(grad);
+julia> pattern = SparseConnectivityTracer.SimpleIndexSet(grad);
 
 julia> SparseConnectivityTracer.GradientTracer(pattern, false)
-SparseConnectivityTracer.GradientTracer{SparseConnectivityTracer.SetIndexset{Set{Int64}}}(1, 3)
+SparseConnectivityTracer.GradientTracer{SparseConnectivityTracer.SimpleIndexSet{Set{Int64}}}(1, 3)
 ```
 """
 struct GradientTracer{P<:AbstractFirstOrderPattern} <: AbstractTracer{P}
@@ -144,10 +143,10 @@ Set{Tuple{Int64, Int64}} with 3 elements:
   (1, 1)
   (2, 3)
 
-julia> pattern = SparseConnectivityTracer.DualSetIndexset(grad, hess);
+julia> pattern = SparseConnectivityTracer.SimpleSecondOrderIndexSet(grad, hess);
 
 julia> SparseConnectivityTracer.HessianTracer(pattern, false)
-SparseConnectivityTracer.HessianTracer{SparseConnectivityTracer.DualSetIndexset{Set{Int64}, Set{Tuple{Int64, Int64}}}}(
+SparseConnectivityTracer.HessianTracer{SparseConnectivityTracer.SimpleSecondOrderIndexSet{Set{Int64}, Set{Tuple{Int64, Int64}}}}(
 First  order: Set([3, 1])
 Second order: Set([(3, 2), (1, 1), (2, 3)])
 )

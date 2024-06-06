@@ -75,7 +75,7 @@ julia> connectivity_pattern(f, x)
 ```
 """
 function connectivity_pattern(f, x, ::Type{C}=DEFAULT_FIRST_ORDER_SET_TYPE) where {C}
-    P = SetIndexset{C}
+    P = SimpleIndexSet{C}
     xt, yt = trace_function(ConnectivityTracer{P}, f, x)
     return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
 end
@@ -90,7 +90,7 @@ where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to
 The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
 """
 function connectivity_pattern(f!, y, x, ::Type{C}=DEFAULT_FIRST_ORDER_SET_TYPE) where {C}
-    P = SetIndexset{C}
+    P = SimpleIndexSet{C}
     xt, yt = trace_function(ConnectivityTracer{P}, f!, y, x)
     return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
 end
@@ -125,7 +125,7 @@ julia> local_connectivity_pattern(f, x)
 ```
 """
 function local_connectivity_pattern(f, x, ::Type{C}=DEFAULT_FIRST_ORDER_SET_TYPE) where {C}
-    P = SetIndexset{C}
+    P = SimpleIndexSet{C}
     D = Dual{eltype(x),ConnectivityTracer{P}}
     xt, yt = trace_function(D, f, x)
     return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
@@ -146,7 +146,7 @@ The type of index set `S` can be specified as an optional argument and defaults 
 function local_connectivity_pattern(
     f!, y, x, ::Type{C}=DEFAULT_FIRST_ORDER_SET_TYPE
 ) where {C}
-    P = SetIndexset{C}
+    P = SimpleIndexSet{C}
     D = Dual{eltype(x),ConnectivityTracer{P}}
     xt, yt = trace_function(D, f!, y, x)
     return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
@@ -204,7 +204,7 @@ julia> jacobian_pattern(f, x)
 ```
 """
 function jacobian_pattern(f, x, ::Type{G}=DEFAULT_FIRST_ORDER_SET_TYPE) where {G}
-    P = SetIndexset{G}
+    P = SimpleIndexSet{G}
     xt, yt = trace_function(GradientTracer{P}, f, x)
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
 end
@@ -218,7 +218,7 @@ Compute the sparsity pattern of the Jacobian of `f!(y, x)`.
 The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
 """
 function jacobian_pattern(f!, y, x, ::Type{G}=DEFAULT_FIRST_ORDER_SET_TYPE) where {G}
-    P = SetIndexset{G}
+    P = SimpleIndexSet{G}
     xt, yt = trace_function(GradientTracer{P}, f!, y, x)
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
 end
@@ -246,7 +246,7 @@ julia> local_jacobian_pattern(f, x)
 ```
 """
 function local_jacobian_pattern(f, x, ::Type{G}=DEFAULT_FIRST_ORDER_SET_TYPE) where {G}
-    P = SetIndexset{G}
+    P = SimpleIndexSet{G}
     D = Dual{eltype(x),GradientTracer{P}}
     xt, yt = trace_function(D, f, x)
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
@@ -261,7 +261,7 @@ Compute the local sparsity pattern of the Jacobian of `f!(y, x)` at `x`.
 The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
 """
 function local_jacobian_pattern(f!, y, x, ::Type{G}=DEFAULT_FIRST_ORDER_SET_TYPE) where {G}
-    P = SetIndexset{G}
+    P = SimpleIndexSet{G}
     D = Dual{eltype(x),GradientTracer{P}}
     xt, yt = trace_function(D, f!, y, x)
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
@@ -333,7 +333,7 @@ julia> hessian_pattern(g, x)
 function hessian_pattern(
     f, x, ::Type{G}=DEFAULT_FIRST_ORDER_SET_TYPE, ::Type{H}=DEFAULT_SECOND_ORDER_SET_TYPE
 ) where {G,H}
-    P = DualSetIndexset{G,H}
+    P = SimpleSecondOrderIndexSet{G,H}
     xt, yt = trace_function(HessianTracer{P}, f, x)
     return hessian_pattern_to_mat(to_array(xt), yt)
 end
@@ -375,7 +375,7 @@ julia> local_hessian_pattern(f, x)
 function local_hessian_pattern(
     f, x, ::Type{G}=DEFAULT_FIRST_ORDER_SET_TYPE, ::Type{H}=DEFAULT_SECOND_ORDER_SET_TYPE
 ) where {G,H}
-    P = DualSetIndexset{G,H}
+    P = SimpleSecondOrderIndexSet{G,H}
     D = Dual{eltype(x),HessianTracer{P}}
     xt, yt = trace_function(D, f, x)
     return hessian_pattern_to_mat(to_array(xt), yt)
