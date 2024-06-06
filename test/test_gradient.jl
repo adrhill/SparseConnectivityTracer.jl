@@ -1,6 +1,6 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer:
-    GradientTracer, Dual, MissingPrimalError, tracer, trace_input
+    GradientTracer, Dual, SimpleIndexSet, MissingPrimalError, tracer, trace_input
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using ADTypes: jacobian_sparsity
 using LinearAlgebra: det, dot, logdet
@@ -8,8 +8,12 @@ using SpecialFunctions: erf, beta
 using NNlib: NNlib
 using Test
 
-const FIRST_ORDER_SET_TYPES = (
-    BitSet, Set{Int}, DuplicateVector{Int}, RecursiveSet{Int}, SortedVector{Int}
+const FIRST_ORDER_PATTERNS = (
+    SimpleIndexSet{BitSet},
+    SimpleIndexSet{Set{Int}},
+    SimpleIndexSet{DuplicateVector{Int}},
+    SimpleIndexSet{RecursiveSet{Int}},
+    SimpleIndexSet{SortedVector{Int}},
 )
 
 NNLIB_ACTIVATIONS_S = (
@@ -42,8 +46,8 @@ NNLIB_ACTIVATIONS_F = (
 NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
 
 @testset "Jacobian Global" begin
-    @testset "Set type $S" for S in FIRST_ORDER_SET_TYPES
-        method = TracerSparsityDetector(S)
+    @testset "Pattern type $P" for P in FIRST_ORDER_PATTERNS
+        method = TracerSparsityDetector(; first_order=P)
 
         f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])]
         @test jacobian_sparsity(f, rand(3), method) == [1 0 0; 1 1 0; 0 0 1]
@@ -126,8 +130,8 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
 end
 
 @testset "Jacobian Local" begin
-    @testset "Set type $S" for S in FIRST_ORDER_SET_TYPES
-        method = TracerLocalSparsityDetector(S)
+    @testset "Pattern type $P" for P in FIRST_ORDER_PATTERNS
+        method = TracerLocalSparsityDetector(; first_order=P)
 
         # Multiplication
         @test jacobian_sparsity(x -> x[1] * x[2], [1.0, 1.0], method) == [1 1;]

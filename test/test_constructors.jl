@@ -5,8 +5,18 @@ using SparseConnectivityTracer: SimpleIndexSet, SimpleSecondOrderIndexSet
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
-const FIRST_ORDER_SET_TYPES = (
-    BitSet, Set{Int}, DuplicateVector{Int}, RecursiveSet{Int}, SortedVector{Int}
+const PATTERNS = (
+    (SimpleIndexSet{BitSet}, SimpleSecondOrderIndexSet{BitSet,Set{Tuple{Int,Int}}}),
+    (SimpleIndexSet{Set{Int}}, SimpleSecondOrderIndexSet{Set{Int},Set{Tuple{Int,Int}}}),
+    (
+        SimpleIndexSet{DuplicateVector{Int}},
+        SimpleSecondOrderIndexSet{DuplicateVector{Int},DuplicateVector{Tuple{Int,Int}}},
+    ),
+    (
+        SimpleIndexSet{SortedVector{Int}},
+        SimpleSecondOrderIndexSet{SortedVector{Int},SortedVector{Tuple{Int,Int}}},
+    ),
+    # TODO: test on RecursiveSet
 )
 
 is_pattern_empty(p::SimpleIndexSet) = isempty(p.inds)
@@ -19,13 +29,10 @@ is_tracer_empty(t::GradientTracer)     = isempty(SparseConnectivityTracer.gradie
 is_tracer_empty(t::HessianTracer)      = isempty(SparseConnectivityTracer.gradient(t)) && isempty(SparseConnectivityTracer.hessian(t)) && t.isempty
 is_tracer_empty(d::Dual)               = is_tracer_empty(tracer(d))
 
-@testset "Set type $S1" for S1 in FIRST_ORDER_SET_TYPES
-    I = eltype(S1)
-    S2 = Set{Tuple{I,I}}
-
-    C = ConnectivityTracer{SimpleIndexSet{S1}}
-    G = GradientTracer{SimpleIndexSet{S1}}
-    H = HessianTracer{SimpleSecondOrderIndexSet{S1,S2}}
+@testset "Pattern types $S1, $S2" for (S1, S2) in PATTERNS
+    C = ConnectivityTracer{S1}
+    G = GradientTracer{S1}
+    H = HessianTracer{S2}
 
     TD = Float32
     DC = Dual{TD,C}
