@@ -4,7 +4,6 @@ abstract type AbstractTracer{P<:AbstractSparsityPattern} <: Real end
 # Set operations    #
 #===================#
 
-product(a::AbstractSet{I}, b::AbstractSet{I}) where {I} = Set((i, j) for i in a, j in b)
 
 function union_product!(
     sh::SH, sgx::SG, sgy::SG

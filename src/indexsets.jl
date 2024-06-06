@@ -1,19 +1,28 @@
-abstract type AbstractSparsityPattern end
-#=
-Expected interface:
-  * myempty(::Type{MyPattern}): return an empty pattern
-  * seed(::Type{MyPattern}, i::Integer): return an pattern that only contains the given index `i`
-  * Base.show
+"""
+    AbstractSparsityPattern
 
-And for compatibility with...
-  * ConnectivityTracer: inputs(p::MyPattern)   
-  * GradientTracer:     gradient(p::MyPattern) 
-  * HessianTracer:      gradient(p::MyPattern) AND hessian(p::MyPattern) 
-=#
+Abstract supertype of all sparsity pattern representations.
+
+## Expected interface
+
+* `myempty(::Type{MyPattern})`: return an empty pattern
+* `seed(::Type{MyPattern}, i::Integer)`: return an pattern that only contains the given index `i`
+* `Base.show`
+
+And for compatibility with tracers:
+
+| Tracer               | Required accessor function                           |
+|:---------------------|:-----------------------------------------------------|
+| `ConnectivityTracer` | `inputs(p::MyPattern)`                               |
+| `GradientTracer`     | `gradient(p::MyPattern)`                             |
+| `HessianTracer`      | `gradient(p::MyPattern)` AND `hessian(p::MyPattern)` | 
+"""
+abstract type AbstractSparsityPattern end
 
 # Utilities on AbstractSet
 myempty(::Type{S}) where {S<:AbstractSet} = S()
 seed(::Type{S}, i::Integer) where {S<:AbstractSet} = S([i])
+product(a::AbstractSet{I}, b::AbstractSet{I}) where {I} = Set((i, j) for i in a, j in b)
 
 ## First order
 abstract type AbstractFirstOrderPattern <: AbstractSparsityPattern end
@@ -22,10 +31,12 @@ abstract type AbstractFirstOrderPattern <: AbstractSparsityPattern end
 $(TYPEDEF)
 
 First order sparsity pattern represented by an index set of non-zero values.
-Represented by an `AbstractSet` of integer indices.
+Represented by a set of integer indices.
+
+## Expected interface
 
 The passed set type `S` has to implement:
-* `myempty(S)`: constructor for empty set (already implemented for `AbstractSet`)
+* `myempty(S)`: constructor for empty set
 * `seed(S, i)`: constructor for a set that only contains the given index `i`
 * `product(a::S{T}, b::S{T})::S{Tuple{T,T}}`: inner product of sets
 * `Base.union`
@@ -33,6 +44,8 @@ The passed set type `S` has to implement:
 * `Base.iterate`
 * `Base.collect`
 * `Base.show`
+
+all of these are already implemented for `AbstractSet`s from Julia Base.
 
 ## Fields
 $(TYPEDFIELDS)
@@ -57,10 +70,12 @@ abstract type AbstractSecondOrderPattern <: AbstractSparsityPattern end
 $(TYPEDEF)
 
 Second order sparsity pattern represented by index sets of non-zero values.
-Represented by two `AbstractSet`s of integer indices ``i`` and tuples ``(i, j)``.
+Represented by a set of integer indices ``i`` and a set of tuples ``(i, j)``.
 
-The passed set types `F` and `S` has to implement:
-* `myempty(S)`: constructor for empty set (already implemented for `AbstractSet`)
+## Expected interface
+
+The passed set type `F` has to implement:
+* `myempty(S)`: constructor for empty set
 * `seed(S, i)`: constructor for a set that only contains the given index `i`
 * `product(a::S{T}, b::S{T})::S{Tuple{T,T}}`: inner product of sets
 * `Base.union`
@@ -68,6 +83,16 @@ The passed set types `F` and `S` has to implement:
 * `Base.iterate`
 * `Base.collect`
 * `Base.show`
+
+The passed set type `S` has to implement:
+* `myempty(S)`: constructor for empty set
+* `Base.union`
+* `Base.union!`
+* `Base.iterate`
+* `Base.collect`
+* `Base.show`
+
+all of these are already implemented for `AbstractSet`s from Julia Base.
 
 ## Fields
 $(TYPEDFIELDS)
