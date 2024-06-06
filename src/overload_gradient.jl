@@ -86,7 +86,7 @@ function gradient_tracer_2_to_1_set(
     elseif is_firstder_arg1_zero && !is_firstder_arg2_zero
         return sy
     else
-        return clever_union(sx, sy) # return set
+        return union(sx, sy) # return set
     end
 end
 

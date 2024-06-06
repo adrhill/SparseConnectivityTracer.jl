@@ -4,16 +4,6 @@ abstract type AbstractTracer{I<:AbstractSparsityPattern} <: Real end
 # Set operations    #
 #===================#
 
-function clever_union(a::AbstractSet{P}, b::AbstractSet{P}) where {P}
-    if isempty(a)
-        return b
-    elseif isempty(b)
-        return a
-    else
-        return union(a, b)
-    end
-end
-
 product(a::AbstractSet{I}, b::AbstractSet{I}) where {I} = Set((i, j) for i in a, j in b)
 
 function union_product!(
