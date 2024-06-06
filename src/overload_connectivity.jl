@@ -60,9 +60,9 @@ function connectivity_tracer_2_to_1(
     if tx.isempty && ty.isempty
         return tx # empty tracer
     elseif ty.isempty
-        connectivity_tracer_1_to_1(tx, is_influence_arg1_zero)
+        return connectivity_tracer_1_to_1(tx, is_influence_arg1_zero)
     elseif tx.isempty
-        connectivity_tracer_1_to_1(ty, is_influence_arg2_zero)
+        return connectivity_tracer_1_to_1(ty, is_influence_arg2_zero)
     else
         pattern = connectivity_tracer_2_to_1_pattern(
             tx.pattern, ty.pattern, is_influence_arg1_zero, is_influence_arg2_zero

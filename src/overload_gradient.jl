@@ -56,9 +56,9 @@ function gradient_tracer_2_to_1(
     if tx.isempty && ty.isempty
         return tx # empty tracer
     elseif ty.isempty
-        gradient_tracer_1_to_1(tx, is_firstder_arg1_zero)
+        return gradient_tracer_1_to_1(tx, is_firstder_arg1_zero)
     elseif tx.isempty
-        gradient_tracer_1_to_1(ty, is_firstder_arg2_zero)
+        return gradient_tracer_1_to_1(ty, is_firstder_arg2_zero)
     else
         pattern = gradient_tracer_2_to_1_pattern(
             tx.pattern, ty.pattern, is_firstder_arg1_zero, is_firstder_arg2_zero
