@@ -31,23 +31,30 @@ julia> ADTypes.hessian_sparsity(f, rand(4), TracerSparsityDetector())
  ⋅  ⋅  ⋅  1
 ```
 """
-struct TracerSparsityDetector{G,H} <: ADTypes.AbstractSparsityDetector end
-TracerSparsityDetector(::Type{G}, ::Type{H}) where {G,H} = TracerSparsityDetector{G,H}()
-function TracerSparsityDetector(::Type{G}) where {G}
-    return TracerSparsityDetector{G,Set{Tuple{Int,Int}}}()
+struct TracerSparsityDetector{F<:AbstractFirstOrderPattern,S<:AbstractSecondOrderPattern} <:
+       ADTypes.AbstractSparsityDetector end
+function TracerSparsityDetector(
+    ::Type{F}, ::Type{S}
+) where {F<:AbstractFirstOrderPattern,S<:AbstractSecondOrderPattern}
+    return TracerSparsityDetector{F,S}()
 end
-TracerSparsityDetector() = TracerSparsityDetector(BitSet, Set{Tuple{Int,Int}})
-
-function ADTypes.jacobian_sparsity(f, x, ::TracerSparsityDetector{G,H}) where {G,H}
-    return jacobian_pattern(f, x, G)
+function TracerSparsityDetector(;
+    first_order::Type{F}=DEFAULT_FIRST_ORDER_PATTERN,
+    second_order::Type{S}=DEFAULT_SECOND_ORDER_PATTERN,
+) where {F<:AbstractFirstOrderPattern,S<:AbstractSecondOrderPattern}
+    return TracerSparsityDetector(first_order, second_order)
 end
 
-function ADTypes.jacobian_sparsity(f!, y, x, ::TracerSparsityDetector{G,H}) where {G,H}
-    return jacobian_pattern(f!, y, x, G)
+function ADTypes.jacobian_sparsity(f, x, ::TracerSparsityDetector{F,S}) where {F,S}
+    return jacobian_pattern(f, x, F)
 end
 
-function ADTypes.hessian_sparsity(f, x, ::TracerSparsityDetector{G,H}) where {G,H}
-    return hessian_pattern(f, x, G, H)
+function ADTypes.jacobian_sparsity(f!, y, x, ::TracerSparsityDetector{F,S}) where {F,S}
+    return jacobian_pattern(f!, y, x, F)
+end
+
+function ADTypes.hessian_sparsity(f, x, ::TracerSparsityDetector{F,S}) where {F,S}
+    return hessian_pattern(f, x, S)
 end
 
 """
@@ -91,23 +98,29 @@ julia> ADTypes.hessian_sparsity(f, [1.0, 2.0, 3.0, 4.0], TracerLocalSparsityDete
  ⋅  ⋅  ⋅  1
 ```
 """
-struct TracerLocalSparsityDetector{G,H} <: ADTypes.AbstractSparsityDetector end
-function TracerLocalSparsityDetector(::Type{G}, ::Type{H}) where {G,H}
-    return TracerLocalSparsityDetector{G,H}()
+struct TracerLocalSparsityDetector{
+    F<:AbstractFirstOrderPattern,S<:AbstractSecondOrderPattern
+} <: ADTypes.AbstractSparsityDetector end
+function TracerLocalSparsityDetector(
+    ::Type{F}, ::Type{S}
+) where {F<:AbstractFirstOrderPattern,S<:AbstractSecondOrderPattern}
+    return TracerLocalSparsityDetector{F,S}()
 end
-function TracerLocalSparsityDetector(::Type{G}) where {G}
-    return TracerLocalSparsityDetector{G,Set{Tuple{Int,Int}}}()
-end
-TracerLocalSparsityDetector() = TracerLocalSparsityDetector(BitSet, Set{Tuple{Int,Int}})
-
-function ADTypes.jacobian_sparsity(f, x, ::TracerLocalSparsityDetector{G,H}) where {G,H}
-    return local_jacobian_pattern(f, x, G)
-end
-
-function ADTypes.jacobian_sparsity(f!, y, x, ::TracerLocalSparsityDetector{G,H}) where {G,H}
-    return local_jacobian_pattern(f!, y, x, G)
+function TracerLocalSparsityDetector(;
+    first_order::Type{F}=DEFAULT_FIRST_ORDER_PATTERN,
+    second_order::Type{S}=DEFAULT_SECOND_ORDER_PATTERN,
+) where {F<:AbstractFirstOrderPattern,S<:AbstractSecondOrderPattern}
+    return TracerLocalSparsityDetector(first_order, second_order)
 end
 
-function ADTypes.hessian_sparsity(f, x, ::TracerLocalSparsityDetector{G,H}) where {G,H}
-    return local_hessian_pattern(f, x, G, H)
+function ADTypes.jacobian_sparsity(f, x, ::TracerLocalSparsityDetector{F,S}) where {F,S}
+    return local_jacobian_pattern(f, x, F)
+end
+
+function ADTypes.jacobian_sparsity(f!, y, x, ::TracerLocalSparsityDetector{F,S}) where {F,S}
+    return local_jacobian_pattern(f!, y, x, F)
+end
+
+function ADTypes.hessian_sparsity(f, x, ::TracerLocalSparsityDetector{F,S}) where {F,S}
+    return local_hessian_pattern(f, x, S)
 end
