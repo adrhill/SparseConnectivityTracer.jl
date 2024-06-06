@@ -6,9 +6,8 @@ import SparseConnectivityTracer as SCT
 using Test
 
 using Pkg
-Pkg.add([
-    "ADNLPModels", "ForwardDiff", "OptimizationProblems", "NLPModels", "NLPModelsJuMP"
-])
+Pkg.add(name="ADNLPModels", version="0.7")
+Pkg.add(["ForwardDiff", "OptimizationProblems", "NLPModels", "NLPModelsJuMP"])
 
 using ADNLPModels
 using ForwardDiff: ForwardDiff
