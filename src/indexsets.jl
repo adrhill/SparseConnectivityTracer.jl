@@ -20,8 +20,25 @@ And for compatibility with tracers:
 abstract type AbstractSparsityPattern end
 
 # Utilities on AbstractSet
+"""
+    myempty(S)
+
+Constructor for an empty set-like data structure of type `S`.
+"""
 myempty(::Type{S}) where {S<:AbstractSet} = S()
+
+"""
+    myempty(S)
+
+Constructor for a set-like data structure of type `S` that only contains the given index `i`.
+"""
 seed(::Type{S}, i::Integer) where {S<:AbstractSet} = S([i])
+
+""""
+    product(a::S{T}, b::S{T})::S{Tuple{T,T}}
+
+Inner product of set-like inputs `a` and `b`.
+"""
 product(a::AbstractSet{I}, b::AbstractSet{I}) where {I} = Set((i, j) for i in a, j in b)
 
 ## First order
@@ -36,16 +53,17 @@ Represented by a set of integer indices.
 ## Expected interface
 
 The passed set type `S` has to implement:
-* `myempty(S)`: constructor for empty set
-* `seed(S, i)`: constructor for a set that only contains the given index `i`
-* `product(a::S{T}, b::S{T})::S{Tuple{T,T}}`: inner product of sets
+* `SparseConnectivityTracer.myempty`
+* `SparseConnectivityTracer.seed`
+* `SparseConnectivityTracer.product`
 * `Base.union`
 * `Base.union!`
 * `Base.iterate`
 * `Base.collect`
 * `Base.show`
 
-all of these are already implemented for `AbstractSet`s from Julia Base.
+All of these methods are already implemented for `AbstractSet`s from Julia Base.
+Refer to the individual documentation of each function for more information. 
 
 ## Fields
 $(TYPEDFIELDS)
@@ -75,9 +93,9 @@ Represented by a set of integer indices ``i`` and a set of tuples ``(i, j)``.
 ## Expected interface
 
 The passed set type `F` has to implement:
-* `myempty(S)`: constructor for empty set
-* `seed(S, i)`: constructor for a set that only contains the given index `i`
-* `product(a::S{T}, b::S{T})::S{Tuple{T,T}}`: inner product of sets
+* `SparseConnectivityTracer.myempty`
+* `SparseConnectivityTracer.seed`
+* `SparseConnectivityTracer.product`
 * `Base.union`
 * `Base.union!`
 * `Base.iterate`
@@ -85,14 +103,16 @@ The passed set type `F` has to implement:
 * `Base.show`
 
 The passed set type `S` has to implement:
-* `myempty(S)`: constructor for empty set
+* `SparseConnectivityTracer.myempty`
 * `Base.union`
 * `Base.union!`
 * `Base.iterate`
 * `Base.collect`
 * `Base.show`
 
-all of these are already implemented for `AbstractSet`s from Julia Base.
+All of these methods are already implemented for `AbstractSet`s from Julia Base.
+Refer to the individual documentation of each function for more information. 
+
 
 ## Fields
 $(TYPEDFIELDS)
