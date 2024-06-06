@@ -24,7 +24,7 @@ end
 
 function hessian_tracer_1_to_1_set(
     sg::SG, sh::SH, is_firstder_zero::Bool, is_secondder_zero::Bool
-) where {I,SG<:AbstractSet{<:I},SH<:AbstractSet{<:Tuple{I,I}}}
+) where {SG,SH}
     sg_out = gradient_tracer_1_to_1_set(sg, is_firstder_zero)
     sh_out = if is_firstder_zero && is_secondder_zero
         myempty(SH)
@@ -132,7 +132,7 @@ function hessian_tracer_2_to_1_set(
     is_firstder_arg2_zero::Bool,
     is_secondder_arg2_zero::Bool,
     is_crossder_zero::Bool,
-) where {I,SG<:AbstractSet{I},SH<:AbstractSet{<:Tuple{I,I}}}
+) where {SG,SH}
     sg_out = gradient_tracer_2_to_1_set(
         sgx, sgy, is_firstder_arg1_zero, is_firstder_arg2_zero
     )
@@ -272,7 +272,7 @@ function hessian_tracer_1_to_2_set(
     is_secondder_out1_zero::Bool,
     is_firstder_out2_zero::Bool,
     is_secondder_out2_zero::Bool,
-) where {I,SG<:AbstractSet{I},SH<:AbstractSet{<:Tuple{I,I}}}
+) where {SG,SH}
     sg_out1, sh_out1 = hessian_tracer_1_to_1_set(
         sg, sh, is_firstder_out1_zero, is_secondder_out1_zero
     )

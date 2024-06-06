@@ -14,9 +14,7 @@ function gradient_tracer_1_to_1_pattern(p::P, is_firstder_zero::Bool) where {P<:
     return P(set) # return pattern
 end
 
-function gradient_tracer_1_to_1_set(
-    s::S, is_firstder_zero::Bool
-) where {S<:AbstractSet{<:Integer}}
+function gradient_tracer_1_to_1_set(s::S, is_firstder_zero::Bool) where {S}
     if is_firstder_zero
         return myempty(S)
     else
@@ -78,7 +76,7 @@ end
 
 function gradient_tracer_2_to_1_set(
     sx::S, sy::S, is_firstder_arg1_zero::Bool, is_firstder_arg2_zero::Bool
-) where {S<:AbstractSet{<:Integer}}
+) where {S}
     if is_firstder_arg1_zero && is_firstder_arg2_zero
         return myempty(S)
     elseif !is_firstder_arg1_zero && is_firstder_arg2_zero
@@ -177,7 +175,7 @@ end
 
 function gradient_tracer_1_to_2_set(
     s::S, is_firstder_out1_zero::Bool, is_firstder_out2_zero::Bool
-) where {S<:AbstractSet{<:Integer}}
+) where {S}
     set1 = gradient_tracer_1_to_1_set(s, is_firstder_out1_zero)
     set2 = gradient_tracer_1_to_1_set(s, is_firstder_out2_zero)
     return (set1, set2)

@@ -18,9 +18,7 @@ function connectivity_tracer_1_to_1_pattern(
     return P(set) # return pattern
 end
 
-function connectivity_tracer_1_to_1_set(
-    s::S, is_influence_zero::Bool
-) where {S<:AbstractSet{<:Integer}}
+function connectivity_tracer_1_to_1_set(s::S, is_influence_zero::Bool) where {S}
     if is_influence_zero
         return myempty(S)
     else
@@ -82,7 +80,7 @@ end
 
 function connectivity_tracer_2_to_1_set(
     sx::S, sy::S, is_influence_arg1_zero::Bool, is_influence_arg2_zero::Bool
-) where {S<:AbstractSet{<:Integer}}
+) where {S}
     if is_influence_arg1_zero && is_influence_arg2_zero
         return myempty(S)
     elseif !is_influence_arg1_zero && is_influence_arg2_zero
@@ -186,7 +184,7 @@ end
 
 function connectivity_tracer_1_to_2_set(
     s::S, is_influence_out1_zero::Bool, is_influence_out2_zero::Bool
-) where {S<:AbstractSet{<:Integer}}
+) where {S}
     s1 = connectivity_tracer_1_to_1_set(s, is_influence_out1_zero)
     s2 = connectivity_tracer_1_to_1_set(s, is_influence_out2_zero)
     return (s1, s2) # return sets
