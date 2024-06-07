@@ -68,7 +68,8 @@ The passed set type `S` has to implement:
 * `Base.collect`
 * `Base.show`
 
-All of these methods are already implemented for `AbstractSet`s from Julia Base.
+All of these methods are already implemented for `AbstractSet`s from Julia Base,
+which are most commonly used in `SimpleVectorIndexSetPattern`.
 Refer to the individual documentation of each function for more information. 
 
 ## Fields
@@ -126,7 +127,8 @@ The passed set type `S` has to implement:
 * `Base.collect`
 * `Base.show`
 
-All of these methods are already implemented for `AbstractSet`s from Julia Base.
+All of these methods are already implemented for `AbstractSet`s from Julia Base,
+which are most commonly used in `SimpleVectorAndMatrixIndexSetPattern`.
 Refer to the individual documentation of each function for more information. 
 
 
