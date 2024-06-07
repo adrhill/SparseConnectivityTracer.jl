@@ -1,26 +1,37 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer:
-    Dual,
-    HessianTracer,
-    SimpleVectorAndMatrixIndexSetPattern,
-    MissingPrimalError,
-    tracer,
-    trace_input,
-    empty
+    Dual, HessianTracer, MissingPrimalError, tracer, trace_input, empty
+using SparseConnectivityTracer:
+    CombinedVectorAndMatrixPattern, SimpleVectorIndexSetPattern, SimpleMatrixIndexSetPattern
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using ADTypes: hessian_sparsity
 using SpecialFunctions: erf, beta
 using Test
 
 SECOND_ORDER_PATTERNS = (
-    SimpleVectorAndMatrixIndexSetPattern{BitSet,Set{Tuple{Int,Int}}},  #
-    SimpleVectorAndMatrixIndexSetPattern{Set{Int},Set{Tuple{Int,Int}}},
-    SimpleVectorAndMatrixIndexSetPattern{
-        DuplicateVector{Int},DuplicateVector{Tuple{Int,Int}}
+    CombinedVectorAndMatrixPattern{
+        SimpleVectorIndexSetPattern{BitSet},SimpleMatrixIndexSetPattern{Set{Tuple{Int,Int}}}
     },
-    # SimpleVectorAndMatrixIndexSetPattern{DuplicateVector{Int},Set{Tuple{Int,Int}}},  # TODO: fix
-    SimpleVectorAndMatrixIndexSetPattern{SortedVector{Int},SortedVector{Tuple{Int,Int}}},
-    SimpleVectorAndMatrixIndexSetPattern{SortedVector{Int},Set{Tuple{Int,Int}}},
+    CombinedVectorAndMatrixPattern{
+        SimpleVectorIndexSetPattern{Set{Int}},
+        SimpleMatrixIndexSetPattern{Set{Tuple{Int,Int}}},
+    },
+    CombinedVectorAndMatrixPattern{
+        SimpleVectorIndexSetPattern{DuplicateVector{Int}},
+        SimpleMatrixIndexSetPattern{DuplicateVector{Tuple{Int,Int}}},
+    },
+    # CombinedVectorAndMatrixPattern{
+    #     SimpleVectorIndexSetPattern{DuplicateVector{Int}},
+    #     SimpleMatrixIndexSetPattern{Set{Tuple{Int,Int}}},
+    # },  # TODO: fix
+    CombinedVectorAndMatrixPattern{
+        SimpleVectorIndexSetPattern{SortedVector{Int}},
+        SimpleMatrixIndexSetPattern{Set{Tuple{Int,Int}}},
+    },
+    CombinedVectorAndMatrixPattern{
+        SimpleVectorIndexSetPattern{SortedVector{Int}},
+        SimpleMatrixIndexSetPattern{Set{Tuple{Int,Int}}},
+    },
 )
 
 @testset "Global Hessian" begin

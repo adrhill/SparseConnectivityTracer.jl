@@ -1,8 +1,7 @@
 using BenchmarkTools
 using SparseConnectivityTracer
 using SparseConnectivityTracer: DuplicateVector, SortedVector, RecursiveSet
-using SparseConnectivityTracer:
-    SimpleVectorIndexSetPattern, SimpleVectorAndMatrixIndexSetPattern
+using SparseConnectivityTracer: SimpleVectorIndexSetPattern, CombinedVectorAndMatrixPattern
 
 const FIRST_ORDER_PATTERNS = (
     SimpleVectorIndexSetPattern{BitSet},
@@ -13,13 +12,25 @@ const FIRST_ORDER_PATTERNS = (
 )
 
 const SECOND_ORDER_PATTERNS = (
-    SimpleVectorAndMatrixIndexSetPattern{BitSet,Set{Tuple{Int,Int}}},  #
-    SimpleVectorAndMatrixIndexSetPattern{Set{Int},Set{Tuple{Int,Int}}},
-    SimpleVectorAndMatrixIndexSetPattern{
-        DuplicateVector{Int},DuplicateVector{Tuple{Int,Int}}
+    CombinedVectorAndMatrixPattern{
+        SimpleVectorIndexSetPattern{BitSet},SimpleVectorIndexSetPattern{Set{Tuple{Int,Int}}}
+    },#
+    CombinedVectorAndMatrixPattern{
+        SimpleVectorIndexSetPattern{Set{Int}},
+        SimpleVectorIndexSetPattern{Set{Tuple{Int,Int}}},
     },
-    SimpleVectorAndMatrixIndexSetPattern{SortedVector{Int},SortedVector{Tuple{Int,Int}}},
-    SimpleVectorAndMatrixIndexSetPattern{SortedVector{Int},Set{Tuple{Int,Int}}},
+    CombinedVectorAndMatrixPattern{
+        SimpleVectorIndexSetPattern{DuplicateVector{Int}},
+        SimpleVectorIndexSetPattern{DuplicateVector{Tuple{Int,Int}}},
+    },
+    CombinedVectorAndMatrixPattern{
+        SimpleVectorIndexSetPattern{SortedVector{Int}},
+        SimpleVectorIndexSetPattern{SortedVector{Tuple{Int,Int}}},
+    },
+    CombinedVectorAndMatrixPattern{
+        SimpleVectorIndexSetPattern{SortedVector{Int}},
+        SimpleVectorIndexSetPattern{Set{Tuple{Int,Int}}},
+    },
 )
 
 include("jacobian.jl")

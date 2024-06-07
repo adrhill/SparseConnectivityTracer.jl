@@ -15,11 +15,15 @@ end
 
 function hessian_tracer_1_to_1_pattern(
     p::P, is_firstder_zero::Bool, is_secondder_zero::Bool
-) where {P<:SimpleVectorAndMatrixIndexSetPattern}
+) where {
+    V<:SimpleVectorIndexSetPattern,
+    M<:SimpleMatrixIndexSetPattern,
+    P<:CombinedVectorAndMatrixPattern{V,M},
+}
     set_grad, set_hessian = hessian_tracer_1_to_1_set(
         gradient(p), hessian(p), is_firstder_zero, is_secondder_zero
     )
-    return P(set_grad, set_hessian) # return pattern
+    return P(V(set_grad), M(set_hessian)) # return pattern
 end
 
 function hessian_tracer_1_to_1_set(
@@ -107,7 +111,11 @@ function hessian_tracer_2_to_1_pattern(
     is_firstder_arg2_zero::Bool,
     is_secondder_arg2_zero::Bool,
     is_crossder_zero::Bool,
-) where {P<:SimpleVectorAndMatrixIndexSetPattern}
+) where {
+    V<:SimpleVectorIndexSetPattern,
+    M<:SimpleMatrixIndexSetPattern,
+    P<:CombinedVectorAndMatrixPattern{V,M},
+}
     set_grad, set_hessian = hessian_tracer_2_to_1_set(
         gradient(px),
         hessian(px),
@@ -119,7 +127,7 @@ function hessian_tracer_2_to_1_pattern(
         is_secondder_arg2_zero,
         is_crossder_zero,
     )
-    return P(set_grad, set_hessian) # return pattern
+    return P(V(set_grad), M(set_hessian)) # return pattern
 end
 
 function hessian_tracer_2_to_1_set(
@@ -251,7 +259,11 @@ function hessian_tracer_1_to_2_pattern(
     is_seconder_out1_zero::Bool,
     is_firstder_out2_zero::Bool,
     is_seconder_out2_zero::Bool,
-) where {P<:SimpleVectorAndMatrixIndexSetPattern}
+) where {
+    V<:SimpleVectorIndexSetPattern,
+    M<:SimpleMatrixIndexSetPattern,
+    P<:CombinedVectorAndMatrixPattern{V,M},
+}
     (set_grad1, set_hessian1), (set_grad2, set_hessian2) = hessian_tracer_1_to_2_set(
         gradient(p),
         hessian(p),
@@ -260,8 +272,8 @@ function hessian_tracer_1_to_2_pattern(
         is_firstder_out2_zero,
         is_seconder_out2_zero,
     )
-    pattern1 = P(set_grad1, set_hessian1)
-    pattern2 = P(set_grad2, set_hessian2)
+    pattern1 = P(V(set_grad1), M(set_hessian1))
+    pattern2 = P(V(set_grad2), M(set_hessian2))
     return (pattern1, pattern2) # return patterns
 end
 

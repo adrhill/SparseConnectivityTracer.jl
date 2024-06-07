@@ -1,6 +1,6 @@
 const DEFAULT_FIRST_ORDER_PATTERN = SimpleVectorIndexSetPattern{BitSet}
-const DEFAULT_SECOND_ORDER_PATTERN = SimpleVectorAndMatrixIndexSetPattern{
-    BitSet,Set{Tuple{Int,Int}}
+const DEFAULT_SECOND_ORDER_PATTERN = CombinedVectorAndMatrixPattern{
+    SimpleVectorIndexSetPattern{BitSet},SimpleMatrixIndexSetPattern{Set{Tuple{Int,Int}}}
 }
 
 #==================#

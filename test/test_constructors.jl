@@ -2,36 +2,44 @@
 using SparseConnectivityTracer: ConnectivityTracer, GradientTracer, HessianTracer, Dual
 using SparseConnectivityTracer: inputs, primal, tracer, myempty
 using SparseConnectivityTracer:
-    SimpleVectorIndexSetPattern, SimpleVectorAndMatrixIndexSetPattern
+    SimpleVectorIndexSetPattern, SimpleMatrixIndexSetPattern, CombinedVectorAndMatrixPattern
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
 const PATTERNS = (
     (
         SimpleVectorIndexSetPattern{BitSet},
-        SimpleVectorAndMatrixIndexSetPattern{BitSet,Set{Tuple{Int,Int}}},
+        CombinedVectorAndMatrixPattern{
+            SimpleVectorIndexSetPattern{BitSet},
+            SimpleMatrixIndexSetPattern{Set{Tuple{Int,Int}}},
+        },
     ),
     (
         SimpleVectorIndexSetPattern{Set{Int}},
-        SimpleVectorAndMatrixIndexSetPattern{Set{Int},Set{Tuple{Int,Int}}},
+        CombinedVectorAndMatrixPattern{
+            SimpleVectorIndexSetPattern{Set{Int}},
+            SimpleMatrixIndexSetPattern{Set{Tuple{Int,Int}}},
+        },
     ),
     (
         SimpleVectorIndexSetPattern{DuplicateVector{Int}},
-        SimpleVectorAndMatrixIndexSetPattern{
-            DuplicateVector{Int},DuplicateVector{Tuple{Int,Int}}
+        CombinedVectorAndMatrixPattern{
+            SimpleVectorIndexSetPattern{DuplicateVector{Int}},
+            SimpleMatrixIndexSetPattern{DuplicateVector{Tuple{Int,Int}}},
         },
     ),
     (
         SimpleVectorIndexSetPattern{SortedVector{Int}},
-        SimpleVectorAndMatrixIndexSetPattern{
-            SortedVector{Int},SortedVector{Tuple{Int,Int}}
+        CombinedVectorAndMatrixPattern{
+            SimpleVectorIndexSetPattern{SortedVector{Int}},
+            SimpleMatrixIndexSetPattern{SortedVector{Tuple{Int,Int}}},
         },
     ),
     # TODO: test on RecursiveSet
 )
 
 is_pattern_empty(p::SimpleVectorIndexSetPattern) = isempty(p.inds)
-function is_pattern_empty(p::SimpleVectorAndMatrixIndexSetPattern)
+function is_pattern_empty(p::CombinedVectorAndMatrixPattern)
     return isempty(p.first_order) && isempty(p.second_order)
 end
 

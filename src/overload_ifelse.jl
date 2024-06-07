@@ -16,8 +16,16 @@
     function output_union(px::P, py::P) where {P<:SimpleVectorIndexSetPattern}
         return P(union(px.inds, py.inds))
     end
-    function output_union(px::P, py::P) where {P<:SimpleVectorAndMatrixIndexSetPattern}
-        return P(union(gradient(px), gradient(py)), union(hessian(px), hessian(py)))
+    function output_union(
+        px::P, py::P
+    ) where {
+        V<:SimpleVectorIndexSetPattern,
+        M<:SimpleMatrixIndexSetPattern,
+        P<:CombinedVectorAndMatrixPattern{V,M},
+    }
+        grad = V(union(gradient(px), gradient(py)))
+        hess = M(union(hessian(px), hessian(py)))
+        return P(grad, hess)
     end
 
     output_union(tx::AbstractTracer, y) = tx
