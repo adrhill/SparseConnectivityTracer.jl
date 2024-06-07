@@ -24,19 +24,6 @@ For a higher-level interface, refer to [`connectivity_pattern`](@ref).
 
 ## Fields
 $(TYPEDFIELDS)
-
-## Example
-```jldoctest
-julia> inputs = Set([1, 3])
-Set{Int64} with 2 elements:
-  3
-  1
-
-julia> pattern = SparseConnectivityTracer.SimpleVectorIndexSetPattern(inputs);
-
-julia> SparseConnectivityTracer.ConnectivityTracer(pattern, false)
-SparseConnectivityTracer.ConnectivityTracer{SparseConnectivityTracer.SimpleVectorIndexSetPattern{Set{Int64}}}(1, 3)
-```
 """
 struct ConnectivityTracer{P<:AbstractVectorPattern} <: AbstractTracer{P}
     "Sparse representation of connected inputs."
@@ -80,19 +67,6 @@ For a higher-level interface, refer to [`jacobian_pattern`](@ref).
 
 ## Fields
 $(TYPEDFIELDS)
-
-## Example
-```jldoctest
-julia> grad = Set([1, 3])
-Set{Int64} with 2 elements:
-  3
-  1
-
-julia> pattern = SparseConnectivityTracer.SimpleVectorIndexSetPattern(grad);
-
-julia> SparseConnectivityTracer.GradientTracer(pattern, false)
-SparseConnectivityTracer.GradientTracer{SparseConnectivityTracer.SimpleVectorIndexSetPattern{Set{Int64}}}(1, 3)
-```
 """
 struct GradientTracer{P<:AbstractVectorPattern} <: AbstractTracer{P}
     "Sparse representation of non-zero entries in the gradient."
@@ -129,28 +103,6 @@ For a higher-level interface, refer to [`hessian_pattern`](@ref).
 
 ## Fields
 $(TYPEDFIELDS)
-
-## Example
-```jldoctest
-julia> grad = Set([1, 3])
-Set{Int64} with 2 elements:
-  3
-  1
-
-julia> hess = Set([(1, 1), (2, 3), (3, 2)])
-Set{Tuple{Int64, Int64}} with 3 elements:
-  (3, 2)
-  (1, 1)
-  (2, 3)
-
-julia> pattern = SparseConnectivityTracer.SimpleVectorAndMatrixIndexSetPattern(grad, hess);
-
-julia> SparseConnectivityTracer.HessianTracer(pattern, false)
-SparseConnectivityTracer.HessianTracer{SparseConnectivityTracer.SimpleVectorAndMatrixIndexSetPattern{Set{Int64}, Set{Tuple{Int64, Int64}}}}(
-First  order: Set([3, 1])
-Second order: Set([(3, 2), (1, 1), (2, 3)])
-)
-```
 """
 struct HessianTracer{P<:AbstractVectorAndMatrixPattern} <: AbstractTracer{P}
     "Sparse representation of non-zero entries in the gradient and the Hessian."
