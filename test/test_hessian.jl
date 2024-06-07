@@ -2,7 +2,7 @@ using SparseConnectivityTracer
 using SparseConnectivityTracer:
     Dual,
     HessianTracer,
-    SimpleSecondOrderIndexSet,
+    SimpleVectorAndMatrixIndexSetPattern,
     MissingPrimalError,
     tracer,
     trace_input,
@@ -13,12 +13,14 @@ using SpecialFunctions: erf, beta
 using Test
 
 SECOND_ORDER_PATTERNS = (
-    SimpleSecondOrderIndexSet{BitSet,Set{Tuple{Int,Int}}},  #
-    SimpleSecondOrderIndexSet{Set{Int},Set{Tuple{Int,Int}}},
-    SimpleSecondOrderIndexSet{DuplicateVector{Int},DuplicateVector{Tuple{Int,Int}}},
-    # SimpleSecondOrderIndexSet{DuplicateVector{Int},Set{Tuple{Int,Int}}},  # TODO: fix
-    SimpleSecondOrderIndexSet{SortedVector{Int},SortedVector{Tuple{Int,Int}}},
-    SimpleSecondOrderIndexSet{SortedVector{Int},Set{Tuple{Int,Int}}},
+    SimpleVectorAndMatrixIndexSetPattern{BitSet,Set{Tuple{Int,Int}}},  #
+    SimpleVectorAndMatrixIndexSetPattern{Set{Int},Set{Tuple{Int,Int}}},
+    SimpleVectorAndMatrixIndexSetPattern{
+        DuplicateVector{Int},DuplicateVector{Tuple{Int,Int}}
+    },
+    # SimpleVectorAndMatrixIndexSetPattern{DuplicateVector{Int},Set{Tuple{Int,Int}}},  # TODO: fix
+    SimpleVectorAndMatrixIndexSetPattern{SortedVector{Int},SortedVector{Tuple{Int,Int}}},
+    SimpleVectorAndMatrixIndexSetPattern{SortedVector{Int},Set{Tuple{Int,Int}}},
 )
 
 @testset "Global Hessian" begin

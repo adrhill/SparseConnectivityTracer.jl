@@ -41,8 +41,14 @@ Inner product of set-like inputs `a` and `b`.
 """
 product(a::AbstractSet{I}, b::AbstractSet{I}) where {I} = Set((i, j) for i in a, j in b)
 
-## First order
-abstract type AbstractFirstOrderPattern <: AbstractSparsityPattern end
+## Vector
+
+"""
+    AbstractVectorPattern <: AbstractSparsityPattern
+
+Abstract supertype of sparsity patterns representing a vector.
+"""
+abstract type AbstractVectorPattern <: AbstractSparsityPattern end
 
 """
 $(TYPEDEF)
@@ -68,21 +74,31 @@ Refer to the individual documentation of each function for more information.
 ## Fields
 $(TYPEDFIELDS)
 """
-struct SimpleIndexSet{S} <: AbstractFirstOrderPattern
+struct SimpleVectorIndexSetPattern{S} <: AbstractVectorPattern
     "Set of indices represting non-zero entries ``i``."
     inds::S
 end
-Base.show(io::IO, s::SimpleIndexSet) = Base.show(io, s.inds)
+Base.show(io::IO, s::SimpleVectorIndexSetPattern) = Base.show(io, s.inds)
 
-myempty(::Type{SimpleIndexSet{S}}) where {S} = SimpleIndexSet{S}(myempty(S))
-seed(::Type{SimpleIndexSet{S}}, i) where {S} = SimpleIndexSet{S}(seed(S, i))
+function myempty(::Type{SimpleVectorIndexSetPattern{S}}) where {S}
+    return SimpleVectorIndexSetPattern{S}(myempty(S))
+end
+function seed(::Type{SimpleVectorIndexSetPattern{S}}, i) where {S}
+    return SimpleVectorIndexSetPattern{S}(seed(S, i))
+end
 
 # Tracer compatibility
-inputs(s::SimpleIndexSet) = s.inds
-gradient(s::SimpleIndexSet) = s.inds
+inputs(s::SimpleVectorIndexSetPattern) = s.inds
+gradient(s::SimpleVectorIndexSetPattern) = s.inds
 
-## Second order
-abstract type AbstractSecondOrderPattern <: AbstractSparsityPattern end
+## Vector and Matrix
+
+"""
+    AbstractVectorAndMatrixPattern <: AbstractSparsityPattern
+
+Abstract supertype of sparsity patterns representing matrices.
+"""
+abstract type AbstractVectorAndMatrixPattern <: AbstractSparsityPattern end
 
 """
 $(TYPEDEF)
@@ -117,25 +133,25 @@ Refer to the individual documentation of each function for more information.
 ## Fields
 $(TYPEDFIELDS)
 """
-struct SimpleSecondOrderIndexSet{F,S} <: AbstractSecondOrderPattern
+struct SimpleVectorAndMatrixIndexSetPattern{F,S} <: AbstractVectorAndMatrixPattern
     "Set of indices represting non-zero entries ``i``."
     first_order::F
     "Set of index tuples represting non-zero entries ``(i, j)``."
     second_order::S
 end
-function Base.show(io::IO, s::SimpleSecondOrderIndexSet)
+function Base.show(io::IO, s::SimpleVectorAndMatrixIndexSetPattern)
     println(io, "First  order: ", s.first_order)
     println(io, "Second order: ", s.second_order)
     return nothing
 end
 
-function myempty(::Type{SimpleSecondOrderIndexSet{F,S}}) where {F,S}
-    return SimpleSecondOrderIndexSet{F,S}(myempty(F), myempty(S))
+function myempty(::Type{SimpleVectorAndMatrixIndexSetPattern{F,S}}) where {F,S}
+    return SimpleVectorAndMatrixIndexSetPattern{F,S}(myempty(F), myempty(S))
 end
-function seed(::Type{SimpleSecondOrderIndexSet{F,S}}, index) where {F,S}
-    return SimpleSecondOrderIndexSet{F,S}(seed(F, index), myempty(S))
+function seed(::Type{SimpleVectorAndMatrixIndexSetPattern{F,S}}, index) where {F,S}
+    return SimpleVectorAndMatrixIndexSetPattern{F,S}(seed(F, index), myempty(S))
 end
 
 # Tracer compatibility
-gradient(s::SimpleSecondOrderIndexSet) = s.first_order
-hessian(s::SimpleSecondOrderIndexSet) = s.second_order
+gradient(s::SimpleVectorAndMatrixIndexSetPattern) = s.first_order
+hessian(s::SimpleVectorAndMatrixIndexSetPattern) = s.second_order

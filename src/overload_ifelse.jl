@@ -13,10 +13,10 @@
         return T(output_union(tx.pattern, ty.pattern))
     end
 
-    function output_union(px::P, py::P) where {P<:SimpleIndexSet}
+    function output_union(px::P, py::P) where {P<:SimpleVectorIndexSetPattern}
         return P(union(px.inds, py.inds))
     end
-    function output_union(px::P, py::P) where {P<:SimpleSecondOrderIndexSet}
+    function output_union(px::P, py::P) where {P<:SimpleVectorAndMatrixIndexSetPattern}
         return P(union(gradient(px), gradient(py)), union(hessian(px), hessian(py)))
     end
 

@@ -1,26 +1,37 @@
 # Test construction and conversions of internal tracer types
 using SparseConnectivityTracer: ConnectivityTracer, GradientTracer, HessianTracer, Dual
 using SparseConnectivityTracer: inputs, primal, tracer, myempty
-using SparseConnectivityTracer: SimpleIndexSet, SimpleSecondOrderIndexSet
+using SparseConnectivityTracer:
+    SimpleVectorIndexSetPattern, SimpleVectorAndMatrixIndexSetPattern
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
 const PATTERNS = (
-    (SimpleIndexSet{BitSet}, SimpleSecondOrderIndexSet{BitSet,Set{Tuple{Int,Int}}}),
-    (SimpleIndexSet{Set{Int}}, SimpleSecondOrderIndexSet{Set{Int},Set{Tuple{Int,Int}}}),
     (
-        SimpleIndexSet{DuplicateVector{Int}},
-        SimpleSecondOrderIndexSet{DuplicateVector{Int},DuplicateVector{Tuple{Int,Int}}},
+        SimpleVectorIndexSetPattern{BitSet},
+        SimpleVectorAndMatrixIndexSetPattern{BitSet,Set{Tuple{Int,Int}}},
     ),
     (
-        SimpleIndexSet{SortedVector{Int}},
-        SimpleSecondOrderIndexSet{SortedVector{Int},SortedVector{Tuple{Int,Int}}},
+        SimpleVectorIndexSetPattern{Set{Int}},
+        SimpleVectorAndMatrixIndexSetPattern{Set{Int},Set{Tuple{Int,Int}}},
+    ),
+    (
+        SimpleVectorIndexSetPattern{DuplicateVector{Int}},
+        SimpleVectorAndMatrixIndexSetPattern{
+            DuplicateVector{Int},DuplicateVector{Tuple{Int,Int}}
+        },
+    ),
+    (
+        SimpleVectorIndexSetPattern{SortedVector{Int}},
+        SimpleVectorAndMatrixIndexSetPattern{
+            SortedVector{Int},SortedVector{Tuple{Int,Int}}
+        },
     ),
     # TODO: test on RecursiveSet
 )
 
-is_pattern_empty(p::SimpleIndexSet) = isempty(p.inds)
-function is_pattern_empty(p::SimpleSecondOrderIndexSet)
+is_pattern_empty(p::SimpleVectorIndexSetPattern) = isempty(p.inds)
+function is_pattern_empty(p::SimpleVectorAndMatrixIndexSetPattern)
     return isempty(p.first_order) && isempty(p.second_order)
 end
 

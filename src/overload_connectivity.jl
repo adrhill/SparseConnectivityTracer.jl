@@ -13,7 +13,7 @@ end
 
 function connectivity_tracer_1_to_1_pattern(
     p::P, is_influence_zero::Bool
-) where {P<:SimpleIndexSet}
+) where {P<:SimpleVectorIndexSetPattern}
     set = connectivity_tracer_1_to_1_set(inputs(p), is_influence_zero)
     return P(set) # return pattern
 end
@@ -71,7 +71,7 @@ end
 
 function connectivity_tracer_2_to_1_pattern(
     px::P, py::P, is_influence_arg1_zero::Bool, is_influence_arg2_zero::Bool
-) where {P<:SimpleIndexSet}
+) where {P<:SimpleVectorIndexSetPattern}
     set = connectivity_tracer_2_to_1_set(
         inputs(px), inputs(py), is_influence_arg1_zero, is_influence_arg2_zero
     )
@@ -175,7 +175,7 @@ end
 
 function connectivity_tracer_1_to_2_pattern(
     p::P, is_influence_out1_zero::Bool, is_influence_out2_zero::Bool
-) where {P<:SimpleIndexSet}
+) where {P<:SimpleVectorIndexSetPattern}
     set1, set2 = connectivity_tracer_1_to_2_set(
         inputs(p), is_influence_out1_zero, is_influence_out2_zero
     )

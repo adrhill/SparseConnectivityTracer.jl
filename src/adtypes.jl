@@ -31,17 +31,17 @@ julia> ADTypes.hessian_sparsity(f, rand(4), TracerSparsityDetector())
  ⋅  ⋅  ⋅  1
 ```
 """
-struct TracerSparsityDetector{F<:AbstractFirstOrderPattern,S<:AbstractSecondOrderPattern} <:
+struct TracerSparsityDetector{F<:AbstractVectorPattern,S<:AbstractVectorAndMatrixPattern} <:
        ADTypes.AbstractSparsityDetector end
 function TracerSparsityDetector(
     ::Type{F}, ::Type{S}
-) where {F<:AbstractFirstOrderPattern,S<:AbstractSecondOrderPattern}
+) where {F<:AbstractVectorPattern,S<:AbstractVectorAndMatrixPattern}
     return TracerSparsityDetector{F,S}()
 end
 function TracerSparsityDetector(;
     first_order::Type{F}=DEFAULT_FIRST_ORDER_PATTERN,
     second_order::Type{S}=DEFAULT_SECOND_ORDER_PATTERN,
-) where {F<:AbstractFirstOrderPattern,S<:AbstractSecondOrderPattern}
+) where {F<:AbstractVectorPattern,S<:AbstractVectorAndMatrixPattern}
     return TracerSparsityDetector(first_order, second_order)
 end
 
@@ -99,17 +99,17 @@ julia> ADTypes.hessian_sparsity(f, [1.0, 2.0, 3.0, 4.0], TracerLocalSparsityDete
 ```
 """
 struct TracerLocalSparsityDetector{
-    F<:AbstractFirstOrderPattern,S<:AbstractSecondOrderPattern
+    F<:AbstractVectorPattern,S<:AbstractVectorAndMatrixPattern
 } <: ADTypes.AbstractSparsityDetector end
 function TracerLocalSparsityDetector(
     ::Type{F}, ::Type{S}
-) where {F<:AbstractFirstOrderPattern,S<:AbstractSecondOrderPattern}
+) where {F<:AbstractVectorPattern,S<:AbstractVectorAndMatrixPattern}
     return TracerLocalSparsityDetector{F,S}()
 end
 function TracerLocalSparsityDetector(;
     first_order::Type{F}=DEFAULT_FIRST_ORDER_PATTERN,
     second_order::Type{S}=DEFAULT_SECOND_ORDER_PATTERN,
-) where {F<:AbstractFirstOrderPattern,S<:AbstractSecondOrderPattern}
+) where {F<:AbstractVectorPattern,S<:AbstractVectorAndMatrixPattern}
     return TracerLocalSparsityDetector(first_order, second_order)
 end
 

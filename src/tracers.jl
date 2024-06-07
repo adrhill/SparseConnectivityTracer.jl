@@ -32,19 +32,19 @@ Set{Int64} with 2 elements:
   3
   1
 
-julia> pattern = SparseConnectivityTracer.SimpleIndexSet(inputs);
+julia> pattern = SparseConnectivityTracer.SimpleVectorIndexSetPattern(inputs);
 
 julia> SparseConnectivityTracer.ConnectivityTracer(pattern, false)
-SparseConnectivityTracer.ConnectivityTracer{SparseConnectivityTracer.SimpleIndexSet{Set{Int64}}}(1, 3)
+SparseConnectivityTracer.ConnectivityTracer{SparseConnectivityTracer.SimpleVectorIndexSetPattern{Set{Int64}}}(1, 3)
 ```
 """
-struct ConnectivityTracer{P<:AbstractFirstOrderPattern} <: AbstractTracer{P}
+struct ConnectivityTracer{P<:AbstractVectorPattern} <: AbstractTracer{P}
     "Sparse representation of connected inputs."
     pattern::P
     "Indicator whether pattern in tracer contains only zeros."
     isempty::Bool
 end
-function ConnectivityTracer{P}(pattern::P) where {P<:AbstractFirstOrderPattern}
+function ConnectivityTracer{P}(pattern::P) where {P<:AbstractVectorPattern}
     return ConnectivityTracer{P}(pattern, false)
 end
 
@@ -58,11 +58,11 @@ end
 # Generic code expecting "regular" numbers `x` will sometimes convert them 
 # by calling `T(x)` (instead of `convert(T, x)`), where `T` can be `ConnectivityTracer`.
 # When this happens, we create a new empty tracer with no input pattern.
-function ConnectivityTracer{P}(::Real) where {P<:AbstractFirstOrderPattern}
+function ConnectivityTracer{P}(::Real) where {P<:AbstractVectorPattern}
     return myempty(ConnectivityTracer{P})
 end
 
-ConnectivityTracer{P}(t::ConnectivityTracer{P}) where {P<:AbstractFirstOrderPattern} = t
+ConnectivityTracer{P}(t::ConnectivityTracer{P}) where {P<:AbstractVectorPattern} = t
 ConnectivityTracer(t::ConnectivityTracer) = t
 
 inputs(t::ConnectivityTracer) = inputs(t.pattern)
@@ -88,19 +88,19 @@ Set{Int64} with 2 elements:
   3
   1
 
-julia> pattern = SparseConnectivityTracer.SimpleIndexSet(grad);
+julia> pattern = SparseConnectivityTracer.SimpleVectorIndexSetPattern(grad);
 
 julia> SparseConnectivityTracer.GradientTracer(pattern, false)
-SparseConnectivityTracer.GradientTracer{SparseConnectivityTracer.SimpleIndexSet{Set{Int64}}}(1, 3)
+SparseConnectivityTracer.GradientTracer{SparseConnectivityTracer.SimpleVectorIndexSetPattern{Set{Int64}}}(1, 3)
 ```
 """
-struct GradientTracer{P<:AbstractFirstOrderPattern} <: AbstractTracer{P}
+struct GradientTracer{P<:AbstractVectorPattern} <: AbstractTracer{P}
     "Sparse representation of non-zero entries in the gradient."
     pattern::P
     "Indicator whether pattern in tracer contains only zeros."
     isempty::Bool
 end
-function GradientTracer{P}(pattern::P) where {P<:AbstractFirstOrderPattern}
+function GradientTracer{P}(pattern::P) where {P<:AbstractVectorPattern}
     return GradientTracer{P}(pattern, false)
 end
 
@@ -110,8 +110,8 @@ function Base.show(io::IO, t::GradientTracer)
     )
 end
 
-GradientTracer{P}(::Real) where {P<:AbstractFirstOrderPattern} = myempty(GradientTracer{P})
-GradientTracer{P}(t::GradientTracer{P}) where {P<:AbstractFirstOrderPattern} = t
+GradientTracer{P}(::Real) where {P<:AbstractVectorPattern} = myempty(GradientTracer{P})
+GradientTracer{P}(t::GradientTracer{P}) where {P<:AbstractVectorPattern} = t
 GradientTracer(t::GradientTracer) = t
 
 gradient(t::GradientTracer) = gradient(t.pattern)
@@ -143,22 +143,22 @@ Set{Tuple{Int64, Int64}} with 3 elements:
   (1, 1)
   (2, 3)
 
-julia> pattern = SparseConnectivityTracer.SimpleSecondOrderIndexSet(grad, hess);
+julia> pattern = SparseConnectivityTracer.SimpleVectorAndMatrixIndexSetPattern(grad, hess);
 
 julia> SparseConnectivityTracer.HessianTracer(pattern, false)
-SparseConnectivityTracer.HessianTracer{SparseConnectivityTracer.SimpleSecondOrderIndexSet{Set{Int64}, Set{Tuple{Int64, Int64}}}}(
+SparseConnectivityTracer.HessianTracer{SparseConnectivityTracer.SimpleVectorAndMatrixIndexSetPattern{Set{Int64}, Set{Tuple{Int64, Int64}}}}(
 First  order: Set([3, 1])
 Second order: Set([(3, 2), (1, 1), (2, 3)])
 )
 ```
 """
-struct HessianTracer{P<:AbstractSecondOrderPattern} <: AbstractTracer{P}
+struct HessianTracer{P<:AbstractVectorAndMatrixPattern} <: AbstractTracer{P}
     "Sparse representation of non-zero entries in the gradient and the Hessian."
     pattern::P
     "Indicator whether pattern in tracer contains only zeros."
     isempty::Bool
 end
-function HessianTracer{P}(pattern::P) where {P<:AbstractSecondOrderPattern}
+function HessianTracer{P}(pattern::P) where {P<:AbstractVectorAndMatrixPattern}
     return HessianTracer{P}(pattern, false)
 end
 
@@ -169,8 +169,10 @@ function Base.show(io::IO, t::HessianTracer)
     return nothing
 end
 
-HessianTracer{P}(::Real) where {P<:AbstractSecondOrderPattern} = myempty(HessianTracer{P})
-HessianTracer{P}(t::HessianTracer{P}) where {P<:AbstractSecondOrderPattern} = t
+function HessianTracer{P}(::Real) where {P<:AbstractVectorAndMatrixPattern}
+    return myempty(HessianTracer{P})
+end
+HessianTracer{P}(t::HessianTracer{P}) where {P<:AbstractVectorAndMatrixPattern} = t
 HessianTracer(t::HessianTracer) = t
 
 gradient(t::HessianTracer) = gradient(t.pattern)
