@@ -169,6 +169,14 @@ struct CombinedPattern{V<:AbstractVectorPattern,M<:AbstractMatrixPattern} <:
        AbstractVectorAndMatrixPattern
     vec::V
     mat::M
+
+    # Manually allow a subset of vector- and matrix pattern combinations
+    # by adding inner constructors
+    function CombinedPattern{V,M}(
+        vec::V, mat::M
+    ) where {I,V<:IndexSetVectorPattern{I},M<:IndexSetMatrixPattern{I}}
+        return new{V,M}(vec, mat)
+    end
 end
 
 function Base.show(io::IO, s::CombinedPattern)
