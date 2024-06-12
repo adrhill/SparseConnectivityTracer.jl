@@ -27,7 +27,7 @@ jobs:
           - '1'
         group:
           - Core
-          # - NLPModels
+          - NLPModels
         exclude:
           - version: '1.6'
             group: NLPModels
