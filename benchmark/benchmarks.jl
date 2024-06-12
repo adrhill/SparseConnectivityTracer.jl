@@ -4,30 +4,31 @@ using SparseConnectivityTracer: DuplicateVector, SortedVector, RecursiveSet
 using SparseConnectivityTracer: IndexSetVectorPattern, CombinedPattern
 
 const FIRST_ORDER_PATTERNS = (
-    IndexSetVectorPattern{BitSet},
-    IndexSetVectorPattern{Set{Int}},
-    IndexSetVectorPattern{DuplicateVector{Int}},
-    IndexSetVectorPattern{RecursiveSet{Int}},
-    IndexSetVectorPattern{SortedVector{Int}},
+    IndexSetVectorPattern{Int,BitSet},
+    IndexSetVectorPattern{Int,Set{Int}},
+    IndexSetVectorPattern{Int,DuplicateVector{Int}},
+    IndexSetVectorPattern{Int,RecursiveSet{Int}},
+    IndexSetVectorPattern{Int,SortedVector{Int}},
 )
 
 const SECOND_ORDER_PATTERNS = (
     CombinedPattern{
-        IndexSetVectorPattern{BitSet},IndexSetVectorPattern{Set{Tuple{Int,Int}}}
+        IndexSetVectorPattern{Int,BitSet},IndexSetMatrixPattern{Int,Set{Tuple{Int,Int}}}
     },#
     CombinedPattern{
-        IndexSetVectorPattern{Set{Int}},IndexSetVectorPattern{Set{Tuple{Int,Int}}}
+        IndexSetVectorPattern{Int,Set{Int}},IndexSetMatrixPattern{Int,Set{Tuple{Int,Int}}}
     },
     CombinedPattern{
-        IndexSetVectorPattern{DuplicateVector{Int}},
-        IndexSetVectorPattern{DuplicateVector{Tuple{Int,Int}}},
+        IndexSetVectorPattern{Int,DuplicateVector{Int}},
+        IndexSetMatrixPattern{Int,DuplicateVector{Tuple{Int,Int}}},
     },
     CombinedPattern{
-        IndexSetVectorPattern{SortedVector{Int}},
-        IndexSetVectorPattern{SortedVector{Tuple{Int,Int}}},
+        IndexSetVectorPattern{Int,SortedVector{Int}},
+        IndexSetMatrixPattern{Int,SortedVector{Tuple{Int,Int}}},
     },
     CombinedPattern{
-        IndexSetVectorPattern{SortedVector{Int}},IndexSetVectorPattern{Set{Tuple{Int,Int}}}
+        IndexSetVectorPattern{Int,SortedVector{Int}},
+        IndexSetMatrixPattern{Int,Set{Tuple{Int,Int}}},
     },
 )
 
