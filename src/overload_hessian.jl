@@ -15,11 +15,7 @@ end
 
 function hessian_tracer_1_to_1_pattern(
     p::P, is_firstder_zero::Bool, is_secondder_zero::Bool
-) where {
-    V<:SimpleVectorIndexSetPattern,
-    M<:SimpleMatrixIndexSetPattern,
-    P<:CombinedVectorAndMatrixPattern{V,M},
-}
+) where {V<:IndexSetVectorPattern,M<:IndexSetMatrixPattern,P<:CombinedPattern{V,M}}
     set_grad, set_hessian = hessian_tracer_1_to_1_set(
         gradient(p), hessian(p), is_firstder_zero, is_secondder_zero
     )
@@ -111,11 +107,7 @@ function hessian_tracer_2_to_1_pattern(
     is_firstder_arg2_zero::Bool,
     is_secondder_arg2_zero::Bool,
     is_crossder_zero::Bool,
-) where {
-    V<:SimpleVectorIndexSetPattern,
-    M<:SimpleMatrixIndexSetPattern,
-    P<:CombinedVectorAndMatrixPattern{V,M},
-}
+) where {V<:IndexSetVectorPattern,M<:IndexSetMatrixPattern,P<:CombinedPattern{V,M}}
     set_grad, set_hessian = hessian_tracer_2_to_1_set(
         gradient(px),
         hessian(px),
@@ -259,11 +251,7 @@ function hessian_tracer_1_to_2_pattern(
     is_seconder_out1_zero::Bool,
     is_firstder_out2_zero::Bool,
     is_seconder_out2_zero::Bool,
-) where {
-    V<:SimpleVectorIndexSetPattern,
-    M<:SimpleMatrixIndexSetPattern,
-    P<:CombinedVectorAndMatrixPattern{V,M},
-}
+) where {V<:IndexSetVectorPattern,M<:IndexSetMatrixPattern,P<:CombinedPattern{V,M}}
     (set_grad1, set_hessian1), (set_grad2, set_hessian2) = hessian_tracer_1_to_2_set(
         gradient(p),
         hessian(p),

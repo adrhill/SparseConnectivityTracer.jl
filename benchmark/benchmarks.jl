@@ -1,35 +1,33 @@
 using BenchmarkTools
 using SparseConnectivityTracer
 using SparseConnectivityTracer: DuplicateVector, SortedVector, RecursiveSet
-using SparseConnectivityTracer: SimpleVectorIndexSetPattern, CombinedVectorAndMatrixPattern
+using SparseConnectivityTracer: IndexSetVectorPattern, CombinedPattern
 
 const FIRST_ORDER_PATTERNS = (
-    SimpleVectorIndexSetPattern{BitSet},
-    SimpleVectorIndexSetPattern{Set{Int}},
-    SimpleVectorIndexSetPattern{DuplicateVector{Int}},
-    SimpleVectorIndexSetPattern{RecursiveSet{Int}},
-    SimpleVectorIndexSetPattern{SortedVector{Int}},
+    IndexSetVectorPattern{BitSet},
+    IndexSetVectorPattern{Set{Int}},
+    IndexSetVectorPattern{DuplicateVector{Int}},
+    IndexSetVectorPattern{RecursiveSet{Int}},
+    IndexSetVectorPattern{SortedVector{Int}},
 )
 
 const SECOND_ORDER_PATTERNS = (
-    CombinedVectorAndMatrixPattern{
-        SimpleVectorIndexSetPattern{BitSet},SimpleVectorIndexSetPattern{Set{Tuple{Int,Int}}}
+    CombinedPattern{
+        IndexSetVectorPattern{BitSet},IndexSetVectorPattern{Set{Tuple{Int,Int}}}
     },#
-    CombinedVectorAndMatrixPattern{
-        SimpleVectorIndexSetPattern{Set{Int}},
-        SimpleVectorIndexSetPattern{Set{Tuple{Int,Int}}},
+    CombinedPattern{
+        IndexSetVectorPattern{Set{Int}},IndexSetVectorPattern{Set{Tuple{Int,Int}}}
     },
-    CombinedVectorAndMatrixPattern{
-        SimpleVectorIndexSetPattern{DuplicateVector{Int}},
-        SimpleVectorIndexSetPattern{DuplicateVector{Tuple{Int,Int}}},
+    CombinedPattern{
+        IndexSetVectorPattern{DuplicateVector{Int}},
+        IndexSetVectorPattern{DuplicateVector{Tuple{Int,Int}}},
     },
-    CombinedVectorAndMatrixPattern{
-        SimpleVectorIndexSetPattern{SortedVector{Int}},
-        SimpleVectorIndexSetPattern{SortedVector{Tuple{Int,Int}}},
+    CombinedPattern{
+        IndexSetVectorPattern{SortedVector{Int}},
+        IndexSetVectorPattern{SortedVector{Tuple{Int,Int}}},
     },
-    CombinedVectorAndMatrixPattern{
-        SimpleVectorIndexSetPattern{SortedVector{Int}},
-        SimpleVectorIndexSetPattern{Set{Tuple{Int,Int}}},
+    CombinedPattern{
+        IndexSetVectorPattern{SortedVector{Int}},IndexSetVectorPattern{Set{Tuple{Int,Int}}}
     },
 )
 

@@ -13,16 +13,12 @@
         return T(output_union(tx.pattern, ty.pattern))
     end
 
-    function output_union(px::P, py::P) where {P<:SimpleVectorIndexSetPattern}
+    function output_union(px::P, py::P) where {P<:IndexSetVectorPattern}
         return P(union(px.inds, py.inds))
     end
     function output_union(
         px::P, py::P
-    ) where {
-        V<:SimpleVectorIndexSetPattern,
-        M<:SimpleMatrixIndexSetPattern,
-        P<:CombinedVectorAndMatrixPattern{V,M},
-    }
+    ) where {V<:IndexSetVectorPattern,M<:IndexSetMatrixPattern,P<:CombinedPattern{V,M}}
         grad = V(union(gradient(px), gradient(py)))
         hess = M(union(hessian(px), hessian(py)))
         return P(grad, hess)

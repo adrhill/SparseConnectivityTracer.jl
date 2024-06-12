@@ -11,7 +11,7 @@ end
 
 function gradient_tracer_1_to_1_pattern(
     p::P, is_firstder_zero::Bool
-) where {P<:SimpleVectorIndexSetPattern}
+) where {P<:IndexSetVectorPattern}
     set = gradient_tracer_1_to_1_set(gradient(p), is_firstder_zero)
     return P(set) # return pattern
 end
@@ -69,7 +69,7 @@ end
 
 function gradient_tracer_2_to_1_pattern(
     px::P, py::P, is_firstder_arg1_zero::Bool, is_firstder_arg2_zero::Bool
-) where {P<:SimpleVectorIndexSetPattern}
+) where {P<:IndexSetVectorPattern}
     set = gradient_tracer_2_to_1_set(
         gradient(px), gradient(py), is_firstder_arg1_zero, is_firstder_arg2_zero
     )
@@ -169,7 +169,7 @@ end
 
 function gradient_tracer_1_to_2_pattern(
     p::P, is_firstder_out1_zero::Bool, is_firstder_out2_zero::Bool
-) where {P<:SimpleVectorIndexSetPattern}
+) where {P<:IndexSetVectorPattern}
     s = gradient(p)
     set1, set2 = gradient_tracer_1_to_2_set(s, is_firstder_out1_zero, is_firstder_out2_zero)
     return (P(set1), P(set2)) # return patterns

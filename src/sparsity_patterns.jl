@@ -3,11 +3,11 @@ The following hierarchy of sparsity pattern representations is implemented in th
 
 AbstractSparsityPattern
 ├── AbstractVectorPattern
-│   └── SimpleVectorIndexSetPattern: pattern represented by index sets using set-like datastructures
+│   └── IndexSetVectorPattern: pattern represented by index sets using set-like datastructures
 ├── AbstractMatrixPattern
-│   └── SimpleMatrixIndexSetPattern: pattern represented by index sets using set-like datastructures
+│   └── IndexSetMatrixPattern: pattern represented by index sets using set-like datastructures
 └── AbstractVectorAndMatrixPattern
-    └── CombinedVectorAndMatrixPattern: combines separate AbstractVectorPattern and AbstractMatrixPattern
+    └── CombinedPattern: combines separate AbstractVectorPattern and AbstractMatrixPattern
 =#
 
 """
@@ -89,28 +89,28 @@ The passed set type `S` has to implement:
 * `Base.show`
 
 All of these methods are already implemented for `AbstractSet`s from Julia Base,
-which are most commonly used in `SimpleVectorIndexSetPattern`.
+which are most commonly used in `IndexSetVectorPattern`.
 Refer to the individual documentation of each function for more information. 
 
 ## Fields
 $(TYPEDFIELDS)
 """
-struct SimpleVectorIndexSetPattern{S} <: AbstractVectorPattern
+struct IndexSetVectorPattern{S} <: AbstractVectorPattern
     "Set of indices represting non-zero entries ``i``."
     inds::S
 end
-Base.show(io::IO, s::SimpleVectorIndexSetPattern) = Base.show(io, s.inds)
+Base.show(io::IO, s::IndexSetVectorPattern) = Base.show(io, s.inds)
 
-function myempty(::Type{SimpleVectorIndexSetPattern{S}}) where {S}
-    return SimpleVectorIndexSetPattern{S}(myempty(S))
+function myempty(::Type{IndexSetVectorPattern{S}}) where {S}
+    return IndexSetVectorPattern{S}(myempty(S))
 end
-function seed(::Type{SimpleVectorIndexSetPattern{S}}, i) where {S}
-    return SimpleVectorIndexSetPattern{S}(seed(S, i))
+function seed(::Type{IndexSetVectorPattern{S}}, i) where {S}
+    return IndexSetVectorPattern{S}(seed(S, i))
 end
 
 # Tracer compatibility
-inputs(s::SimpleVectorIndexSetPattern) = s.inds
-gradient(s::SimpleVectorIndexSetPattern) = s.inds
+inputs(s::IndexSetVectorPattern) = s.inds
+gradient(s::IndexSetVectorPattern) = s.inds
 
 ## Matrix
 
@@ -149,23 +149,23 @@ The passed set type `S` has to implement:
 * `Base.show`
 
 All of these methods are already implemented for `AbstractSet`s from Julia Base,
-which are most commonly used in `SimpleMatrixIndexSetPattern`.
+which are most commonly used in `IndexSetMatrixPattern`.
 Refer to the individual documentation of each function for more information. 
 
 ## Fields
 $(TYPEDFIELDS)
 """
-struct SimpleMatrixIndexSetPattern{S} <: AbstractMatrixPattern
+struct IndexSetMatrixPattern{S} <: AbstractMatrixPattern
     "Set of index tuples represting non-zero entries ``(i, j)``."
     inds::S
 end
-Base.show(io::IO, s::SimpleMatrixIndexSetPattern) = Base.show(io, s.inds)
+Base.show(io::IO, s::IndexSetMatrixPattern) = Base.show(io, s.inds)
 
-function myempty(::Type{SimpleMatrixIndexSetPattern{S}}) where {S}
-    return SimpleMatrixIndexSetPattern{S}(myempty(S))
+function myempty(::Type{IndexSetMatrixPattern{S}}) where {S}
+    return IndexSetMatrixPattern{S}(myempty(S))
 end
 
-hessian(p::SimpleMatrixIndexSetPattern) = p.inds
+hessian(p::IndexSetMatrixPattern) = p.inds
 
 ## Vector and Matrix
 
@@ -191,29 +191,29 @@ And for compatibility with tracers:
 abstract type AbstractVectorAndMatrixPattern <: AbstractSparsityPattern end
 
 """
-    CombinedVectorAndMatrixPattern(vec::AbstractVectorPattern, mat::AbstractMatrixPattern)
+    CombinedPattern(vec::AbstractVectorPattern, mat::AbstractMatrixPattern)
 
 Vector and matrix sparsity pattern constructed by combining two separate vector and matrix representations.
 """
-struct CombinedVectorAndMatrixPattern{V<:AbstractVectorPattern,M<:AbstractMatrixPattern} <:
+struct CombinedPattern{V<:AbstractVectorPattern,M<:AbstractMatrixPattern} <:
        AbstractVectorAndMatrixPattern
     vec::V
     mat::M
 end
 
-function Base.show(io::IO, s::CombinedVectorAndMatrixPattern)
+function Base.show(io::IO, s::CombinedPattern)
     println(io, "Vector: ", s.vec)
     println(io, "Matrix: ", s.mat)
     return nothing
 end
 
-function myempty(::Type{CombinedVectorAndMatrixPattern{V,M}}) where {V,M}
-    return CombinedVectorAndMatrixPattern{V,M}(myempty(V), myempty(M))
+function myempty(::Type{CombinedPattern{V,M}}) where {V,M}
+    return CombinedPattern{V,M}(myempty(V), myempty(M))
 end
-function seed(::Type{CombinedVectorAndMatrixPattern{V,M}}, index) where {V,M}
-    return CombinedVectorAndMatrixPattern{V,M}(seed(V, index), myempty(M))
+function seed(::Type{CombinedPattern{V,M}}, index) where {V,M}
+    return CombinedPattern{V,M}(seed(V, index), myempty(M))
 end
 
 # Tracer compatibility
-gradient(s::CombinedVectorAndMatrixPattern) = gradient(s.vec)
-hessian(s::CombinedVectorAndMatrixPattern) = hessian(s.mat)
+gradient(s::CombinedPattern) = gradient(s.vec)
+hessian(s::CombinedPattern) = hessian(s.mat)

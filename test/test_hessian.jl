@@ -2,35 +2,32 @@ using SparseConnectivityTracer
 using SparseConnectivityTracer:
     Dual, HessianTracer, MissingPrimalError, tracer, trace_input, empty
 using SparseConnectivityTracer:
-    CombinedVectorAndMatrixPattern, SimpleVectorIndexSetPattern, SimpleMatrixIndexSetPattern
+    CombinedPattern, IndexSetVectorPattern, IndexSetMatrixPattern
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using ADTypes: hessian_sparsity
 using SpecialFunctions: erf, beta
 using Test
 
 SECOND_ORDER_PATTERNS = (
-    CombinedVectorAndMatrixPattern{
-        SimpleVectorIndexSetPattern{BitSet},SimpleMatrixIndexSetPattern{Set{Tuple{Int,Int}}}
+    CombinedPattern{
+        IndexSetVectorPattern{BitSet},IndexSetMatrixPattern{Set{Tuple{Int,Int}}}
     },
-    CombinedVectorAndMatrixPattern{
-        SimpleVectorIndexSetPattern{Set{Int}},
-        SimpleMatrixIndexSetPattern{Set{Tuple{Int,Int}}},
+    CombinedPattern{
+        IndexSetVectorPattern{Set{Int}},IndexSetMatrixPattern{Set{Tuple{Int,Int}}}
     },
-    CombinedVectorAndMatrixPattern{
-        SimpleVectorIndexSetPattern{DuplicateVector{Int}},
-        SimpleMatrixIndexSetPattern{DuplicateVector{Tuple{Int,Int}}},
+    CombinedPattern{
+        IndexSetVectorPattern{DuplicateVector{Int}},
+        IndexSetMatrixPattern{DuplicateVector{Tuple{Int,Int}}},
     },
-    # CombinedVectorAndMatrixPattern{
-    #     SimpleVectorIndexSetPattern{DuplicateVector{Int}},
-    #     SimpleMatrixIndexSetPattern{Set{Tuple{Int,Int}}},
+    # CombinedPattern{
+    #     IndexSetVectorPattern{DuplicateVector{Int}},
+    #     IndexSetMatrixPattern{Set{Tuple{Int,Int}}},
     # },  # TODO: fix
-    CombinedVectorAndMatrixPattern{
-        SimpleVectorIndexSetPattern{SortedVector{Int}},
-        SimpleMatrixIndexSetPattern{Set{Tuple{Int,Int}}},
+    CombinedPattern{
+        IndexSetVectorPattern{SortedVector{Int}},IndexSetMatrixPattern{Set{Tuple{Int,Int}}}
     },
-    CombinedVectorAndMatrixPattern{
-        SimpleVectorIndexSetPattern{SortedVector{Int}},
-        SimpleMatrixIndexSetPattern{Set{Tuple{Int,Int}}},
+    CombinedPattern{
+        IndexSetVectorPattern{SortedVector{Int}},IndexSetMatrixPattern{Set{Tuple{Int,Int}}}
     },
 )
 

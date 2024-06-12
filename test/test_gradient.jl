@@ -1,11 +1,6 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer:
-    GradientTracer,
-    Dual,
-    SimpleVectorIndexSetPattern,
-    MissingPrimalError,
-    tracer,
-    trace_input
+    GradientTracer, Dual, IndexSetVectorPattern, MissingPrimalError, tracer, trace_input
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using ADTypes: jacobian_sparsity
 using LinearAlgebra: det, dot, logdet
@@ -14,11 +9,11 @@ using NNlib: NNlib
 using Test
 
 const FIRST_ORDER_PATTERNS = (
-    SimpleVectorIndexSetPattern{BitSet},
-    SimpleVectorIndexSetPattern{Set{Int}},
-    SimpleVectorIndexSetPattern{DuplicateVector{Int}},
-    SimpleVectorIndexSetPattern{RecursiveSet{Int}},
-    SimpleVectorIndexSetPattern{SortedVector{Int}},
+    IndexSetVectorPattern{BitSet},
+    IndexSetVectorPattern{Set{Int}},
+    IndexSetVectorPattern{DuplicateVector{Int}},
+    IndexSetVectorPattern{RecursiveSet{Int}},
+    IndexSetVectorPattern{SortedVector{Int}},
 )
 
 NNLIB_ACTIVATIONS_S = (

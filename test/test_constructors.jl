@@ -2,44 +2,42 @@
 using SparseConnectivityTracer: ConnectivityTracer, GradientTracer, HessianTracer, Dual
 using SparseConnectivityTracer: inputs, primal, tracer, myempty
 using SparseConnectivityTracer:
-    SimpleVectorIndexSetPattern, SimpleMatrixIndexSetPattern, CombinedVectorAndMatrixPattern
+    IndexSetVectorPattern, IndexSetMatrixPattern, CombinedPattern
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
 const PATTERNS = (
     (
-        SimpleVectorIndexSetPattern{BitSet},
-        CombinedVectorAndMatrixPattern{
-            SimpleVectorIndexSetPattern{BitSet},
-            SimpleMatrixIndexSetPattern{Set{Tuple{Int,Int}}},
+        IndexSetVectorPattern{BitSet},
+        CombinedPattern{
+            IndexSetVectorPattern{BitSet},IndexSetMatrixPattern{Set{Tuple{Int,Int}}}
         },
     ),
     (
-        SimpleVectorIndexSetPattern{Set{Int}},
-        CombinedVectorAndMatrixPattern{
-            SimpleVectorIndexSetPattern{Set{Int}},
-            SimpleMatrixIndexSetPattern{Set{Tuple{Int,Int}}},
+        IndexSetVectorPattern{Set{Int}},
+        CombinedPattern{
+            IndexSetVectorPattern{Set{Int}},IndexSetMatrixPattern{Set{Tuple{Int,Int}}}
         },
     ),
     (
-        SimpleVectorIndexSetPattern{DuplicateVector{Int}},
-        CombinedVectorAndMatrixPattern{
-            SimpleVectorIndexSetPattern{DuplicateVector{Int}},
-            SimpleMatrixIndexSetPattern{DuplicateVector{Tuple{Int,Int}}},
+        IndexSetVectorPattern{DuplicateVector{Int}},
+        CombinedPattern{
+            IndexSetVectorPattern{DuplicateVector{Int}},
+            IndexSetMatrixPattern{DuplicateVector{Tuple{Int,Int}}},
         },
     ),
     (
-        SimpleVectorIndexSetPattern{SortedVector{Int}},
-        CombinedVectorAndMatrixPattern{
-            SimpleVectorIndexSetPattern{SortedVector{Int}},
-            SimpleMatrixIndexSetPattern{SortedVector{Tuple{Int,Int}}},
+        IndexSetVectorPattern{SortedVector{Int}},
+        CombinedPattern{
+            IndexSetVectorPattern{SortedVector{Int}},
+            IndexSetMatrixPattern{SortedVector{Tuple{Int,Int}}},
         },
     ),
     # TODO: test on RecursiveSet
 )
 
-is_pattern_empty(p::SimpleVectorIndexSetPattern) = isempty(p.inds)
-function is_pattern_empty(p::CombinedVectorAndMatrixPattern)
+is_pattern_empty(p::IndexSetVectorPattern) = isempty(p.inds)
+function is_pattern_empty(p::CombinedPattern)
     return isempty(p.first_order) && isempty(p.second_order)
 end
 
