@@ -7,7 +7,8 @@ using Test
 
 using Pkg
 Pkg.add(; name="ADNLPModels", version="0.7")
-Pkg.add(["ForwardDiff", "OptimizationProblems", "NLPModels", "NLPModelsJuMP"])
+Pkg.add(; name="OptimizationProblems", version="0.7")
+Pkg.add(["ForwardDiff", "NLPModels", "NLPModelsJuMP"])
 
 using ADNLPModels
 using ForwardDiff: ForwardDiff
