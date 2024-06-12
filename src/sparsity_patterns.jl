@@ -73,39 +73,23 @@ abstract type AbstractVectorPattern <: AbstractSparsityPattern end
 """
 $(TYPEDEF)
 
-Vector sparsity pattern represented by an index set ``{i}`` of non-zero values.
-Supports set-like datastructures `S`.
-
-## Expected interface
-
-The passed set type `S` has to implement:
-* `SparseConnectivityTracer.myempty`
-* `SparseConnectivityTracer.seed`
-* `SparseConnectivityTracer.product`
-* `Base.union`
-* `Base.union!`
-* `Base.iterate`
-* `Base.collect`
-* `Base.show`
-
-All of these methods are already implemented for `AbstractSet`s from Julia Base,
-which are most commonly used in `IndexSetVectorPattern`.
-Refer to the individual documentation of each function for more information. 
+Vector sparsity pattern represented by an `AbstractSet` of indices ``{i}`` of non-zero values.
 
 ## Fields
 $(TYPEDFIELDS)
 """
-struct IndexSetVectorPattern{S} <: AbstractVectorPattern
+struct IndexSetVectorPattern{I<:Integer,S<:AbstractSet{I}} <: AbstractVectorPattern
     "Set of indices represting non-zero entries ``i``."
     inds::S
 end
+
 Base.show(io::IO, s::IndexSetVectorPattern) = Base.show(io, s.inds)
 
-function myempty(::Type{IndexSetVectorPattern{S}}) where {S}
-    return IndexSetVectorPattern{S}(myempty(S))
+function myempty(::Type{IndexSetVectorPattern{I,S}}) where {I,S}
+    return IndexSetVectorPattern{I,S}(myempty(S))
 end
-function seed(::Type{IndexSetVectorPattern{S}}, i) where {S}
-    return IndexSetVectorPattern{S}(seed(S, i))
+function seed(::Type{IndexSetVectorPattern{I,S}}, i) where {I,S}
+    return IndexSetVectorPattern{I,S}(seed(S, i))
 end
 
 # Tracer compatibility
@@ -135,34 +119,20 @@ abstract type AbstractMatrixPattern <: AbstractSparsityPattern end
 """
 $(TYPEDEF)
 
-Matrix sparsity pattern represented by an index set ``{(i,j)}`` of non-zero values.
-Supports set-like datastructures `S`.
-
-## Expected interface
-
-The passed set type `S` has to implement:
-* `SparseConnectivityTracer.myempty`
-* `Base.union`
-* `Base.union!`
-* `Base.iterate`
-* `Base.collect`
-* `Base.show`
-
-All of these methods are already implemented for `AbstractSet`s from Julia Base,
-which are most commonly used in `IndexSetMatrixPattern`.
-Refer to the individual documentation of each function for more information. 
+Matrix sparsity pattern represented by an `AbstractSet` of indices ``{(i,j)}`` of non-zero values.
 
 ## Fields
 $(TYPEDFIELDS)
 """
-struct IndexSetMatrixPattern{S} <: AbstractMatrixPattern
+struct IndexSetMatrixPattern{I<:Integer,S<:AbstractSet{Tuple{I,I}}} <: AbstractMatrixPattern
     "Set of index tuples represting non-zero entries ``(i, j)``."
     inds::S
 end
+
 Base.show(io::IO, s::IndexSetMatrixPattern) = Base.show(io, s.inds)
 
-function myempty(::Type{IndexSetMatrixPattern{S}}) where {S}
-    return IndexSetMatrixPattern{S}(myempty(S))
+function myempty(::Type{IndexSetMatrixPattern{I,S}}) where {I,S}
+    return IndexSetMatrixPattern{I,S}(myempty(S))
 end
 
 hessian(p::IndexSetMatrixPattern) = p.inds

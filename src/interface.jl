@@ -1,6 +1,6 @@
-const DEFAULT_FIRST_ORDER_PATTERN = IndexSetVectorPattern{BitSet}
+const DEFAULT_FIRST_ORDER_PATTERN = IndexSetVectorPattern{Int,BitSet}
 const DEFAULT_SECOND_ORDER_PATTERN = CombinedPattern{
-    IndexSetVectorPattern{BitSet},IndexSetMatrixPattern{Set{Tuple{Int,Int}}}
+    IndexSetVectorPattern{Int,BitSet},IndexSetMatrixPattern{Int,Set{Tuple{Int,Int}}}
 }
 
 #==================#
