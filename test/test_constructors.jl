@@ -1,7 +1,7 @@
 # Test construction and conversions of internal tracer types
 using SparseConnectivityTracer:
     AbstractTracer, ConnectivityTracer, GradientTracer, HessianTracer, Dual
-using SparseConnectivityTracer: hessian, gradient, inputs, primal, tracer, myempty, name
+using SparseConnectivityTracer: inputs, primal, tracer, myempty, name
 using SparseConnectivityTracer:
     IndexSetVectorPattern, IndexSetMatrixPattern, CombinedPattern
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
