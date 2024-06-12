@@ -8,27 +8,22 @@ using ADTypes: hessian_sparsity
 using SpecialFunctions: erf, beta
 using Test
 
-SECOND_ORDER_PATTERNS = (
+PATTERNS = (
     CombinedPattern{
-        IndexSetVectorPattern{BitSet},IndexSetMatrixPattern{Set{Tuple{Int,Int}}}
+        IndexSetVectorPattern{Int,BitSet},IndexSetMatrixPattern{Int,Set{Tuple{Int,Int}}}
     },
     CombinedPattern{
-        IndexSetVectorPattern{Set{Int}},IndexSetMatrixPattern{Set{Tuple{Int,Int}}}
+        IndexSetVectorPattern{Int,Set{Int}},IndexSetMatrixPattern{Int,Set{Tuple{Int,Int}}}
     },
     CombinedPattern{
-        IndexSetVectorPattern{DuplicateVector{Int}},
-        IndexSetMatrixPattern{DuplicateVector{Tuple{Int,Int}}},
-    },
-    # CombinedPattern{
-    #     IndexSetVectorPattern{DuplicateVector{Int}},
-    #     IndexSetMatrixPattern{Set{Tuple{Int,Int}}},
-    # },  # TODO: fix
-    CombinedPattern{
-        IndexSetVectorPattern{SortedVector{Int}},IndexSetMatrixPattern{Set{Tuple{Int,Int}}}
+        IndexSetVectorPattern{Int,DuplicateVector{Int}},
+        IndexSetMatrixPattern{Int,DuplicateVector{Tuple{Int,Int}}},
     },
     CombinedPattern{
-        IndexSetVectorPattern{SortedVector{Int}},IndexSetMatrixPattern{Set{Tuple{Int,Int}}}
+        IndexSetVectorPattern{Int,SortedVector{Int}},
+        IndexSetMatrixPattern{Int,SortedVector{Tuple{Int,Int}}},
     },
+    # TODO: test on RecursiveSet
 )
 
 @testset "Global Hessian" begin
@@ -42,7 +37,7 @@ SECOND_ORDER_PATTERNS = (
         ]
     end
 
-    @testset "Pattern type $P" for P in SECOND_ORDER_PATTERNS
+    @testset "Pattern type $P" for P in PATTERNS
         method = TracerSparsityDetector(; second_order=P)
 
         @test hessian_sparsity(identity, rand(), method) ≈ [0;;]
@@ -236,7 +231,7 @@ SECOND_ORDER_PATTERNS = (
 end
 
 @testset "Local Hessian" begin
-    @testset "Pattern type $P" for P in SECOND_ORDER_PATTERNS
+    @testset "Pattern type $P" for P in PATTERNS
         method = TracerLocalSparsityDetector(; second_order=P)
 
         f1(x) = x[1] + x[2] * x[3] + 1 / x[4] + x[2] * max(x[1], x[5])

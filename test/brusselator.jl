@@ -6,11 +6,11 @@ using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
 const FIRST_ORDER_PATTERNS = (
-    IndexSetVectorPattern{BitSet},
-    IndexSetVectorPattern{Set{Int}},
-    IndexSetVectorPattern{DuplicateVector{Int}},
-    IndexSetVectorPattern{RecursiveSet{Int}},
-    IndexSetVectorPattern{SortedVector{Int}},
+    IndexSetVectorPattern{Int,BitSet},
+    IndexSetVectorPattern{Int,Set{Int}},
+    IndexSetVectorPattern{Int,DuplicateVector{Int}},
+    IndexSetVectorPattern{Int,RecursiveSet{Int}},
+    IndexSetVectorPattern{Int,SortedVector{Int}},
 )
 
 include("brusselator_definition.jl")

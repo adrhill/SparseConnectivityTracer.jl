@@ -7,12 +7,12 @@ using SpecialFunctions: erf, beta
 using NNlib: NNlib
 using Test
 
-const FIRST_ORDER_PATTERNS = (
-    IndexSetVectorPattern{BitSet},
-    IndexSetVectorPattern{Set{Int}},
-    IndexSetVectorPattern{DuplicateVector{Int}},
-    IndexSetVectorPattern{RecursiveSet{Int}},
-    IndexSetVectorPattern{SortedVector{Int}},
+PATTERNS = (
+    IndexSetVectorPattern{Int,BitSet},
+    IndexSetVectorPattern{Int,Set{Int}},
+    IndexSetVectorPattern{Int,DuplicateVector{Int}},
+    IndexSetVectorPattern{Int,RecursiveSet{Int}},
+    IndexSetVectorPattern{Int,SortedVector{Int}},
 )
 
 NNLIB_ACTIVATIONS_S = (
@@ -45,7 +45,7 @@ NNLIB_ACTIVATIONS_F = (
 NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
 
 @testset "Connectivity Global" begin
-    @testset "Pattern type $P" for P in FIRST_ORDER_PATTERNS
+    @testset "Pattern type $P" for P in PATTERNS
         A = rand(1, 3)
         @test connectivity_pattern(x -> only(A * x), rand(3), P) == [1 1 1]
 
@@ -127,7 +127,7 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
 end
 
 @testset "Connectivity Local" begin
-    @testset "Pattern type $P" for P in FIRST_ORDER_PATTERNS
+    @testset "Pattern type $P" for P in PATTERNS
         @test local_connectivity_pattern(
             x -> ifelse(x[2] < x[3], x[1] + x[2], x[3] * x[4]), [1 2 3 4], P
         ) == [1 1 0 0]
