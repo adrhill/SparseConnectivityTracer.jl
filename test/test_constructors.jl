@@ -244,7 +244,9 @@ end
 
         TS = (H, DH)
 
-        @testset "Nested Duals on HessianTracer" test_nested_duals(H)
+        @testset "Nested Duals on HessianTracer" begin
+            test_nested_duals(H)
+        end
 
         @testset "Constant functions on $(name(T))" for T in TS
             test_constant_functions(T)
