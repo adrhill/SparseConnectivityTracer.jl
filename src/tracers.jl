@@ -153,6 +153,7 @@ struct Dual{P<:Real,T<:AbstractTracer} <: Real
         return new{P,T}(primal, tracer)
     end
 end
+Dual{P,T}(d::Dual{P,T}) where {P<:Real,T<:AbstractTracer} = d
 Dual(primal::P, tracer::T) where {P,T} = Dual{P,T}(primal, tracer)
 
 primal(d::Dual) = d.primal
@@ -172,8 +173,8 @@ end
 #===========#
 
 myempty(::Type{ConnectivityTracer{P}}) where {P} = ConnectivityTracer{P}(myempty(P), true)
-myempty(::Type{GradientTracer{P}}) where {P} = GradientTracer{P}(myempty(P), true)
-myempty(::Type{HessianTracer{P}}) where {P} = HessianTracer{P}(myempty(P), true)
+myempty(::Type{GradientTracer{P}}) where {P}     = GradientTracer{P}(myempty(P), true)
+myempty(::Type{HessianTracer{P}}) where {P}      = HessianTracer{P}(myempty(P), true)
 
 """
     create_tracer(T, index) where {T<:AbstractTracer}
@@ -193,3 +194,11 @@ end
 function create_tracer(::Type{HessianTracer{P}}, ::Real, index::Integer) where {P}
     return HessianTracer{P}(seed(P, index), false)
 end
+
+# Pretty-printing of Dual tracers
+name(::Type{T}) where {T<:ConnectivityTracer} = "ConnectivityTracer"
+name(::Type{T}) where {T<:GradientTracer}     = "GradientTracer"
+name(::Type{T}) where {T<:HessianTracer}      = "HessianTracer"
+name(::Type{D}) where {P,T,D<:Dual{P,T}}      = "Dual-$(name(T))"
+name(::T) where {T<:AbstractTracer}           = name(T)
+name(::D) where {D<:Dual}                     = name(D)
