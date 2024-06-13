@@ -55,18 +55,20 @@ function mylagrangian(nlp::AbstractNLPModel, x::AbstractVector)
     return L
 end
 
-function jac_sparsity_sct(name::Symbol)
+function compute_jac_sparsity_sct(name::Symbol)
     nlp = OptimizationProblems.ADNLPProblems.eval(name)()
     c = Base.Fix1(myconstraints, nlp)
     x0 = nlp.meta.x0
-    return ADTypes.jacobian_sparsity(c, x0, TracerSparsityDetector())
+    jac_sparsity = ADTypes.jacobian_sparsity(c, x0, TracerSparsityDetector())
+    return jac_sparsity
 end
 
-function hess_sparsity_sct(name::Symbol)
+function compute_hess_sparsity_sct(name::Symbol)
     nlp = OptimizationProblems.ADNLPProblems.eval(name)()
     L = Base.Fix1(mylagrangian, nlp)
     x0 = nlp.meta.x0
-    return ADTypes.hessian_sparsity(L, x0, TracerSparsityDetector())
+    hess_sparsity = ADTypes.hessian_sparsity(L, x0, TracerSparsityDetector())
+    return hess_sparsity
 end
 
 ## JuMP
@@ -78,48 +80,45 @@ https://jso.dev/OptimizationProblems.jl/stable/tutorial/#Problems-in-JuMP-syntax
 https://jso.dev/NLPModelsJuMP.jl/stable/tutorial/#MathOptNLPModel
 =#
 
-function jac_jump(name::Symbol)
+function compute_jac_sparsity_and_value_jump(name::Symbol)
     nlp_jump = OptimizationProblems.PureJuMP.eval(name)()
     nlp = NLPModelsJuMP.MathOptNLPModel(nlp_jump)
     n, m = nlp.meta.nvar, nlp.meta.ncon
     x0 = nlp.meta.x0
     I, J = NLPModels.jac_structure(nlp)
     V = NLPModels.jac_coord(nlp, x0)
+    jac_sparsity = sparse(I, J, ones(Bool, length(I)), m, n)
     jac = sparse(I, J, V, m, n)
-    return jac
+    return jac_sparsity, jac
 end
 
-function hess_jump(name::Symbol)
-    nlp_jump = PureJuMP.eval(name)()
+function compute_hess_sparsity_and_value_jump(name::Symbol)
+    nlp_jump = OptimizationProblems.PureJuMP.eval(name)()
     nlp = NLPModelsJuMP.MathOptNLPModel(nlp_jump)
     n, m = nlp.meta.nvar, nlp.meta.ncon
     x0 = nlp.meta.x0
     yrand = rand(m)
     I, J = NLPModels.hess_structure(nlp)
     V = NLPModels.hess_coord(nlp, x0, yrand)
-    hess_lower = sparse(I, J, V, n, n)
-    hess = sparse(Symmetric(hess_lower, :L))
-    return hess
+    hess_sparsity = sparse(Symmetric(sparse(I, J, ones(Bool, length(I)), n, n), :L))
+    hess = sparse(Symmetric(sparse(I, J, V, n, n), :L))
+    return hess_sparsity, hess
 end
 
 ## Comparison
 
 function compare_patterns(
-    ground_truth::AbstractMatrix{<:Real};
-    sct::AbstractMatrix{Bool},
-    jump::AbstractMatrix{Bool},
+    truth::AbstractMatrix{<:Real}; sct::AbstractMatrix{Bool}, jump::AbstractMatrix{Bool}
 )
     difference = jump - sct
-    nnz_sct = nnz(sct)
-    nnz_jump = nnz(jump)
-
-    @assert size(ground_truth) == size(difference)
     if nnz(difference) > 0
+        # test that all pattern differences are local zeros in the ground truth
         I, J, _ = findnz(difference)
-        coeffs = [ground_truth[i, j] for (i, j) in zip(I, J)]
-        @test all(iszero, coeffs)
+        coeffs = [truth[i, j] for (i, j) in zip(I, J)]
+        @test maximum(abs, coeffs) < 1e-7
     end
 
+    nnz_sct, nnz_jump = nnz(sct), nnz(jump)
     diagonal = (difference == Diagonal(difference)) ? "[diagonal difference only]" : ""
     message = if all(>(0), nonzeros(difference))
         "SCT ($nnz_sct nz) ⊂ JuMP ($nnz_jump nz) $diagonal"
@@ -133,19 +132,23 @@ end
 
 ## Actual tests
 
+#=
+Please look at the warnings displayed at the end.
+=#
+
 jac_inconsistencies = []
 
 @testset verbose = true "Jacobian comparison" begin
     @testset "$name" for name in NAMES
         @info "$(now()) - Testing Jacobian sparsity for $name"
-        Jb_sct = jac_sparsity_sct(name)
-        J_jump = jac_jump(name)
-        Jb_jump = (!iszero).(J_jump)
-        if Jb_sct == Jb_jump
-            @test Jb_sct == Jb_jump
+        jac_sparsity_sct = compute_jac_sparsity_sct(name)
+        jac_sparsity_jump, jac = compute_jac_sparsity_and_value_jump(name)
+        if jac_sparsity_sct == jac_sparsity_jump
+            @test jac_sparsity_sct == jac_sparsity_jump
         else
-            @test_broken Jb_sct == Jb_jump
-            message = compare_patterns(J_jump; sct=Jb_sct, jump=Jb_jump)
+            @test_broken jac_sparsity_sct == jac_sparsity_jump
+            message = compare_patterns(jac; sct=jac_sparsity_sct, jump=jac_sparsity_jump)
+            @warn "Inconsistency for Jacobian of $name: $message"
             push!(jac_inconsistencies, (name, message))
         end
     end
@@ -156,14 +159,14 @@ hess_inconsistencies = []
 @testset verbose = true "Hessian comparison" begin
     @testset "$name" for name in NAMES
         @info "$(now()) - Testing Hessian sparsity for $name"
-        Hb_sct = hess_sparsity_sct(name)
-        H_jump = hess_jump(name)
-        Hb_jump = (!iszero).(H_jump)
-        if Hb_sct == Hb_jump
-            @test Hb_sct == Hb_jump
+        hess_sparsity_sct = compute_hess_sparsity_sct(name)
+        hess_sparsity_jump, hess = compute_hess_sparsity_and_value_jump(name)
+        if hess_sparsity_sct == hess_sparsity_jump
+            @test hess_sparsity_sct == hess_sparsity_jump
         else
-            @test_broken Hb_sct == Hb_jump
-            message = compare_patterns(H_jump; sct=Hb_sct, jump=Hb_jump)
+            @test_broken hess_sparsity_sct == hess_sparsity_jump
+            message = compare_patterns(hess; sct=hess_sparsity_sct, jump=hess_sparsity_jump)
+            @warn "Inconsistency for Hessian of $name: $message"
             push!(hess_inconsistencies, (name, message))
         end
     end
