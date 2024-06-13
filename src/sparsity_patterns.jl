@@ -31,14 +31,14 @@ abstract type AbstractSparsityPattern end
 
 Constructor for an empty set-like data structure of type `S`.
 """
-myempty(::Type{S}) where {S<:AbstractSet} = S()
+@inline myempty(::Type{S}) where {S<:AbstractSet} = S()
 
 """
     myempty(S)
 
 Constructor for a set-like data structure of type `S` that only contains the given index `i`.
 """
-seed(::Type{S}, i::Integer) where {S<:AbstractSet} = S([i])
+@inline seed(::Type{S}, i::Integer) where {S<:AbstractSet} = S([i])
 
 """"
     product(a::S{T}, b::S{T})::S{Tuple{T,T}}
@@ -85,16 +85,16 @@ end
 
 Base.show(io::IO, s::IndexSetVectorPattern) = Base.show(io, s.inds)
 
-function myempty(::Type{IndexSetVectorPattern{I,S}}) where {I,S}
+@inline function myempty(::Type{IndexSetVectorPattern{I,S}}) where {I,S}
     return IndexSetVectorPattern{I,S}(myempty(S))
 end
-function seed(::Type{IndexSetVectorPattern{I,S}}, i) where {I,S}
+@inline function seed(::Type{IndexSetVectorPattern{I,S}}, i) where {I,S}
     return IndexSetVectorPattern{I,S}(seed(S, i))
 end
 
 # Tracer compatibility
-inputs(s::IndexSetVectorPattern) = s.inds
-gradient(s::IndexSetVectorPattern) = s.inds
+@inline inputs(s::IndexSetVectorPattern) = s.inds
+@inline gradient(s::IndexSetVectorPattern) = s.inds
 
 ## Matrix
 
@@ -131,7 +131,7 @@ end
 
 Base.show(io::IO, s::IndexSetMatrixPattern) = Base.show(io, s.inds)
 
-function myempty(::Type{IndexSetMatrixPattern{I,S}}) where {I,S}
+@inline function myempty(::Type{IndexSetMatrixPattern{I,S}}) where {I,S}
     return IndexSetMatrixPattern{I,S}(myempty(S))
 end
 
@@ -185,13 +185,13 @@ function Base.show(io::IO, s::CombinedPattern)
     return nothing
 end
 
-function myempty(::Type{CombinedPattern{V,M}}) where {V,M}
+@inline function myempty(::Type{CombinedPattern{V,M}}) where {V,M}
     return CombinedPattern{V,M}(myempty(V), myempty(M))
 end
-function seed(::Type{CombinedPattern{V,M}}, index) where {V,M}
+@inline function seed(::Type{CombinedPattern{V,M}}, index) where {V,M}
     return CombinedPattern{V,M}(seed(V, index), myempty(M))
 end
 
 # Tracer compatibility
-gradient(s::CombinedPattern) = gradient(s.vec)
-hessian(s::CombinedPattern) = hessian(s.mat)
+@inline gradient(s::CombinedPattern) = gradient(s.vec)
+@inline hessian(s::CombinedPattern) = hessian(s.mat)

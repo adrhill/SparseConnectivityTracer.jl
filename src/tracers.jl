@@ -5,8 +5,8 @@ abstract type AbstractTracer{P<:AbstractSparsityPattern} <: Real end
 #===================#
 
 function union_product!(
-    sh::SH, sgx::SG, sgy::SG
-) where {I,SG<:AbstractSet{I},SH<:AbstractSet{Tuple{I,I}}}
+    sh::H, sgx::G, sgy::G
+) where {I<:Integer,G<:AbstractSet{I},H<:AbstractSet{Tuple{I,I}}}
     shxy = product(sgx, sgy)
     return union!(sh, shxy)
 end
@@ -52,7 +52,7 @@ end
 ConnectivityTracer{P}(t::ConnectivityTracer{P}) where {P<:AbstractVectorPattern} = t
 ConnectivityTracer(t::ConnectivityTracer) = t
 
-inputs(t::ConnectivityTracer) = inputs(t.pattern)
+@inline inputs(t::ConnectivityTracer) = inputs(t.pattern)
 
 #================#
 # GradientTracer #
@@ -88,7 +88,7 @@ GradientTracer{P}(::Real) where {P<:AbstractVectorPattern} = myempty(GradientTra
 GradientTracer{P}(t::GradientTracer{P}) where {P<:AbstractVectorPattern} = t
 GradientTracer(t::GradientTracer) = t
 
-gradient(t::GradientTracer) = gradient(t.pattern)
+@inline gradient(t::GradientTracer) = gradient(t.pattern)
 
 #===============#
 # HessianTracer #
@@ -127,8 +127,8 @@ end
 HessianTracer{P}(t::HessianTracer{P}) where {P<:AbstractVectorAndMatrixPattern} = t
 HessianTracer(t::HessianTracer) = t
 
-gradient(t::HessianTracer) = gradient(t.pattern)
-hessian(t::HessianTracer) = hessian(t.pattern)
+@inline gradient(t::HessianTracer) = gradient(t.pattern)
+@inline hessian(t::HessianTracer) = hessian(t.pattern)
 
 #================================#
 # Dual numbers for local tracing #
@@ -156,13 +156,13 @@ end
 Dual{P,T}(d::Dual{P,T}) where {P<:Real,T<:AbstractTracer} = d
 Dual(primal::P, tracer::T) where {P,T} = Dual{P,T}(primal, tracer)
 
-primal(d::Dual) = d.primal
-tracer(d::Dual) = d.tracer
+@inline primal(d::Dual) = d.primal
+@inline tracer(d::Dual) = d.tracer
 
-inputs(d::Dual{P,T}) where {P,T<:ConnectivityTracer} = inputs(d.tracer)
-gradient(d::Dual{P,T}) where {P,T<:GradientTracer} = gradient(d.tracer)
-gradient(d::Dual{P,T}) where {P,T<:HessianTracer} = gradient(d.tracer)
-hessian(d::Dual{P,T}) where {P,T<:HessianTracer} = hessian(d.tracer)
+@inline inputs(d::Dual{P,T}) where {P,T<:ConnectivityTracer} = inputs(d.tracer)
+@inline gradient(d::Dual{P,T}) where {P,T<:GradientTracer} = gradient(d.tracer)
+@inline gradient(d::Dual{P,T}) where {P,T<:HessianTracer} = gradient(d.tracer)
+@inline hessian(d::Dual{P,T}) where {P,T<:HessianTracer} = hessian(d.tracer)
 
 function Dual{P,T}(x::Real) where {P<:Real,T<:AbstractTracer}
     return Dual(convert(P, x), myempty(T))
@@ -172,9 +172,9 @@ end
 # Utilities #
 #===========#
 
-myempty(::Type{ConnectivityTracer{P}}) where {P} = ConnectivityTracer{P}(myempty(P), true)
-myempty(::Type{GradientTracer{P}}) where {P}     = GradientTracer{P}(myempty(P), true)
-myempty(::Type{HessianTracer{P}}) where {P}      = HessianTracer{P}(myempty(P), true)
+@inline myempty(::Type{ConnectivityTracer{P}}) where {P} = ConnectivityTracer{P}(myempty(P), true)
+@inline myempty(::Type{GradientTracer{P}}) where {P}     = GradientTracer{P}(myempty(P), true)
+@inline myempty(::Type{HessianTracer{P}}) where {P}      = HessianTracer{P}(myempty(P), true)
 
 """
     create_tracer(T, index) where {T<:AbstractTracer}
