@@ -212,7 +212,7 @@ end
             is_firstder_out2_zero,
             is_seconder_out2_zero,
         )
-        return (T(g_out1, h_out1, false), T(g_out2, h_out2, false)) # return tracers
+        return (T(g_out1, h_out1), T(g_out2, h_out2)) # return tracers
     end
 end
 

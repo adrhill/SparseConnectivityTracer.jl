@@ -39,10 +39,10 @@ function TracerSparsityDetector(
     return TracerSparsityDetector{TG,TH}()
 end
 function TracerSparsityDetector(;
-    gradient_tracer::Type{TG}=DEFAULT_GRADIENT_TRACER,
-    hessian_tracer::Type{TH}=DEFAULT_HESSIAN_TRACER,
+    gradient_tracer_type::Type{TG}=DEFAULT_GRADIENT_TRACER,
+    hessian_tracer_type::Type{TH}=DEFAULT_HESSIAN_TRACER,
 ) where {TG<:GradientTracer,TH<:HessianTracer}
-    return TracerSparsityDetector(gradient_tracer, hessian_tracer)
+    return TracerSparsityDetector(gradient_tracer_type, hessian_tracer_type)
 end
 
 function ADTypes.jacobian_sparsity(f, x, ::TracerSparsityDetector{TG,TH}) where {TG,TH}
@@ -106,10 +106,10 @@ function TracerLocalSparsityDetector(
     return TracerLocalSparsityDetector{TG,TH}()
 end
 function TracerLocalSparsityDetector(;
-    gradient_tracer::Type{TG}=DEFAULT_GRADIENT_TRACER,
-    hessian_tracer::Type{TH}=DEFAULT_HESSIAN_TRACER,
+    gradient_tracer_type::Type{TG}=DEFAULT_GRADIENT_TRACER,
+    hessian_tracer_type::Type{TH}=DEFAULT_HESSIAN_TRACER,
 ) where {TG<:GradientTracer,TH<:HessianTracer}
-    return TracerLocalSparsityDetector(gradient_tracer, hessian_tracer)
+    return TracerLocalSparsityDetector(gradient_tracer_type, hessian_tracer_type)
 end
 
 function ADTypes.jacobian_sparsity(f, x, ::TracerLocalSparsityDetector{TG,TH}) where {TG,TH}
