@@ -7,8 +7,12 @@ SET_TYPES = (BitSet, Set{Int}, DuplicateVector{Int}, RecursiveSet{Int}, SortedVe
 
 include("jacobian.jl")
 include("hessian.jl")
+include("nlpmodels.jl")
 
 SUITE = BenchmarkGroup()
+
+SUITE["OptimizationProblems"] = optbench([:britgas])
+
 for S1 in SET_TYPES
     S2 = Set{Tuple{Int,Int}}
 

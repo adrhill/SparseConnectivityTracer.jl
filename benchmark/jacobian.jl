@@ -49,7 +49,7 @@ end
 
 ## Brusselator
 
-include("../test/brusselator_definition.jl")
+include("../test/definitions/brusselator_definition.jl")
 
 function jacbench_brusselator(method)
     suite = BenchmarkGroup()
