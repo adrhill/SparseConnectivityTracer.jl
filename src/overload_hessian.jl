@@ -1,6 +1,6 @@
 ## 1-to-1
 
-function hessian_tracer_1_to_1(
+@noinline function hessian_tracer_1_to_1(
     t::T, is_firstder_zero::Bool, is_secondder_zero::Bool
 ) where {T<:HessianTracer}
     if t.isempty # TODO: add test
@@ -60,7 +60,7 @@ end
 
 ## 2-to-1
 
-function hessian_tracer_2_to_1(
+@noinline function hessian_tracer_2_to_1(
     tx::T,
     ty::T,
     is_firstder_arg1_zero::Bool,
@@ -194,7 +194,7 @@ end
 
 ## 1-to-2
 
-function hessian_tracer_1_to_2(
+@noinline function hessian_tracer_1_to_2(
     t::T,
     is_firstder_out1_zero::Bool,
     is_seconder_out1_zero::Bool,
