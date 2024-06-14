@@ -6,10 +6,10 @@
     if t.isempty # TODO: add test
         return t
     else
-        gradient, hessian = hessian_tracer_1_to_1_inner(
-            t.gradient, t.hessian, is_firstder_zero, is_secondder_zero
+        grad, hess = hessian_tracer_1_to_1_inner(
+            gradient(t), hessian(t), is_firstder_zero, is_secondder_zero
         )
-        return T(gradient, hessian) # return tracer
+        return T(grad, hess) # return tracer
     end
 end
 
@@ -46,10 +46,10 @@ function overload_hessian_1_to_1_dual(M, op)
     SCT = SparseConnectivityTracer
     return quote
         function $M.$op(d::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
-            x = d.primal
+            x = $SCT.primal(d)
             p_out = $M.$op(x)
             t_out = $SCT.hessian_tracer_1_to_1(
-                d.tracer,
+                $SCT.tracer(d),
                 $SCT.is_firstder_zero_local($M.$op, x),
                 $SCT.is_seconder_zero_local($M.$op, x),
             )
@@ -77,18 +77,18 @@ end
     elseif tx.isempty
         return hessian_tracer_1_to_1(ty, is_firstder_arg2_zero, is_secondder_arg2_zero)
     else
-        gradient, hessian = hessian_tracer_2_to_1_inner(
-            tx.gradient,
-            tx.hessian,
-            ty.gradient,
-            ty.hessian,
+        grad, hess = hessian_tracer_2_to_1_inner(
+            gradient(tx),
+            hessian(tx),
+            gradient(ty),
+            hessian(ty),
             is_firstder_arg1_zero,
             is_secondder_arg1_zero,
             is_firstder_arg2_zero,
             is_secondder_arg2_zero,
             is_crossder_zero,
         )
-        return T(gradient, hessian) # return tracer
+        return T(grad, hess) # return tracer
     end
 end
 
@@ -153,12 +153,12 @@ function overload_hessian_2_to_1_dual(M, op)
     SCT = SparseConnectivityTracer
     return quote
         function $M.$op(dx::D, dy::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
-            x = dx.primal
-            y = dy.primal
+            x = $SCT.primal(dx)
+            y = $SCT.primal(dy)
             p_out = $M.$op(x, y)
             t_out = $SCT.hessian_tracer_2_to_1(
-                dx.tracer,
-                dy.tracer,
+                $SCT.tracer(dx),
+                $SCT.tracer(dy),
                 $SCT.is_firstder_arg1_zero_local($M.$op, x, y),
                 $SCT.is_seconder_arg1_zero_local($M.$op, x, y),
                 $SCT.is_firstder_arg2_zero_local($M.$op, x, y),
@@ -169,10 +169,10 @@ function overload_hessian_2_to_1_dual(M, op)
         end
 
         function $M.$op(dx::D, y::Real) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
-            x = dx.primal
+            x = $SCT.primal(dx)
             p_out = $M.$op(x, y)
             t_out = $SCT.hessian_tracer_1_to_1(
-                dx.tracer,
+                $SCT.tracer(dx),
                 $SCT.is_firstder_arg1_zero_local($M.$op, x, y),
                 $SCT.is_seconder_arg1_zero_local($M.$op, x, y),
             )
@@ -180,10 +180,10 @@ function overload_hessian_2_to_1_dual(M, op)
         end
 
         function $M.$op(x::Real, dy::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
-            y = dy.primal
+            y = $SCT.primal(dy)
             p_out = $M.$op(x, y)
             t_out = $SCT.hessian_tracer_1_to_1(
-                dy.tracer,
+                $SCT.tracer(dy),
                 $SCT.is_firstder_arg2_zero_local($M.$op, x, y),
                 $SCT.is_seconder_arg2_zero_local($M.$op, x, y),
             )
@@ -205,8 +205,8 @@ end
         return (t, t)
     else
         (g1, h1), (g2, h2) = hessian_tracer_1_to_2_inner(
-            t.gradient,
-            t.hessian,
+            gradient(t),
+            hessian(t),
             is_firstder_out1_zero,
             is_seconder_out1_zero,
             is_firstder_out2_zero,
@@ -252,7 +252,7 @@ function overload_hessian_1_to_2_dual(M, op)
     SCT = SparseConnectivityTracer
     return quote
         function $M.$op(d::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
-            x = d.primal
+            x = $SCT.primal(d)
             p1_out, p2_out = $M.$op(x)
             t1_out, t2_out = $SCT.hessian_tracer_1_to_2(
                 d,
@@ -271,25 +271,25 @@ end
 ## Exponent (requires extra types)
 for S in (Integer, Rational, Irrational{:ℯ})
     function Base.:^(t::T, ::S) where {T<:HessianTracer}
-        gradient, hessian = hessian_tracer_1_to_1_inner(t.gradient, t.hessian, false, false)
-        return T(gradient, hessian)
+        grad, hess = hessian_tracer_1_to_1_inner(gradient(t), hessian(t), false, false)
+        return T(grad, hess)
     end
     function Base.:^(::S, t::T) where {T<:HessianTracer}
-        gradient, hessian = hessian_tracer_1_to_1_inner(t.gradient, t.hessian, false, false)
-        return T(gradient, hessian)
+        grad, hess = hessian_tracer_1_to_1_inner(gradient(t), hessian(t), false, false)
+        return T(grad, hess)
     end
 
     function Base.:^(d::D, y::S) where {P,T<:HessianTracer,D<:Dual{P,T}}
-        x = d.primal
-        t = d.tracer
-        gradient, hessian = hessian_tracer_1_to_1_inner(t.gradient, t.hessian, false, false)
-        return Dual(x^y, T(gradient, hessian))
+        x = primal(d)
+        t = tracer(d)
+        grad, hess = hessian_tracer_1_to_1_inner(gradient(t), hessian(t), false, false)
+        return Dual(x^y, T(grad, hess))
     end
     function Base.:^(x::S, d::D) where {P,T<:HessianTracer,D<:Dual{P,T}}
-        y = d.primal
-        t = d.tracer
-        gradient, hessian = hessian_tracer_1_to_1_inner(t.gradient, t.hessian, false, false)
-        return Dual(x^y, T(gradient, hessian))
+        y = primal(d)
+        t = tracer(d)
+        grad, hess = hessian_tracer_1_to_1_inner(gradient(t), hessian(t), false, false)
+        return Dual(x^y, T(grad, hess))
     end
 end
 

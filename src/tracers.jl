@@ -41,9 +41,11 @@ struct ConnectivityTracer{I} <: AbstractTracer
     end
 end
 
+@inline inputs(t::ConnectivityTracer) = t.inputs
+
 function Base.show(io::IO, t::ConnectivityTracer)
     return Base.show_delim_array(
-        io, convert.(Int, sort(collect(t.inputs))), "$(typeof(t))(", ',', ')', true
+        io, convert.(Int, sort(collect(inputs(t)))), "$(typeof(t))(", ',', ')', true
     )
 end
 
@@ -83,9 +85,11 @@ struct GradientTracer{G} <: AbstractTracer
     end
 end
 
+@inline gradient(t::GradientTracer) = t.gradient
+
 function Base.show(io::IO, t::GradientTracer)
     return Base.show_delim_array(
-        io, convert.(Int, sort(collect(t.gradient))), "$(typeof(t))(", ',', ')', true
+        io, convert.(Int, sort(collect(gradient(t)))), "$(typeof(t))(", ',', ')', true
     )
 end
 
@@ -120,10 +124,13 @@ struct HessianTracer{G,H} <: AbstractTracer
     end
 end
 
+@inline gradient(t::HessianTracer) = t.gradient
+@inline hessian(t::HessianTracer) = t.hessian
+
 function Base.show(io::IO, t::HessianTracer)
     println(io, "$(eltype(t))(")
-    print(io, "  Gradient: ", t.gradient)
-    print(io, "  Hessian:  ", t.hessian)
+    print(io, "  Gradient: ", gradient(t))
+    print(io, "  Hessian:  ", hessian(t))
     print(io, ")")
     return nothing
 end
@@ -157,6 +164,15 @@ struct Dual{P<:Real,T<:AbstractTracer} <: Real
         return new{P,T}(primal, tracer)
     end
 end
+
+@inline primal(d::Dual) = d.primal
+@inline tracer(d::Dual) = d.tracer
+
+@inline inputs(d::Dual{P,T}) where {P,T<:ConnectivityTracer} = inputs(tracer(d))
+@inline gradient(d::Dual{P,T}) where {P,T<:GradientTracer}   = gradient(tracer(d))
+@inline gradient(d::Dual{P,T}) where {P,T<:HessianTracer}    = gradient(tracer(d))
+@inline hessian(d::Dual{P,T}) where {P,T<:HessianTracer}     = hessian(tracer(d))
+
 Dual{P,T}(d::Dual{P,T}) where {P<:Real,T<:AbstractTracer} = d
 Dual(primal::P, tracer::T) where {P,T} = Dual{P,T}(primal, tracer)
 

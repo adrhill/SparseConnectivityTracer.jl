@@ -10,15 +10,15 @@
 
     ## output union on scalar outputs
     function output_union(tx::T, ty::T) where {T<:ConnectivityTracer}
-        return T(union(tx.inputs, ty.inputs))
+        return T(union(inputs(tx), inputs(ty)))
     end
     function output_union(tx::T, ty::T) where {T<:GradientTracer}
-        return T(union(tx.gradient, ty.gradient))
+        return T(union(gradient(tx), gradient(ty)))
     end
     function output_union(tx::T, ty::T) where {T<:HessianTracer}
-        gradient = union(tx.gradient, ty.gradient)
-        hessian  = union(tx.hessian, ty.hessian)
-        return T(gradient, hessian)
+        grad = union(gradient(tx), gradient(ty))
+        hess = union(hessian(tx), hessian(ty))
+        return T(grad, hess)
     end
 
     output_union(tx::AbstractTracer, y) = tx

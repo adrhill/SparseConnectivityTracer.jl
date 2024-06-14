@@ -46,7 +46,7 @@ to_array(x::AbstractArray) = x
 
 # Utilities
 _tracer_or_number(x::Real) = x
-_tracer_or_number(d::Dual) = d.tracer
+_tracer_or_number(d::Dual) = tracer(d)
 
 #====================#
 # ConnectivityTracer #
@@ -164,7 +164,7 @@ function connectivity_pattern_to_mat(
     V = Bool[]   # values
     for (i, y) in enumerate(yt)
         if y isa T
-            for j in y.inputs
+            for j in inputs(y)
                 push!(I, i)
                 push!(J, j)
                 push!(V, true)
@@ -177,7 +177,7 @@ end
 function connectivity_pattern_to_mat(
     xt::AbstractArray{D}, yt::AbstractArray{<:Real}
 ) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
-    return connectivity_pattern_to_mat(getproperty.(xt, :tracer), _tracer_or_number.(yt))
+    return connectivity_pattern_to_mat(tracer.(xt), _tracer_or_number.(yt))
 end
 
 #================#
@@ -281,7 +281,7 @@ function jacobian_pattern_to_mat(
     V = Bool[]   # values
     for (i, y) in enumerate(yt)
         if y isa T
-            for j in y.gradient
+            for j in gradient(y)
                 push!(I, i)
                 push!(J, j)
                 push!(V, true)
@@ -294,7 +294,7 @@ end
 function jacobian_pattern_to_mat(
     xt::AbstractArray{D}, yt::AbstractArray{<:Real}
 ) where {P,T<:GradientTracer,D<:Dual{P,T}}
-    return jacobian_pattern_to_mat(getproperty.(xt, :tracer), _tracer_or_number.(yt))
+    return jacobian_pattern_to_mat(tracer.(xt), _tracer_or_number.(yt))
 end
 
 #===============#
@@ -388,7 +388,7 @@ function hessian_pattern_to_mat(xt::AbstractArray{T}, yt::T) where {T<:HessianTr
     J = Int[] # column indices
     V = Bool[]   # values
 
-    for (i, j) in yt.hessian
+    for (i, j) in hessian(yt)
         push!(I, i)
         push!(J, j)
         push!(V, true)
@@ -400,7 +400,7 @@ end
 function hessian_pattern_to_mat(
     xt::AbstractArray{D1}, yt::D2
 ) where {P1,P2,T<:HessianTracer,D1<:Dual{P1,T},D2<:Dual{P2,T}}
-    return hessian_pattern_to_mat(getproperty.(xt, :tracer), yt.tracer)
+    return hessian_pattern_to_mat(tracer.(xt), tracer(yt))
 end
 
 function hessian_pattern_to_mat(xt::AbstractArray{T}, yt::Number) where {T<:HessianTracer}
@@ -410,5 +410,5 @@ end
 function hessian_pattern_to_mat(
     xt::AbstractArray{D1}, yt::Number
 ) where {P1,T<:HessianTracer,D1<:Dual{P1,T}}
-    return hessian_pattern_to_mat(getproperty.(xt, :tracer), myempty(T))
+    return hessian_pattern_to_mat(tracer.(xt), myempty(T))
 end
