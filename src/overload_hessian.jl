@@ -6,10 +6,10 @@
     if isemptytracer(t) # TODO: add test
         return t
     else
-        grad, hess = hessian_tracer_1_to_1_inner(
+        g_out, h_out = hessian_tracer_1_to_1_inner(
             gradient(t), hessian(t), is_firstder_zero, is_secondder_zero
         )
-        return T(grad, hess) # return tracer
+        return T(g_out, h_out) # return tracer
     end
 end
 
@@ -77,7 +77,7 @@ end
     elseif tx.isempty
         return hessian_tracer_1_to_1(ty, is_firstder_arg2_zero, is_secondder_arg2_zero)
     else
-        grad, hess = hessian_tracer_2_to_1_inner(
+        g_out, h_out = hessian_tracer_2_to_1_inner(
             gradient(tx),
             hessian(tx),
             gradient(ty),
@@ -88,7 +88,7 @@ end
             is_secondder_arg2_zero,
             is_crossder_zero,
         )
-        return T(grad, hess) # return tracer
+        return T(g_out, h_out) # return tracer
     end
 end
 
@@ -204,7 +204,7 @@ end
     if isemptytracer(t) # TODO: add test
         return (t, t)
     else
-        (g1, h1), (g2, h2) = hessian_tracer_1_to_2_inner(
+        (g_out1, h_out1), (g_out2, h_out2) = hessian_tracer_1_to_2_inner(
             gradient(t),
             hessian(t),
             is_firstder_out1_zero,
@@ -212,7 +212,7 @@ end
             is_firstder_out2_zero,
             is_seconder_out2_zero,
         )
-        return (T(g1, h1, false), T(g2, h2, false)) # return tracers
+        return (T(g_out1, h_out1, false), T(g_out2, h_out2, false)) # return tracers
     end
 end
 
@@ -253,15 +253,15 @@ function overload_hessian_1_to_2_dual(M, op)
     return quote
         function $M.$op(d::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
             x = $SCT.primal(d)
-            p1_out, p2_out = $M.$op(x)
-            t1_out, t2_out = $SCT.hessian_tracer_1_to_2(
+            p_out1, p_out2 = $M.$op(x)
+            t_out1, t_out2 = $SCT.hessian_tracer_1_to_2(
                 d,
                 $SCT.is_firstder_out1_zero_local($M.$op, x),
                 $SCT.is_seconder_out1_zero_local($M.$op, x),
                 $SCT.is_firstder_out2_zero_local($M.$op, x),
                 $SCT.is_seconder_out2_zero_local($M.$op, x),
             )
-            return ($SCT.Dual(p1_out, t1_out), $SCT.Dual(p2_out, t2_out))
+            return ($SCT.Dual(p_out1, t_out1), $SCT.Dual(p_out2, t_out2))
         end
     end
 end
@@ -271,25 +271,25 @@ end
 ## Exponent (requires extra types)
 for S in (Integer, Rational, Irrational{:ℯ})
     function Base.:^(t::T, ::S) where {T<:HessianTracer}
-        grad, hess = hessian_tracer_1_to_1_inner(gradient(t), hessian(t), false, false)
-        return T(grad, hess)
+        g_out, h_out = hessian_tracer_1_to_1_inner(gradient(t), hessian(t), false, false)
+        return T(g_out, h_out)
     end
     function Base.:^(::S, t::T) where {T<:HessianTracer}
-        grad, hess = hessian_tracer_1_to_1_inner(gradient(t), hessian(t), false, false)
-        return T(grad, hess)
+        g_out, h_out = hessian_tracer_1_to_1_inner(gradient(t), hessian(t), false, false)
+        return T(g_out, h_out)
     end
 
     function Base.:^(d::D, y::S) where {P,T<:HessianTracer,D<:Dual{P,T}}
         x = primal(d)
         t = tracer(d)
-        grad, hess = hessian_tracer_1_to_1_inner(gradient(t), hessian(t), false, false)
-        return Dual(x^y, T(grad, hess))
+        g_out, h_out = hessian_tracer_1_to_1_inner(gradient(t), hessian(t), false, false)
+        return Dual(x^y, T(g_out, h_out))
     end
     function Base.:^(x::S, d::D) where {P,T<:HessianTracer,D<:Dual{P,T}}
         y = primal(d)
         t = tracer(d)
-        grad, hess = hessian_tracer_1_to_1_inner(gradient(t), hessian(t), false, false)
-        return Dual(x^y, T(grad, hess))
+        g_out, h_out = hessian_tracer_1_to_1_inner(gradient(t), hessian(t), false, false)
+        return Dual(x^y, T(g_out, h_out))
     end
 end
 

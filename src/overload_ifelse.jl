@@ -16,9 +16,9 @@
         return T(union(gradient(tx), gradient(ty)))
     end
     function output_union(tx::T, ty::T) where {T<:HessianTracer}
-        grad = union(gradient(tx), gradient(ty))
-        hess = union(hessian(tx), hessian(ty))
-        return T(grad, hess)
+        g_out = union(gradient(tx), gradient(ty))
+        h_out = union(hessian(tx), hessian(ty))
+        return T(g_out, h_out)
     end
 
     output_union(tx::AbstractTracer, y) = tx
