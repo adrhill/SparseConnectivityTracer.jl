@@ -5,7 +5,7 @@ using SparseConnectivityTracer
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
-include("brusselator_definition.jl")
+include("definitions/brusselator_definition.jl")
 
 function test_brusselator(method::AbstractSparsityDetector)
     N = 6

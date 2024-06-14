@@ -6,8 +6,12 @@ SET_TYPES = (BitSet, Set{Int}, DuplicateVector{Int}, RecursiveSet{Int}, SortedVe
 
 include("jacobian.jl")
 include("hessian.jl")
+include("nlpmodels.jl")
 
 SUITE = BenchmarkGroup()
+
+SUITE["OptimizationProblems"] = optbench([:britgas])
+
 for G in SET_TYPES
     H = Set{Tuple{Int,Int}}
     SUITE["Jacobian"]["Global"][nameof(G)] = jacbench(TracerSparsityDetector(G))
