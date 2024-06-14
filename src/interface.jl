@@ -29,7 +29,7 @@ end
 # Trace through functions #
 #=========================#
 
-function trace_function(::Type{T}, f, x) where {T<:Union{AbstractTracer,Dual}}
+function trace_function(::Type{T}, f::F, x) where {T<:Union{AbstractTracer,Dual},F}
     xt = trace_input(T, x)
     yt = f(xt)
     return xt, yt
@@ -339,8 +339,8 @@ julia> hessian_pattern(g, x)
 ```
 """
 function hessian_pattern(
-    f, x, ::Type{P}=DEFAULT_SECOND_ORDER_PATTERN
-) where {P<:AbstractVectorAndMatrixPattern}
+    f::F, x, ::Type{P}=DEFAULT_SECOND_ORDER_PATTERN
+) where {F,P<:AbstractVectorAndMatrixPattern}
     xt, yt = trace_function(HessianTracer{P}, f, x)
     return hessian_pattern_to_mat(to_array(xt), yt)
 end

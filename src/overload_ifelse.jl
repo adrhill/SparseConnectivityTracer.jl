@@ -1,3 +1,4 @@
+#=
 @static if VERSION >= v"1.8"
     function Base.ifelse(::AbstractTracer, x, y)
         size(x) != size(y) && throw(
@@ -40,6 +41,7 @@
         return ty
     end
 end
+=#
 
 # Overload only on AbstractTracer, not Dual 
 for op in (isequal, isapprox, isless, ==, <, >, <=, >=)

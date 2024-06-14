@@ -1,5 +1,6 @@
 
 # Special overloads for Dual numbers
+#=
 for fn in (
     :iseven,
     :isfinite,
@@ -24,3 +25,4 @@ for fn in (:isequal, :isapprox, :isless, :(==), :(<), :(>), :(<=), :(>=))
     @eval Base.$fn(dx::D, y::Real) where {D<:Dual} = $fn(primal(dx), y)
     @eval Base.$fn(x::Real, dy::D) where {D<:Dual} = $fn(x, primal(dy))
 end
+=#
