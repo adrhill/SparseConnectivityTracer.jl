@@ -11,7 +11,7 @@ include("hessian.jl")
 SUITE = BenchmarkGroup()
 for S1 in SET_TYPES
     S2 = Set{Tuple{Int,Int}}
-    
+
     G = GradientTracer{S1}
     H = HessianTracer{S1,S2}
 
