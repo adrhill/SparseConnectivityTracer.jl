@@ -25,7 +25,7 @@ HESSIAN_TRACERS = (
     end
 
     @testset "$T" for T in HESSIAN_TRACERS
-        method = TracerSparsityDetector(; hessian_tracer=T)
+        method = TracerSparsityDetector(; hessian_tracer_type=T)
 
         @test hessian_sparsity(identity, rand(), method) ≈ [0;;]
         @test hessian_sparsity(sqrt, rand(), method) ≈ [1;;]
@@ -219,7 +219,7 @@ end
 
 @testset "Local Hessian" begin
     @testset "$T" for T in HESSIAN_TRACERS
-        method = TracerLocalSparsityDetector(; hessian_tracer=T)
+        method = TracerLocalSparsityDetector(; hessian_tracer_type=T)
 
         f1(x) = x[1] + x[2] * x[3] + 1 / x[4] + x[2] * max(x[1], x[5])
         h = hessian_sparsity(f1, [1.0 3.0 5.0 1.0 2.0], method)

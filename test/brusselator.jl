@@ -25,6 +25,6 @@ function test_brusselator(method::AbstractSparsityDetector)
 end
 
 @testset "$T" for T in GRADIENT_TRACERS
-    method = TracerSparsityDetector(; gradient_tracer=T)
+    method = TracerSparsityDetector(; gradient_tracer_type=T)
     test_brusselator(method)
 end

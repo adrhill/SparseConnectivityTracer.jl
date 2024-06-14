@@ -45,7 +45,7 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
 
 @testset "Jacobian Global" begin
     @testset "$T" for T in GRADIENT_TRACERS
-        method = TracerSparsityDetector(; gradient_tracer=T)
+        method = TracerSparsityDetector(; gradient_tracer_type=T)
 
         f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])]
         @test jacobian_sparsity(f, rand(3), method) == [1 0 0; 1 1 0; 0 0 1]
@@ -129,7 +129,7 @@ end
 
 @testset "Jacobian Local" begin
     @testset "$T" for T in GRADIENT_TRACERS
-        method = TracerLocalSparsityDetector(; gradient_tracer=T)
+        method = TracerLocalSparsityDetector(; gradient_tracer_type=T)
 
         # Multiplication
         @test jacobian_sparsity(x -> x[1] * x[2], [1.0, 1.0], method) == [1 1;]
