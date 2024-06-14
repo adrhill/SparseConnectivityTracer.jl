@@ -23,5 +23,4 @@ for G in SET_TYPES
 end
 =#
 
-SUITE["Jacobian"]["OptimizationProblems"] = jacbench_opt()
-SUITE["Hessian"]["OptimizationProblems"] = hessbench_opt()
+SUITE["OptimizationProblems"] = optbench()

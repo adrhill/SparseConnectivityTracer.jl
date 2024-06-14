@@ -1,6 +1,7 @@
+using OptimizationProblems
 using Test
 
-include("definitions/nlpmodels_definitions.jl")
+include("definitions/nlpmodels_definitions.jl");
 
 function compare_patterns(
     truth::AbstractMatrix{<:Real}; sct::AbstractMatrix{Bool}, jump::AbstractMatrix{Bool}
@@ -30,12 +31,17 @@ Please look at the warnings displayed at the end.
 =#
 
 jac_inconsistencies = []
+hess_inconsistencies = []
 
-@testset verbose = true "Jacobian comparison" begin
-    @testset "$name" for name in problem_names()
-        @info "$(now()) - Testing Jacobian sparsity for $name"
-        jac_sparsity_sct = compute_jac_sparsity_sct(name)
-        jac_sparsity_jump, jac = compute_jac_sparsity_and_value_jump(name)
+@testset "$name" for name in problem_names()
+    @info "$(now()) - $name"
+
+    (jac_sparsity_sct, hess_sparsity_sct) = compute_jac_and_hess_sparsity_sct(name)
+    ((jac_sparsity_jump, jac), (hess_sparsity_jump, hess)) = compute_jac_and_hess_sparsity_and_value_jump(
+        name
+    )
+
+    @testset verbose = true "Jacobian comparison" begin
         if jac_sparsity_sct == jac_sparsity_jump
             @test jac_sparsity_sct == jac_sparsity_jump
         else
@@ -45,15 +51,8 @@ jac_inconsistencies = []
             push!(jac_inconsistencies, (name, message))
         end
     end
-end;
 
-hess_inconsistencies = []
-
-@testset verbose = true "Hessian comparison" begin
-    @testset "$name" for name in problem_names()
-        @info "$(now()) - Testing Hessian sparsity for $name"
-        hess_sparsity_sct = compute_hess_sparsity_sct(name)
-        hess_sparsity_jump, hess = compute_hess_sparsity_and_value_jump(name)
+    @testset verbose = true "Hessian comparison" begin
         if hess_sparsity_sct == hess_sparsity_jump
             @test hess_sparsity_sct == hess_sparsity_jump
         else

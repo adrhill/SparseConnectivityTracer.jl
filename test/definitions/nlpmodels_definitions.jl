@@ -60,11 +60,6 @@ function compute_jac_sparsity_sct(nlp::AbstractNLPModel)
     return jac_sparsity
 end
 
-function compute_jac_sparsity_sct(name::Symbol)
-    nlp = OptimizationProblems.ADNLPProblems.eval(name)()
-    return compute_jac_sparsity_sct(nlp)
-end
-
 function compute_hess_sparsity_sct(nlp::AbstractNLPModel)
     L = Base.Fix1(mylagrangian, nlp)
     x0 = nlp.meta.x0
@@ -72,9 +67,32 @@ function compute_hess_sparsity_sct(nlp::AbstractNLPModel)
     return hess_sparsity
 end
 
-function compute_hess_sparsity_sct(name::Symbol)
+function compute_jac_and_hess_sparsity_sct(name::Symbol)
     nlp = OptimizationProblems.ADNLPProblems.eval(name)()
-    return compute_hess_sparsity_sct(nlp)
+    return compute_jac_sparsity_sct(nlp), compute_hess_sparsity_sct(nlp)
+end
+
+## Generic
+
+function compute_jac_sparsity_and_value(nlp::AbstractNLPModel)
+    n, m = nlp.meta.nvar, nlp.meta.ncon
+    x0 = nlp.meta.x0
+    I, J = NLPModels.jac_structure(nlp)
+    V = NLPModels.jac_coord(nlp, x0)
+    jac_sparsity = sparse(I, J, ones(Bool, length(I)), m, n)
+    jac = sparse(I, J, V, m, n)
+    return jac_sparsity, jac
+end
+
+function compute_hess_sparsity_and_value(nlp::AbstractNLPModel)
+    n, m = nlp.meta.nvar, nlp.meta.ncon
+    x0 = nlp.meta.x0
+    yrand = rand(m)
+    I, J = NLPModels.hess_structure(nlp)
+    V = NLPModels.hess_coord(nlp, x0, yrand)
+    hess_sparsity = sparse(Symmetric(sparse(I, J, ones(Bool, length(I)), n, n), :L))
+    hess = sparse(Symmetric(sparse(I, J, V, n, n), :L))
+    return hess_sparsity, hess
 end
 
 ## JuMP
@@ -86,27 +104,10 @@ https://jso.dev/OptimizationProblems.jl/stable/tutorial/#Problems-in-JuMP-syntax
 https://jso.dev/NLPModelsJuMP.jl/stable/tutorial/#MathOptNLPModel
 =#
 
-function compute_jac_sparsity_and_value_jump(name::Symbol)
+function compute_jac_and_hess_sparsity_and_value_jump(name::Symbol)
     nlp_jump = OptimizationProblems.PureJuMP.eval(name)()
     nlp = NLPModelsJuMP.MathOptNLPModel(nlp_jump)
-    n, m = nlp.meta.nvar, nlp.meta.ncon
-    x0 = nlp.meta.x0
-    I, J = NLPModels.jac_structure(nlp)
-    V = NLPModels.jac_coord(nlp, x0)
-    jac_sparsity = sparse(I, J, ones(Bool, length(I)), m, n)
-    jac = sparse(I, J, V, m, n)
-    return jac_sparsity, jac
-end
-
-function compute_hess_sparsity_and_value_jump(name::Symbol)
-    nlp_jump = OptimizationProblems.PureJuMP.eval(name)()
-    nlp = NLPModelsJuMP.MathOptNLPModel(nlp_jump)
-    n, m = nlp.meta.nvar, nlp.meta.ncon
-    x0 = nlp.meta.x0
-    yrand = rand(m)
-    I, J = NLPModels.hess_structure(nlp)
-    V = NLPModels.hess_coord(nlp, x0, yrand)
-    hess_sparsity = sparse(Symmetric(sparse(I, J, ones(Bool, length(I)), n, n), :L))
-    hess = sparse(Symmetric(sparse(I, J, V, n, n), :L))
-    return hess_sparsity, hess
+    jac_sparsity, jac = compute_jac_sparsity_and_value(nlp)
+    hess_sparsity, hess = compute_hess_sparsity_and_value(nlp)
+    return ((jac_sparsity, jac), (hess_sparsity, hess))
 end
