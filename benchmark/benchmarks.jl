@@ -6,6 +6,7 @@ SET_TYPES = (BitSet, Set{Int}, DuplicateVector{Int}, RecursiveSet{Int}, SortedVe
 
 include("jacobian.jl")
 include("hessian.jl")
+include("nlpmodels.jl")
 
 SUITE = BenchmarkGroup()
 for G in SET_TYPES
@@ -19,3 +20,6 @@ for G in SET_TYPES
         TracerLocalSparsityDetector(G, H)
     )
 end
+
+SUITE["Jacobian"]["OptimizationProblems"] = jacbench_opt()
+SUITE["Hessian"]["OptimizationProblems"] = hessbench_opt()
