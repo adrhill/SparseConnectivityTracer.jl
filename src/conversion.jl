@@ -25,16 +25,13 @@ Base.floatmax(::Type{T})    where {T<:AbstractTracer} = myempty(T)
 Base.maxintfloat(::Type{T}) where {T<:AbstractTracer} = myempty(T)
 
 ## Array constructors
-Base.similar(a::Array{T,1})             where {T<:AbstractTracer}   = zeros(T, size(a, 1))
-Base.similar(a::Array{T,2})             where {T<:AbstractTracer}   = zeros(T, size(a, 1), size(a, 2))
-Base.similar(a::Array{A,1}, ::Type{T})  where {T<:AbstractTracer,A} = zeros(T, size(a, 1))
-Base.similar(a::Array{A,2}, ::Type{T})  where {T<:AbstractTracer,A} = zeros(T, size(a, 1), size(a, 2))
-Base.similar(::Array{T}, m::Int)        where {T<:AbstractTracer}   = zeros(T, m)
-Base.similar(::Array{T}, dims::Dims{N}) where {T<:AbstractTracer,N} = zeros(T, dims)
+Base.similar(a::Array{T,1})                     where {T<:AbstractTracer}   = zeros(T, size(a, 1))
+Base.similar(a::Array{T,2})                     where {T<:AbstractTracer}   = zeros(T, size(a, 1), size(a, 2))
+Base.similar(a::Array{A,1}, ::Type{T})          where {T<:AbstractTracer,A} = zeros(T, size(a, 1))
+Base.similar(a::Array{A,2}, ::Type{T})          where {T<:AbstractTracer,A} = zeros(T, size(a, 1), size(a, 2))
+Base.similar(::Array{T}, m::Int)                where {T<:AbstractTracer}   = zeros(T, m)
+Base.similar(::Array, ::Type{T}, dims::Dims{N}) where {T<:AbstractTracer,N} = zeros(T, dims)
 
-Base.similar(::Array, ::Type{ConnectivityTracer{P}}, dims::Dims{N}) where {P,N}   = zeros(ConnectivityTracer{P}, dims)
-Base.similar(::Array, ::Type{GradientTracer{P}},     dims::Dims{N}) where {P,N}   = zeros(GradientTracer{P},     dims)
-Base.similar(::Array, ::Type{HessianTracer{P}},      dims::Dims{N}) where {P,N}   = zeros(HessianTracer{P},      dims)
 
 ## Duals
 function Base.promote_rule(::Type{Dual{P1, T}}, ::Type{Dual{P2, T}}) where {P1,P2,T}
