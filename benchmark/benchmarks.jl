@@ -9,6 +9,7 @@ include("hessian.jl")
 include("nlpmodels.jl")
 
 SUITE = BenchmarkGroup()
+#=  # TODO: uncomment
 for G in SET_TYPES
     H = Set{Tuple{Int,Int}}
     SUITE["Jacobian"]["Global"][nameof(G)] = jacbench(TracerSparsityDetector(G))
@@ -20,6 +21,7 @@ for G in SET_TYPES
         TracerLocalSparsityDetector(G, H)
     )
 end
+=#
 
 SUITE["Jacobian"]["OptimizationProblems"] = jacbench_opt()
 SUITE["Hessian"]["OptimizationProblems"] = hessbench_opt()
