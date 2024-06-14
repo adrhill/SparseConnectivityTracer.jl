@@ -15,7 +15,7 @@ include("settypes/duplicatevector.jl")
 include("settypes/recursiveset.jl")
 include("settypes/sortedvector.jl")
 
-include("sparsity_patterns.jl")
+# include("sparsity_patterns.jl")
 include("tracers.jl")
 include("exceptions.jl")
 include("conversion.jl")

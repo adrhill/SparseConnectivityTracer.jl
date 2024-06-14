@@ -4,7 +4,7 @@
 Singleton struct for integration with the sparsity detection framework of [ADTypes.jl](https://github.com/SciML/ADTypes.jl).
 
 Computes global sparsity patterns over the entire input domain.
-For local sparsity patterns at a specific input point, use [`TracerLocalSparsityDetector`](@ref).
+Gor local sparsity patterns at a specific input point, use [`TracerLocalSparsityDetector`](@ref).
 
 # Example
 
@@ -31,30 +31,30 @@ julia> ADTypes.hessian_sparsity(f, rand(4), TracerSparsityDetector())
  ⋅  ⋅  ⋅  1
 ```
 """
-struct TracerSparsityDetector{F<:AbstractVectorPattern,S<:AbstractVectorAndMatrixPattern} <:
+struct TracerSparsityDetector{TG<:GradientTracer,TH<:HessianTracer} <:
        ADTypes.AbstractSparsityDetector end
 function TracerSparsityDetector(
-    ::Type{F}, ::Type{S}
-) where {F<:AbstractVectorPattern,S<:AbstractVectorAndMatrixPattern}
-    return TracerSparsityDetector{F,S}()
+    ::Type{TG}, ::Type{TH}
+) where {TG<:GradientTracer,TH<:HessianTracer}
+    return TracerSparsityDetector{TG,TH}()
 end
 function TracerSparsityDetector(;
-    first_order::Type{F}=DEFAULT_FIRST_ORDER_PATTERN,
-    second_order::Type{S}=DEFAULT_SECOND_ORDER_PATTERN,
-) where {F<:AbstractVectorPattern,S<:AbstractVectorAndMatrixPattern}
-    return TracerSparsityDetector(first_order, second_order)
+    gradient_tracer::Type{TG}=DEFAULT_GRADIENT_TRACER,
+    hessian_tracer::Type{TH}=DEFAULT_HESSIAN_TRACER,
+) where {TG<:GradientTracer,TH<:HessianTracer}
+    return TracerSparsityDetector(gradient_tracer, hessian_tracer)
 end
 
-function ADTypes.jacobian_sparsity(f, x, ::TracerSparsityDetector{F,S}) where {F,S}
-    return jacobian_pattern(f, x, F)
+function ADTypes.jacobian_sparsity(f, x, ::TracerSparsityDetector{TG,TH}) where {TG,TH}
+    return jacobian_pattern(f, x, TG)
 end
 
-function ADTypes.jacobian_sparsity(f!, y, x, ::TracerSparsityDetector{F,S}) where {F,S}
-    return jacobian_pattern(f!, y, x, F)
+function ADTypes.jacobian_sparsity(f!, y, x, ::TracerSparsityDetector{TG,TH}) where {TG,TH}
+    return jacobian_pattern(f!, y, x, TG)
 end
 
-function ADTypes.hessian_sparsity(f, x, ::TracerSparsityDetector{F,S}) where {F,S}
-    return hessian_pattern(f, x, S)
+function ADTypes.hessian_sparsity(f, x, ::TracerSparsityDetector{TG,TH}) where {TG,TH}
+    return hessian_pattern(f, x, TH)
 end
 
 """
@@ -98,29 +98,30 @@ julia> ADTypes.hessian_sparsity(f, [1.0, 2.0, 3.0, 4.0], TracerLocalSparsityDete
  ⋅  ⋅  ⋅  1
 ```
 """
-struct TracerLocalSparsityDetector{
-    F<:AbstractVectorPattern,S<:AbstractVectorAndMatrixPattern
-} <: ADTypes.AbstractSparsityDetector end
+struct TracerLocalSparsityDetector{TG<:GradientTracer,TH<:HessianTracer} <:
+       ADTypes.AbstractSparsityDetector end
 function TracerLocalSparsityDetector(
-    ::Type{F}, ::Type{S}
-) where {F<:AbstractVectorPattern,S<:AbstractVectorAndMatrixPattern}
-    return TracerLocalSparsityDetector{F,S}()
+    ::Type{TG}, ::Type{TH}
+) where {TG<:GradientTracer,TH<:HessianTracer}
+    return TracerLocalSparsityDetector{TG,TH}()
 end
 function TracerLocalSparsityDetector(;
-    first_order::Type{F}=DEFAULT_FIRST_ORDER_PATTERN,
-    second_order::Type{S}=DEFAULT_SECOND_ORDER_PATTERN,
-) where {F<:AbstractVectorPattern,S<:AbstractVectorAndMatrixPattern}
-    return TracerLocalSparsityDetector(first_order, second_order)
+    gradient_tracer::Type{TG}=DEFAULT_GRADIENT_TRACER,
+    hessian_tracer::Type{TH}=DEFAULT_HESSIAN_TRACER,
+) where {TG<:GradientTracer,TH<:HessianTracer}
+    return TracerLocalSparsityDetector(gradient_tracer, hessian_tracer)
 end
 
-function ADTypes.jacobian_sparsity(f, x, ::TracerLocalSparsityDetector{F,S}) where {F,S}
-    return local_jacobian_pattern(f, x, F)
+function ADTypes.jacobian_sparsity(f, x, ::TracerLocalSparsityDetector{TG,TH}) where {TG,TH}
+    return local_jacobian_pattern(f, x, TG)
 end
 
-function ADTypes.jacobian_sparsity(f!, y, x, ::TracerLocalSparsityDetector{F,S}) where {F,S}
-    return local_jacobian_pattern(f!, y, x, F)
+function ADTypes.jacobian_sparsity(
+    f!, y, x, ::TracerLocalSparsityDetector{TG,TH}
+) where {TG,TH}
+    return local_jacobian_pattern(f!, y, x, TG)
 end
 
-function ADTypes.hessian_sparsity(f, x, ::TracerLocalSparsityDetector{F,S}) where {F,S}
-    return local_hessian_pattern(f, x, S)
+function ADTypes.hessian_sparsity(f, x, ::TracerLocalSparsityDetector{TG,TH}) where {TG,TH}
+    return local_hessian_pattern(f, x, TH)
 end

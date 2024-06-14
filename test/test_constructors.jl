@@ -1,41 +1,36 @@
 # Test construction and conversions of internal tracer types
 using SparseConnectivityTracer:
     AbstractTracer, ConnectivityTracer, GradientTracer, HessianTracer, Dual
-using SparseConnectivityTracer: inputs, primal, tracer, myempty, name
-using SparseConnectivityTracer:
-    IndexSetVectorPattern, IndexSetMatrixPattern, CombinedPattern
+using SparseConnectivityTracer: myempty, name
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
-VECTOR_PATTERNS = (
-    IndexSetVectorPattern{Int,BitSet},
-    IndexSetVectorPattern{Int,Set{Int}},
-    IndexSetVectorPattern{Int,DuplicateVector{Int}},
-    IndexSetVectorPattern{Int,SortedVector{Int}},
+CONNECTIVITY_TRACERS = (
+    ConnectivityTracer{BitSet},
+    ConnectivityTracer{Set{Int}},
+    ConnectivityTracer{DuplicateVector{Int}},
+    ConnectivityTracer{SortedVector{Int}},
 )
 
-VECTOR_AND_MATRIX_PATTERNS = (
-    CombinedPattern{
-        IndexSetVectorPattern{Int,BitSet},IndexSetMatrixPattern{Int,Set{Tuple{Int,Int}}}
-    },
-    CombinedPattern{
-        IndexSetVectorPattern{Int,Set{Int}},IndexSetMatrixPattern{Int,Set{Tuple{Int,Int}}}
-    },
-    CombinedPattern{
-        IndexSetVectorPattern{Int,DuplicateVector{Int}},
-        IndexSetMatrixPattern{Int,DuplicateVector{Tuple{Int,Int}}},
-    },
-    CombinedPattern{
-        IndexSetVectorPattern{Int,SortedVector{Int}},
-        IndexSetMatrixPattern{Int,SortedVector{Tuple{Int,Int}}},
-    },
+GRADIENT_TRACERS = (
+    GradientTracer{BitSet},
+    GradientTracer{Set{Int}},
+    GradientTracer{DuplicateVector{Int}},
+    GradientTracer{SortedVector{Int}},
+)
+
+HESSIAN_TRACERS = (
+    HessianTracer{BitSet,Set{Tuple{Int,Int}}},
+    HessianTracer{Set{Int},Set{Tuple{Int,Int}}},
+    HessianTracer{DuplicateVector{Int},DuplicateVector{Tuple{Int,Int}}},
+    HessianTracer{SortedVector{Int},SortedVector{Tuple{Int,Int}}},
     # TODO: test on RecursiveSet
 )
 
-is_tracer_empty(t::ConnectivityTracer) = isempty(inputs(t)) && t.isempty
-is_tracer_empty(t::GradientTracer)     = isempty(SparseConnectivityTracer.gradient(t)) && t.isempty
-is_tracer_empty(t::HessianTracer)      = isempty(SparseConnectivityTracer.gradient(t)) && isempty(SparseConnectivityTracer.hessian(t)) && t.isempty
-is_tracer_empty(d::Dual)               = is_tracer_empty(tracer(d))
+is_tracer_empty(t::ConnectivityTracer) = t.isempty && isempty(t.inputs)
+is_tracer_empty(t::GradientTracer)     = t.isempty && isempty(t.gradient)
+is_tracer_empty(t::HessianTracer)      = t.isempty && isempty(t.gradient) && isempty(t.hessian)
+is_tracer_empty(d::Dual)               = is_tracer_empty(d.tracer)
 
 function test_nested_duals(::Type{T}) where {T<:AbstractTracer}
     # Putting Duals into Duals is prohibited
@@ -61,7 +56,7 @@ function test_constant_functions(::Type{D}) where {P,T,D<:Dual{P,T}}
         d = f(D)
         @test isa(d, D)
         @test is_tracer_empty(d)
-        @test primal(d) == f(P)
+        @test d.primal == f(P)
     end
 end
 
@@ -86,12 +81,12 @@ end
 
 function test_type_casting(::Type{T}) where {T<:AbstractTracer}
     t_in = myempty(T)
-    @testset "$(name(T)) to $(name(T))" begin
+    @testset "$T to $T" begin
         t_out = T(t_in)
         @test t_out isa T
         @test is_tracer_empty(t_out)
     end
-    @testset "$N to $(name(T))" for N in (Int, Float32, Irrational)
+    @testset "$N to $T" for N in (Int, Float32, Irrational)
         t_out = T(one(N))
         @test t_out isa T
         @test is_tracer_empty(t_out)
@@ -102,15 +97,15 @@ function test_type_casting(::Type{D}) where {P,T,D<:Dual{P,T}}
     d_in = Dual(one(P), myempty(T))
     @testset "$(name(D)) to $(name(D))" begin
         d_out = D(d_in)
-        @test primal(d_out) == primal(d_in)
-        @test tracer(d_out) isa T
+        @test d_out.primal == d_in.primal
+        @test d_out.tracer isa T
         @test is_tracer_empty(d_out)
     end
     @testset "$P2 to $(name(D))" for P2 in (Int, Float32, Irrational)
         p_in = one(P2)
         d_out = D(p_in)
-        @test primal(d_out) == P(p_in)
-        @test tracer(d_out) isa T
+        @test d_out.primal == P(p_in)
+        @test d_out.tracer isa T
         @test is_tracer_empty(d_out)
     end
 end
@@ -167,98 +162,106 @@ function test_similar(::Type{D}) where {P,T,D<:Dual{P,T}}
     @test eltype(B) == D
     @test size(B) == (2, 3)
     @test all(is_tracer_empty, B)
-    @test all(d -> primal(d) isa P, B)
+    @test all(d -> d.primal isa P, B)
 
     # 1-arg from matrix of tracers
     B1 = similar(B)
     @test eltype(B1) == D
     @test size(B1) == (2, 3)
     @test all(is_tracer_empty, B1)
-    @test all(d -> primal(d) isa P, B1)
+    @test all(d -> d.primal isa P, B1)
 
     # 2-arg from matrix of tracers
     B2 = similar(B, D)
     @test eltype(B2) == D
     @test size(B2) == (2, 3)
     @test all(is_tracer_empty, B2)
-    @test all(d -> primal(d) isa P, B2)
+    @test all(d -> d.primal isa P, B2)
 
     # 2-arg from matrix of tracers, custom size
     B3 = similar(B, 4, 5)
     @test eltype(B3) == D
     @test size(B3) == (4, 5)
     @test all(is_tracer_empty, B3)
-    @test all(d -> primal(d) isa P, B3)
+    @test all(d -> d.primal isa P, B3)
 
     # 3-arg from matrix of Reals
     B4 = similar(A, D, 4, 5)
     @test eltype(B4) == D
     @test size(B4) == (4, 5)
     @test all(is_tracer_empty, B4)
-    @test all(d -> primal(d) isa P, B4)
+    @test all(d -> d.primal isa P, B4)
 
     # 3-arg from matrix of tracers
     B5 = similar(B, D, 5, 6)
     @test eltype(B5) == D
     @test size(B5) == (5, 6)
     @test all(is_tracer_empty, B5)
-    @test all(d -> primal(d) isa P, B5)
+    @test all(d -> d.primal isa P, B5)
 end
 
-@testset "First order tracers" begin
-    @testset "Pattern $P" for P in VECTOR_PATTERNS
-        C = ConnectivityTracer{P}
-        G = GradientTracer{P}
+@testset "ConnectivityTracer" begin
+    P = Float32
+    DUAL_CONNECTIVITY_TRACERS = [Dual{P,T} for T in CONNECTIVITY_TRACERS]
+    ALL_CONNECTIVITY_TRACERS = (CONNECTIVITY_TRACERS..., DUAL_CONNECTIVITY_TRACERS...)
 
-        N = Float32
-        DC = Dual{N,C}
-        DG = Dual{N,G}
-
-        TS = (C, G, DC, DG)
-
-        @testset "Nested Duals on $(name(T))" for T in (C, G)
-            test_nested_duals(T)
-        end
-
-        @testset "Constant functions on $(name(T))" for T in TS
-            test_constant_functions(T)
-        end
-        @testset "Type conversions on $(name(T))" for T in TS
-            test_type_conversion_functions(T)
-        end
-        @testset "Type casting on $(name(T))" for T in TS
-            test_type_casting(T)
-        end
-        @testset "similar on $(name(T))" for T in TS
-            test_similar(T)
-        end
+    @testset "Nested Duals on HessianTracer" for T in CONNECTIVITY_TRACERS
+        test_nested_duals(T)
+    end
+    @testset "Constant functions on $T" for T in ALL_CONNECTIVITY_TRACERS
+        test_constant_functions(T)
+    end
+    @testset "Type conversions on $T" for T in ALL_CONNECTIVITY_TRACERS
+        test_type_conversion_functions(T)
+    end
+    @testset "Type casting on $T" for T in ALL_CONNECTIVITY_TRACERS
+        test_type_casting(T)
+    end
+    @testset "similar on $T" for T in ALL_CONNECTIVITY_TRACERS
+        test_similar(T)
     end
 end
 
-@testset "Second order tracers" begin
-    @testset "Pattern $P" for P in VECTOR_AND_MATRIX_PATTERNS
-        H = HessianTracer{P}
+@testset "GradientTracer" begin
+    P = Float32
+    DUAL_GRADIENT_TRACERS = [Dual{P,T} for T in GRADIENT_TRACERS]
+    ALL_GRADIENT_TRACERS = (GRADIENT_TRACERS..., DUAL_GRADIENT_TRACERS...)
 
-        N = Float32
-        DH = Dual{N,H}
+    @testset "Nested Duals on HessianTracer" for T in GRADIENT_TRACERS
+        test_nested_duals(T)
+    end
+    @testset "Constant functions on $T" for T in ALL_GRADIENT_TRACERS
+        test_constant_functions(T)
+    end
+    @testset "Type conversions on $T" for T in ALL_GRADIENT_TRACERS
+        test_type_conversion_functions(T)
+    end
+    @testset "Type casting on $T" for T in ALL_GRADIENT_TRACERS
+        test_type_casting(T)
+    end
+    @testset "similar on $T" for T in ALL_GRADIENT_TRACERS
+        test_similar(T)
+    end
+end
 
-        TS = (H, DH)
+@testset "HessianTracer" begin
+    P = Float32
+    DUAL_HESSIAN_TRACERS = [Dual{P,T} for T in HESSIAN_TRACERS]
+    ALL_HESSIAN_TRACERS = (HESSIAN_TRACERS..., DUAL_HESSIAN_TRACERS...)
 
-        @testset "Nested Duals on HessianTracer" begin
-            test_nested_duals(H)
-        end
-
-        @testset "Constant functions on $(name(T))" for T in TS
-            test_constant_functions(T)
-        end
-        @testset "Type conversions on $(name(T))" for T in TS
-            test_type_conversion_functions(T)
-        end
-        @testset "Type casting on $(name(T))" for T in TS
-            test_type_casting(T)
-        end
-        @testset "similar on $(name(T))" for T in TS
-            test_similar(T)
-        end
+    @testset "Nested Duals on HessianTracer" for T in HESSIAN_TRACERS
+        test_nested_duals(T)
+    end
+    @testset "Constant functions on $T" for T in ALL_HESSIAN_TRACERS
+        test_constant_functions(T)
+    end
+    @testset "Type conversions on $T" for T in ALL_HESSIAN_TRACERS
+        test_type_conversion_functions(T)
+    end
+    @testset "Type casting on $T" for T in ALL_HESSIAN_TRACERS
+        test_type_casting(T)
+    end
+    @testset "similar on $T" for T in ALL_HESSIAN_TRACERS
+        test_similar(T)
     end
 end

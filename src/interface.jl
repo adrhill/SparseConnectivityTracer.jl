@@ -1,7 +1,6 @@
-const DEFAULT_FIRST_ORDER_PATTERN = IndexSetVectorPattern{Int,BitSet}
-const DEFAULT_SECOND_ORDER_PATTERN = CombinedPattern{
-    IndexSetVectorPattern{Int,BitSet},IndexSetMatrixPattern{Int,Set{Tuple{Int,Int}}}
-}
+const DEFAULT_CONNECTIVITY_TRACER = ConnectivityTracer{BitSet}
+const DEFAULT_GRADIENT_TRACER = GradientTracer{BitSet}
+const DEFAULT_HESSIAN_TRACER = HessianTracer{BitSet,Set{Tuple{Int,Int}}}
 
 #==================#
 # Enumerate inputs #
@@ -47,7 +46,7 @@ to_array(x::AbstractArray) = x
 
 # Utilities
 _tracer_or_number(x::Real) = x
-_tracer_or_number(d::Dual) = tracer(d)
+_tracer_or_number(d::Dual) = d.tracer
 
 #====================#
 # ConnectivityTracer #
@@ -60,7 +59,7 @@ _tracer_or_number(d::Dual) = tracer(d)
 Enumerates inputs `x` and primal outputs `y = f(x)` and returns sparse matrix `C` of size `(m, n)`
 where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
 
-The type of sparsity pattern `P<:AbstractVectorPattern` can be specified as an optional argument and defaults to `$DEFAULT_FIRST_ORDER_PATTERN`.
+The type of `ConnectivityTracer` can be specified as an optional argument and defaults to `$DEFAULT_CONNECTIVITY_TRACER`.
 
 ## Example
 
@@ -77,9 +76,9 @@ julia> connectivity_pattern(f, x)
 ```
 """
 function connectivity_pattern(
-    f, x, ::Type{P}=DEFAULT_FIRST_ORDER_PATTERN
-) where {P<:AbstractVectorPattern}
-    xt, yt = trace_function(ConnectivityTracer{P}, f, x)
+    f, x, ::Type{T}=DEFAULT_CONNECTIVITY_TRACER
+) where {T<:ConnectivityTracer}
+    xt, yt = trace_function(T, f, x)
     return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
@@ -90,12 +89,12 @@ end
 Enumerates inputs `x` and primal outputs `y` after `f!(y, x)` and returns sparse matrix `C` of size `(m, n)`
 where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
 
-The type of sparsity pattern `P<:AbstractVectorPattern` can be specified as an optional argument and defaults to `$DEFAULT_FIRST_ORDER_PATTERN`.
+The type of `ConnectivityTracer` can be specified as an optional argument and defaults to `$DEFAULT_CONNECTIVITY_TRACER`.
 """
 function connectivity_pattern(
-    f!, y, x, ::Type{P}=DEFAULT_FIRST_ORDER_PATTERN
-) where {P<:AbstractVectorPattern}
-    xt, yt = trace_function(ConnectivityTracer{P}, f!, y, x)
+    f!, y, x, ::Type{T}=DEFAULT_CONNECTIVITY_TRACER
+) where {T<:ConnectivityTracer}
+    xt, yt = trace_function(T, f!, y, x)
     return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
@@ -108,7 +107,7 @@ where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to
 
 Unlike [`connectivity_pattern`](@ref), this function supports control flow and comparisons.
 
-The type of sparsity pattern `P<:AbstractVectorPattern` can be specified as an optional argument and defaults to `$DEFAULT_FIRST_ORDER_PATTERN`.
+The type of `ConnectivityTracer` can be specified as an optional argument and defaults to `$DEFAULT_CONNECTIVITY_TRACER`.
 
 ## Example
 
@@ -129,9 +128,9 @@ julia> local_connectivity_pattern(f, x)
 ```
 """
 function local_connectivity_pattern(
-    f, x, ::Type{P}=DEFAULT_FIRST_ORDER_PATTERN
-) where {P<:AbstractVectorPattern}
-    D = Dual{eltype(x),ConnectivityTracer{P}}
+    f, x, ::Type{T}=DEFAULT_CONNECTIVITY_TRACER
+) where {T<:ConnectivityTracer}
+    D = Dual{eltype(x),T}
     xt, yt = trace_function(D, f, x)
     return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
 end
@@ -146,12 +145,12 @@ where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to
 Unlike [`connectivity_pattern`](@ref), this function supports control flow and comparisons.
 
 
-The type of sparsity pattern `P<:AbstractVectorPattern` can be specified as an optional argument and defaults to `$DEFAULT_FIRST_ORDER_PATTERN`.
+The type of `ConnectivityTracer` can be specified as an optional argument and defaults to `$DEFAULT_CONNECTIVITY_TRACER`.
 """
 function local_connectivity_pattern(
-    f!, y, x, ::Type{P}=DEFAULT_FIRST_ORDER_PATTERN
-) where {P<:AbstractVectorPattern}
-    D = Dual{eltype(x),ConnectivityTracer{P}}
+    f!, y, x, ::Type{T}=DEFAULT_CONNECTIVITY_TRACER
+) where {T<:ConnectivityTracer}
+    D = Dual{eltype(x),T}
     xt, yt = trace_function(D, f!, y, x)
     return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
 end
@@ -165,7 +164,7 @@ function connectivity_pattern_to_mat(
     V = Bool[]   # values
     for (i, y) in enumerate(yt)
         if y isa T
-            for j in inputs(y)
+            for j in y.inputs
                 push!(I, i)
                 push!(J, j)
                 push!(V, true)
@@ -178,7 +177,7 @@ end
 function connectivity_pattern_to_mat(
     xt::AbstractArray{D}, yt::AbstractArray{<:Real}
 ) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
-    return connectivity_pattern_to_mat(tracer.(xt), _tracer_or_number.(yt))
+    return connectivity_pattern_to_mat(getproperty.(xt, :tracer), _tracer_or_number.(yt))
 end
 
 #================#
@@ -191,7 +190,7 @@ end
 
 Compute the sparsity pattern of the Jacobian of `y = f(x)`.
 
-The type of sparsity pattern `P<:AbstractVectorPattern` can be specified as an optional argument and defaults to `$DEFAULT_FIRST_ORDER_PATTERN`.
+The type of `GradientTracer` can be specified as an optional argument and defaults to `$DEFAULT_CONNECTIVITY_TRACER`.
 
 ## Example
 
@@ -207,10 +206,8 @@ julia> jacobian_pattern(f, x)
  ⋅  ⋅  ⋅
 ```
 """
-function jacobian_pattern(
-    f, x, ::Type{P}=DEFAULT_FIRST_ORDER_PATTERN
-) where {P<:AbstractVectorPattern}
-    xt, yt = trace_function(GradientTracer{P}, f, x)
+function jacobian_pattern(f, x, ::Type{T}=DEFAULT_GRADIENT_TRACER) where {T<:GradientTracer}
+    xt, yt = trace_function(T, f, x)
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
@@ -220,12 +217,12 @@ end
 
 Compute the sparsity pattern of the Jacobian of `f!(y, x)`.
 
-The type of sparsity pattern `P<:AbstractVectorPattern` can be specified as an optional argument and defaults to `$DEFAULT_FIRST_ORDER_PATTERN`.
+The type of `GradientTracer` can be specified as an optional argument and defaults to `$DEFAULT_GRADIENT_TRACER`.
 """
 function jacobian_pattern(
-    f!, y, x, ::Type{P}=DEFAULT_FIRST_ORDER_PATTERN
-) where {P<:AbstractVectorPattern}
-    xt, yt = trace_function(GradientTracer{P}, f!, y, x)
+    f!, y, x, ::Type{T}=DEFAULT_GRADIENT_TRACER
+) where {T<:GradientTracer}
+    xt, yt = trace_function(T, f!, y, x)
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
@@ -235,7 +232,7 @@ end
 
 Compute the local sparsity pattern of the Jacobian of `y = f(x)` at `x`.
 
-The type of sparsity pattern `P<:AbstractVectorPattern` can be specified as an optional argument and defaults to `$DEFAULT_FIRST_ORDER_PATTERN`.
+The type of `GradientTracer` can be specified as an optional argument and defaults to `$DEFAULT_GRADIENT_TRACER`.
 
 ## Example
 
@@ -252,9 +249,9 @@ julia> local_jacobian_pattern(f, x)
 ```
 """
 function local_jacobian_pattern(
-    f, x, ::Type{P}=DEFAULT_FIRST_ORDER_PATTERN
-) where {P<:AbstractVectorPattern}
-    D = Dual{eltype(x),GradientTracer{P}}
+    f, x, ::Type{T}=DEFAULT_GRADIENT_TRACER
+) where {T<:GradientTracer}
+    D = Dual{eltype(x),T}
     xt, yt = trace_function(D, f, x)
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
 end
@@ -265,12 +262,12 @@ end
 
 Compute the local sparsity pattern of the Jacobian of `f!(y, x)` at `x`.
 
-The type of sparsity pattern `P<:AbstractVectorPattern` can be specified as an optional argument and defaults to `$DEFAULT_FIRST_ORDER_PATTERN`.
+The type of `GradientTracer` can be specified as an optional argument and defaults to `$DEFAULT_GRADIENT_TRACER`.
 """
 function local_jacobian_pattern(
-    f!, y, x, ::Type{P}=DEFAULT_FIRST_ORDER_PATTERN
-) where {P<:AbstractVectorPattern}
-    D = Dual{eltype(x),GradientTracer{P}}
+    f!, y, x, ::Type{T}=DEFAULT_GRADIENT_TRACER
+) where {T<:GradientTracer}
+    D = Dual{eltype(x),T}
     xt, yt = trace_function(D, f!, y, x)
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
 end
@@ -284,7 +281,7 @@ function jacobian_pattern_to_mat(
     V = Bool[]   # values
     for (i, y) in enumerate(yt)
         if y isa T
-            for j in gradient(y)
+            for j in y.gradient
                 push!(I, i)
                 push!(J, j)
                 push!(V, true)
@@ -297,7 +294,7 @@ end
 function jacobian_pattern_to_mat(
     xt::AbstractArray{D}, yt::AbstractArray{<:Real}
 ) where {P,T<:GradientTracer,D<:Dual{P,T}}
-    return jacobian_pattern_to_mat(tracer.(xt), _tracer_or_number.(yt))
+    return jacobian_pattern_to_mat(getproperty.(xt, :tracer), _tracer_or_number.(yt))
 end
 
 #===============#
@@ -310,7 +307,7 @@ end
 
 Computes the sparsity pattern of the Hessian of a scalar function `y = f(x)`.
 
-The type of sparsity pattern `P<:AbstractVectorAndMatrixPattern` can be specified as an optional argument and defaults to `$DEFAULT_SECOND_ORDER_PATTERN`.
+The type of `HessianTracer` can be specified as an optional argument and defaults to `$DEFAULT_HESSIAN_TRACER`.
 
 ## Example
 
@@ -338,10 +335,8 @@ julia> hessian_pattern(g, x)
  ⋅  1  ⋅  ⋅  1
 ```
 """
-function hessian_pattern(
-    f, x, ::Type{P}=DEFAULT_SECOND_ORDER_PATTERN
-) where {P<:AbstractVectorAndMatrixPattern}
-    xt, yt = trace_function(HessianTracer{P}, f, x)
+function hessian_pattern(f, x, ::Type{T}=DEFAULT_HESSIAN_TRACER) where {T<:HessianTracer}
+    xt, yt = trace_function(T, f, x)
     return hessian_pattern_to_mat(to_array(xt), yt)
 end
 
@@ -351,7 +346,7 @@ end
 
 Computes the local sparsity pattern of the Hessian of a scalar function `y = f(x)` at `x`.
 
-The type of sparsity pattern `P<:AbstractVectorAndMatrixPattern` can be specified as an optional argument and defaults to `$DEFAULT_SECOND_ORDER_PATTERN`.
+The type of `HessianTracer` can be specified as an optional argument and defaults to `$DEFAULT_HESSIAN_TRACER`.
 
 ## Example
 
@@ -380,9 +375,9 @@ julia> local_hessian_pattern(f, x)
 ```
 """
 function local_hessian_pattern(
-    f, x, ::Type{P}=DEFAULT_SECOND_ORDER_PATTERN
-) where {P<:AbstractVectorAndMatrixPattern}
-    D = Dual{eltype(x),HessianTracer{P}}
+    f, x, ::Type{T}=DEFAULT_HESSIAN_TRACER
+) where {T<:HessianTracer}
+    D = Dual{eltype(x),T}
     xt, yt = trace_function(D, f, x)
     return hessian_pattern_to_mat(to_array(xt), yt)
 end
@@ -393,7 +388,7 @@ function hessian_pattern_to_mat(xt::AbstractArray{T}, yt::T) where {T<:HessianTr
     J = Int[] # column indices
     V = Bool[]   # values
 
-    for (i, j) in hessian(yt)
+    for (i, j) in yt.hessian
         push!(I, i)
         push!(J, j)
         push!(V, true)
@@ -405,7 +400,7 @@ end
 function hessian_pattern_to_mat(
     xt::AbstractArray{D1}, yt::D2
 ) where {P1,P2,T<:HessianTracer,D1<:Dual{P1,T},D2<:Dual{P2,T}}
-    return hessian_pattern_to_mat(tracer.(xt), tracer(yt))
+    return hessian_pattern_to_mat(getproperty.(xt, :tracer), yt.tracer)
 end
 
 function hessian_pattern_to_mat(xt::AbstractArray{T}, yt::Number) where {T<:HessianTracer}
@@ -415,5 +410,5 @@ end
 function hessian_pattern_to_mat(
     xt::AbstractArray{D1}, yt::Number
 ) where {P1,T<:HessianTracer,D1<:Dual{P1,T}}
-    return hessian_pattern_to_mat(tracer.(xt), myempty(T))
+    return hessian_pattern_to_mat(getproperty.(xt, :tracer), myempty(T))
 end

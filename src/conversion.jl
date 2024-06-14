@@ -32,7 +32,6 @@ Base.similar(a::Array{A,2}, ::Type{T})          where {T<:AbstractTracer,A} = ze
 Base.similar(::Array{T}, m::Int)                where {T<:AbstractTracer}   = zeros(T, m)
 Base.similar(::Array, ::Type{T}, dims::Dims{N}) where {T<:AbstractTracer,N} = zeros(T, dims)
 
-
 ## Duals
 function Base.promote_rule(::Type{Dual{P1, T}}, ::Type{Dual{P2, T}}) where {P1,P2,T}
     PP = Base.promote_type(P1, P2) # TODO: possible method call error?
@@ -53,10 +52,10 @@ Base.float(::Type{D}) where {P,T,D<:Dual{P,T}} = Dual{float(P),T}
 
 Base.convert(::Type{D}, x::Real) where {P,T,D<:Dual{P,T}}           = Dual(x, myempty(T))
 Base.convert(::Type{D}, d::D)    where {P,T,D<:Dual{P,T}}           = d
-Base.convert(::Type{N}, d::D)    where {N<:Real,P,T,D<:Dual{P,T}}   = Dual(convert(T, primal(d)), tracer(d))
+Base.convert(::Type{N}, d::D)    where {N<:Real,P,T,D<:Dual{P,T}}   = Dual(convert(T, d.primal), d.tracer)
 
 function Base.convert(::Type{Dual{P1,T}}, d::Dual{P2,T}) where {P1,P2,T} 
-    return Dual(convert(P1, primal(d)), tracer(d))
+    return Dual(convert(P1, d.primal), d.tracer)
 end
 
 ## Constants
@@ -73,11 +72,11 @@ Base.maxintfloat(::Type{D}) where {P,T,D<:Dual{P,T}} = D(maxintfloat(P), myempty
 
 ## Array constructors
 function Base.similar(a::Array{D,1}) where {P,T,D<:Dual{P,T}}
-    p_out = similar(primal.(a))
+    p_out = similar(getproperty.(a, :primal))
     return Dual.(p_out, myempty(T))
 end
 function Base.similar(a::Array{D,2}) where {P,T,D<:Dual{P,T}}
-    p_out = similar(primal.(a))
+    p_out = similar(getproperty.(a, :primal))
     return Dual.(p_out, myempty(T))
 end
 function Base.similar(a::Array{A,1}, ::Type{D}) where {P,T,D<:Dual{P,T},A}
@@ -89,15 +88,15 @@ function Base.similar(a::Array{A,2}, ::Type{D}) where {P,T,D<:Dual{P,T},A}
     return Dual.(p_out, myempty(T))
 end
 function Base.similar(a::Array{D}, m::Int) where {P,T,D<:Dual{P,T}}
-    p_out = similar(primal.(a), m)
+    p_out = similar(getproperty.(a, :primal), m)
     return Dual.(p_out, myempty(T))
 end
 function Base.similar(a::Array{D}, dims::Dims{N}) where {P,T,D<:Dual{P,T}, N}
-    p_out = similar(primal.(a), dims)
+    p_out = similar(getproperty.(a, :primal), dims)
     return Dual.(p_out, myempty(T))
 end
 function Base.similar(a::Array{D2}, ::Type{Dual{P,T}}, dims::Dims{N}) where {P,T,N,D2<:Dual}
-    p_out = similar(primal.(a), P, dims)
+    p_out = similar(getproperty.(a, :primal), P, dims)
     return Dual.(p_out, myempty(T))
 end
 function Base.similar(a::Array, ::Type{Dual{P,T}}, dims::Dims{N}) where {P,T,N}

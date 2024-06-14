@@ -6,19 +6,14 @@ function connectivity_tracer_1_to_1(
     if t.isempty # TODO: add test
         return t
     else
-        pattern = connectivity_tracer_1_to_1_pattern(t.pattern, is_influence_zero)
-        return T(pattern) # return tracer
+        inputs = connectivity_tracer_1_to_1_inner(t.inputs, is_influence_zero)
+        return T(inputs) # return tracer
     end
 end
 
-function connectivity_tracer_1_to_1_pattern(
-    p::P, is_influence_zero::Bool
-) where {P<:IndexSetVectorPattern}
-    set = connectivity_tracer_1_to_1_set(inputs(p), is_influence_zero)
-    return P(set) # return pattern
-end
-
-function connectivity_tracer_1_to_1_set(s::S, is_influence_zero::Bool) where {S}
+function connectivity_tracer_1_to_1_inner(
+    s::S, is_influence_zero::Bool
+) where {S<:AbstractSet}
     if is_influence_zero
         return myempty(S)
     else
@@ -39,10 +34,10 @@ function overload_connectivity_1_to_1_dual(M, op)
     SCT = SparseConnectivityTracer
     return quote
         function $M.$op(d::D) where {P,T<:$SCT.ConnectivityTracer,D<:$SCT.Dual{P,T}}
-            x = $SCT.primal(d)
+            x = d.primal
             p_out = $M.$op(x)
             t_out = $SCT.connectivity_tracer_1_to_1(
-                $SCT.tracer(d), $SCT.is_influence_zero_local($M.$op, x)
+                d.tracer, $SCT.is_influence_zero_local($M.$op, x)
             )
             return $SCT.Dual(p_out, t_out)
         end
@@ -62,25 +57,16 @@ function connectivity_tracer_2_to_1(
     elseif tx.isempty
         return connectivity_tracer_1_to_1(ty, is_influence_arg2_zero)
     else
-        pattern = connectivity_tracer_2_to_1_pattern(
-            tx.pattern, ty.pattern, is_influence_arg1_zero, is_influence_arg2_zero
+        inputs = connectivity_tracer_2_to_1_inner(
+            tx.inputs, ty.inputs, is_influence_arg1_zero, is_influence_arg2_zero
         )
-        return T(pattern) # return tracer 
+        return T(inputs) # return tracer 
     end
 end
 
-function connectivity_tracer_2_to_1_pattern(
-    px::P, py::P, is_influence_arg1_zero::Bool, is_influence_arg2_zero::Bool
-) where {P<:IndexSetVectorPattern}
-    set = connectivity_tracer_2_to_1_set(
-        inputs(px), inputs(py), is_influence_arg1_zero, is_influence_arg2_zero
-    )
-    return P(set) # return pattern
-end
-
-function connectivity_tracer_2_to_1_set(
+function connectivity_tracer_2_to_1_inner(
     sx::S, sy::S, is_influence_arg1_zero::Bool, is_influence_arg2_zero::Bool
-) where {S}
+) where {S<:AbstractSet}
     if is_influence_arg1_zero && is_influence_arg2_zero
         return myempty(S)
     elseif !is_influence_arg1_zero && is_influence_arg2_zero
@@ -122,12 +108,12 @@ function overload_connectivity_2_to_1_dual(M, op)
     SCT = SparseConnectivityTracer
     return quote
         function $M.$op(dx::D, dy::D) where {P,T<:$SCT.ConnectivityTracer,D<:$SCT.Dual{P,T}}
-            x = $SCT.primal(dx)
-            y = $SCT.primal(dy)
+            x = dx.primal
+            y = dy.primal
             p_out = $M.$op(x, y)
             t_out = $SCT.connectivity_tracer_2_to_1(
-                $SCT.tracer(dx),
-                $SCT.tracer(dy),
+                dx.tracer,
+                dy.tracer,
                 $SCT.is_influence_arg1_zero_local($M.$op, x, y),
                 $SCT.is_influence_arg2_zero_local($M.$op, x, y),
             )
@@ -137,10 +123,10 @@ function overload_connectivity_2_to_1_dual(M, op)
         function $M.$op(
             dx::D, y::Real
         ) where {P,T<:$SCT.ConnectivityTracer,D<:$SCT.Dual{P,T}}
-            x = $SCT.primal(dx)
+            x = dx.primal
             p_out = $M.$op(x, y)
             t_out = $SCT.connectivity_tracer_1_to_1(
-                $SCT.tracer(dx), $SCT.is_influence_arg1_zero_local($M.$op, x, y)
+                dx.tracer, $SCT.is_influence_arg1_zero_local($M.$op, x, y)
             )
             return $SCT.Dual(p_out, t_out)
         end
@@ -148,10 +134,10 @@ function overload_connectivity_2_to_1_dual(M, op)
         function $M.$op(
             x::Real, dy::D
         ) where {P,T<:$SCT.ConnectivityTracer,D<:$SCT.Dual{P,T}}
-            y = $SCT.primal(dy)
+            y = dy.primal
             p_out = $M.$op(x, y)
             t_out = $SCT.connectivity_tracer_1_to_1(
-                $SCT.tracer(dy), $SCT.is_influence_arg2_zero_local($M.$op, x, y)
+                dy.tracer, $SCT.is_influence_arg2_zero_local($M.$op, x, y)
             )
             return $SCT.Dual(p_out, t_out)
         end
@@ -166,27 +152,18 @@ function connectivity_tracer_1_to_2(
     if t.isempty # TODO: add test
         return (t, t)
     else
-        pattern1, pattern2 = connectivity_tracer_1_to_2_pattern(
-            t.pattern, is_influence_out1_zero, is_influence_out2_zero
+        inputs1, inputs2 = connectivity_tracer_1_to_2_inner(
+            t.inputs, is_influence_out1_zero, is_influence_out2_zero
         )
-        return (T(pattern1), T(pattern2)) # return tracers 
+        return (T(inputs1), T(inputs2)) # return tracers 
     end
 end
 
-function connectivity_tracer_1_to_2_pattern(
-    p::P, is_influence_out1_zero::Bool, is_influence_out2_zero::Bool
-) where {P<:IndexSetVectorPattern}
-    set1, set2 = connectivity_tracer_1_to_2_set(
-        inputs(p), is_influence_out1_zero, is_influence_out2_zero
-    )
-    return (P(set1), P(set2)) # return pattern
-end
-
-function connectivity_tracer_1_to_2_set(
+function connectivity_tracer_1_to_2_inner(
     s::S, is_influence_out1_zero::Bool, is_influence_out2_zero::Bool
-) where {S}
-    s1 = connectivity_tracer_1_to_1_set(s, is_influence_out1_zero)
-    s2 = connectivity_tracer_1_to_1_set(s, is_influence_out2_zero)
+) where {S<:AbstractSet}
+    s1 = connectivity_tracer_1_to_1_inner(s, is_influence_out1_zero)
+    s2 = connectivity_tracer_1_to_1_inner(s, is_influence_out2_zero)
     return (s1, s2) # return sets
 end
 
@@ -207,10 +184,10 @@ function overload_connectivity_1_to_2_dual(M, op)
     SCT = SparseConnectivityTracer
     return quote
         function $M.$op(d::D) where {P,T<:$SCT.ConnectivityTracer,D<:$SCT.Dual{P,T}}
-            x = $SCT.primal(d)
+            x = d.primal
             p1_out, p2_out = $M.$op(x)
             t1_out, t2_out = $SCT.connectivity_tracer_1_to_2(
-                $SCT.tracer(d),  # TODO: add test, this was buggy
+                d.tracer,  # TODO: add test, this was buggy
                 $SCT.is_influence_out1_zero_local($M.$op, x),
                 $SCT.is_influence_out2_zero_local($M.$op, x),
             )
@@ -226,10 +203,12 @@ for S in (Integer, Rational, Irrational{:ℯ})
     Base.:^(t::ConnectivityTracer, ::S) = t
     Base.:^(::S, t::ConnectivityTracer) = t
     function Base.:^(dx::D, y::S) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
-        return Dual(primal(dx)^y, tracer(dx))
+        x = dx.primal
+        return Dual(x^y, dx.tracer)
     end
     function Base.:^(x::S, dy::D) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
-        return Dual(x^primal(dy), tracer(dy))
+        y = dy.primal
+        return Dual(x^y, dy.tracer)
     end
 end
 

@@ -1,14 +1,19 @@
-abstract type AbstractTracer{P<:AbstractSparsityPattern} <: Real end
+abstract type AbstractTracer <: Real end
 
 #===================#
 # Set operations    #
 #===================#
 
+@inline myempty(::Type{S}) where {S<:AbstractSet} = S()
+@inline seed(::Type{S}, i::Integer) where {S<:AbstractSet} = S([i])
+
+product(a::AbstractSet{I}, b::AbstractSet{I}) where {I} = Set((i, j) for i in a, j in b)
+
 function union_product!(
-    sh::H, sgx::G, sgy::G
+    h::H, gx::G, gy::G
 ) where {I<:Integer,G<:AbstractSet{I},H<:AbstractSet{Tuple{I,I}}}
-    shxy = product(sgx, sgy)
-    return union!(sh, shxy)
+    hxy = product(gx, gy)
+    return union!(h, hxy)
 end
 
 #====================#
@@ -25,19 +30,20 @@ For a higher-level interface, refer to [`connectivity_pattern`](@ref).
 ## Fields
 $(TYPEDFIELDS)
 """
-struct ConnectivityTracer{P<:AbstractVectorPattern} <: AbstractTracer{P}
+struct ConnectivityTracer{I} <: AbstractTracer
     "Sparse representation of connected inputs."
-    pattern::P
+    inputs::I
     "Indicator whether pattern in tracer contains only zeros."
     isempty::Bool
-end
-function ConnectivityTracer{P}(pattern::P) where {P<:AbstractVectorPattern}
-    return ConnectivityTracer{P}(pattern, false)
+
+    function ConnectivityTracer{I}(inputs::I, isempty::Bool=false) where {I}
+        return new{I}(inputs, isempty)
+    end
 end
 
 function Base.show(io::IO, t::ConnectivityTracer)
     return Base.show_delim_array(
-        io, convert.(Int, sort(collect(inputs(t)))), "$(typeof(t))(", ',', ')', true
+        io, convert.(Int, sort(collect(t.inputs))), "$(typeof(t))(", ',', ')', true
     )
 end
 
@@ -45,14 +51,12 @@ end
 # Generic code expecting "regular" numbers `x` will sometimes convert them 
 # by calling `T(x)` (instead of `convert(T, x)`), where `T` can be `ConnectivityTracer`.
 # When this happens, we create a new empty tracer with no input pattern.
-function ConnectivityTracer{P}(::Real) where {P<:AbstractVectorPattern}
-    return myempty(ConnectivityTracer{P})
+function ConnectivityTracer{I}(::Real) where {I}
+    return myempty(ConnectivityTracer{I})
 end
 
-ConnectivityTracer{P}(t::ConnectivityTracer{P}) where {P<:AbstractVectorPattern} = t
+ConnectivityTracer{I}(t::ConnectivityTracer{I}) where {I} = t
 ConnectivityTracer(t::ConnectivityTracer) = t
-
-@inline inputs(t::ConnectivityTracer) = inputs(t.pattern)
 
 #================#
 # GradientTracer #
@@ -68,27 +72,26 @@ For a higher-level interface, refer to [`jacobian_pattern`](@ref).
 ## Fields
 $(TYPEDFIELDS)
 """
-struct GradientTracer{P<:AbstractVectorPattern} <: AbstractTracer{P}
+struct GradientTracer{G} <: AbstractTracer
     "Sparse representation of non-zero entries in the gradient."
-    pattern::P
-    "Indicator whether pattern in tracer contains only zeros."
+    gradient::G
+    "Indicator whether gradient in tracer contains only zeros."
     isempty::Bool
-end
-function GradientTracer{P}(pattern::P) where {P<:AbstractVectorPattern}
-    return GradientTracer{P}(pattern, false)
+
+    function GradientTracer{G}(gradient::G, isempty::Bool=false) where {G}
+        return new{G}(gradient, isempty)
+    end
 end
 
 function Base.show(io::IO, t::GradientTracer)
     return Base.show_delim_array(
-        io, convert.(Int, sort(collect(gradient(t)))), "$(typeof(t))(", ',', ')', true
+        io, convert.(Int, sort(collect(t.gradient))), "$(typeof(t))(", ',', ')', true
     )
 end
 
-GradientTracer{P}(::Real) where {P<:AbstractVectorPattern} = myempty(GradientTracer{P})
-GradientTracer{P}(t::GradientTracer{P}) where {P<:AbstractVectorPattern} = t
+GradientTracer{G}(::Real) where {G} = myempty(GradientTracer{G})
+GradientTracer{G}(t::GradientTracer{G}) where {G} = t
 GradientTracer(t::GradientTracer) = t
-
-@inline gradient(t::GradientTracer) = gradient(t.pattern)
 
 #===============#
 # HessianTracer #
@@ -104,31 +107,32 @@ For a higher-level interface, refer to [`hessian_pattern`](@ref).
 ## Fields
 $(TYPEDFIELDS)
 """
-struct HessianTracer{P<:AbstractVectorAndMatrixPattern} <: AbstractTracer{P}
+struct HessianTracer{G,H} <: AbstractTracer
     "Sparse representation of non-zero entries in the gradient and the Hessian."
-    pattern::P
-    "Indicator whether pattern in tracer contains only zeros."
+    gradient::G
+    "Sparse representation of non-zero entries in the Hessian."
+    hessian::H
+    "Indicator whether gradient and Hessian in tracer both contain only zeros."
     isempty::Bool
-end
-function HessianTracer{P}(pattern::P) where {P<:AbstractVectorAndMatrixPattern}
-    return HessianTracer{P}(pattern, false)
+
+    function HessianTracer{G,H}(gradient::G, hessian::H, isempty::Bool=false) where {G,H}
+        return new{G,H}(gradient, hessian, isempty)
+    end
 end
 
 function Base.show(io::IO, t::HessianTracer)
     println(io, "$(eltype(t))(")
-    print(io, t.pattern)
+    print(io, "  Gradient: ", t.gradient)
+    print(io, "  Hessian:  ", t.hessian)
     print(io, ")")
     return nothing
 end
 
-function HessianTracer{P}(::Real) where {P<:AbstractVectorAndMatrixPattern}
-    return myempty(HessianTracer{P})
+function HessianTracer{G,H}(::Real) where {G,H}
+    return myempty(HessianTracer{G,H})
 end
-HessianTracer{P}(t::HessianTracer{P}) where {P<:AbstractVectorAndMatrixPattern} = t
+HessianTracer{G,H}(t::HessianTracer{G,H}) where {G,H} = t
 HessianTracer(t::HessianTracer) = t
-
-@inline gradient(t::HessianTracer) = gradient(t.pattern)
-@inline hessian(t::HessianTracer) = hessian(t.pattern)
 
 #================================#
 # Dual numbers for local tracing #
@@ -156,14 +160,6 @@ end
 Dual{P,T}(d::Dual{P,T}) where {P<:Real,T<:AbstractTracer} = d
 Dual(primal::P, tracer::T) where {P,T} = Dual{P,T}(primal, tracer)
 
-@inline primal(d::Dual) = d.primal
-@inline tracer(d::Dual) = d.tracer
-
-@inline inputs(d::Dual{P,T}) where {P,T<:ConnectivityTracer} = inputs(d.tracer)
-@inline gradient(d::Dual{P,T}) where {P,T<:GradientTracer} = gradient(d.tracer)
-@inline gradient(d::Dual{P,T}) where {P,T<:HessianTracer} = gradient(d.tracer)
-@inline hessian(d::Dual{P,T}) where {P,T<:HessianTracer} = hessian(d.tracer)
-
 function Dual{P,T}(x::Real) where {P<:Real,T<:AbstractTracer}
     return Dual(convert(P, x), myempty(T))
 end
@@ -172,9 +168,9 @@ end
 # Utilities #
 #===========#
 
-@inline myempty(::Type{ConnectivityTracer{P}}) where {P} = ConnectivityTracer{P}(myempty(P), true)
-@inline myempty(::Type{GradientTracer{P}}) where {P}     = GradientTracer{P}(myempty(P), true)
-@inline myempty(::Type{HessianTracer{P}}) where {P}      = HessianTracer{P}(myempty(P), true)
+@inline myempty(::Type{ConnectivityTracer{I}}) where {I} = ConnectivityTracer{I}(myempty(I), true)
+@inline myempty(::Type{GradientTracer{G}}) where {G}     = GradientTracer{G}(myempty(G), true)
+@inline myempty(::Type{HessianTracer{G,H}}) where {G,H}  = HessianTracer{G,H}(myempty(G), myempty(H), true)
 
 """
     create_tracer(T, index) where {T<:AbstractTracer}
@@ -185,14 +181,14 @@ function create_tracer(::Type{Dual{P,T}}, primal::Real, index::Integer) where {P
     return Dual(primal, create_tracer(T, primal, index))
 end
 
-function create_tracer(::Type{ConnectivityTracer{P}}, ::Real, index::Integer) where {P}
-    return ConnectivityTracer{P}(seed(P, index))
+function create_tracer(::Type{ConnectivityTracer{I}}, ::Real, index::Integer) where {I}
+    return ConnectivityTracer{I}(seed(I, index))
 end
-function create_tracer(::Type{GradientTracer{P}}, ::Real, index::Integer) where {P}
-    return GradientTracer{P}(seed(P, index))
+function create_tracer(::Type{GradientTracer{G}}, ::Real, index::Integer) where {G}
+    return GradientTracer{G}(seed(G, index))
 end
-function create_tracer(::Type{HessianTracer{P}}, ::Real, index::Integer) where {P}
-    return HessianTracer{P}(seed(P, index), false)
+function create_tracer(::Type{HessianTracer{G,H}}, ::Real, index::Integer) where {G,H}
+    return HessianTracer{G,H}(seed(G, index), myempty(H), false)
 end
 
 # Pretty-printing of Dual tracers

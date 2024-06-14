@@ -9,19 +9,16 @@
     end
 
     ## output union on scalar outputs
-    function output_union(tx::T, ty::T) where {T<:AbstractTracer}
-        return T(output_union(tx.pattern, ty.pattern))
+    function output_union(tx::T, ty::T) where {T<:ConnectivityTracer}
+        return T(union(tx.inputs, ty.inputs))
     end
-
-    function output_union(px::P, py::P) where {P<:IndexSetVectorPattern}
-        return P(union(px.inds, py.inds))
+    function output_union(tx::T, ty::T) where {T<:GradientTracer}
+        return T(union(tx.gradient, ty.gradient))
     end
-    function output_union(
-        px::P, py::P
-    ) where {V<:IndexSetVectorPattern,M<:IndexSetMatrixPattern,P<:CombinedPattern{V,M}}
-        grad = V(union(gradient(px), gradient(py)))
-        hess = M(union(hessian(px), hessian(py)))
-        return P(grad, hess)
+    function output_union(tx::T, ty::T) where {T<:HessianTracer}
+        gradient = union(tx.gradient, ty.gradient)
+        hessian  = union(tx.hessian, ty.hessian)
+        return T(gradient, hessian)
     end
 
     output_union(tx::AbstractTracer, y) = tx

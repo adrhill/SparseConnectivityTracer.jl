@@ -1,28 +1,15 @@
 using SparseConnectivityTracer
-using SparseConnectivityTracer:
-    Dual, HessianTracer, MissingPrimalError, tracer, trace_input, empty
-using SparseConnectivityTracer:
-    CombinedPattern, IndexSetVectorPattern, IndexSetMatrixPattern
+using SparseConnectivityTracer: Dual, HessianTracer, MissingPrimalError, trace_input, empty
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using ADTypes: hessian_sparsity
 using SpecialFunctions: erf, beta
 using Test
 
-PATTERNS = (
-    CombinedPattern{
-        IndexSetVectorPattern{Int,BitSet},IndexSetMatrixPattern{Int,Set{Tuple{Int,Int}}}
-    },
-    CombinedPattern{
-        IndexSetVectorPattern{Int,Set{Int}},IndexSetMatrixPattern{Int,Set{Tuple{Int,Int}}}
-    },
-    CombinedPattern{
-        IndexSetVectorPattern{Int,DuplicateVector{Int}},
-        IndexSetMatrixPattern{Int,DuplicateVector{Tuple{Int,Int}}},
-    },
-    CombinedPattern{
-        IndexSetVectorPattern{Int,SortedVector{Int}},
-        IndexSetMatrixPattern{Int,SortedVector{Tuple{Int,Int}}},
-    },
+HESSIAN_TRACERS = (
+    HessianTracer{BitSet,Set{Tuple{Int,Int}}},
+    HessianTracer{Set{Int},Set{Tuple{Int,Int}}},
+    HessianTracer{DuplicateVector{Int},DuplicateVector{Tuple{Int,Int}}},
+    HessianTracer{SortedVector{Int},SortedVector{Tuple{Int,Int}}},
     # TODO: test on RecursiveSet
 )
 
@@ -37,8 +24,8 @@ PATTERNS = (
         ]
     end
 
-    @testset "Pattern type $P" for P in PATTERNS
-        method = TracerSparsityDetector(; second_order=P)
+    @testset "$T" for T in HESSIAN_TRACERS
+        method = TracerSparsityDetector(; hessian_tracer=T)
 
         @test hessian_sparsity(identity, rand(), method) ≈ [0;;]
         @test hessian_sparsity(sqrt, rand(), method) ≈ [1;;]
@@ -231,8 +218,8 @@ PATTERNS = (
 end
 
 @testset "Local Hessian" begin
-    @testset "Pattern type $P" for P in PATTERNS
-        method = TracerLocalSparsityDetector(; second_order=P)
+    @testset "$T" for T in HESSIAN_TRACERS
+        method = TracerLocalSparsityDetector(; hessian_tracer=T)
 
         f1(x) = x[1] + x[2] * x[3] + 1 / x[4] + x[2] * max(x[1], x[5])
         h = hessian_sparsity(f1, [1.0 3.0 5.0 1.0 2.0], method)
