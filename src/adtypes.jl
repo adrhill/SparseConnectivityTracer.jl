@@ -53,7 +53,7 @@ function ADTypes.jacobian_sparsity(f!, y, x, ::TracerSparsityDetector{F,S}) wher
     return jacobian_pattern(f!, y, x, F)
 end
 
-function ADTypes.hessian_sparsity(f::A, x, ::TracerSparsityDetector{F,S}) where {A,F,S}
+function ADTypes.hessian_sparsity(f, x, ::TracerSparsityDetector{F,S}) where {F,S}
     return hessian_pattern(f, x, S)
 end
 
