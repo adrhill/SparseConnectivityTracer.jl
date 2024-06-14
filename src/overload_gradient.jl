@@ -3,7 +3,7 @@
 @noinline function gradient_tracer_1_to_1(
     t::T, is_firstder_zero::Bool
 ) where {T<:GradientTracer}
-    if t.isempty # TODO: add test
+    if isemptytracer(t) # TODO: add test
         return t
     else
         grad = gradient_tracer_1_to_1_inner(gradient(t), is_firstder_zero)
@@ -143,7 +143,7 @@ end
 @noinline function gradient_tracer_1_to_2(
     t::T, is_firstder_out1_zero::Bool, is_firstder_out2_zero::Bool
 ) where {T<:GradientTracer}
-    if t.isempty # TODO: add test
+    if isemptytracer(t) # TODO: add test
         return (t, t)
     else
         gradient1, gradient2 = gradient_tracer_1_to_2_inner(

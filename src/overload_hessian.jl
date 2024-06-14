@@ -3,7 +3,7 @@
 @noinline function hessian_tracer_1_to_1(
     t::T, is_firstder_zero::Bool, is_secondder_zero::Bool
 ) where {T<:HessianTracer}
-    if t.isempty # TODO: add test
+    if isemptytracer(t) # TODO: add test
         return t
     else
         grad, hess = hessian_tracer_1_to_1_inner(
@@ -201,7 +201,7 @@ end
     is_firstder_out2_zero::Bool,
     is_seconder_out2_zero::Bool,
 ) where {T<:HessianTracer}
-    if t.isempty # TODO: add test
+    if isemptytracer(t) # TODO: add test
         return (t, t)
     else
         (g1, h1), (g2, h2) = hessian_tracer_1_to_2_inner(

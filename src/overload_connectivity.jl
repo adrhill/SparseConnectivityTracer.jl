@@ -3,7 +3,7 @@
 @noinline function connectivity_tracer_1_to_1(
     t::T, is_influence_zero::Bool
 ) where {T<:ConnectivityTracer}
-    if t.isempty # TODO: add test
+    if isemptytracer(t) # TODO: add test
         return t
     else
         inp = connectivity_tracer_1_to_1_inner(inputs(t), is_influence_zero)
@@ -149,7 +149,7 @@ end
 @noinline function connectivity_tracer_1_to_2(
     t::T, is_influence_out1_zero::Bool, is_influence_out2_zero::Bool
 ) where {T<:ConnectivityTracer}
-    if t.isempty # TODO: add test
+    if isemptytracer(t) # TODO: add test
         return (t, t)
     else
         inputs1, inputs2 = connectivity_tracer_1_to_2_inner(
