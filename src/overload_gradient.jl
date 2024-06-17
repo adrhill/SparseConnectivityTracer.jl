@@ -1,8 +1,6 @@
 ## 1-to-1
 
-@noinline function gradient_tracer_1_to_1(
-    t::T, is_firstder_zero::Bool
-) where {T<:GradientTracer}
+function gradient_tracer_1_to_1(t::T, is_firstder_zero::Bool) where {T<:GradientTracer}
     if isemptytracer(t) # TODO: add test
         return t
     else
@@ -46,7 +44,7 @@ end
 
 ## 2-to-1
 
-@noinline function gradient_tracer_2_to_1(
+function gradient_tracer_2_to_1(
     tx::T, ty::T, is_firstder_arg1_zero::Bool, is_firstder_arg2_zero::Bool
 ) where {T<:GradientTracer}
     # TODO: add tests for isempty
@@ -142,7 +140,7 @@ end
 
 ## 1-to-2
 
-@noinline function gradient_tracer_1_to_2(
+function gradient_tracer_1_to_2(
     t::T, is_firstder_out1_zero::Bool, is_firstder_out2_zero::Bool
 ) where {T<:GradientTracer}
     if isemptytracer(t) # TODO: add test
