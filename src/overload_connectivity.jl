@@ -1,6 +1,6 @@
 ## 1-to-1
 
-function connectivity_tracer_1_to_1(
+@noinline function connectivity_tracer_1_to_1(
     t::T, is_influence_zero::Bool
 ) where {T<:ConnectivityTracer}
     if isemptytracer(t) # TODO: add test
@@ -46,7 +46,7 @@ end
 
 ## 2-to-1
 
-function connectivity_tracer_2_to_1(
+@noinline function connectivity_tracer_2_to_1(
     tx::T, ty::T, is_influence_arg1_zero::Bool, is_influence_arg2_zero::Bool
 ) where {T<:ConnectivityTracer}
     # TODO: add tests for isempty
@@ -146,7 +146,7 @@ end
 
 ## 1-to-2
 
-function connectivity_tracer_1_to_2(
+@noinline function connectivity_tracer_1_to_2(
     t::T, is_influence_out1_zero::Bool, is_influence_out2_zero::Bool
 ) where {T<:ConnectivityTracer}
     if isemptytracer(t) # TODO: add test
