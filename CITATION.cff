@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: "Hill"
+    given-names: "Adrian"
+    orcid: "https://orcid.org/0009-0009-5977-301X"
+  - family-names: "Dalle"
+    given-names: "Guillaume"
+    orcid: "https://orcid.org/0000-0003-4866-1687"
+title: "SparseConnectivityTracer.jl"
+version: 0.1.0
+date-released: 2024-04-22
+url: "https://github.com/adrhill/SparseConnectivityTracer.jl"
