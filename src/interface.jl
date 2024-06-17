@@ -1,5 +1,6 @@
-const DEFAULT_VECTOR_TYPE = BitSet
-const DEFAULT_MATRIX_TYPE = Set{Tuple{Int,Int}}
+const DEFAULT_CONNECTIVITY_TRACER = ConnectivityTracer{BitSet}
+const DEFAULT_GRADIENT_TRACER = GradientTracer{BitSet}
+const DEFAULT_HESSIAN_TRACER = HessianTracer{BitSet,Set{Tuple{Int,Int}}}
 
 #==================#
 # Enumerate inputs #
@@ -58,7 +59,7 @@ _tracer_or_number(d::Dual) = tracer(d)
 Enumerates inputs `x` and primal outputs `y = f(x)` and returns sparse matrix `C` of size `(m, n)`
 where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
 
-The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
+The type of `ConnectivityTracer` can be specified as an optional argument and defaults to `$DEFAULT_CONNECTIVITY_TRACER`.
 
 ## Example
 
@@ -74,8 +75,10 @@ julia> connectivity_pattern(f, x)
  ⋅  ⋅  1
 ```
 """
-function connectivity_pattern(f, x, ::Type{C}=DEFAULT_VECTOR_TYPE) where {C}
-    xt, yt = trace_function(ConnectivityTracer{C}, f, x)
+function connectivity_pattern(
+    f, x, ::Type{T}=DEFAULT_CONNECTIVITY_TRACER
+) where {T<:ConnectivityTracer}
+    xt, yt = trace_function(T, f, x)
     return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
@@ -86,23 +89,25 @@ end
 Enumerates inputs `x` and primal outputs `y` after `f!(y, x)` and returns sparse matrix `C` of size `(m, n)`
 where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
 
-The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
+The type of `ConnectivityTracer` can be specified as an optional argument and defaults to `$DEFAULT_CONNECTIVITY_TRACER`.
 """
-function connectivity_pattern(f!, y, x, ::Type{C}=DEFAULT_VECTOR_TYPE) where {C}
-    xt, yt = trace_function(ConnectivityTracer{C}, f!, y, x)
+function connectivity_pattern(
+    f!, y, x, ::Type{T}=DEFAULT_CONNECTIVITY_TRACER
+) where {T<:ConnectivityTracer}
+    xt, yt = trace_function(T, f!, y, x)
     return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
 """
     local_connectivity_pattern(f, x)
-    local_connectivity_pattern(f, x, T)
+    local_connectivity_pattern(f, x, P)
 
 Enumerates inputs `x` and primal outputs `y = f(x)` and returns sparse matrix `C` of size `(m, n)`
 where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
 
 Unlike [`connectivity_pattern`](@ref), this function supports control flow and comparisons.
 
-The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
+The type of `ConnectivityTracer` can be specified as an optional argument and defaults to `$DEFAULT_CONNECTIVITY_TRACER`.
 
 ## Example
 
@@ -122,8 +127,10 @@ julia> local_connectivity_pattern(f, x)
  ⋅  ⋅  1  1
 ```
 """
-function local_connectivity_pattern(f, x, ::Type{C}=DEFAULT_VECTOR_TYPE) where {C}
-    D = Dual{eltype(x),ConnectivityTracer{C}}
+function local_connectivity_pattern(
+    f, x, ::Type{T}=DEFAULT_CONNECTIVITY_TRACER
+) where {T<:ConnectivityTracer}
+    D = Dual{eltype(x),T}
     xt, yt = trace_function(D, f, x)
     return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
 end
@@ -138,10 +145,12 @@ where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to
 Unlike [`connectivity_pattern`](@ref), this function supports control flow and comparisons.
 
 
-The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
+The type of `ConnectivityTracer` can be specified as an optional argument and defaults to `$DEFAULT_CONNECTIVITY_TRACER`.
 """
-function local_connectivity_pattern(f!, y, x, ::Type{C}=DEFAULT_VECTOR_TYPE) where {C}
-    D = Dual{eltype(x),ConnectivityTracer{C}}
+function local_connectivity_pattern(
+    f!, y, x, ::Type{T}=DEFAULT_CONNECTIVITY_TRACER
+) where {T<:ConnectivityTracer}
+    D = Dual{eltype(x),T}
     xt, yt = trace_function(D, f!, y, x)
     return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
 end
@@ -181,7 +190,7 @@ end
 
 Compute the sparsity pattern of the Jacobian of `y = f(x)`.
 
-The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
+The type of `GradientTracer` can be specified as an optional argument and defaults to `$DEFAULT_CONNECTIVITY_TRACER`.
 
 ## Example
 
@@ -197,8 +206,8 @@ julia> jacobian_pattern(f, x)
  ⋅  ⋅  ⋅
 ```
 """
-function jacobian_pattern(f, x, ::Type{G}=DEFAULT_VECTOR_TYPE) where {G}
-    xt, yt = trace_function(GradientTracer{G}, f, x)
+function jacobian_pattern(f, x, ::Type{T}=DEFAULT_GRADIENT_TRACER) where {T<:GradientTracer}
+    xt, yt = trace_function(T, f, x)
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
@@ -208,10 +217,12 @@ end
 
 Compute the sparsity pattern of the Jacobian of `f!(y, x)`.
 
-The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
+The type of `GradientTracer` can be specified as an optional argument and defaults to `$DEFAULT_GRADIENT_TRACER`.
 """
-function jacobian_pattern(f!, y, x, ::Type{G}=DEFAULT_VECTOR_TYPE) where {G}
-    xt, yt = trace_function(GradientTracer{G}, f!, y, x)
+function jacobian_pattern(
+    f!, y, x, ::Type{T}=DEFAULT_GRADIENT_TRACER
+) where {T<:GradientTracer}
+    xt, yt = trace_function(T, f!, y, x)
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
 end
 
@@ -221,7 +232,7 @@ end
 
 Compute the local sparsity pattern of the Jacobian of `y = f(x)` at `x`.
 
-The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
+The type of `GradientTracer` can be specified as an optional argument and defaults to `$DEFAULT_GRADIENT_TRACER`.
 
 ## Example
 
@@ -237,8 +248,10 @@ julia> local_jacobian_pattern(f, x)
  ⋅  ⋅  1
 ```
 """
-function local_jacobian_pattern(f, x, ::Type{G}=DEFAULT_VECTOR_TYPE) where {G}
-    D = Dual{eltype(x),GradientTracer{G}}
+function local_jacobian_pattern(
+    f, x, ::Type{T}=DEFAULT_GRADIENT_TRACER
+) where {T<:GradientTracer}
+    D = Dual{eltype(x),T}
     xt, yt = trace_function(D, f, x)
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
 end
@@ -249,10 +262,12 @@ end
 
 Compute the local sparsity pattern of the Jacobian of `f!(y, x)` at `x`.
 
-The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
+The type of `GradientTracer` can be specified as an optional argument and defaults to `$DEFAULT_GRADIENT_TRACER`.
 """
-function local_jacobian_pattern(f!, y, x, ::Type{G}=DEFAULT_VECTOR_TYPE) where {G}
-    D = Dual{eltype(x),GradientTracer{G}}
+function local_jacobian_pattern(
+    f!, y, x, ::Type{T}=DEFAULT_GRADIENT_TRACER
+) where {T<:GradientTracer}
+    D = Dual{eltype(x),T}
     xt, yt = trace_function(D, f!, y, x)
     return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
 end
@@ -292,7 +307,7 @@ end
 
 Computes the sparsity pattern of the Hessian of a scalar function `y = f(x)`.
 
-The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
+The type of `HessianTracer` can be specified as an optional argument and defaults to `$DEFAULT_HESSIAN_TRACER`.
 
 ## Example
 
@@ -320,10 +335,8 @@ julia> hessian_pattern(g, x)
  ⋅  1  ⋅  ⋅  1
 ```
 """
-function hessian_pattern(
-    f, x, ::Type{G}=DEFAULT_VECTOR_TYPE, ::Type{H}=DEFAULT_MATRIX_TYPE
-) where {G,H}
-    xt, yt = trace_function(HessianTracer{G,H}, f, x)
+function hessian_pattern(f, x, ::Type{T}=DEFAULT_HESSIAN_TRACER) where {T<:HessianTracer}
+    xt, yt = trace_function(T, f, x)
     return hessian_pattern_to_mat(to_array(xt), yt)
 end
 
@@ -333,7 +346,7 @@ end
 
 Computes the local sparsity pattern of the Hessian of a scalar function `y = f(x)` at `x`.
 
-The type of index set `S` can be specified as an optional argument and defaults to `BitSet`.
+The type of `HessianTracer` can be specified as an optional argument and defaults to `$DEFAULT_HESSIAN_TRACER`.
 
 ## Example
 
@@ -362,9 +375,9 @@ julia> local_hessian_pattern(f, x)
 ```
 """
 function local_hessian_pattern(
-    f, x, ::Type{G}=DEFAULT_VECTOR_TYPE, ::Type{H}=DEFAULT_MATRIX_TYPE
-) where {G,H}
-    D = Dual{eltype(x),HessianTracer{G,H}}
+    f, x, ::Type{T}=DEFAULT_HESSIAN_TRACER
+) where {T<:HessianTracer}
+    D = Dual{eltype(x),T}
     xt, yt = trace_function(D, f, x)
     return hessian_pattern_to_mat(to_array(xt), yt)
 end

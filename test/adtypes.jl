@@ -4,7 +4,7 @@ using SparseArrays
 using Test
 
 @testset "Global" begin
-    sd = TracerSparsityDetector(BitSet, Set{Tuple{Int,Int}})
+    sd = TracerSparsityDetector()
 
     x = rand(10)
     y = zeros(9)
@@ -32,7 +32,7 @@ using Test
 end
 
 @testset "Local" begin
-    lsd = TracerLocalSparsityDetector(BitSet, Set{Tuple{Int,Int}})
+    lsd = TracerLocalSparsityDetector()
     fl1(x) = x[1] + x[2] * x[3] + 1 / x[4] + x[2] * max(x[1], x[5])
     HL1 = hessian_sparsity(fl1, [1.0 3.0 5.0 1.0 2.0], lsd)
     @test HL1 ≈ [

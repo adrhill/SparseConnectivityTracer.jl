@@ -6,9 +6,13 @@ using SparseConnectivityTracer
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
-const SET_TYPES = (
-    BitSet, Set{Int}, DuplicateVector{Int}, RecursiveSet{Int}, SortedVector{Int}
+GRADIENT_TRACERS = (
+    GradientTracer{BitSet},
+    GradientTracer{Set{Int}},
+    GradientTracer{DuplicateVector{Int}},
+    GradientTracer{SortedVector{Int}},
 )
+
 const INPUT_FLUX = reshape(
     [
         0.2677768300138966
@@ -66,14 +70,14 @@ function test_flux_conv_local(method::AbstractSparsityDetector)
 end
 
 @testset "Global" begin
-    @testset "$S" for S in SET_TYPES
-        method = TracerSparsityDetector(S)
+    @testset "$T" for T in GRADIENT_TRACERS
+        method = TracerSparsityDetector(; gradient_tracer_type=T)
         test_flux_conv(method)
     end
 end
 @testset "Local" begin
-    @testset "$S" for S in SET_TYPES
-        method = TracerLocalSparsityDetector(S)
+    @testset "$T" for T in GRADIENT_TRACERS
+        method = TracerLocalSparsityDetector(; gradient_tracer_type=T)
         test_flux_conv(method)
         test_flux_conv_local(method)
     end

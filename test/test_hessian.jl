@@ -1,18 +1,16 @@
 using SparseConnectivityTracer
-using SparseConnectivityTracer:
-    Dual, HessianTracer, MissingPrimalError, tracer, trace_input, empty
+using SparseConnectivityTracer: Dual, HessianTracer, MissingPrimalError, trace_input, empty
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using ADTypes: hessian_sparsity
 using SpecialFunctions: erf, beta
 using Test
 
-SECOND_ORDER_SET_TYPE_TUPLES = (
-    (BitSet, Set{Tuple{Int,Int}}),  #
-    (Set{Int}, Set{Tuple{Int,Int}}),
-    (DuplicateVector{Int}, DuplicateVector{Tuple{Int,Int}}),
-    # (DuplicateVector{Int}, Set{Tuple{Int,Int}}),  # TODO: fix
-    (SortedVector{Int}, SortedVector{Tuple{Int,Int}}),
-    (SortedVector{Int}, Set{Tuple{Int,Int}}),
+HESSIAN_TRACERS = (
+    HessianTracer{BitSet,Set{Tuple{Int,Int}}},
+    HessianTracer{Set{Int},Set{Tuple{Int,Int}}},
+    HessianTracer{DuplicateVector{Int},DuplicateVector{Tuple{Int,Int}}},
+    HessianTracer{SortedVector{Int},SortedVector{Tuple{Int,Int}}},
+    # TODO: test on RecursiveSet
 )
 
 @testset "Global Hessian" begin
@@ -26,8 +24,8 @@ SECOND_ORDER_SET_TYPE_TUPLES = (
         ]
     end
 
-    @testset "Set type $((G,H))" for (G, H) in SECOND_ORDER_SET_TYPE_TUPLES
-        method = TracerSparsityDetector(G, H)
+    @testset "$T" for T in HESSIAN_TRACERS
+        method = TracerSparsityDetector(; hessian_tracer_type=T)
 
         @test hessian_sparsity(identity, rand(), method) ≈ [0;;]
         @test hessian_sparsity(sqrt, rand(), method) ≈ [1;;]
@@ -220,8 +218,8 @@ SECOND_ORDER_SET_TYPE_TUPLES = (
 end
 
 @testset "Local Hessian" begin
-    @testset "Set type $((G, H))" for (G, H) in SECOND_ORDER_SET_TYPE_TUPLES
-        method = TracerLocalSparsityDetector(G, H)
+    @testset "$T" for T in HESSIAN_TRACERS
+        method = TracerLocalSparsityDetector(; hessian_tracer_type=T)
 
         f1(x) = x[1] + x[2] * x[3] + 1 / x[4] + x[2] * max(x[1], x[5])
         h = hessian_sparsity(f1, [1.0 3.0 5.0 1.0 2.0], method)

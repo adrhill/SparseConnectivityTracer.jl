@@ -1,18 +1,23 @@
 ## 1-to-1
 
-function gradient_tracer_1_to_1(t::T, is_firstder_zero::Bool) where {T<:GradientTracer}
-    s = gradient(t)
-    s_out = gradient_tracer_1_to_1(s, is_firstder_zero)
-    return T(s_out)
+@noinline function gradient_tracer_1_to_1(
+    t::T, is_firstder_zero::Bool
+) where {T<:GradientTracer}
+    if isemptytracer(t) # TODO: add test
+        return t
+    else
+        g_out = gradient_tracer_1_to_1_inner(gradient(t), is_firstder_zero)
+        return T(g_out) # return tracer
+    end
 end
 
-function gradient_tracer_1_to_1(
+function gradient_tracer_1_to_1_inner(
     s::S, is_firstder_zero::Bool
 ) where {S<:AbstractSet{<:Integer}}
     if is_firstder_zero
         return myempty(S)
     else
-        return s
+        return s # return set
     end
 end
 
@@ -41,15 +46,25 @@ end
 
 ## 2-to-1
 
-function gradient_tracer_2_to_1(
+@noinline function gradient_tracer_2_to_1(
     tx::T, ty::T, is_firstder_arg1_zero::Bool, is_firstder_arg2_zero::Bool
 ) where {T<:GradientTracer}
-    sx, sy = gradient(tx), gradient(ty)
-    s_out = gradient_tracer_2_to_1(sx, sy, is_firstder_arg1_zero, is_firstder_arg2_zero)
-    return T(s_out)
+    # TODO: add tests for isempty
+    if tx.isempty && ty.isempty
+        return tx # empty tracer
+    elseif ty.isempty
+        return gradient_tracer_1_to_1(tx, is_firstder_arg1_zero)
+    elseif tx.isempty
+        return gradient_tracer_1_to_1(ty, is_firstder_arg2_zero)
+    else
+        g_out = gradient_tracer_2_to_1_inner(
+            gradient(tx), gradient(ty), is_firstder_arg1_zero, is_firstder_arg2_zero
+        )
+        return T(g_out) # return tracer
+    end
 end
 
-function gradient_tracer_2_to_1(
+function gradient_tracer_2_to_1_inner(
     sx::S, sy::S, is_firstder_arg1_zero::Bool, is_firstder_arg2_zero::Bool
 ) where {S<:AbstractSet{<:Integer}}
     if is_firstder_arg1_zero && is_firstder_arg2_zero
@@ -59,7 +74,7 @@ function gradient_tracer_2_to_1(
     elseif is_firstder_arg1_zero && !is_firstder_arg2_zero
         return sy
     else
-        return clever_union(sx, sy)
+        return union(sx, sy) # return set
     end
 end
 
@@ -127,19 +142,24 @@ end
 
 ## 1-to-2
 
-function gradient_tracer_1_to_2(
+@noinline function gradient_tracer_1_to_2(
     t::T, is_firstder_out1_zero::Bool, is_firstder_out2_zero::Bool
 ) where {T<:GradientTracer}
-    s = gradient(t)
-    s_out1, s_out2 = gradient_tracer_1_to_2(s, is_firstder_out1_zero, is_firstder_out2_zero)
-    return (T(s_out1), T(s_out2))
+    if isemptytracer(t) # TODO: add test
+        return (t, t)
+    else
+        g_out1, g_out2 = gradient_tracer_1_to_2_inner(
+            gradient(t), is_firstder_out1_zero, is_firstder_out2_zero
+        )
+        return (T(g_out1), T(g_out2)) # return tracers
+    end
 end
 
-function gradient_tracer_1_to_2(
+function gradient_tracer_1_to_2_inner(
     s::S, is_firstder_out1_zero::Bool, is_firstder_out2_zero::Bool
 ) where {S<:AbstractSet{<:Integer}}
-    s_out1 = gradient_tracer_1_to_1(s, is_firstder_out1_zero)
-    s_out2 = gradient_tracer_1_to_1(s, is_firstder_out2_zero)
+    s_out1 = gradient_tracer_1_to_1_inner(s, is_firstder_out1_zero)
+    s_out2 = gradient_tracer_1_to_1_inner(s, is_firstder_out2_zero)
     return (s_out1, s_out2)
 end
 
@@ -161,13 +181,13 @@ function overload_gradient_1_to_2_dual(M, op)
     return quote
         function $M.$op(d::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
             x = $SCT.primal(d)
-            p1_out, p2_out = $M.$op(x)
-            t1_out, t2_out = $SCT.gradient_tracer_1_to_2(
+            p_out1, p_out2 = $M.$op(x)
+            t_out1, t_out2 = $SCT.gradient_tracer_1_to_2(
                 $SCT.tracer(d),
                 $SCT.is_firstder_out1_zero_local($M.$op, x),
                 $SCT.is_firstder_out2_zero_local($M.$op, x),
             )
-            return ($SCT.Dual(p1_out, t1_out), $SCT.Dual(p2_out, t2_out))  # TODO: this was wrong, add test
+            return ($SCT.Dual(p_out1, t_out1), $SCT.Dual(p_out2, t_out2))  # TODO: this was wrong, add test
         end
     end
 end
@@ -176,14 +196,25 @@ end
 
 ## Exponent (requires extra types)
 for S in (Integer, Rational, Irrational{:ℯ})
-    Base.:^(t::GradientTracer, ::S) = t
-    Base.:^(::S, t::GradientTracer) = t
-
-    function Base.:^(dx::D, y::S) where {P,T<:GradientTracer,D<:Dual{P,T}}
-        return Dual(primal(dx)^y, tracer(dx))
+    function Base.:^(t::T, ::S) where {T<:GradientTracer}
+        g_out = gradient_tracer_1_to_1_inner(gradient(t), false)
+        return T(g_out)
     end
-    function Base.:^(x::S, dy::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
-        return Dual(x^primal(dy), tracer(dy))
+    function Base.:^(::S, t::T) where {T<:GradientTracer}
+        g_out = gradient_tracer_1_to_1_inner(gradient(t), false)
+        return T(g_out)
+    end
+    function Base.:^(d::D, y::S) where {P,T<:GradientTracer,D<:Dual{P,T}}
+        x = primal(d)
+        t = tracer(d)
+        g_out = gradient_tracer_1_to_1_inner(gradient(t), false)
+        return Dual(x^y, T(g_out))
+    end
+    function Base.:^(x::S, d::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
+        y = primal(d)
+        t = tracer(d)
+        g_out = gradient_tracer_1_to_1_inner(gradient(t), false)
+        return Dual(x^y, T(g_out))
     end
 end
 

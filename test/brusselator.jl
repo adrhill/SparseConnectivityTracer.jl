@@ -5,6 +5,13 @@ using SparseConnectivityTracer
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
+GRADIENT_TRACERS = (
+    GradientTracer{BitSet},
+    GradientTracer{Set{Int}},
+    GradientTracer{DuplicateVector{Int}},
+    GradientTracer{SortedVector{Int}},
+)
+
 include("definitions/brusselator_definition.jl")
 
 function test_brusselator(method::AbstractSparsityDetector)
@@ -17,12 +24,7 @@ function test_brusselator(method::AbstractSparsityDetector)
     @test_reference "references/pattern/jacobian/Brusselator.txt" BitMatrix(J)
 end
 
-@testset "$method" for method in (
-    TracerSparsityDetector(BitSet),
-    TracerSparsityDetector(Set{Int}),
-    TracerSparsityDetector(DuplicateVector{Int}),
-    TracerSparsityDetector(RecursiveSet{Int}),
-    TracerSparsityDetector(SortedVector{Int}),
-)
+@testset "$T" for T in GRADIENT_TRACERS
+    method = TracerSparsityDetector(; gradient_tracer_type=T)
     test_brusselator(method)
 end

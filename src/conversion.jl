@@ -25,16 +25,18 @@ Base.floatmax(::Type{T})    where {T<:AbstractTracer} = myempty(T)
 Base.maxintfloat(::Type{T}) where {T<:AbstractTracer} = myempty(T)
 
 ## Array constructors
-Base.similar(a::Array{T,1})             where {T<:AbstractTracer}   = zeros(T, size(a, 1))
-Base.similar(a::Array{T,2})             where {T<:AbstractTracer}   = zeros(T, size(a, 1), size(a, 2))
-Base.similar(a::Array{A,1}, ::Type{T})  where {T<:AbstractTracer,A} = zeros(T, size(a, 1))
-Base.similar(a::Array{A,2}, ::Type{T})  where {T<:AbstractTracer,A} = zeros(T, size(a, 1), size(a, 2))
-Base.similar(::Array{T}, m::Int)        where {T<:AbstractTracer}   = zeros(T, m)
-Base.similar(::Array{T}, dims::Dims{N}) where {T<:AbstractTracer,N} = zeros(T, dims)
+# TODO: remove (#123)
+Base.similar(a::Array{T,1})                     where {T<:AbstractTracer}   = zeros(T, size(a, 1))
+Base.similar(a::Array{T,2})                     where {T<:AbstractTracer}   = zeros(T, size(a, 1), size(a, 2))
+Base.similar(a::Array{A,1}, ::Type{T})          where {T<:AbstractTracer,A} = zeros(T, size(a, 1))
+Base.similar(a::Array{A,2}, ::Type{T})          where {T<:AbstractTracer,A} = zeros(T, size(a, 1), size(a, 2))
+Base.similar(::Array{T}, m::Int)                where {T<:AbstractTracer}   = zeros(T, m)
 
-Base.similar(::Array, ::Type{ConnectivityTracer{C}}, dims::Dims{N}) where {C,N}   = zeros(ConnectivityTracer{C}, dims)
-Base.similar(::Array, ::Type{GradientTracer{G}},     dims::Dims{N}) where {G,N}   = zeros(GradientTracer{G},     dims)
-Base.similar(::Array, ::Type{HessianTracer{G,H}},    dims::Dims{N}) where {G,H,N} = zeros(HessianTracer{G,H},    dims)
+# These have to be defined on specific types to exclude `Union{}` triggered by Documenter.jl
+# TODO: remove (#123)
+Base.similar(::Array, ::Type{ConnectivityTracer{I}}, dims::Dims{N}) where {I,N}   = zeros(ConnectivityTracer{I}, dims)
+Base.similar(::Array, ::Type{GradientTracer{G}},     dims::Dims{N}) where {G,N}   = zeros(GradientTracer{G}, dims)
+Base.similar(::Array, ::Type{HessianTracer{G,H}},    dims::Dims{N}) where {G,H,N} = zeros(HessianTracer{G,H}, dims)
 
 ## Duals
 function Base.promote_rule(::Type{Dual{P1, T}}, ::Type{Dual{P2, T}}) where {P1,P2,T}
@@ -75,6 +77,7 @@ Base.floatmax(::Type{D})    where {P,T,D<:Dual{P,T}} = D(floatmax(P),    myempty
 Base.maxintfloat(::Type{D}) where {P,T,D<:Dual{P,T}} = D(maxintfloat(P), myempty(T))
 
 ## Array constructors
+# TODO: remove (#123)
 function Base.similar(a::Array{D,1}) where {P,T,D<:Dual{P,T}}
     p_out = similar(primal.(a))
     return Dual.(p_out, myempty(T))

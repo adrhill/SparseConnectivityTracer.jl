@@ -27,7 +27,7 @@ include("overload_dual.jl")
 include("overload_all.jl")
 include("overload_ifelse.jl")
 
-include("pattern.jl")
+include("interface.jl")
 include("adtypes.jl")
 
 export connectivity_pattern, local_connectivity_pattern

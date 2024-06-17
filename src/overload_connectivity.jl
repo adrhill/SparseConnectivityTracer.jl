@@ -1,20 +1,23 @@
 ## 1-to-1
 
-function connectivity_tracer_1_to_1(
+@noinline function connectivity_tracer_1_to_1(
     t::T, is_influence_zero::Bool
 ) where {T<:ConnectivityTracer}
-    s = inputs(t)
-    s_out = connectivity_tracer_1_to_1(s, is_influence_zero)
-    return T(s_out)
+    if isemptytracer(t) # TODO: add test
+        return t
+    else
+        i_out = connectivity_tracer_1_to_1_inner(inputs(t), is_influence_zero)
+        return T(i_out) # return tracer
+    end
 end
 
-function connectivity_tracer_1_to_1(
+function connectivity_tracer_1_to_1_inner(
     s::S, is_influence_zero::Bool
 ) where {S<:AbstractSet{<:Integer}}
     if is_influence_zero
         return myempty(S)
     else
-        return s
+        return s # return set
     end
 end
 
@@ -43,17 +46,25 @@ end
 
 ## 2-to-1
 
-function connectivity_tracer_2_to_1(
+@noinline function connectivity_tracer_2_to_1(
     tx::T, ty::T, is_influence_arg1_zero::Bool, is_influence_arg2_zero::Bool
 ) where {T<:ConnectivityTracer}
-    sx, sy = inputs(tx), inputs(ty)
-    s_out = connectivity_tracer_2_to_1(
-        sx, sy, is_influence_arg1_zero, is_influence_arg2_zero
-    )
-    return T(s_out)
+    # TODO: add tests for isempty
+    if tx.isempty && ty.isempty
+        return tx # empty tracer
+    elseif ty.isempty
+        return connectivity_tracer_1_to_1(tx, is_influence_arg1_zero)
+    elseif tx.isempty
+        return connectivity_tracer_1_to_1(ty, is_influence_arg2_zero)
+    else
+        i_out = connectivity_tracer_2_to_1_inner(
+            inputs(tx), inputs(ty), is_influence_arg1_zero, is_influence_arg2_zero
+        )
+        return T(i_out) # return tracer 
+    end
 end
 
-function connectivity_tracer_2_to_1(
+function connectivity_tracer_2_to_1_inner(
     sx::S, sy::S, is_influence_arg1_zero::Bool, is_influence_arg2_zero::Bool
 ) where {S<:AbstractSet{<:Integer}}
     if is_influence_arg1_zero && is_influence_arg2_zero
@@ -63,7 +74,7 @@ function connectivity_tracer_2_to_1(
     elseif is_influence_arg1_zero && !is_influence_arg2_zero
         return sy
     else
-        return clever_union(sx, sy)
+        return union(sx, sy) # return set
     end
 end
 
@@ -135,22 +146,25 @@ end
 
 ## 1-to-2
 
-function connectivity_tracer_1_to_2(
+@noinline function connectivity_tracer_1_to_2(
     t::T, is_influence_out1_zero::Bool, is_influence_out2_zero::Bool
 ) where {T<:ConnectivityTracer}
-    s = inputs(t)
-    (s_out1, s_out2) = connectivity_tracer_1_to_2(
-        s, is_influence_out1_zero, is_influence_out2_zero
-    )
-    return (T(s_out1), T(s_out2))
+    if isemptytracer(t) # TODO: add test
+        return (t, t)
+    else
+        i_out1, i_out2 = connectivity_tracer_1_to_2_inner(
+            inputs(t), is_influence_out1_zero, is_influence_out2_zero
+        )
+        return (T(i_out1), T(i_out2)) # return tracers 
+    end
 end
 
-function connectivity_tracer_1_to_2(
+function connectivity_tracer_1_to_2_inner(
     s::S, is_influence_out1_zero::Bool, is_influence_out2_zero::Bool
 ) where {S<:AbstractSet{<:Integer}}
-    s1 = connectivity_tracer_1_to_1(s, is_influence_out1_zero)
-    s2 = connectivity_tracer_1_to_1(s, is_influence_out2_zero)
-    return (s1, s2)
+    s_out1 = connectivity_tracer_1_to_1_inner(s, is_influence_out1_zero)
+    s_out2 = connectivity_tracer_1_to_1_inner(s, is_influence_out2_zero)
+    return (s_out1, s_out2) # return sets
 end
 
 function overload_connectivity_1_to_2(M, op)
@@ -171,13 +185,13 @@ function overload_connectivity_1_to_2_dual(M, op)
     return quote
         function $M.$op(d::D) where {P,T<:$SCT.ConnectivityTracer,D<:$SCT.Dual{P,T}}
             x = $SCT.primal(d)
-            p1_out, p2_out = $M.$op(x)
-            t1_out, t2_out = $SCT.connectivity_tracer_1_to_2(
+            p_out1, p_out2 = $M.$op(x)
+            t_out1, t_out2 = $SCT.connectivity_tracer_1_to_2(
                 $SCT.tracer(d),  # TODO: add test, this was buggy
                 $SCT.is_influence_out1_zero_local($M.$op, x),
                 $SCT.is_influence_out2_zero_local($M.$op, x),
             )
-            return ($SCT.Dual(p1_out, t1_out), $SCT.Dual(p2_out, t2_out))
+            return ($SCT.Dual(p_out1, t_out1), $SCT.Dual(p_out2, t_out2))
         end
     end
 end
@@ -187,13 +201,14 @@ end
 ## Exponent (requires extra types)
 for S in (Integer, Rational, Irrational{:ℯ})
     Base.:^(t::ConnectivityTracer, ::S) = t
-    function Base.:^(dx::D, y::S) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
-        return Dual(primal(dx)^y, tracer(dx))
-    end
-
     Base.:^(::S, t::ConnectivityTracer) = t
+    function Base.:^(dx::D, y::S) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
+        x = primal(dx)
+        return Dual(x^y, tracer(dx))
+    end
     function Base.:^(x::S, dy::D) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
-        return Dual(x^primal(dy), tracer(dy))
+        y = primal(dy)
+        return Dual(x^y, tracer(dy))
     end
 end
 
