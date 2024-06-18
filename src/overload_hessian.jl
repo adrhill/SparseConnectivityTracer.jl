@@ -271,25 +271,21 @@ end
 ## Exponent (requires extra types)
 for S in (Integer, Rational, Irrational{:ℯ})
     function Base.:^(t::T, ::S) where {T<:HessianTracer}
-        g_out, h_out = hessian_tracer_1_to_1_inner(gradient(t), hessian(t), false, false)
-        return T(g_out, h_out)
+        return hessian_tracer_1_to_1(t, false, false)
     end
     function Base.:^(::S, t::T) where {T<:HessianTracer}
-        g_out, h_out = hessian_tracer_1_to_1_inner(gradient(t), hessian(t), false, false)
-        return T(g_out, h_out)
+        return hessian_tracer_1_to_1(t, false, false)
     end
 
     function Base.:^(d::D, y::S) where {P,T<:HessianTracer,D<:Dual{P,T}}
         x = primal(d)
-        t = tracer(d)
-        g_out, h_out = hessian_tracer_1_to_1_inner(gradient(t), hessian(t), false, false)
-        return Dual(x^y, T(g_out, h_out))
+        t = hessian_tracer_1_to_1(tracer(d), false, false)
+        return Dual(x^y, t)
     end
     function Base.:^(x::S, d::D) where {P,T<:HessianTracer,D<:Dual{P,T}}
         y = primal(d)
-        t = tracer(d)
-        g_out, h_out = hessian_tracer_1_to_1_inner(gradient(t), hessian(t), false, false)
-        return Dual(x^y, T(g_out, h_out))
+        t = hessian_tracer_1_to_1(tracer(d), false, false)
+        return Dual(x^y, t)
     end
 end
 

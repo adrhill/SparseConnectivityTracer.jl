@@ -196,25 +196,17 @@ end
 
 ## Exponent (requires extra types)
 for S in (Integer, Rational, Irrational{:ℯ})
-    function Base.:^(t::T, ::S) where {T<:GradientTracer}
-        g_out = gradient_tracer_1_to_1_inner(gradient(t), false)
-        return T(g_out)
-    end
-    function Base.:^(::S, t::T) where {T<:GradientTracer}
-        g_out = gradient_tracer_1_to_1_inner(gradient(t), false)
-        return T(g_out)
-    end
+    Base.:^(t::T, ::S) where {T<:GradientTracer} = t
+    Base.:^(::S, t::T) where {T<:GradientTracer} = t
     function Base.:^(d::D, y::S) where {P,T<:GradientTracer,D<:Dual{P,T}}
         x = primal(d)
         t = tracer(d)
-        g_out = gradient_tracer_1_to_1_inner(gradient(t), false)
-        return Dual(x^y, T(g_out))
+        return Dual(x^y, t)
     end
     function Base.:^(x::S, d::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
         y = primal(d)
         t = tracer(d)
-        g_out = gradient_tracer_1_to_1_inner(gradient(t), false)
-        return Dual(x^y, T(g_out))
+        return Dual(x^y, t)
     end
 end
 
