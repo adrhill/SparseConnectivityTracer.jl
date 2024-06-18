@@ -94,8 +94,6 @@ GradientTracer(t::GradientTracer) = t
 
 gradient(t::GradientTracer) = t.gradient
 isemptytracer(t::GradientTracer) = t.isempty
-@noinline sorted_gradient(t::GradientTracer{S}) where {S<:AbstractSet} =
-    sort(collect(gradient(t)))
 
 function Base.show(io::IO, t::GradientTracer)
     print(io, typeof(t))
