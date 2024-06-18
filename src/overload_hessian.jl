@@ -204,33 +204,10 @@ end
     if isemptytracer(t) # TODO: add test
         return (t, t)
     else
-        (g_out1, h_out1), (g_out2, h_out2) = hessian_tracer_1_to_2_inner(
-            gradient(t),
-            hessian(t),
-            is_firstder_out1_zero,
-            is_seconder_out1_zero,
-            is_firstder_out2_zero,
-            is_seconder_out2_zero,
-        )
-        return (T(g_out1, h_out1), T(g_out2, h_out2)) # return tracers
+        t_out1 = hessian_tracer_1_to_1(t, is_firstder_out1_zero, is_seconder_out1_zero)
+        t_out2 = hessian_tracer_1_to_1(t, is_firstder_out2_zero, is_seconder_out2_zero)
+        return (t_out1, t_out2)
     end
-end
-
-function hessian_tracer_1_to_2_inner(
-    sg::G,
-    sh::H,
-    is_firstder_out1_zero::Bool,
-    is_secondder_out1_zero::Bool,
-    is_firstder_out2_zero::Bool,
-    is_secondder_out2_zero::Bool,
-) where {I<:Integer,G<:AbstractSet{I},H<:AbstractSet{Tuple{I,I}}}
-    sg_out1, sh_out1 = hessian_tracer_1_to_1_inner(
-        sg, sh, is_firstder_out1_zero, is_secondder_out1_zero
-    )
-    sg_out2, sh_out2 = hessian_tracer_1_to_1_inner(
-        sg, sh, is_firstder_out2_zero, is_secondder_out2_zero
-    )
-    return (sg_out1, sh_out1), (sg_out2, sh_out2) # return sets
 end
 
 function overload_hessian_1_to_2(M, op)
