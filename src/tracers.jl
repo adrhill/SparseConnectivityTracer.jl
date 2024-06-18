@@ -1,5 +1,9 @@
 abstract type AbstractTracer <: Real end
 
+# Trait to call empty constructor
+struct EmptyInitializer end
+const emptyinit = EmptyInitializer()
+
 #===================#
 # Set operations    #
 #===================#
@@ -39,8 +43,8 @@ struct ConnectivityTracer{I} <: AbstractTracer
     function ConnectivityTracer{I}(inputs::I, isempty::Bool=false) where {I}
         return new{I}(isempty, inputs)
     end
-    function ConnectivityTracer{I}(::UndefInitializer) where {I}
-        return new{I}(true)
+    function ConnectivityTracer{I}(::EmptyInitializer) where {I}
+        return new{I}(true) # partial initialization with empty `inputs` field
     end
 end
 
@@ -92,8 +96,8 @@ struct GradientTracer{G} <: AbstractTracer
     function GradientTracer{G}(gradient::G, isempty::Bool=false) where {G}
         return new{G}(isempty, gradient)
     end
-    function GradientTracer{G}(::UndefInitializer) where {G}
-        return new{G}(true)
+    function GradientTracer{G}(::EmptyInitializer) where {G}
+        return new{G}(true) # partial initialization with empty `gradient` field
     end
 end
 
@@ -142,8 +146,8 @@ struct HessianTracer{G,H} <: AbstractTracer
     function HessianTracer{G,H}(gradient::G, hessian::H, isempty::Bool=false) where {G,H}
         return new{G,H}(isempty, gradient, hessian)
     end
-    function HessianTracer{G,H}(::UndefInitializer) where {G,H}
-        return new{G,H}(true)
+    function HessianTracer{G,H}(::EmptyInitializer) where {G,H}
+        return new{G,H}(true) # partial initialization with empty `gradient` and `hessian` fields
     end
 end
 
@@ -215,9 +219,9 @@ end
 # Utilities #
 #===========#
 
-@inline myempty(::Type{ConnectivityTracer{I}}) where {I} = ConnectivityTracer{I}(undef)
-@inline myempty(::Type{GradientTracer{G}}) where {G}     = GradientTracer{G}(undef)
-@inline myempty(::Type{HessianTracer{G,H}}) where {G,H}  = HessianTracer{G,H}(undef)
+@inline myempty(::Type{ConnectivityTracer{I}}) where {I} = ConnectivityTracer{I}(emptyinit)
+@inline myempty(::Type{GradientTracer{G}}) where {G}     = GradientTracer{G}(emptyinit)
+@inline myempty(::Type{HessianTracer{G,H}}) where {G,H}  = HessianTracer{G,H}(emptyinit)
 
 """
     create_tracer(T, index) where {T<:AbstractTracer}
