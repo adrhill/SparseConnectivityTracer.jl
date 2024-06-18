@@ -3,21 +3,10 @@
 @noinline function connectivity_tracer_1_to_1(
     t::T, is_influence_zero::Bool
 ) where {T<:ConnectivityTracer}
-    if isemptytracer(t) # TODO: add test
+    if is_influence_zero && !isemptytracer(t)
+        return myempty(T)
+    else
         return t
-    else
-        i_out = connectivity_tracer_1_to_1_inner(inputs(t), is_influence_zero)
-        return T(i_out) # return tracer
-    end
-end
-
-function connectivity_tracer_1_to_1_inner(
-    s::S, is_influence_zero::Bool
-) where {S<:AbstractSet{<:Integer}}
-    if is_influence_zero
-        return myempty(S)
-    else
-        return s # return set
     end
 end
 
@@ -152,19 +141,10 @@ end
     if isemptytracer(t) # TODO: add test
         return (t, t)
     else
-        i_out1, i_out2 = connectivity_tracer_1_to_2_inner(
-            inputs(t), is_influence_out1_zero, is_influence_out2_zero
-        )
-        return (T(i_out1), T(i_out2)) # return tracers 
+        t_out1 = connectivity_tracer_1_to_1(t, is_influence_out1_zero)
+        t_out2 = connectivity_tracer_1_to_1(t, is_influence_out2_zero)
+        return (t_out1, t_out2) # return tracers 
     end
-end
-
-function connectivity_tracer_1_to_2_inner(
-    s::S, is_influence_out1_zero::Bool, is_influence_out2_zero::Bool
-) where {S<:AbstractSet{<:Integer}}
-    s_out1 = connectivity_tracer_1_to_1_inner(s, is_influence_out1_zero)
-    s_out2 = connectivity_tracer_1_to_1_inner(s, is_influence_out2_zero)
-    return (s_out1, s_out2) # return sets
 end
 
 function overload_connectivity_1_to_2(M, op)
