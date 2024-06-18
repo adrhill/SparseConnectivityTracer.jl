@@ -67,6 +67,12 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
         @test jacobian_sparsity(x -> round(x, RoundNearestTiesUp), 1, method) ≈ [0;;]
         @test jacobian_sparsity(x -> 0, 1, method) ≈ [0;;]
 
+        # Test special cases on empty tracer
+        @test jacobian_sparsity(x -> zero(x)^(2//3), 1, method) ≈ [0;;]
+        @test jacobian_sparsity(x -> (2//3)^zero(x), 1, method) ≈ [0;;]
+        @test jacobian_sparsity(x -> zero(x)^ℯ, 1, method) ≈ [0;;]
+        @test jacobian_sparsity(x -> ℯ^zero(x), 1, method) ≈ [0;;]
+
         # Linear Algebra
         @test jacobian_sparsity(x -> dot(x[1:2], x[4:5]), rand(5), method) == [1 1 0 1 1]
 

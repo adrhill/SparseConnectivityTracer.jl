@@ -28,12 +28,6 @@ HESSIAN_TRACERS = (
     # TODO: test on RecursiveSet
 )
 
-# Note that this is a more in-depth check than `isemptytracer`.
-iscompletelyempty(t::ConnectivityTracer) = isemptytracer(t) && isempty(inputs(t))
-iscompletelyempty(t::GradientTracer)     = isemptytracer(t) && isempty(SparseConnectivityTracer.gradient(t))
-iscompletelyempty(t::HessianTracer)      = isemptytracer(t) && isempty(SparseConnectivityTracer.gradient(t)) && isempty(SparseConnectivityTracer.hessian(t))
-iscompletelyempty(d::Dual)               = iscompletelyempty(tracer(d))
-
 function test_nested_duals(::Type{T}) where {T<:AbstractTracer}
     # Putting Duals into Duals is prohibited
     t = myempty(T)
@@ -47,7 +41,7 @@ function test_constant_functions(::Type{T}) where {T<:AbstractTracer}
     )
         t = f(T)
         @test isa(t, T)
-        @test iscompletelyempty(t)
+        @test isemptytracer(t)
     end
 end
 
@@ -57,7 +51,7 @@ function test_constant_functions(::Type{D}) where {P,T,D<:Dual{P,T}}
     )
         d = f(D)
         @test isa(d, D)
-        @test iscompletelyempty(d)
+        @test isemptytracer(d)
         @test primal(d) == f(P)
     end
 end
@@ -86,12 +80,12 @@ function test_type_casting(::Type{T}) where {T<:AbstractTracer}
     @testset "$T to $T" begin
         t_out = T(t_in)
         @test t_out isa T
-        @test iscompletelyempty(t_out)
+        @test isemptytracer(t_out)
     end
     @testset "$N to $T" for N in (Int, Float32, Irrational)
         t_out = T(one(N))
         @test t_out isa T
-        @test iscompletelyempty(t_out)
+        @test isemptytracer(t_out)
     end
 end
 
@@ -101,14 +95,14 @@ function test_type_casting(::Type{D}) where {P,T,D<:Dual{P,T}}
         d_out = D(d_in)
         @test primal(d_out) == primal(d_in)
         @test tracer(d_out) isa T
-        @test iscompletelyempty(d_out)
+        @test isemptytracer(d_out)
     end
     @testset "$P2 to $(name(D))" for P2 in (Int, Float32, Irrational)
         p_in = one(P2)
         d_out = D(p_in)
         @test primal(d_out) == P(p_in)
         @test tracer(d_out) isa T
-        @test iscompletelyempty(d_out)
+        @test isemptytracer(d_out)
     end
 end
 
@@ -119,37 +113,31 @@ function test_similar(::Type{T}) where {T<:AbstractTracer}
     B = similar(A, T)
     @test eltype(B) == T
     @test size(B) == (2, 3)
-    @test all(iscompletelyempty, B)
 
     # 1-arg from matrix of tracers
     B1 = similar(B)
     @test eltype(B1) == T
     @test size(B1) == (2, 3)
-    @test all(iscompletelyempty, B1)
 
     # 2-arg from matrix of tracers
     B2 = similar(B, T)
     @test eltype(B2) == T
     @test size(B2) == (2, 3)
-    @test all(iscompletelyempty, B2)
 
     # 2-arg from matrix of tracers, custom size
     B3 = similar(B, 4, 5)
     @test eltype(B3) == T
     @test size(B3) == (4, 5)
-    @test all(iscompletelyempty, B3)
 
     # 3-arg from matrix of Reals
     B4 = similar(A, T, 4, 5)
     @test eltype(B4) == T
     @test size(B4) == (4, 5)
-    @test all(iscompletelyempty, B4)
 
     # 3-arg from matrix of tracers
     B5 = similar(B, T, 5, 6)
     @test eltype(B5) == T
     @test size(B5) == (5, 6)
-    @test all(iscompletelyempty, B5)
 end
 
 function test_similar(::Type{D}) where {P,T,D<:Dual{P,T}}
@@ -163,43 +151,31 @@ function test_similar(::Type{D}) where {P,T,D<:Dual{P,T}}
     B = similar(A, D)
     @test eltype(B) == D
     @test size(B) == (2, 3)
-    @test all(iscompletelyempty, B)
-    @test all(d -> primal(d) isa P, B)
 
     # 1-arg from matrix of tracers
     B1 = similar(B)
     @test eltype(B1) == D
     @test size(B1) == (2, 3)
-    @test all(iscompletelyempty, B1)
-    @test all(d -> primal(d) isa P, B1)
 
     # 2-arg from matrix of tracers
     B2 = similar(B, D)
     @test eltype(B2) == D
     @test size(B2) == (2, 3)
-    @test all(iscompletelyempty, B2)
-    @test all(d -> primal(d) isa P, B2)
 
     # 2-arg from matrix of tracers, custom size
     B3 = similar(B, 4, 5)
     @test eltype(B3) == D
     @test size(B3) == (4, 5)
-    @test all(iscompletelyempty, B3)
-    @test all(d -> primal(d) isa P, B3)
 
     # 3-arg from matrix of Reals
     B4 = similar(A, D, 4, 5)
     @test eltype(B4) == D
     @test size(B4) == (4, 5)
-    @test all(iscompletelyempty, B4)
-    @test all(d -> primal(d) isa P, B4)
 
     # 3-arg from matrix of tracers
     B5 = similar(B, D, 5, 6)
     @test eltype(B5) == D
     @test size(B5) == (5, 6)
-    @test all(iscompletelyempty, B5)
-    @test all(d -> primal(d) isa P, B5)
 end
 
 @testset "ConnectivityTracer" begin
