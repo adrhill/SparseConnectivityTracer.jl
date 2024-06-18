@@ -262,5 +262,11 @@ end
         @test hessian_sparsity(x -> x^ℯ, 1, method) ≈ [1;;]
         @test hessian_sparsity(x -> ℯ^x, 1, method) ≈ [1;;]
         @test hessian_sparsity(x -> 0, 1, method) ≈ [0;;]
+
+        # Test special cases on empty tracer
+        @test hessian_sparsity(x -> zero(x)^(2//3), 1, method) ≈ [0;;]
+        @test hessian_sparsity(x -> (2//3)^zero(x), 1, method) ≈ [0;;]
+        @test hessian_sparsity(x -> zero(x)^ℯ, 1, method) ≈ [0;;]
+        @test hessian_sparsity(x -> ℯ^zero(x), 1, method) ≈ [0;;]
     end
 end
