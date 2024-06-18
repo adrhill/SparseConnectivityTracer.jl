@@ -8,8 +8,8 @@ const emptyinit = EmptyInitializer()
 # Set operations    #
 #===================#
 
-@inline myempty(::Type{S}) where {S<:AbstractSet} = S()
-@inline seed(::Type{S}, i::Integer) where {S<:AbstractSet} = S(i)
+myempty(::Type{S}) where {S<:AbstractSet} = S()
+seed(::Type{S}, i::Integer) where {S<:AbstractSet} = S(i)
 
 product(a::AbstractSet{I}, b::AbstractSet{I}) where {I} = Set((i, j) for i in a, j in b)
 
@@ -48,8 +48,16 @@ struct ConnectivityTracer{I} <: AbstractTracer
     end
 end
 
-@inline inputs(t::ConnectivityTracer) = t.inputs
-@inline isemptytracer(t::ConnectivityTracer) = t.isempty
+# We have to be careful when defining constructors:
+# Generic code expecting "regular" numbers `x` will sometimes convert them 
+# by calling `T(x)` (instead of `convert(T, x)`), where `T` can be `ConnectivityTracer`.
+# When this happens, we create a new empty tracer with no input pattern.
+ConnectivityTracer{I}(::Real) where {I} = ConnectivityTracer{I}(emptyinit)
+ConnectivityTracer{I}(t::ConnectivityTracer{I}) where {I} = t
+ConnectivityTracer(t::ConnectivityTracer) = t
+
+inputs(t::ConnectivityTracer) = t.inputs
+isemptytracer(t::ConnectivityTracer) = t.isempty
 
 function Base.show(io::IO, t::ConnectivityTracer)
     print(io, typeof(t))
@@ -61,17 +69,6 @@ function Base.show(io::IO, t::ConnectivityTracer)
     println(io)
     return nothing
 end
-
-# We have to be careful when defining constructors:
-# Generic code expecting "regular" numbers `x` will sometimes convert them 
-# by calling `T(x)` (instead of `convert(T, x)`), where `T` can be `ConnectivityTracer`.
-# When this happens, we create a new empty tracer with no input pattern.
-function ConnectivityTracer{I}(::Real) where {I}
-    return myempty(ConnectivityTracer{I})
-end
-
-ConnectivityTracer{I}(t::ConnectivityTracer{I}) where {I} = t
-ConnectivityTracer(t::ConnectivityTracer) = t
 
 #================#
 # GradientTracer #
@@ -101,8 +98,12 @@ struct GradientTracer{G} <: AbstractTracer
     end
 end
 
-@inline gradient(t::GradientTracer) = t.gradient
-@inline isemptytracer(t::GradientTracer) = t.isempty
+GradientTracer{G}(::Real) where {G} = GradientTracer{G}(emptyinit)
+GradientTracer{G}(t::GradientTracer{G}) where {G} = t
+GradientTracer(t::GradientTracer) = t
+
+gradient(t::GradientTracer) = t.gradient
+isemptytracer(t::GradientTracer) = t.isempty
 @noinline sorted_gradient(t::GradientTracer{S}) where {S<:AbstractSet} =
     sort(collect(gradient(t)))
 
@@ -116,10 +117,6 @@ function Base.show(io::IO, t::GradientTracer)
     println(io)
     return nothing
 end
-
-GradientTracer{G}(::Real) where {G} = myempty(GradientTracer{G})
-GradientTracer{G}(t::GradientTracer{G}) where {G} = t
-GradientTracer(t::GradientTracer) = t
 
 #===============#
 # HessianTracer #
@@ -151,9 +148,13 @@ struct HessianTracer{G,H} <: AbstractTracer
     end
 end
 
-@inline gradient(t::HessianTracer) = t.gradient
-@inline hessian(t::HessianTracer) = t.hessian
-@inline isemptytracer(t::HessianTracer) = t.isempty
+HessianTracer{G,H}(::Real) where {G,H} = HessianTracer{G,H}(emptyinit)
+HessianTracer{G,H}(t::HessianTracer{G,H}) where {G,H} = t
+HessianTracer(t::HessianTracer) = t
+
+gradient(t::HessianTracer) = t.gradient
+hessian(t::HessianTracer) = t.hessian
+isemptytracer(t::HessianTracer) = t.isempty
 
 function Base.show(io::IO, t::HessianTracer)
     print(io, typeof(t))
@@ -168,12 +169,6 @@ function Base.show(io::IO, t::HessianTracer)
     end
     return nothing
 end
-
-function HessianTracer{G,H}(::Real) where {G,H}
-    return myempty(HessianTracer{G,H})
-end
-HessianTracer{G,H}(t::HessianTracer{G,H}) where {G,H} = t
-HessianTracer(t::HessianTracer) = t
 
 #================================#
 # Dual numbers for local tracing #
@@ -199,14 +194,14 @@ struct Dual{P<:Real,T<:AbstractTracer} <: Real
     end
 end
 
-@inline primal(d::Dual) = d.primal
-@inline tracer(d::Dual) = d.tracer
+primal(d::Dual) = d.primal
+tracer(d::Dual) = d.tracer
 
-@inline inputs(d::Dual{P,T}) where {P,T<:ConnectivityTracer} = inputs(tracer(d))
-@inline gradient(d::Dual{P,T}) where {P,T<:GradientTracer}   = gradient(tracer(d))
-@inline gradient(d::Dual{P,T}) where {P,T<:HessianTracer}    = gradient(tracer(d))
-@inline hessian(d::Dual{P,T}) where {P,T<:HessianTracer}     = hessian(tracer(d))
-@inline isemptytracer(d::Dual)                               = isemptytracer(tracer(d))
+inputs(d::Dual{P,T}) where {P,T<:ConnectivityTracer} = inputs(tracer(d))
+gradient(d::Dual{P,T}) where {P,T<:GradientTracer}   = gradient(tracer(d))
+gradient(d::Dual{P,T}) where {P,T<:HessianTracer}    = gradient(tracer(d))
+hessian(d::Dual{P,T}) where {P,T<:HessianTracer}     = hessian(tracer(d))
+isemptytracer(d::Dual)                               = isemptytracer(tracer(d))
 
 Dual{P,T}(d::Dual{P,T}) where {P<:Real,T<:AbstractTracer} = d
 Dual(primal::P, tracer::T) where {P,T} = Dual{P,T}(primal, tracer)
@@ -219,9 +214,9 @@ end
 # Utilities #
 #===========#
 
-@inline myempty(::Type{ConnectivityTracer{I}}) where {I} = ConnectivityTracer{I}(emptyinit)
-@inline myempty(::Type{GradientTracer{G}}) where {G}     = GradientTracer{G}(emptyinit)
-@inline myempty(::Type{HessianTracer{G,H}}) where {G,H}  = HessianTracer{G,H}(emptyinit)
+myempty(::Type{ConnectivityTracer{I}}) where {I} = ConnectivityTracer{I}(emptyinit)
+myempty(::Type{GradientTracer{G}}) where {G}     = GradientTracer{G}(emptyinit)
+myempty(::Type{HessianTracer{G,H}}) where {G,H}  = HessianTracer{G,H}(emptyinit)
 
 """
     create_tracer(T, index) where {T<:AbstractTracer}
