@@ -37,7 +37,7 @@ end
 
 function jacbench_sparsemul(method)
     suite = BenchmarkGroup()
-    for n in [50], p in [0.01, 0.05, 0.1, 0.25], depth in [5]
+    for n in [50], p in [0.01, 0.25], depth in [5]
         x = rand(n)
         f = IteratedSparseMul(; n, p, depth)
         suite["(n=$n, p=$p, depth=$depth)"] = @benchmarkable jacobian_sparsity(
@@ -53,7 +53,7 @@ include("../test/definitions/brusselator_definition.jl")
 
 function jacbench_brusselator(method)
     suite = BenchmarkGroup()
-    for N in (6, 24, 100)
+    for N in (6, 24)
         f! = Brusselator!(N)
         x = rand(N, N, 2)
         y = similar(x)
