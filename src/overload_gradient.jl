@@ -3,14 +3,14 @@
 @noinline function gradient_tracer_1_to_1(
     t::T, is_firstder_zero::Bool
 ) where {T<:GradientTracer}
-    if isemptytracer(t) # TODO: add test
-        return t
+    if is_firstder_zero && !isemptytracer(t)
+        return myempty(T)
     else
-        g_out = gradient_tracer_1_to_1_inner(gradient(t), is_firstder_zero)
-        return T(g_out) # return tracer
+        return t
     end
 end
 
+# Called by HessianTracer with AbstractSet
 function gradient_tracer_1_to_1_inner(
     s::S, is_firstder_zero::Bool
 ) where {S<:AbstractSet{<:Integer}}
@@ -148,19 +148,10 @@ end
     if isemptytracer(t) # TODO: add test
         return (t, t)
     else
-        g_out1, g_out2 = gradient_tracer_1_to_2_inner(
-            gradient(t), is_firstder_out1_zero, is_firstder_out2_zero
-        )
-        return (T(g_out1), T(g_out2)) # return tracers
+        t_out1 = gradient_tracer_1_to_1(t, is_firstder_out1_zero)
+        t_out2 = gradient_tracer_1_to_1(t, is_firstder_out2_zero)
+        return (t_out1, t_out2)
     end
-end
-
-function gradient_tracer_1_to_2_inner(
-    s::S, is_firstder_out1_zero::Bool, is_firstder_out2_zero::Bool
-) where {S<:AbstractSet{<:Integer}}
-    s_out1 = gradient_tracer_1_to_1_inner(s, is_firstder_out1_zero)
-    s_out2 = gradient_tracer_1_to_1_inner(s, is_firstder_out2_zero)
-    return (s_out1, s_out2)
 end
 
 function overload_gradient_1_to_2(M, op)
