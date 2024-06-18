@@ -163,7 +163,7 @@ function connectivity_pattern_to_mat(
     J = Int[] # column indices
     V = Bool[]   # values
     for (i, y) in enumerate(yt)
-        if y isa T
+        if y isa T && !isemptytracer(y)
             for j in inputs(y)
                 push!(I, i)
                 push!(J, j)
@@ -280,7 +280,7 @@ function jacobian_pattern_to_mat(
     J = Int[] # column indices
     V = Bool[]   # values
     for (i, y) in enumerate(yt)
-        if y isa T
+        if y isa T && !isemptytracer(y)
             for j in gradient(y)
                 push!(I, i)
                 push!(J, j)
@@ -388,10 +388,12 @@ function hessian_pattern_to_mat(xt::AbstractArray{T}, yt::T) where {T<:HessianTr
     J = Int[] # column indices
     V = Bool[]   # values
 
-    for (i, j) in hessian(yt)
-        push!(I, i)
-        push!(J, j)
-        push!(V, true)
+    if !isemptytracer(yt)
+        for (i, j) in hessian(yt)
+            push!(I, i)
+            push!(J, j)
+            push!(V, true)
+        end
     end
     h = sparse(I, J, V, n, n)
     return h

@@ -5,7 +5,7 @@ abstract type AbstractTracer <: Real end
 #===================#
 
 @inline myempty(::Type{S}) where {S<:AbstractSet} = S()
-@inline seed(::Type{S}, i::Integer) where {S<:AbstractSet} = S([i])
+@inline seed(::Type{S}, i::Integer) where {S<:AbstractSet} = S(i)
 
 product(a::AbstractSet{I}, b::AbstractSet{I}) where {I} = Set((i, j) for i in a, j in b)
 
@@ -31,13 +31,16 @@ For a higher-level interface, refer to [`connectivity_pattern`](@ref).
 $(TYPEDFIELDS)
 """
 struct ConnectivityTracer{I} <: AbstractTracer
-    "Sparse representation of connected inputs."
-    inputs::I
     "Indicator whether pattern in tracer contains only zeros."
     isempty::Bool
+    "Sparse representation of connected inputs."
+    inputs::I
 
     function ConnectivityTracer{I}(inputs::I, isempty::Bool=false) where {I}
-        return new{I}(inputs, isempty)
+        return new{I}(isempty, inputs)
+    end
+    function ConnectivityTracer{I}(::UndefInitializer) where {I}
+        return new{I}(true)
     end
 end
 
@@ -45,9 +48,14 @@ end
 @inline isemptytracer(t::ConnectivityTracer) = t.isempty
 
 function Base.show(io::IO, t::ConnectivityTracer)
-    return Base.show_delim_array(
-        io, convert.(Int, sort(collect(inputs(t)))), "$(typeof(t))(", ',', ')', true
-    )
+    print(io, typeof(t))
+    if isemptytracer(t)
+        print(io, "()")
+    else
+        printsorted(io, inputs(t))
+    end
+    println(io)
+    return nothing
 end
 
 # We have to be careful when defining constructors:
@@ -76,23 +84,33 @@ For a higher-level interface, refer to [`jacobian_pattern`](@ref).
 $(TYPEDFIELDS)
 """
 struct GradientTracer{G} <: AbstractTracer
-    "Sparse representation of non-zero entries in the gradient."
-    gradient::G
     "Indicator whether gradient in tracer contains only zeros."
     isempty::Bool
+    "Sparse representation of non-zero entries in the gradient."
+    gradient::G
 
     function GradientTracer{G}(gradient::G, isempty::Bool=false) where {G}
-        return new{G}(gradient, isempty)
+        return new{G}(isempty, gradient)
+    end
+    function GradientTracer{G}(::UndefInitializer) where {G}
+        return new{G}(true)
     end
 end
 
 @inline gradient(t::GradientTracer) = t.gradient
 @inline isemptytracer(t::GradientTracer) = t.isempty
+@noinline sorted_gradient(t::GradientTracer{S}) where {S<:AbstractSet} =
+    sort(collect(gradient(t)))
 
 function Base.show(io::IO, t::GradientTracer)
-    return Base.show_delim_array(
-        io, convert.(Int, sort(collect(gradient(t)))), "$(typeof(t))(", ',', ')', true
-    )
+    print(io, typeof(t))
+    if isemptytracer(t)
+        print(io, "()")
+    else
+        printsorted(io, gradient(t))
+    end
+    println(io)
+    return nothing
 end
 
 GradientTracer{G}(::Real) where {G} = myempty(GradientTracer{G})
@@ -114,15 +132,18 @@ For a higher-level interface, refer to [`hessian_pattern`](@ref).
 $(TYPEDFIELDS)
 """
 struct HessianTracer{G,H} <: AbstractTracer
+    "Indicator whether gradient and Hessian in tracer both contain only zeros."
+    isempty::Bool
     "Sparse representation of non-zero entries in the gradient and the Hessian."
     gradient::G
     "Sparse representation of non-zero entries in the Hessian."
     hessian::H
-    "Indicator whether gradient and Hessian in tracer both contain only zeros."
-    isempty::Bool
 
     function HessianTracer{G,H}(gradient::G, hessian::H, isempty::Bool=false) where {G,H}
-        return new{G,H}(gradient, hessian, isempty)
+        return new{G,H}(isempty, gradient, hessian)
+    end
+    function HessianTracer{G,H}(::UndefInitializer) where {G,H}
+        return new{G,H}(true)
     end
 end
 
@@ -131,10 +152,16 @@ end
 @inline isemptytracer(t::HessianTracer) = t.isempty
 
 function Base.show(io::IO, t::HessianTracer)
-    println(io, "$(eltype(t))(")
-    print(io, "  Gradient: ", gradient(t))
-    print(io, "  Hessian:  ", hessian(t))
-    print(io, ")")
+    print(io, typeof(t))
+    if isemptytracer(t)
+        print(io, "()")
+    else
+        print(io, "(\n", "  Gradient:")
+        printlnsorted(io, gradient(t))
+        print(io, "  Hessian: ")
+        printlnsorted(io, hessian(t))
+        println(io, ")")
+    end
     return nothing
 end
 
@@ -188,9 +215,9 @@ end
 # Utilities #
 #===========#
 
-@inline myempty(::Type{ConnectivityTracer{I}}) where {I} = ConnectivityTracer{I}(myempty(I), true)
-@inline myempty(::Type{GradientTracer{G}}) where {G}     = GradientTracer{G}(myempty(G), true)
-@inline myempty(::Type{HessianTracer{G,H}}) where {G,H}  = HessianTracer{G,H}(myempty(G), myempty(H), true)
+@inline myempty(::Type{ConnectivityTracer{I}}) where {I} = ConnectivityTracer{I}(undef)
+@inline myempty(::Type{GradientTracer{G}}) where {G}     = GradientTracer{G}(undef)
+@inline myempty(::Type{HessianTracer{G,H}}) where {G,H}  = HessianTracer{G,H}(undef)
 
 """
     create_tracer(T, index) where {T<:AbstractTracer}
@@ -218,3 +245,12 @@ name(::Type{T}) where {T<:HessianTracer}      = "HessianTracer"
 name(::Type{D}) where {P,T,D<:Dual{P,T}}      = "Dual-$(name(T))"
 name(::T) where {T<:AbstractTracer}           = name(T)
 name(::D) where {D<:Dual}                     = name(D)
+
+# Utilities for printing sets
+printsorted(io::IO, x) = Base.show_delim_array(io, sort(x), "(", ',', ')', true)
+printsorted(io::IO, s::AbstractSet) = printsorted(io, collect(s))
+function printlnsorted(io::IO, x)
+    printsorted(io, x)
+    println(io)
+    return nothing
+end
