@@ -36,15 +36,17 @@ end
 
 function hessbench_arrowhead(method)
     suite = BenchmarkGroup()
+    # Commented-out cases (N, K) are included in the JuMP paper linked above,
+    # but excluded from to accelerate the benchmark suite.
     for (N, K) in [
-        # Table 1
+        ## Table 1
         (200, 16),
-        (400, 16),
-        (800, 16),
-        # Table 2
+        # (400, 16),
+        # (800, 16),
+        ## Table 2
         (3200, 2),
-        (3200, 4),
-        (3200, 8),
+        # (3200, 4),
+        # (3200, 8),
     ]
         x = rand(N)
         f = ArrowHead(K)
@@ -72,15 +74,17 @@ end
 
 function hessbench_randomsparsity(method)
     suite = BenchmarkGroup()
+    # Commented-out cases (N, K) are included in the JuMP paper linked above,
+    # but excluded from to accelerate the benchmark suite.
     for (N, K) in [
-        # Table 3
+        ## Table 3
         (400, 2),
-        (400, 4),
-        (400, 8),
-        # Table 4
+        # (400, 4),
+        # (400, 8),
+        ## Table 4
         (100, 32),
-        (200, 32),
-        (400, 32),
+        # (200, 32),
+        # (400, 32),
     ]
         x = rand(N)
         f = RandomSparsity(N, K)
