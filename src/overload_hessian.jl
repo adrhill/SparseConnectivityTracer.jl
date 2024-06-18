@@ -270,12 +270,8 @@ end
 
 ## Exponent (requires extra types)
 for S in (Integer, Rational, Irrational{:ℯ})
-    function Base.:^(t::T, ::S) where {T<:HessianTracer}
-        return hessian_tracer_1_to_1(t, false, false)
-    end
-    function Base.:^(::S, t::T) where {T<:HessianTracer}
-        return hessian_tracer_1_to_1(t, false, false)
-    end
+    Base.:^(t::T, ::S) where {T<:HessianTracer} = hessian_tracer_1_to_1(t, false, false)
+    Base.:^(::S, t::T) where {T<:HessianTracer} = hessian_tracer_1_to_1(t, false, false)
 
     function Base.:^(d::D, y::S) where {P,T<:HessianTracer,D<:Dual{P,T}}
         x = primal(d)
