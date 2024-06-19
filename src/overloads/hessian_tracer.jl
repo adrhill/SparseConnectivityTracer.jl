@@ -1,6 +1,6 @@
 ## 1-to-1
 
-@noinline function hessian_tracer_1_to_1(
+function hessian_tracer_1_to_1(
     t::T, is_firstder_zero::Bool, is_secondder_zero::Bool
 ) where {T<:HessianTracer}
     if isemptytracer(t) # TODO: add test
@@ -33,10 +33,10 @@ function overload_hessian_1_to_1(M, op)
     SCT = SparseConnectivityTracer
     return quote
         function $M.$op(t::$SCT.HessianTracer)
-            return $SCT.hessian_tracer_1_to_1(
-                t,
-                $SCT.is_firstder_zero_global($M.$op),
-                $SCT.is_seconder_zero_global($M.$op),
+            is_firstder_zero = $SCT.is_firstder_zero_global($M.$op)
+            is_seconder_zero = $SCT.is_seconder_zero_global($M.$op)
+            return @noinline $SCT.hessian_tracer_1_to_1(
+                t, is_firstder_zero, is_seconder_zero
             )
         end
     end
@@ -48,10 +48,12 @@ function overload_hessian_1_to_1_dual(M, op)
         function $M.$op(d::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
             x = $SCT.primal(d)
             p_out = $M.$op(x)
-            t_out = $SCT.hessian_tracer_1_to_1(
-                $SCT.tracer(d),
-                $SCT.is_firstder_zero_local($M.$op, x),
-                $SCT.is_seconder_zero_local($M.$op, x),
+
+            t = $SCT.tracer(d)
+            is_firstder_zero = $SCT.is_firstder_zero_local($M.$op, x)
+            is_seconder_zero = $SCT.is_seconder_zero_local($M.$op, x)
+            t_out = @noinline $SCT.hessian_tracer_1_to_1(
+                t, is_firstder_zero, is_seconder_zero
             )
             return $SCT.Dual(p_out, t_out)
         end
@@ -60,7 +62,7 @@ end
 
 ## 2-to-1
 
-@noinline function hessian_tracer_2_to_1(
+function hessian_tracer_2_to_1(
     tx::T,
     ty::T,
     is_firstder_arg1_zero::Bool,
@@ -120,30 +122,35 @@ function overload_hessian_2_to_1(M, op)
     SCT = SparseConnectivityTracer
     return quote
         function $M.$op(tx::T, ty::T) where {T<:$SCT.HessianTracer}
-            return $SCT.hessian_tracer_2_to_1(
+            is_firstder_arg1_zero = $SCT.is_firstder_arg1_zero_global($M.$op)
+            is_seconder_arg1_zero = $SCT.is_seconder_arg1_zero_global($M.$op)
+            is_firstder_arg2_zero = $SCT.is_firstder_arg2_zero_global($M.$op)
+            is_seconder_arg2_zero = $SCT.is_seconder_arg2_zero_global($M.$op)
+            is_crossder_zero = $SCT.is_crossder_zero_global($M.$op)
+            return @noinline $SCT.hessian_tracer_2_to_1(
                 tx,
                 ty,
-                $SCT.is_firstder_arg1_zero_global($M.$op),
-                $SCT.is_seconder_arg1_zero_global($M.$op),
-                $SCT.is_firstder_arg2_zero_global($M.$op),
-                $SCT.is_seconder_arg2_zero_global($M.$op),
-                $SCT.is_crossder_zero_global($M.$op),
+                is_firstder_arg1_zero,
+                is_seconder_arg1_zero,
+                is_firstder_arg2_zero,
+                is_seconder_arg2_zero,
+                is_crossder_zero,
             )
         end
 
         function $M.$op(tx::$SCT.HessianTracer, y::Real)
-            return $SCT.hessian_tracer_1_to_1(
-                tx,
-                $SCT.is_firstder_arg1_zero_global($M.$op),
-                $SCT.is_seconder_arg1_zero_global($M.$op),
+            is_firstder_arg1_zero = $SCT.is_firstder_arg1_zero_global($M.$op)
+            is_seconder_arg1_zero = $SCT.is_seconder_arg1_zero_global($M.$op)
+            return @noinline $SCT.hessian_tracer_1_to_1(
+                tx, is_firstder_arg1_zero, is_seconder_arg1_zero
             )
         end
 
         function $M.$op(x::Real, ty::$SCT.HessianTracer)
-            return $SCT.hessian_tracer_1_to_1(
-                ty,
-                $SCT.is_firstder_arg2_zero_global($M.$op),
-                $SCT.is_seconder_arg2_zero_global($M.$op),
+            is_firstder_arg2_zero = $SCT.is_firstder_arg2_zero_global($M.$op)
+            is_seconder_arg2_zero = $SCT.is_seconder_arg2_zero_global($M.$op)
+            return @noinline $SCT.hessian_tracer_1_to_1(
+                ty, is_firstder_arg2_zero, is_seconder_arg2_zero
             )
         end
     end
@@ -156,7 +163,7 @@ function overload_hessian_2_to_1_dual(M, op)
             x = $SCT.primal(dx)
             y = $SCT.primal(dy)
             p_out = $M.$op(x, y)
-            t_out = $SCT.hessian_tracer_2_to_1(
+            t_out = @noinline $SCT.hessian_tracer_2_to_1(
                 $SCT.tracer(dx),
                 $SCT.tracer(dy),
                 $SCT.is_firstder_arg1_zero_local($M.$op, x, y),
@@ -171,10 +178,12 @@ function overload_hessian_2_to_1_dual(M, op)
         function $M.$op(dx::D, y::Real) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
             x = $SCT.primal(dx)
             p_out = $M.$op(x, y)
-            t_out = $SCT.hessian_tracer_1_to_1(
-                $SCT.tracer(dx),
-                $SCT.is_firstder_arg1_zero_local($M.$op, x, y),
-                $SCT.is_seconder_arg1_zero_local($M.$op, x, y),
+
+            tx = $SCT.tracer(dx)
+            is_firstder_arg1_zero = $SCT.is_firstder_arg1_zero_local($M.$op, x, y)
+            is_seconder_arg1_zero = $SCT.is_seconder_arg1_zero_local($M.$op, x, y)
+            t_out = @noinline $SCT.hessian_tracer_1_to_1(
+                tx, is_firstder_arg1_zero, is_seconder_arg1_zero
             )
             return $SCT.Dual(p_out, t_out)
         end
@@ -182,10 +191,12 @@ function overload_hessian_2_to_1_dual(M, op)
         function $M.$op(x::Real, dy::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
             y = $SCT.primal(dy)
             p_out = $M.$op(x, y)
-            t_out = $SCT.hessian_tracer_1_to_1(
-                $SCT.tracer(dy),
-                $SCT.is_firstder_arg2_zero_local($M.$op, x, y),
-                $SCT.is_seconder_arg2_zero_local($M.$op, x, y),
+
+            tx = $SCT.tracer(dy)
+            is_firstder_arg2_zero = $SCT.is_firstder_arg2_zero_local($M.$op, x, y)
+            is_seconder_arg2_zero = $SCT.is_seconder_arg2_zero_local($M.$op, x, y)
+            t_out = @noinline $SCT.hessian_tracer_1_to_1(
+                tx, is_firstder_arg2_zero, is_seconder_arg2_zero
             )
             return $SCT.Dual(p_out, t_out)
         end
@@ -194,7 +205,7 @@ end
 
 ## 1-to-2
 
-@noinline function hessian_tracer_1_to_2(
+function hessian_tracer_1_to_2(
     t::T,
     is_firstder_out1_zero::Bool,
     is_seconder_out1_zero::Bool,
@@ -214,12 +225,16 @@ function overload_hessian_1_to_2(M, op)
     SCT = SparseConnectivityTracer
     return quote
         function $M.$op(t::$SCT.HessianTracer)
-            return $SCT.hessian_tracer_1_to_2(
+            is_firstder_out1_zero = $SCT.is_firstder_out1_zero_global($M.$op)
+            is_seconder_out1_zero = $SCT.is_seconder_out1_zero_global($M.$op)
+            is_firstder_out2_zero = $SCT.is_firstder_out2_zero_global($M.$op)
+            is_seconder_out2_zero = $SCT.is_seconder_out2_zero_global($M.$op)
+            return @noinline $SCT.hessian_tracer_1_to_2(
                 t,
-                $SCT.is_firstder_out1_zero_global($M.$op),
-                $SCT.is_seconder_out1_zero_global($M.$op),
-                $SCT.is_firstder_out2_zero_global($M.$op),
-                $SCT.is_seconder_out2_zero_global($M.$op),
+                is_firstder_out1_zero,
+                is_seconder_out1_zero,
+                is_firstder_out2_zero,
+                is_seconder_out2_zero,
             )
         end
     end
@@ -231,12 +246,17 @@ function overload_hessian_1_to_2_dual(M, op)
         function $M.$op(d::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
             x = $SCT.primal(d)
             p_out1, p_out2 = $M.$op(x)
-            t_out1, t_out2 = $SCT.hessian_tracer_1_to_2(
+
+            is_firstder_out1_zero = $SCT.is_firstder_out1_zero_local($M.$op, x)
+            is_seconder_out1_zero = $SCT.is_seconder_out1_zero_local($M.$op, x)
+            is_firstder_out2_zero = $SCT.is_firstder_out2_zero_local($M.$op, x)
+            is_seconder_out2_zero = $SCT.is_seconder_out2_zero_local($M.$op, x)
+            t_out1, t_out2 = @noinline $SCT.hessian_tracer_1_to_2(
                 d,
-                $SCT.is_firstder_out1_zero_local($M.$op, x),
-                $SCT.is_seconder_out1_zero_local($M.$op, x),
-                $SCT.is_firstder_out2_zero_local($M.$op, x),
-                $SCT.is_seconder_out2_zero_local($M.$op, x),
+                is_firstder_out1_zero,
+                is_seconder_out1_zero,
+                is_firstder_out2_zero,
+                is_seconder_out2_zero,
             )
             return ($SCT.Dual(p_out1, t_out1), $SCT.Dual(p_out2, t_out2))
         end
