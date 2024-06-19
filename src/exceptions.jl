@@ -14,10 +14,6 @@ function Base.showerror(io::IO, e::MissingPrimalError)
     return nothing
 end
 
-str_pattern_fn(::ConnectivityTracer) = "connectivity_pattern"
-str_pattern_fn(::GradientTracer)     = "jacobian_pattern"
-str_pattern_fn(::HessianTracer)      = "hessian_pattern"
-
 str_local_pattern_fn(::ConnectivityTracer) = "local_connectivity_pattern"
 str_local_pattern_fn(::GradientTracer)     = "local_jacobian_pattern"
 str_local_pattern_fn(::HessianTracer)      = "local_hessian_pattern"
