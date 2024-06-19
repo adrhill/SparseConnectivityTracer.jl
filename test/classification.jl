@@ -1,29 +1,29 @@
 using SparseConnectivityTracer:
     list_operators_1_to_1,
-    is_firstder_zero_global,
-    is_seconder_zero_global,
-    is_firstder_zero_local,
-    is_seconder_zero_local,
+    is_der1_zero_global,
+    is_der2_zero_global,
+    is_der1_zero_local,
+    is_der2_zero_local,
     list_operators_2_to_1,
-    is_firstder_arg1_zero_global,
-    is_seconder_arg1_zero_global,
-    is_firstder_arg2_zero_global,
-    is_seconder_arg2_zero_global,
-    is_crossder_zero_global,
-    is_firstder_arg1_zero_local,
-    is_seconder_arg1_zero_local,
-    is_firstder_arg2_zero_local,
-    is_seconder_arg2_zero_local,
-    is_crossder_zero_local,
+    is_der1_arg1_zero_global,
+    is_der2_arg1_zero_global,
+    is_der1_arg2_zero_global,
+    is_der2_arg2_zero_global,
+    is_der_cross_zero_global,
+    is_der1_arg1_zero_local,
+    is_der2_arg1_zero_local,
+    is_der1_arg2_zero_local,
+    is_der2_arg2_zero_local,
+    is_der_cross_zero_local,
     list_operators_1_to_2,
-    is_firstder_out1_zero_global,
-    is_seconder_out1_zero_global,
-    is_firstder_out2_zero_global,
-    is_seconder_out2_zero_global,
-    is_seconder_out1_zero_local,
-    is_firstder_out1_zero_local,
-    is_firstder_out2_zero_local,
-    is_seconder_out2_zero_local
+    is_der1_out1_zero_global,
+    is_der2_out1_zero_global,
+    is_der1_out2_zero_global,
+    is_der2_out2_zero_global,
+    is_der2_out1_zero_local,
+    is_der1_out1_zero_local,
+    is_der1_out2_zero_local,
+    is_der2_out2_zero_local
 using SpecialFunctions: SpecialFunctions
 using NNlib: NNlib
 using Test
@@ -72,10 +72,9 @@ end
 
 function correct_classification_1_to_1(op, x; atol)
     dfdx, d²fdx² = both_derivatives_1_to_1(op, x)
-    if (is_firstder_zero_global(op) | is_firstder_zero_local(op, x)) &&
-        !isapprox(dfdx, 0; atol)
+    if (is_der1_zero_global(op) | is_der1_zero_local(op, x)) && !isapprox(dfdx, 0; atol)
         return false
-    elseif (is_seconder_zero_global(op) | is_seconder_zero_local(op, x)) &&
+    elseif (is_der2_zero_global(op) | is_der2_zero_local(op, x)) &&
         !isapprox(d²fdx², 0; atol)
         return false
     else
@@ -105,19 +104,19 @@ function correct_classification_2_to_1(op, x, y; atol)
     ∂²f∂y²  = H[2, 2]
     ∂²f∂x∂y = H[1, 2]
 
-    if (is_firstder_arg1_zero_global(op) | is_firstder_arg1_zero_local(op, x, y)) &&
+    if (is_der1_arg1_zero_global(op) | is_der1_arg1_zero_local(op, x, y)) &&
         !isapprox(∂f∂x, 0; atol)
         return false
-    elseif (is_seconder_arg1_zero_global(op) | is_seconder_arg1_zero_local(op, x, y)) &&
+    elseif (is_der2_arg1_zero_global(op) | is_der2_arg1_zero_local(op, x, y)) &&
         !isapprox(∂²f∂x², 0; atol)
         return false
-    elseif (is_firstder_arg2_zero_global(op) | is_firstder_arg2_zero_local(op, x, y)) &&
+    elseif (is_der1_arg2_zero_global(op) | is_der1_arg2_zero_local(op, x, y)) &&
         !isapprox(∂f∂y, 0; atol)
         return false
-    elseif (is_seconder_arg2_zero_global(op) | is_seconder_arg2_zero_local(op, x, y)) &&
+    elseif (is_der2_arg2_zero_global(op) | is_der2_arg2_zero_local(op, x, y)) &&
         !isapprox(∂²f∂y², 0; atol)
         return false
-    elseif (is_crossder_zero_global(op) | is_crossder_zero_local(op, x, y)) &&
+    elseif (is_der_cross_zero_global(op) | is_der_cross_zero_local(op, x, y)) &&
         !isapprox(∂²f∂x∂y, 0; atol)
         return false
     else
@@ -147,16 +146,16 @@ function correct_classification_1_to_2(op, x; atol)
     ∂²f₁∂x² = d2[1]
     ∂²f₂∂x² = d2[2]
 
-    if (is_firstder_out1_zero_global(op) | is_firstder_out1_zero_local(op, x)) &&
+    if (is_der1_out1_zero_global(op) | is_der1_out1_zero_local(op, x)) &&
         !isapprox(∂f₁∂x, 0; atol)
         return false
-    elseif (is_seconder_out1_zero_global(op) | is_seconder_out1_zero_local(op, x)) &&
+    elseif (is_der2_out1_zero_global(op) | is_der2_out1_zero_local(op, x)) &&
         !isapprox(∂²f₁∂x², 0; atol)
         return false
-    elseif (is_firstder_out2_zero_global(op) | is_firstder_out2_zero_local(op, x)) &&
+    elseif (is_der1_out2_zero_global(op) | is_der1_out2_zero_local(op, x)) &&
         !isapprox(∂f₂∂x, 0; atol)
         return false
-    elseif (is_seconder_out2_zero_global(op) | is_seconder_out2_zero_local(op, x)) &&
+    elseif (is_der2_out2_zero_global(op) | is_der2_out2_zero_local(op, x)) &&
         !isapprox(∂²f₂∂x², 0; atol)
         return false
     else
