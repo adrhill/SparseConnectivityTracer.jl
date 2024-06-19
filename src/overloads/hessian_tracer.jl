@@ -157,14 +157,22 @@ function overload_hessian_2_to_1_dual(M, op)
             x = $SCT.primal(dx)
             y = $SCT.primal(dy)
             p_out = $M.$op(x, y)
+
+            tx = $SCT.tracer(dx)
+            ty = $SCT.tracer(dy)
+            is_der1_arg1_zero = $SCT.is_der1_arg1_zero_local($M.$op, x, y)
+            is_der2_arg1_zero = $SCT.is_der2_arg1_zero_local($M.$op, x, y)
+            is_der1_arg2_zero = $SCT.is_der1_arg2_zero_local($M.$op, x, y)
+            is_der2_arg2_zero = $SCT.is_der2_arg2_zero_local($M.$op, x, y)
+            is_crossder_zero = $SCT.is_crossder_zero_local($M.$op, x, y)
             t_out = @noinline $SCT.hessian_tracer_2_to_1(
-                $SCT.tracer(dx),
-                $SCT.tracer(dy),
-                $SCT.is_der1_arg1_zero_local($M.$op, x, y),
-                $SCT.is_der2_arg1_zero_local($M.$op, x, y),
-                $SCT.is_der1_arg2_zero_local($M.$op, x, y),
-                $SCT.is_der2_arg2_zero_local($M.$op, x, y),
-                $SCT.is_crossder_zero_local($M.$op, x, y),
+                tx,
+                ty,
+                is_der1_arg1_zero,
+                is_der2_arg1_zero,
+                is_der1_arg2_zero,
+                is_der2_arg2_zero,
+                is_crossder_zero,
             )
             return $SCT.Dual(p_out, t_out)
         end
@@ -186,11 +194,11 @@ function overload_hessian_2_to_1_dual(M, op)
             y = $SCT.primal(dy)
             p_out = $M.$op(x, y)
 
-            tx = $SCT.tracer(dy)
+            ty = $SCT.tracer(dy)
             is_der1_arg2_zero = $SCT.is_der1_arg2_zero_local($M.$op, x, y)
             is_der2_arg2_zero = $SCT.is_der2_arg2_zero_local($M.$op, x, y)
             t_out = @noinline $SCT.hessian_tracer_1_to_1(
-                tx, is_der1_arg2_zero, is_der2_arg2_zero
+                ty, is_der1_arg2_zero, is_der2_arg2_zero
             )
             return $SCT.Dual(p_out, t_out)
         end
