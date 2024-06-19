@@ -1,5 +1,5 @@
 using SparseConnectivityTracer
-using SparseConnectivityTracer: GradientTracer, gradient
+using SparseConnectivityTracer: GradientTracer
 using SparseArrays
 using LinearAlgebra: det, logdet, inv, pinv
 using Test
@@ -42,5 +42,5 @@ end
 
     b = A \ x
     s_out = BitSet([1, 2, 3, 4, 8, 9])
-    @test all(t -> gradient(t) == s_out, b)
+    @test all(t -> SparseConnectivityTracer.gradient(t) == s_out, b)
 end
