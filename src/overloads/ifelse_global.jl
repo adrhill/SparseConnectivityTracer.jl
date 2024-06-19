@@ -43,10 +43,10 @@ for op in (isequal, isapprox, isless, ==, <, >, <=, >=)
     T = typeof(op)
     @eval is_influence_arg1_zero_global(::$T) = false
     @eval is_influence_arg2_zero_global(::$T) = false
-    @eval is_firstder_arg1_zero_global(::$T) = true
-    @eval is_seconder_arg1_zero_global(::$T) = true
-    @eval is_firstder_arg2_zero_global(::$T) = true
-    @eval is_seconder_arg2_zero_global(::$T) = true
+    @eval is_der1_arg1_zero_global(::$T) = true
+    @eval is_der2_arg1_zero_global(::$T) = true
+    @eval is_der1_arg2_zero_global(::$T) = true
+    @eval is_der2_arg2_zero_global(::$T) = true
     @eval is_crossder_zero_global(::$T) = true
 
     op_symb = nameof(op)

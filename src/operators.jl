@@ -13,13 +13,13 @@
 # Operators for functions f: ℝ → ℝ #
 #==================================#
 function is_influence_zero_global end
-function is_firstder_zero_global end
-function is_seconder_zero_global end
+function is_der1_zero_global end
+function is_der2_zero_global end
 
 # Fallbacks for local derivatives:
 is_influence_zero_local(f::F, x) where {F} = is_influence_zero_global(f)
-is_firstder_zero_local(f::F, x) where {F} = is_firstder_zero_global(f)
-is_seconder_zero_local(f::F, x) where {F} = is_seconder_zero_global(f)
+is_der1_zero_local(f::F, x) where {F} = is_der1_zero_global(f)
+is_der2_zero_local(f::F, x) where {F} = is_der2_zero_global(f)
 
 # ops_1_to_1_s: 
 # x -> f  != 0
@@ -54,8 +54,8 @@ ops_1_to_1_s = (
 for op in ops_1_to_1_s
     T = typeof(op)
     @eval is_influence_zero_global(::$T) = false
-    @eval is_firstder_zero_global(::$T) = false
-    @eval is_seconder_zero_global(::$T) = false
+    @eval is_der1_zero_global(::$T) = false
+    @eval is_der2_zero_global(::$T) = false
 end
 
 # ops_1_to_1_f:
@@ -79,8 +79,8 @@ ops_1_to_1_f = (
 for op in ops_1_to_1_f
     T = typeof(op)
     @eval is_influence_zero_global(::$T) = false
-    @eval is_firstder_zero_global(::$T) = false
-    @eval is_seconder_zero_global(::$T) = true
+    @eval is_der1_zero_global(::$T) = false
+    @eval is_der2_zero_global(::$T) = true
 end
 
 # ops_1_to_1_z:
@@ -94,8 +94,8 @@ ops_1_to_1_z = (
 for op in ops_1_to_1_z
     T = typeof(op)
     @eval is_influence_zero_global(::$T) = false
-    @eval is_firstder_zero_global(::$T) = true
-    @eval is_seconder_zero_global(::$T) = true
+    @eval is_der1_zero_global(::$T) = true
+    @eval is_der2_zero_global(::$T) = true
 end
 
 # ops_1_to_1_i:
@@ -110,8 +110,8 @@ ops_1_to_1_i = (
 for op in ops_1_to_1_i
     T = typeof(op)
     @eval is_influence_zero_global(::$T) = true
-    @eval is_firstder_zero_global(::$T) = true
-    @eval is_seconder_zero_global(::$T) = true
+    @eval is_der1_zero_global(::$T) = true
+    @eval is_der2_zero_global(::$T) = true
 end
 
 ops_1_to_1 = union(
@@ -127,19 +127,19 @@ ops_1_to_1 = union(
 
 function is_influence_arg1_zero_global end
 function is_influence_arg2_zero_global end
-function is_firstder_arg1_zero_global end
-function is_seconder_arg1_zero_global end
-function is_firstder_arg2_zero_global end
-function is_seconder_arg2_zero_global end
+function is_der1_arg1_zero_global end
+function is_der2_arg1_zero_global end
+function is_der1_arg2_zero_global end
+function is_der2_arg2_zero_global end
 function is_crossder_zero_global end
 
 # Fallbacks for local derivatives:
 is_influence_arg1_zero_local(f::F, x, y) where {F} = is_influence_arg1_zero_global(f)
 is_influence_arg2_zero_local(f::F, x, y) where {F} = is_influence_arg2_zero_global(f)
-is_firstder_arg1_zero_local(f::F, x, y) where {F} = is_firstder_arg1_zero_global(f)
-is_seconder_arg1_zero_local(f::F, x, y) where {F} = is_seconder_arg1_zero_global(f)
-is_firstder_arg2_zero_local(f::F, x, y) where {F} = is_firstder_arg2_zero_global(f)
-is_seconder_arg2_zero_local(f::F, x, y) where {F} = is_seconder_arg2_zero_global(f)
+is_der1_arg1_zero_local(f::F, x, y) where {F} = is_der1_arg1_zero_global(f)
+is_der2_arg1_zero_local(f::F, x, y) where {F} = is_der2_arg1_zero_global(f)
+is_der1_arg2_zero_local(f::F, x, y) where {F} = is_der1_arg2_zero_global(f)
+is_der2_arg2_zero_local(f::F, x, y) where {F} = is_der2_arg2_zero_global(f)
 is_crossder_zero_local(f::F, x, y) where {F}      = is_crossder_zero_global(f)
 
 # ops_2_to_1_ssc:
@@ -155,10 +155,10 @@ for op in ops_2_to_1_ssc
     T = typeof(op)
     @eval is_influence_arg1_zero_global(::$T) = false
     @eval is_influence_arg2_zero_global(::$T) = false
-    @eval is_firstder_arg1_zero_global(::$T) = false
-    @eval is_seconder_arg1_zero_global(::$T) = false
-    @eval is_firstder_arg2_zero_global(::$T) = false
-    @eval is_seconder_arg2_zero_global(::$T) = false
+    @eval is_der1_arg1_zero_global(::$T) = false
+    @eval is_der2_arg1_zero_global(::$T) = false
+    @eval is_der1_arg2_zero_global(::$T) = false
+    @eval is_der2_arg2_zero_global(::$T) = false
     @eval is_crossder_zero_global(::$T)      = false
 end
 
@@ -174,10 +174,10 @@ for op in ops_2_to_1_ssz
     T = typeof(op)
     @eval is_influence_arg1_zero_global(::$T) = false
     @eval is_influence_arg2_zero_global(::$T) = false
-    @eval is_seconder_arg1_zero_global(::$T) = false
-    @eval is_firstder_arg1_zero_global(::$T) = false
-    @eval is_firstder_arg2_zero_global(::$T) = false
-    @eval is_seconder_arg2_zero_global(::$T) = false
+    @eval is_der2_arg1_zero_global(::$T) = false
+    @eval is_der1_arg1_zero_global(::$T) = false
+    @eval is_der1_arg2_zero_global(::$T) = false
+    @eval is_der2_arg2_zero_global(::$T) = false
     @eval is_crossder_zero_global(::$T)      = true
 end
 =#
@@ -194,10 +194,10 @@ for op in ops_2_to_1_sfc
     T = typeof(op)
     @eval is_influence_arg1_zero_global(::$T) = false
     @eval is_influence_arg2_zero_global(::$T) = false
-    @eval is_firstder_arg1_zero_global(::$T) = false
-    @eval is_seconder_arg1_zero_global(::$T) = false
-    @eval is_firstder_arg2_zero_global(::$T) = false
-    @eval is_seconder_arg2_zero_global(::$T) = true
+    @eval is_der1_arg1_zero_global(::$T) = false
+    @eval is_der2_arg1_zero_global(::$T) = false
+    @eval is_der1_arg2_zero_global(::$T) = false
+    @eval is_der2_arg2_zero_global(::$T) = true
     @eval is_crossder_zero_global(::$T)      = false
 end
 =#
@@ -214,10 +214,10 @@ for op in ops_2_to_1_sfz
     T = typeof(op)
     @eval is_influence_arg1_zero_global(::$T) = false
     @eval is_influence_arg2_zero_global(::$T) = false
-    @eval is_firstder_arg1_zero_global(::$T) = false
-    @eval is_seconder_arg1_zero_global(::$T) = false
-    @eval is_firstder_arg2_zero_global(::$T) = false
-    @eval is_seconder_arg2_zero_global(::$T) = true
+    @eval is_der1_arg1_zero_global(::$T) = false
+    @eval is_der2_arg1_zero_global(::$T) = false
+    @eval is_der1_arg2_zero_global(::$T) = false
+    @eval is_der2_arg2_zero_global(::$T) = true
     @eval is_crossder_zero_global(::$T)      = true
 end
 =#
@@ -236,15 +236,15 @@ for op in ops_2_to_1_fsc
     T = typeof(op)
     @eval is_influence_arg1_zero_global(::$T) = false
     @eval is_influence_arg2_zero_global(::$T) = false
-    @eval is_firstder_arg1_zero_global(::$T) = false
-    @eval is_seconder_arg1_zero_global(::$T) = true
-    @eval is_firstder_arg2_zero_global(::$T) = false
-    @eval is_seconder_arg2_zero_global(::$T) = false
+    @eval is_der1_arg1_zero_global(::$T) = false
+    @eval is_der2_arg1_zero_global(::$T) = true
+    @eval is_der1_arg2_zero_global(::$T) = false
+    @eval is_der2_arg2_zero_global(::$T) = false
     @eval is_crossder_zero_global(::$T)      = false
 end
 
 # gradient of x/y: [1/y -x/y²]
-SparseConnectivityTracer.is_firstder_arg2_zero_local(::typeof(/), x, y) = iszero(x)
+SparseConnectivityTracer.is_der1_arg2_zero_local(::typeof(/), x, y) = iszero(x)
 
 # ops_2_to_1_fsz: 
 # ∂f/∂x    != 0
@@ -258,10 +258,10 @@ for op in ops_2_to_1_fsz
     T = typeof(op)
     @eval is_influence_arg1_zero_global(::$T) = false
     @eval is_influence_arg2_zero_global(::$T) = false
-    @eval is_firstder_arg1_zero_global(::$T) = false
-    @eval is_seconder_arg1_zero_global(::$T) = true
-    @eval is_firstder_arg2_zero_global(::$T) = false
-    @eval is_seconder_arg2_zero_global(::$T) = false
+    @eval is_der1_arg1_zero_global(::$T) = false
+    @eval is_der2_arg1_zero_global(::$T) = true
+    @eval is_der1_arg2_zero_global(::$T) = false
+    @eval is_der2_arg2_zero_global(::$T) = false
     @eval is_crossder_zero_global(::$T)      = true
 end
 =#
@@ -279,16 +279,16 @@ for op in ops_2_to_1_ffc
     T = typeof(op)
     @eval is_influence_arg1_zero_global(::$T) = false
     @eval is_influence_arg2_zero_global(::$T) = false
-    @eval is_firstder_arg1_zero_global(::$T) = false
-    @eval is_seconder_arg1_zero_global(::$T) = true
-    @eval is_firstder_arg2_zero_global(::$T) = false
-    @eval is_seconder_arg2_zero_global(::$T) = true
+    @eval is_der1_arg1_zero_global(::$T) = false
+    @eval is_der2_arg1_zero_global(::$T) = true
+    @eval is_der1_arg2_zero_global(::$T) = false
+    @eval is_der2_arg2_zero_global(::$T) = true
     @eval is_crossder_zero_global(::$T)      = false
 end
 
 # gradient of x*y: [y x]
-is_firstder_arg1_zero_local(::typeof(*), x, y) = iszero(y)
-is_firstder_arg2_zero_local(::typeof(*), x, y) = iszero(x)
+is_der1_arg1_zero_local(::typeof(*), x, y) = iszero(y)
+is_der1_arg2_zero_local(::typeof(*), x, y) = iszero(x)
 
 # ops_2_to_1_ffz: 
 # ∂f/∂x    != 0
@@ -305,20 +305,20 @@ for op in ops_2_to_1_ffz
     T = typeof(op)
     @eval is_influence_arg1_zero_global(::$T) = false
     @eval is_influence_arg2_zero_global(::$T) = false
-    @eval is_firstder_arg1_zero_global(::$T) = false
-    @eval is_seconder_arg1_zero_global(::$T) = true
-    @eval is_firstder_arg2_zero_global(::$T) = false
-    @eval is_seconder_arg2_zero_global(::$T) = true
+    @eval is_der1_arg1_zero_global(::$T) = false
+    @eval is_der2_arg1_zero_global(::$T) = true
+    @eval is_der1_arg2_zero_global(::$T) = false
+    @eval is_der2_arg2_zero_global(::$T) = true
     @eval is_crossder_zero_global(::$T)      = true
 end
 
-is_firstder_arg2_zero_local(::typeof(mod), x, y) = ifelse(y > zero(y), y > x, x > y)
+is_der1_arg2_zero_local(::typeof(mod), x, y) = ifelse(y > zero(y), y > x, x > y)
 
-is_firstder_arg1_zero_local(::typeof(max), x, y) = x < y
-is_firstder_arg2_zero_local(::typeof(max), x, y) = y < x
+is_der1_arg1_zero_local(::typeof(max), x, y) = x < y
+is_der1_arg2_zero_local(::typeof(max), x, y) = y < x
 
-is_firstder_arg1_zero_local(::typeof(min), x, y) = x > y
-is_firstder_arg2_zero_local(::typeof(min), x, y) = y > x
+is_der1_arg1_zero_local(::typeof(min), x, y) = x > y
+is_der1_arg2_zero_local(::typeof(min), x, y) = y > x
 
 # ops_2_to_1_szz: 
 # ∂f/∂x    != 0
@@ -332,10 +332,10 @@ for op in ops_2_to_1_szz
     T = typeof(op)
     @eval is_influence_arg1_zero_global(::$T) = false
     @eval is_influence_arg2_zero_global(::$T) = false
-    @eval is_firstder_arg1_zero_global(::$T) = false
-    @eval is_seconder_arg1_zero_global(::$T) = false
-    @eval is_firstder_arg2_zero_global(::$T) = true
-    @eval is_seconder_arg2_zero_global(::$T) = true
+    @eval is_der1_arg1_zero_global(::$T) = false
+    @eval is_der2_arg1_zero_global(::$T) = false
+    @eval is_der1_arg2_zero_global(::$T) = true
+    @eval is_der2_arg2_zero_global(::$T) = true
     @eval is_crossder_zero_global(::$T)      = true
 end
 =#
@@ -352,10 +352,10 @@ for op in ops_2_to_1_zsz
     T = typeof(op)
     @eval is_influence_arg1_zero_global(::$T) = false
     @eval is_influence_arg2_zero_global(::$T) = false
-    @eval is_firstder_arg1_zero_global(::$T) = true
-    @eval is_seconder_arg1_zero_global(::$T) = true
-    @eval is_firstder_arg2_zero_global(::$T) = false
-    @eval is_seconder_arg2_zero_global(::$T) = false
+    @eval is_der1_arg1_zero_global(::$T) = true
+    @eval is_der2_arg1_zero_global(::$T) = true
+    @eval is_der1_arg2_zero_global(::$T) = false
+    @eval is_der2_arg2_zero_global(::$T) = false
     @eval is_crossder_zero_global(::$T)      = true
 end
 =#
@@ -373,10 +373,10 @@ for op in ops_2_to_1_fzz
     T = typeof(op)
     @eval is_influence_arg1_zero_global(::$T) = false
     @eval is_influence_arg2_zero_global(::$T) = false
-    @eval is_firstder_arg1_zero_global(::$T) = false
-    @eval is_seconder_arg1_zero_global(::$T) = true
-    @eval is_firstder_arg2_zero_global(::$T) = true
-    @eval is_seconder_arg2_zero_global(::$T) = true
+    @eval is_der1_arg1_zero_global(::$T) = false
+    @eval is_der2_arg1_zero_global(::$T) = true
+    @eval is_der1_arg2_zero_global(::$T) = true
+    @eval is_der2_arg2_zero_global(::$T) = true
     @eval is_crossder_zero_global(::$T)      = true
 end
 
@@ -392,10 +392,10 @@ for op in ops_2_to_1_zfz
     T = typeof(op)
     @eval is_influence_arg1_zero_global(::$T) = false
     @eval is_influence_arg2_zero_global(::$T) = false
-    @eval is_firstder_arg1_zero_global(::$T) = true
-    @eval is_seconder_arg1_zero_global(::$T) = true
-    @eval is_firstder_arg2_zero_global(::$T) = false
-    @eval is_seconder_arg2_zero_global(::$T) = true
+    @eval is_der1_arg1_zero_global(::$T) = true
+    @eval is_der2_arg1_zero_global(::$T) = true
+    @eval is_der1_arg2_zero_global(::$T) = false
+    @eval is_der2_arg2_zero_global(::$T) = true
     @eval is_crossder_zero_global(::$T)      = true
 end
 =#
@@ -414,10 +414,10 @@ for op in ops_2_to_1_zzz
     T = typeof(op)
     @eval is_influence_arg1_zero_global(::$T) = false
     @eval is_influence_arg2_zero_global(::$T) = false
-    @eval is_firstder_arg1_zero_global(::$T) = true
-    @eval is_seconder_arg1_zero_global(::$T) = true
-    @eval is_firstder_arg2_zero_global(::$T) = true
-    @eval is_seconder_arg2_zero_global(::$T) = true
+    @eval is_der1_arg1_zero_global(::$T) = true
+    @eval is_der2_arg1_zero_global(::$T) = true
+    @eval is_der1_arg2_zero_global(::$T) = true
+    @eval is_der2_arg2_zero_global(::$T) = true
     @eval is_crossder_zero_global(::$T)      = true
 end
 
@@ -450,18 +450,18 @@ ops_2_to_1 = union(
 
 function is_influence_out1_zero_global end
 function is_influence_out2_zero_global end
-function is_firstder_out1_zero_global end
-function is_seconder_out1_zero_global end
-function is_firstder_out2_zero_global end
-function is_seconder_out2_zero_global end
+function is_der1_out1_zero_global end
+function is_der2_out1_zero_global end
+function is_der1_out2_zero_global end
+function is_der2_out2_zero_global end
 
 # Fallbacks for local derivatives:
 is_influence_out1_zero_local(f::F, x) where {F} = is_influence_out1_zero_global(f)
 is_influence_out2_zero_local(f::F, x) where {F} = is_influence_out2_zero_global(f)
-is_firstder_out1_zero_local(f::F, x) where {F} = is_firstder_out1_zero_global(f)
-is_seconder_out1_zero_local(f::F, x) where {F} = is_seconder_out1_zero_global(f)
-is_firstder_out2_zero_local(f::F, x) where {F} = is_firstder_out2_zero_global(f)
-is_seconder_out2_zero_local(f::F, x) where {F} = is_seconder_out2_zero_global(f)
+is_der1_out1_zero_local(f::F, x) where {F} = is_der1_out1_zero_global(f)
+is_der2_out1_zero_local(f::F, x) where {F} = is_der2_out1_zero_global(f)
+is_der1_out2_zero_local(f::F, x) where {F} = is_der1_out2_zero_global(f)
+is_der2_out2_zero_local(f::F, x) where {F} = is_der2_out2_zero_global(f)
 
 # ops_1_to_2_ss: 
 # ∂f₁/∂x   != 0
@@ -477,10 +477,10 @@ for op in ops_1_to_2_ss
     T = typeof(op)
     @eval is_influence_out1_zero_global(::$T) = false
     @eval is_influence_out2_zero_global(::$T) = false
-    @eval is_firstder_out1_zero_global(::$T) = false
-    @eval is_seconder_out1_zero_global(::$T) = false
-    @eval is_firstder_out2_zero_global(::$T) = false
-    @eval is_seconder_out2_zero_global(::$T) = false
+    @eval is_der1_out1_zero_global(::$T) = false
+    @eval is_der2_out1_zero_global(::$T) = false
+    @eval is_der1_out2_zero_global(::$T) = false
+    @eval is_der2_out2_zero_global(::$T) = false
 end
 
 # ops_1_to_2_sf: 
@@ -494,10 +494,10 @@ for op in ops_1_to_2_sf
     T = typeof(op)
     @eval is_influence_out1_zero_global(::$T) = false
     @eval is_influence_out2_zero_global(::$T) = false
-    @eval is_firstder_out1_zero_global(::$T) = false
-    @eval is_seconder_out1_zero_global(::$T) = false
-    @eval is_firstder_out2_zero_global(::$T) = false
-    @eval is_seconder_out2_zero_global(::$T) = true
+    @eval is_der1_out1_zero_global(::$T) = false
+    @eval is_der2_out1_zero_global(::$T) = false
+    @eval is_der1_out2_zero_global(::$T) = false
+    @eval is_der2_out2_zero_global(::$T) = true
 end
 =#
 
@@ -512,10 +512,10 @@ for op in ops_1_to_2_sz
     T = typeof(op)
     @eval is_influence_out1_zero_global(::$T) = false
     @eval is_influence_out2_zero_global(::$T) = false
-    @eval is_firstder_out1_zero_global(::$T) = false
-    @eval is_seconder_out1_zero_global(::$T) = false
-    @eval is_firstder_out2_zero_global(::$T) = true
-    @eval is_seconder_out2_zero_global(::$T) = true
+    @eval is_der1_out1_zero_global(::$T) = false
+    @eval is_der2_out1_zero_global(::$T) = false
+    @eval is_der1_out2_zero_global(::$T) = true
+    @eval is_der2_out2_zero_global(::$T) = true
 end
 =#
 
@@ -530,10 +530,10 @@ for op in ops_1_to_2_fs
     T = typeof(op)
     @eval is_influence_out1_zero_global(::$T) = false
     @eval is_influence_out2_zero_global(::$T) = false
-    @eval is_firstder_out1_zero_global(::$T) = false
-    @eval is_seconder_out1_zero_global(::$T) = true
-    @eval is_firstder_out2_zero_global(::$T) = false
-    @eval is_seconder_out2_zero_global(::$T) = false
+    @eval is_der1_out1_zero_global(::$T) = false
+    @eval is_der2_out1_zero_global(::$T) = true
+    @eval is_der1_out2_zero_global(::$T) = false
+    @eval is_der2_out2_zero_global(::$T) = false
 end
 =#
 
@@ -548,10 +548,10 @@ for op in ops_1_to_2_ff
     T = typeof(op)
     @eval is_influence_out1_zero_global(::$T) = false
     @eval is_influence_out2_zero_global(::$T) = false
-    @eval is_firstder_out1_zero_global(::$T) = false
-    @eval is_seconder_out1_zero_global(::$T) = true
-    @eval is_firstder_out2_zero_global(::$T) = false
-    @eval is_seconder_out2_zero_global(::$T) = true
+    @eval is_der1_out1_zero_global(::$T) = false
+    @eval is_der2_out1_zero_global(::$T) = true
+    @eval is_der1_out2_zero_global(::$T) = false
+    @eval is_der2_out2_zero_global(::$T) = true
 end
 =#
 
@@ -568,10 +568,10 @@ for op in ops_1_to_2_fz
     T = typeof(op)
     @eval is_influence_out1_zero_global(::$T) = false
     @eval is_influence_out2_zero_global(::$T) = false
-    @eval is_firstder_out1_zero_global(::$T) = false
-    @eval is_seconder_out1_zero_global(::$T) = true
-    @eval is_firstder_out2_zero_global(::$T) = true
-    @eval is_seconder_out2_zero_global(::$T) = true
+    @eval is_der1_out1_zero_global(::$T) = false
+    @eval is_der2_out1_zero_global(::$T) = true
+    @eval is_der1_out2_zero_global(::$T) = true
+    @eval is_der2_out2_zero_global(::$T) = true
 end
 =#
 
@@ -586,10 +586,10 @@ for op in ops_1_to_2_zs
     T = typeof(op)
     @eval is_influence_out1_zero_global(::$T) = false
     @eval is_influence_out2_zero_global(::$T) = false
-    @eval is_firstder_out1_zero_global(::$T) = true
-    @eval is_seconder_out1_zero_global(::$T) = true
-    @eval is_firstder_out2_zero_global(::$T) = false
-    @eval is_seconder_out2_zero_global(::$T) = false
+    @eval is_der1_out1_zero_global(::$T) = true
+    @eval is_der2_out1_zero_global(::$T) = true
+    @eval is_der1_out2_zero_global(::$T) = false
+    @eval is_der2_out2_zero_global(::$T) = false
 end
 =#
 
@@ -604,10 +604,10 @@ for op in ops_1_to_2_zf
     T = typeof(op)
     @eval is_influence_out1_zero_global(::$T) = false
     @eval is_influence_out2_zero_global(::$T) = false
-    @eval is_firstder_out1_zero_global(::$T) = true
-    @eval is_seconder_out1_zero_global(::$T) = true
-    @eval is_firstder_out2_zero_global(::$T) = false
-    @eval is_seconder_out2_zero_global(::$T) = true
+    @eval is_der1_out1_zero_global(::$T) = true
+    @eval is_der2_out1_zero_global(::$T) = true
+    @eval is_der1_out2_zero_global(::$T) = false
+    @eval is_der2_out2_zero_global(::$T) = true
 end
 =#
 
@@ -622,10 +622,10 @@ for op in ops_1_to_2_zz
     T = typeof(op)
     @eval is_influence_out1_zero_global(::$T) = false
     @eval is_influence_out2_zero_global(::$T) = false
-    @eval is_firstder_out1_zero_global(::$T) = true
-    @eval is_seconder_out1_zero_global(::$T) = true
-    @eval is_firstder_out2_zero_global(::$T) = true
-    @eval is_seconder_out2_zero_global(::$T) = true
+    @eval is_der1_out1_zero_global(::$T) = true
+    @eval is_der2_out1_zero_global(::$T) = true
+    @eval is_der1_out2_zero_global(::$T) = true
+    @eval is_der2_out2_zero_global(::$T) = true
 end
 =#
 
