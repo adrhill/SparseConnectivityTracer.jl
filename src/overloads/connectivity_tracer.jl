@@ -1,6 +1,8 @@
 ## 1-to-1
 
-function connectivity_tracer_1_to_1(t::T, is_infl_zero::Bool) where {T<:ConnectivityTracer}
+@noinline function connectivity_tracer_1_to_1(
+    t::T, is_infl_zero::Bool
+) where {T<:ConnectivityTracer}
     if is_infl_zero && !isemptytracer(t)
         return myempty(T)
     else
@@ -13,7 +15,7 @@ function overload_connectivity_1_to_1(M, op)
     return quote
         function $M.$op(t::T) where {T<:$SCT.ConnectivityTracer}
             is_infl_zero = $SCT.is_infl_zero_global($M.$op)
-            return @noinline $SCT.connectivity_tracer_1_to_1(t, is_infl_zero)
+            return $SCT.connectivity_tracer_1_to_1(t, is_infl_zero)
         end
     end
 end
@@ -27,7 +29,7 @@ function overload_connectivity_1_to_1_dual(M, op)
 
             t = $SCT.tracer(d)
             is_infl_zero = $SCT.is_infl_zero_local($M.$op, x)
-            t_out = @noinline $SCT.connectivity_tracer_1_to_1(t, is_infl_zero)
+            t_out = $SCT.connectivity_tracer_1_to_1(t, is_infl_zero)
             return $SCT.Dual(p_out, t_out)
         end
     end
@@ -35,7 +37,7 @@ end
 
 ## 2-to-1
 
-function connectivity_tracer_2_to_1(
+@noinline function connectivity_tracer_2_to_1(
     tx::T, ty::T, is_infl_arg1_zero::Bool, is_infl_arg2_zero::Bool
 ) where {T<:ConnectivityTracer}
     # TODO: add tests for isempty
@@ -73,19 +75,19 @@ function overload_connectivity_2_to_1(M, op)
         function $M.$op(tx::T, ty::T) where {T<:$SCT.ConnectivityTracer}
             is_infl_arg1_zero = $SCT.is_infl_arg1_zero_global($M.$op)
             is_infl_arg2_zero = $SCT.is_infl_arg2_zero_global($M.$op)
-            return @noinline $SCT.connectivity_tracer_2_to_1(
+            return $SCT.connectivity_tracer_2_to_1(
                 tx, ty, is_infl_arg1_zero, is_infl_arg2_zero
             )
         end
 
         function $M.$op(tx::$SCT.ConnectivityTracer, ::Real)
             is_infl_arg1_zero = $SCT.is_infl_arg1_zero_global($M.$op)
-            return @noinline $SCT.connectivity_tracer_1_to_1(tx, is_infl_arg1_zero)
+            return $SCT.connectivity_tracer_1_to_1(tx, is_infl_arg1_zero)
         end
 
         function $M.$op(::Real, ty::$SCT.ConnectivityTracer)
             is_infl_arg2_zero = $SCT.is_infl_arg2_zero_global($M.$op)
-            return @noinline $SCT.connectivity_tracer_1_to_1(ty, is_infl_arg2_zero)
+            return $SCT.connectivity_tracer_1_to_1(ty, is_infl_arg2_zero)
         end
     end
 end
@@ -102,7 +104,7 @@ function overload_connectivity_2_to_1_dual(M, op)
             ty = $SCT.tracer(dy)
             is_infl_arg1_zero = $SCT.is_infl_arg1_zero_local($M.$op, x, y)
             is_infl_arg2_zero = $SCT.is_infl_arg2_zero_local($M.$op, x, y)
-            t_out = @noinline $SCT.connectivity_tracer_2_to_1(
+            t_out = $SCT.connectivity_tracer_2_to_1(
                 tx, ty, is_infl_arg1_zero, is_infl_arg2_zero
             )
             return $SCT.Dual(p_out, t_out)
@@ -116,7 +118,7 @@ function overload_connectivity_2_to_1_dual(M, op)
 
             tx = $SCT.tracer(dx)
             is_infl_arg1_zero = $SCT.is_infl_arg1_zero_local($M.$op, x, y)
-            t_out = @noinline $SCT.connectivity_tracer_1_to_1(tx, is_infl_arg1_zero)
+            t_out = $SCT.connectivity_tracer_1_to_1(tx, is_infl_arg1_zero)
             return $SCT.Dual(p_out, t_out)
         end
 
@@ -128,7 +130,7 @@ function overload_connectivity_2_to_1_dual(M, op)
 
             ty = $SCT.tracer(dy)
             is_infl_arg2_zero = $SCT.is_infl_arg2_zero_local($M.$op, x, y)
-            t_out = @noinline $SCT.connectivity_tracer_1_to_1(ty, is_infl_arg2_zero)
+            t_out = $SCT.connectivity_tracer_1_to_1(ty, is_infl_arg2_zero)
             return $SCT.Dual(p_out, t_out)
         end
     end
@@ -136,7 +138,7 @@ end
 
 ## 1-to-2
 
-function connectivity_tracer_1_to_2(
+@noinline function connectivity_tracer_1_to_2(
     t::T, is_infl_out1_zero::Bool, is_infl_out2_zero::Bool
 ) where {T<:ConnectivityTracer}
     if isemptytracer(t) # TODO: add test
@@ -154,9 +156,7 @@ function overload_connectivity_1_to_2(M, op)
         function $M.$op(t::$SCT.ConnectivityTracer)
             is_infl_out1_zero = $SCT.is_infl_out1_zero_global($M.$op)
             is_infl_out2_zero = $SCT.is_infl_out2_zero_global($M.$op)
-            return @noinline $SCT.connectivity_tracer_1_to_2(
-                t, is_infl_out1_zero, is_infl_out2_zero
-            )
+            return $SCT.connectivity_tracer_1_to_2(t, is_infl_out1_zero, is_infl_out2_zero)
         end
     end
 end
@@ -171,7 +171,7 @@ function overload_connectivity_1_to_2_dual(M, op)
             t = tracer(d)
             is_infl_out1_zero = $SCT.is_infl_out1_zero_local($M.$op, x)
             is_infl_out2_zero = $SCT.is_infl_out2_zero_local($M.$op, x)
-            t_out1, t_out2 = @noinline $SCT.connectivity_tracer_1_to_2(
+            t_out1, t_out2 = $SCT.connectivity_tracer_1_to_2(
                 t, is_infl_out1_zero, is_infl_out2_zero
             )# TODO: add test, this was buggy
             return ($SCT.Dual(p_out1, t_out1), $SCT.Dual(p_out2, t_out2))

@@ -1,6 +1,8 @@
 ## 1-to-1
 
-function gradient_tracer_1_to_1(t::T, is_der1_zero::Bool) where {T<:GradientTracer}
+@noinline function gradient_tracer_1_to_1(
+    t::T, is_der1_zero::Bool
+) where {T<:GradientTracer}
     if is_der1_zero && !isemptytracer(t)
         return myempty(T)
     else
@@ -24,7 +26,7 @@ function overload_gradient_1_to_1(M, op)
     return quote
         function $M.$op(t::$SCT.GradientTracer)
             is_der1_zero = $SCT.is_der1_zero_global($M.$op)
-            return @noinline $SCT.gradient_tracer_1_to_1(t, is_der1_zero)
+            return $SCT.gradient_tracer_1_to_1(t, is_der1_zero)
         end
     end
 end
@@ -38,7 +40,7 @@ function overload_gradient_1_to_1_dual(M, op)
 
             t = $SCT.tracer(d)
             is_der1_zero = $SCT.is_der1_zero_local($op, x)
-            t_out = @noinline $SCT.gradient_tracer_1_to_1(t, is_der1_zero)
+            t_out = $SCT.gradient_tracer_1_to_1(t, is_der1_zero)
             return $SCT.Dual(p_out, t_out)
         end
     end
@@ -46,7 +48,7 @@ end
 
 ## 2-to-1
 
-function gradient_tracer_2_to_1(
+@noinline function gradient_tracer_2_to_1(
     tx::T, ty::T, is_der1_arg1_zero::Bool, is_der1_arg2_zero::Bool
 ) where {T<:GradientTracer}
     # TODO: add tests for isempty
@@ -84,19 +86,17 @@ function overload_gradient_2_to_1(M, op)
         function $M.$op(tx::T, ty::T) where {T<:$SCT.GradientTracer}
             is_der1_arg1_zero = $SCT.is_der1_arg1_zero_global($M.$op)
             is_der1_arg2_zero = $SCT.is_der1_arg2_zero_global($M.$op)
-            return @noinline $SCT.gradient_tracer_2_to_1(
-                tx, ty, is_der1_arg1_zero, is_der1_arg2_zero
-            )
+            return $SCT.gradient_tracer_2_to_1(tx, ty, is_der1_arg1_zero, is_der1_arg2_zero)
         end
 
         function $M.$op(tx::$SCT.GradientTracer, ::Real)
             is_der1_arg1_zero = $SCT.is_der1_arg1_zero_global($M.$op)
-            return @noinline $SCT.gradient_tracer_1_to_1(tx, is_der1_arg1_zero)
+            return $SCT.gradient_tracer_1_to_1(tx, is_der1_arg1_zero)
         end
 
         function $M.$op(::Real, ty::$SCT.GradientTracer)
             is_der1_arg2_zero = $SCT.is_der1_arg2_zero_global($M.$op)
-            return @noinline $SCT.gradient_tracer_1_to_1(ty, is_der1_arg2_zero)
+            return $SCT.gradient_tracer_1_to_1(ty, is_der1_arg2_zero)
         end
     end
 end
@@ -113,7 +113,7 @@ function overload_gradient_2_to_1_dual(M, op)
             ty = $SCT.tracer(dy)
             is_der1_arg1_zero = $SCT.is_der1_arg1_zero_local($M.$op, x, y)
             is_der1_arg2_zero = $SCT.is_der1_arg2_zero_local($M.$op, x, y)
-            t_out = @noinline $SCT.gradient_tracer_2_to_1(
+            t_out = $SCT.gradient_tracer_2_to_1(
                 tx, ty, is_der1_arg1_zero, is_der1_arg2_zero
             )
             return $SCT.Dual(p_out, t_out)
@@ -125,7 +125,7 @@ function overload_gradient_2_to_1_dual(M, op)
 
             tx = $SCT.tracer(dx)
             is_der1_arg1_zero = $SCT.is_der1_arg1_zero_local($M.$op, x, y)
-            t_out = @noinline $SCT.gradient_tracer_1_to_1(tx, is_der1_arg1_zero)
+            t_out = $SCT.gradient_tracer_1_to_1(tx, is_der1_arg1_zero)
             return $SCT.Dual(p_out, t_out)
         end
 
@@ -135,7 +135,7 @@ function overload_gradient_2_to_1_dual(M, op)
 
             ty = $SCT.tracer(dy)
             is_der1_arg2_zero = $SCT.is_der1_arg2_zero_local($M.$op, x, y)
-            t_out = @noinline $SCT.gradient_tracer_1_to_1(ty, is_der1_arg2_zero)
+            t_out = $SCT.gradient_tracer_1_to_1(ty, is_der1_arg2_zero)
             return $SCT.Dual(p_out, t_out)
         end
     end
@@ -143,7 +143,7 @@ end
 
 ## 1-to-2
 
-function gradient_tracer_1_to_2(
+@noinline function gradient_tracer_1_to_2(
     t::T, is_der1_out1_zero::Bool, is_der1_out2_zero::Bool
 ) where {T<:GradientTracer}
     if isemptytracer(t) # TODO: add test
@@ -161,9 +161,7 @@ function overload_gradient_1_to_2(M, op)
         function $M.$op(t::$SCT.GradientTracer)
             is_der1_out1_zero = $SCT.is_der1_out1_zero_global($M.$op)
             is_der1_out2_zero = $SCT.is_der1_out2_zero_global($M.$op)
-            return @noinline $SCT.gradient_tracer_1_to_2(
-                t, is_der1_out1_zero, is_der1_out2_zero
-            )
+            return $SCT.gradient_tracer_1_to_2(t, is_der1_out1_zero, is_der1_out2_zero)
         end
     end
 end
@@ -178,7 +176,7 @@ function overload_gradient_1_to_2_dual(M, op)
             t = $SCT.tracer(d)
             is_der1_out2_zero = $SCT.is_der1_out2_zero_local($M.$op, x)
             is_der1_out1_zero = $SCT.is_der1_out1_zero_local($M.$op, x)
-            t_out1, t_out2 = @noinline $SCT.gradient_tracer_1_to_2(
+            t_out1, t_out2 = $SCT.gradient_tracer_1_to_2(
                 t, is_der1_out1_zero, is_der1_out2_zero
             )
             return ($SCT.Dual(p_out1, t_out1), $SCT.Dual(p_out2, t_out2))  # TODO: this was wrong, add test
