@@ -61,7 +61,7 @@ ops_1_to_1_s = (
 
 for op in ops_1_to_1_s
     T = typeof(op)
-    @eval SCT.is_influence_zero_global(::$T) = false
+    @eval SCT.is_infl_zero_global(::$T) = false
     @eval SCT.is_der1_zero_global(::$T) = false
     @eval SCT.is_der2_zero_global(::$T) = false
 end
@@ -102,13 +102,13 @@ ops_2_to_1_ssc = (
 
 for op in ops_2_to_1_ssc
     T = typeof(op)
-    @eval SCT.is_influence_arg1_zero_global(::$T) = false
-    @eval SCT.is_influence_arg2_zero_global(::$T) = false
+    @eval SCT.is_infl_arg1_zero_global(::$T) = false
+    @eval SCT.is_infl_arg2_zero_global(::$T) = false
     @eval SCT.is_der1_arg1_zero_global(::$T) = false
     @eval SCT.is_der2_arg1_zero_global(::$T) = false
     @eval SCT.is_der1_arg2_zero_global(::$T) = false
     @eval SCT.is_der2_arg2_zero_global(::$T) = false
-    @eval SCT.is_crossder_zero_global(::$T) = false
+    @eval SCT.is_der_cross_zero_global(::$T) = false
 end
 
 ops_2_to_1 = ops_2_to_1_ssc

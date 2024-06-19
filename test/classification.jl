@@ -9,12 +9,12 @@ using SparseConnectivityTracer:
     is_der2_arg1_zero_global,
     is_der1_arg2_zero_global,
     is_der2_arg2_zero_global,
-    is_crossder_zero_global,
+    is_der_cross_zero_global,
     is_der1_arg1_zero_local,
     is_der2_arg1_zero_local,
     is_der1_arg2_zero_local,
     is_der2_arg2_zero_local,
-    is_crossder_zero_local,
+    is_der_cross_zero_local,
     list_operators_1_to_2,
     is_der1_out1_zero_global,
     is_der2_out1_zero_global,
@@ -116,7 +116,7 @@ function correct_classification_2_to_1(op, x, y; atol)
     elseif (is_der2_arg2_zero_global(op) | is_der2_arg2_zero_local(op, x, y)) &&
         !isapprox(∂²f∂y², 0; atol)
         return false
-    elseif (is_crossder_zero_global(op) | is_crossder_zero_local(op, x, y)) &&
+    elseif (is_der_cross_zero_global(op) | is_der_cross_zero_local(op, x, y)) &&
         !isapprox(∂²f∂x∂y, 0; atol)
         return false
     else

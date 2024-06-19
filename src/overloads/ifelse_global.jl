@@ -41,13 +41,13 @@ end
 # Overload only on AbstractTracer, not Dual 
 for op in (isequal, isapprox, isless, ==, <, >, <=, >=)
     T = typeof(op)
-    @eval is_influence_arg1_zero_global(::$T) = false
-    @eval is_influence_arg2_zero_global(::$T) = false
+    @eval is_infl_arg1_zero_global(::$T) = false
+    @eval is_infl_arg2_zero_global(::$T) = false
     @eval is_der1_arg1_zero_global(::$T) = true
     @eval is_der2_arg1_zero_global(::$T) = true
     @eval is_der1_arg2_zero_global(::$T) = true
     @eval is_der2_arg2_zero_global(::$T) = true
-    @eval is_crossder_zero_global(::$T) = true
+    @eval is_der_cross_zero_global(::$T) = true
 
     op_symb = nameof(op)
     SparseConnectivityTracer.eval(overload_connectivity_2_to_1(:Base, op_symb))
