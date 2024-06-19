@@ -40,16 +40,16 @@ ops_1_to_1_s = (
 for op in ops_1_to_1_s
     T = typeof(op)
     @eval SCT.is_influence_zero_global(::$T) = false
-    @eval SCT.is_firstder_zero_global(::$T) = false
-    @eval SCT.is_seconder_zero_global(::$T) = false
+    @eval SCT.is_der1_zero_global(::$T) = false
+    @eval SCT.is_der2_zero_global(::$T) = false
 end
 
-SCT.is_seconder_zero_local(::typeof(celu)) = x > 0
-SCT.is_seconder_zero_local(::typeof(elu)) = x > 0
-SCT.is_seconder_zero_local(::typeof(selu)) = x > 0
+SCT.is_der2_zero_local(::typeof(celu)) = x > 0
+SCT.is_der2_zero_local(::typeof(elu)) = x > 0
+SCT.is_der2_zero_local(::typeof(selu)) = x > 0
 
-SCT.is_firstder_zero_local(::typeof(hardswish)) = x < -3
-SCT.is_seconder_zero_local(::typeof(hardswish)) = x < -3 || x > 3
+SCT.is_der1_zero_local(::typeof(hardswish)) = x < -3
+SCT.is_der2_zero_local(::typeof(hardswish)) = x < -3 || x > 3
 
 # ops_1_to_1_f:
 # x -> f  != 0
@@ -70,17 +70,17 @@ ops_1_to_1_f = (
 for op in ops_1_to_1_f
     T = typeof(op)
     @eval SCT.is_influence_zero_global(::$T) = false
-    @eval SCT.is_firstder_zero_global(::$T) = false
-    @eval SCT.is_seconder_zero_global(::$T) = true
+    @eval SCT.is_der1_zero_global(::$T) = false
+    @eval SCT.is_der2_zero_global(::$T) = true
 end
 
-SCT.is_firstder_zero_local(::typeof(relu), x) = x < 0
-SCT.is_firstder_zero_local(::typeof(relu6), x) = x < 0 || x > 6
-SCT.is_firstder_zero_local(::typeof(trelu), x) = x < 1
+SCT.is_der1_zero_local(::typeof(relu), x) = x < 0
+SCT.is_der1_zero_local(::typeof(relu6), x) = x < 0 || x > 6
+SCT.is_der1_zero_local(::typeof(trelu), x) = x < 1
 
-SCT.is_firstder_zero_local(::typeof(hardσ), x) = x < -3 || x > 3
-SCT.is_firstder_zero_local(::typeof(hardtanh), x) = x < -1 || x > 1
-SCT.is_firstder_zero_local(::typeof(softshrink), x) = x > -0.5 && x < 0.5
+SCT.is_der1_zero_local(::typeof(hardσ), x) = x < -3 || x > 3
+SCT.is_der1_zero_local(::typeof(hardtanh), x) = x < -1 || x > 1
+SCT.is_der1_zero_local(::typeof(softshrink), x) = x > -0.5 && x < 0.5
 
 ops_1_to_1 = union(ops_1_to_1_s, ops_1_to_1_f)
 
