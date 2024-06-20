@@ -141,6 +141,10 @@ end
 
 # Conversion of matrices of tracers to SparseMatrixCSC has to be rewritten 
 # due to use of `count(_isnotzero, M)` in SparseArrays.jl
+#
+# Code modified from MIT licensed SparseArrays.jl source:
+# https://github.com/JuliaSparse/SparseArrays.jl/blob/45dfe459ede2fa1419e7068d4bda92d9d22bd44d/src/sparsematrix.jl#L901-L920
+# Copyright (c) 2009-2024: Jeff Bezanson, Stefan Karpinski, Viral B. Shah, and other contributors: https://github.com/JuliaLang/julia/contributors
 function SparseArrays.SparseMatrixCSC{Tv,Ti}(
     M::StridedMatrix{Tv}
 ) where {Tv<:AbstractTracer,Ti}
