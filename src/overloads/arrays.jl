@@ -22,9 +22,21 @@ end
 # LinearAlgebra.jl #
 #==================#
 
+# TODO: replace `conservative_or` by less conservative sparsity patterns when possible
+
 LinearAlgebra.det(A::AbstractMatrix{T}) where {T<:AbstractTracer} = conservative_or(A)
 LinearAlgebra.logdet(A::AbstractMatrix{T}) where {T<:AbstractTracer} = conservative_or(A)
 LinearAlgebra.logabsdet(A::AbstractMatrix{T}) where {T<:AbstractTracer} = conservative_or(A)
+
+function LinearAlgebra.norm(A::AbstractArray{T}, p::Real=2) where {T<:AbstractTracer}
+    return conservative_or(A)
+end
+function LinearAlgebra.opnorm(A::AbstractArray{T}, p::Real=2) where {T<:AbstractTracer}
+    return conservative_or(A)
+end
+function LinearAlgebra.opnorm(A::AbstractMatrix{T}, p::Real=2) where {T<:AbstractTracer}
+    return conservative_or(A)
+end
 
 function LinearAlgebra.inv(A::StridedMatrix{T}) where {T<:AbstractTracer}
     LinearAlgebra.checksquare(A)

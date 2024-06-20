@@ -7,16 +7,24 @@ using Test
 
 PATTERN_FUNCTIONS = (connectivity_pattern, jacobian_pattern, hessian_pattern)
 
+TEST_MATRICES = Dict(
+    "Matrix (3×3)" => rand(3, 3),
+    "Matrix (3×4)" => rand(3, 4),
+    "Symmetric (3×3)" => Symmetric(rand(3, 3)),
+    "Diagonal (3×3)" => Diagonal(rand(3)),
+)
+
 function test_full_patterns(f, x)
-    @testset "$pf" for pf in PATTERN_FUNCTIONS
-        @test all(isone, pf(f, x))
+    @testset "$f_pattern" for f_pattern in PATTERN_FUNCTIONS
+        @test all(isone, f_pattern(f, x))
     end
 end
 
-@testset "Determinant" begin
-    A = rand(3, 4)
-    @testset "$f" for f in (det, logdet, logabsdet)
-        test_full_patterns(f, A)
+@testset "Scalar functions" begin
+    @testset "$f" for f in (det, logdet, logabsdet, norm, opnorm)
+        @testset "$name" for (name, A) in TEST_MATRICES
+            test_full_patterns(f, A)
+        end
     end
 end
 
@@ -26,10 +34,11 @@ end
         sumf(x) = sum(f(x))
         test_full_patterns(sumf, A)
     end
-    A = rand(3, 4)
     @testset "$f" for f in (pinv,)
-        sumf(x) = sum(f(x))
-        test_full_patterns(sumf, A)
+        @testset "$name" for (name, A) in TEST_MATRICES
+            sumf(x) = sum(f(x))
+            test_full_patterns(sumf, A)
+        end
     end
 end
 
