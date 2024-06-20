@@ -52,6 +52,7 @@ end
 #===========#
 # Utilities #
 #===========#
+
 function split_dual_array(A::AbstractArray{D}) where {D<:Dual}
     primals = getproperty.(A, :primal)
     tracers = getproperty.(A, :tracer)
@@ -93,9 +94,9 @@ function LinearAlgebra.logdet(A::AbstractMatrix{D}) where {D<:Dual}
 end
 function LinearAlgebra.logabsdet(A::AbstractMatrix{D}) where {D<:Dual}
     P, T = split_dual_array(A)
-    ps = LinearAlgebra.logabsdet(P)
-    ts = LinearAlgebra.logabsdet(T)
-    return (D(ps[1], ts[1]), D(ps[2], ts[2]))
+    p1, p2 = LinearAlgebra.logabsdet(P)
+    t1, t2 = LinearAlgebra.logabsdet(T)
+    return (D(p1, t1), D(p2, t2))
 end
 
 ## Norm

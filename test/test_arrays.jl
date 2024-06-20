@@ -1,4 +1,4 @@
-using SparseConnectivityTracer
+import SparseConnectivityTracer as SCT
 using SparseConnectivityTracer: GradientTracer
 using LinearAlgebra: Symmetric, Diagonal
 using LinearAlgebra: det, logdet, logabsdet, norm, opnorm
@@ -15,6 +15,9 @@ TEST_SQUARE_MATRICES = Dict(
     "`Diagonal` (3×3)" => Diagonal(rand(3)),
 )
 TEST_MATRICES = merge(TEST_SQUARE_MATRICES, Dict("`Matrix` (3×4)" => rand(3, 4)))
+
+S = BitSet
+TG = GradientTracer{S}
 
 # NOTE: we currently test for conservative patterns on array overloads
 # Changes making array overloads less convervative will break these tests, but are welcome!  
@@ -79,33 +82,39 @@ end
 end
 
 @testset "Matrix division" begin
-    t1 = GradientTracer{BitSet}(BitSet([1, 3, 4]))
-    t2 = GradientTracer{BitSet}(BitSet([2, 4]))
-    t3 = GradientTracer{BitSet}(BitSet([8, 9]))
-    t4 = GradientTracer{BitSet}(BitSet([8, 9]))
+    t1 = TG(S([1, 3, 4]))
+    t2 = TG(S([2, 4]))
+    t3 = TG(S([8, 9]))
+    t4 = TG(S([8, 9]))
     A = [t1 t2; t3 t4]
-    s_out = BitSet([1, 2, 3, 4, 8, 9])
+    s_out = S([1, 2, 3, 4, 8, 9])
 
     x = rand(2)
     b = A \ x
-    @test all(t -> SparseConnectivityTracer.gradient(t) == s_out, b)
+    @test all(t -> SCT.gradient(t) == s_out, b)
 end
 
 @testset "Eigenvalues" begin
+    t1 = TG(S([1, 3, 4]))
+    t2 = TG(S([2, 4]))
+    t3 = TG(S([8, 9]))
+    t4 = TG(S([8, 9]))
+    A = [t1 t2; t3 t4]
+    s_out = S([1, 2, 3, 4, 8, 9])
     values, vectors = eigen(A)
     @test size(values) == (2,)
     @test size(vectors) == (2, 2)
-    @test all(t -> SparseConnectivityTracer.gradient(t) == s_out, values)
-    @test all(t -> SparseConnectivityTracer.gradient(t) == s_out, vectors)
+    @test all(t -> SCT.gradient(t) == s_out, values)
+    @test all(t -> SCT.gradient(t) == s_out, vectors)
 end
 
 @testset "SparseMatrixCSC construction" begin
-    t1 = GradientTracer{BitSet}(BitSet(1))
-    t2 = GradientTracer{BitSet}(BitSet(2))
-    t3 = GradientTracer{BitSet}(BitSet(3))
+    t1 = TG(S(1))
+    t2 = TG(S(2))
+    t3 = TG(S(3))
     SA = sparse([t1 t2; t3 0])
     @test length(SA.nzval) == 3
 
     res = opnorm(SA, 1)
-    @test SparseConnectivityTracer.gradient(res) == BitSet([1, 2, 3])
+    @test SCT.gradient(res) == S([1, 2, 3])
 end
