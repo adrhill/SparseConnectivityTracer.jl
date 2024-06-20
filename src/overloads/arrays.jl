@@ -49,6 +49,21 @@ function first_order_or(a::T, b::T) where {T<:HessianTracer}
     return hessian_tracer_2_to_1(a, b, false, true, false, true, true)
 end
 
+#===========#
+# Utilities #
+#===========#
+function split_dual_array(A::AbstractArray{D}) where {D<:Dual}
+    primals = getproperty.(A, :primal)
+    tracers = getproperty.(A, :tracer)
+    return primals, tracers
+end
+function split_dual_array(A::SparseArrays.SparseMatrixCSC{D}) where {D<:Dual}
+    A = Matrix(A)
+    primals = getproperty.(A, :primal)
+    tracers = getproperty.(A, :tracer)
+    return sparse(primals), sparse(tracers)
+end
+
 #==================#
 # LinearAlgebra.jl #
 #==================#
@@ -61,6 +76,26 @@ LinearAlgebra.logdet(A::AbstractMatrix{T}) where {T<:AbstractTracer} = second_or
 function LinearAlgebra.logabsdet(A::AbstractMatrix{T}) where {T<:AbstractTracer}
     t = second_order_or(A)
     return (t, t)
+end
+
+# Fix for issue #108
+function LinearAlgebra.det(A::AbstractMatrix{D}) where {D<:Dual}
+    P, T = split_dual_array(A)
+    p = LinearAlgebra.logdet(P)
+    t = LinearAlgebra.logdet(T)
+    return D(p, t)
+end
+function LinearAlgebra.logdet(A::AbstractMatrix{D}) where {D<:Dual}
+    P, T = split_dual_array(A)
+    p = LinearAlgebra.logdet(P)
+    t = LinearAlgebra.logdet(T)
+    return D(p, t)
+end
+function LinearAlgebra.logabsdet(A::AbstractMatrix{D}) where {D<:Dual}
+    P, T = split_dual_array(A)
+    ps = LinearAlgebra.logabsdet(P)
+    ts = LinearAlgebra.logabsdet(T)
+    return (D(ps[1], ts[1]), D(ps[2], ts[2]))
 end
 
 ## Norm
