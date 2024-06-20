@@ -1,7 +1,8 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer: GradientTracer
 using SparseArrays
-using LinearAlgebra: det, logdet, inv, pinv
+using LinearAlgebra: det, logdet, logabsdet
+using LinearAlgebra: inv, pinv
 using Test
 
 PATTERN_FUNCTIONS = (connectivity_pattern, jacobian_pattern, hessian_pattern)
@@ -14,7 +15,7 @@ end
 
 @testset "Determinant" begin
     A = rand(3, 4)
-    @testset "$f" for f in (det, logdet)
+    @testset "$f" for f in (det, logdet, logabsdet)
         test_full_patterns(f, A)
     end
 end

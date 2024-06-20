@@ -24,6 +24,7 @@ end
 
 LinearAlgebra.det(A::AbstractMatrix{T}) where {T<:AbstractTracer} = conservative_or(A)
 LinearAlgebra.logdet(A::AbstractMatrix{T}) where {T<:AbstractTracer} = conservative_or(A)
+LinearAlgebra.logabsdet(A::AbstractMatrix{T}) where {T<:AbstractTracer} = conservative_or(A)
 
 function LinearAlgebra.inv(A::StridedMatrix{T}) where {T<:AbstractTracer}
     LinearAlgebra.checksquare(A)
