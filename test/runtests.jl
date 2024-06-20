@@ -91,8 +91,10 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
             @testset "Brusselator" begin
                 include("brusselator.jl")
             end
-            @testset "Flux.jl" begin
-                include("flux.jl")
+            if pkgversion(NNlib) >= v"0.9.18" # contains NNlib PR #592
+                @testset "Flux.jl" begin
+                    include("flux.jl")
+                end
             end
         end
     end
