@@ -58,7 +58,10 @@ end
 ## Determinant
 LinearAlgebra.det(A::AbstractMatrix{T}) where {T<:AbstractTracer} = second_order_or(A)
 LinearAlgebra.logdet(A::AbstractMatrix{T}) where {T<:AbstractTracer} = second_order_or(A)
-LinearAlgebra.logabsdet(A::AbstractMatrix{T}) where {T<:AbstractTracer} = second_order_or(A)
+function LinearAlgebra.logabsdet(A::AbstractMatrix{T}) where {T<:AbstractTracer}
+    t = second_order_or(A)
+    return (t, t)
+end
 
 ## Norm
 function LinearAlgebra.norm(A::AbstractArray{T}, p::Real=2) where {T<:AbstractTracer}
