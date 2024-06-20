@@ -4,7 +4,7 @@ using LinearAlgebra: Symmetric, Diagonal
 using LinearAlgebra: det, logdet, logabsdet, norm, opnorm
 using LinearAlgebra: eigen, eigmax, eigmin
 using LinearAlgebra: inv, pinv
-using SparseArrays: sparse
+using SparseArrays: sparse, spdiagm
 using Test
 
 PATTERN_FUNCTIONS = (connectivity_pattern, jacobian_pattern, hessian_pattern)
@@ -31,12 +31,24 @@ end
         end
         @testset "`SparseMatrixCSC` (3×3)" begin
             test_full_patterns(A -> f(sparse(A)), rand(3, 3))
+            test_full_patterns(A -> f(spdiagm(A)), rand(3))
         end
     end
     @testset "opnorm" begin
-        @test all(isone, connectivity_pattern(a -> opnorm(a, 1), A))
-        @test all(isone, jacobian_pattern(a -> opnorm(a, 1), A))
-        @test all(iszero, hessian_pattern(a -> opnorm(a, 1), A))
+        @testset "$name" for (name, A) in TEST_MATRICES
+            @test all(isone, connectivity_pattern(a -> opnorm(a, 1), A))
+            @test all(isone, jacobian_pattern(a -> opnorm(a, 1), A))
+            @test all(iszero, hessian_pattern(a -> opnorm(a, 1), A))
+        end
+        @testset "`SparseMatrixCSC` (3×3)" begin
+            @test all(isone, connectivity_pattern(a -> opnorm(sparse(a), 1), rand(3, 3)))
+            @test all(isone, jacobian_pattern(a -> opnorm(sparse(a), 1), rand(3, 3)))
+            @test all(iszero, hessian_pattern(a -> opnorm(sparse(a), 1), rand(3, 3)))
+
+            @test all(isone, connectivity_pattern(a -> opnorm(spdiagm(a), 1), rand(3)))
+            @test all(isone, jacobian_pattern(a -> opnorm(spdiagm(a), 1), rand(3)))
+            @test all(iszero, hessian_pattern(a -> opnorm(spdiagm(a), 1), rand(3)))
+        end
     end
 end
 
