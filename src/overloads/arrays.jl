@@ -87,3 +87,19 @@ function LinearAlgebra.:\(
     Ainv = LinearAlgebra.pinv(A)
     return Ainv * B
 end
+
+## Exponent
+function LinearAlgebra.exp(A::AbstractMatrix{T}) where {T<:AbstractTracer}
+    LinearAlgebra.checksquare(A)
+    n = size(A, 1)
+    t = conservative_or(A)
+    return Fill(t, n, n)
+end
+
+## Matrix power
+function LinearAlgebra.:^(A::AbstractMatrix{T}, p::Integer) where {T<:AbstractTracer}
+    LinearAlgebra.checksquare(A)
+    n = size(A, 1)
+    t = conservative_or(A)
+    return Fill(t, n, n)
+end

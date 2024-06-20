@@ -7,12 +7,12 @@ using Test
 
 PATTERN_FUNCTIONS = (connectivity_pattern, jacobian_pattern, hessian_pattern)
 
-TEST_MATRICES = Dict(
+TEST_SQUARE_MATRICES = Dict(
     "Matrix (3×3)" => rand(3, 3),
-    "Matrix (3×4)" => rand(3, 4),
     "Symmetric (3×3)" => Symmetric(rand(3, 3)),
     "Diagonal (3×3)" => Diagonal(rand(3)),
 )
+TEST_MATRICES = merge(TEST_SQUARE_MATRICES, Dict("Matrix (3×4)" => rand(3, 4)))
 
 function test_full_patterns(f, x)
     @testset "$f_pattern" for f_pattern in PATTERN_FUNCTIONS
@@ -28,15 +28,18 @@ end
     end
 end
 
-@testset "Matrix inverse" begin
-    A = rand(3, 3)
-    @testset "$f" for f in (inv, pinv)
+@testset "Matrix-valued functions" begin
+    # Functions that only work on square matrices
+    @testset "$f" for f in (inv, exp, A -> A^3)
         sumf(x) = sum(f(x))
-        test_full_patterns(sumf, A)
+        @testset "$name" for (name, A) in TEST_SQUARE_MATRICES
+            test_full_patterns(sumf, A)
+        end
     end
+    # Functions that work on all matrices
     @testset "$f" for f in (pinv,)
+        sumf(x) = sum(f(x))
         @testset "$name" for (name, A) in TEST_MATRICES
-            sumf(x) = sum(f(x))
             test_full_patterns(sumf, A)
         end
     end
