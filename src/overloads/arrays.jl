@@ -134,3 +134,32 @@ function LinearAlgebra.:^(A::AbstractMatrix{T}, p::Integer) where {T<:AbstractTr
     t = second_order_or(A)
     return Fill(t, n, n)
 end
+
+#==============#
+# SparseArrays #
+#==============#
+
+# Conversion of matrices of tracers to SparseMatrixCSC has to be rewritten 
+# due to use of `count(_isnotzero, M)` in SparseArrays.jl
+function SparseArrays.SparseMatrixCSC{Tv,Ti}(
+    M::StridedMatrix{Tv}
+) where {Tv<:AbstractTracer,Ti}
+    nz = count(!isemptytracer, M)
+    colptr = zeros(Ti, size(M, 2) + 1)
+    nzval = Vector{Tv}(undef, nz)
+    rowval = Vector{Ti}(undef, nz)
+    colptr[1] = 1
+    cnt = 1
+    @inbounds for j in 1:size(M, 2)
+        for i in 1:size(M, 1)
+            v = M[i, j]
+            if !isemptytracer(v)
+                rowval[cnt] = i
+                nzval[cnt] = v
+                cnt += 1
+            end
+        end
+        colptr[j + 1] = cnt
+    end
+    return SparseArrays.SparseMatrixCSC(size(M, 1), size(M, 2), colptr, rowval, nzval)
+end
