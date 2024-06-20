@@ -20,6 +20,3 @@ ReferenceTests = "324d217c-45ce-50fc-942e-d289b448e8cf"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-
-[compat]
-NNlib = "0.9.18" # contains NNlib PR #592, which solves #123
