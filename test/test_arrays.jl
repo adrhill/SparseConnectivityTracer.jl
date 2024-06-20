@@ -21,7 +21,7 @@ function test_full_patterns(f, x)
 end
 
 @testset "Scalar functions" begin
-    @testset "$f" for f in (det, logdet, logabsdet, norm, opnorm)
+    @testset "$f" for f in (det, logdet, logabsdet, norm, opnorm, eigmax, eigmin)
         @testset "$name" for (name, A) in TEST_MATRICES
             test_full_patterns(f, A)
         end
@@ -42,15 +42,22 @@ end
     end
 end
 
-@testset "Matrix division" begin
-    t1 = GradientTracer{BitSet}(BitSet([1, 3, 4]))
-    t2 = GradientTracer{BitSet}(BitSet([2, 4]))
-    t3 = GradientTracer{BitSet}(BitSet([8, 9]))
-    t4 = GradientTracer{BitSet}(BitSet([8, 9]))
-    A = [t1 t2; t3 t4]
-    x = rand(2)
+t1 = GradientTracer{BitSet}(BitSet([1, 3, 4]))
+t2 = GradientTracer{BitSet}(BitSet([2, 4]))
+t3 = GradientTracer{BitSet}(BitSet([8, 9]))
+t4 = GradientTracer{BitSet}(BitSet([8, 9]))
+A = [t1 t2; t3 t4]
+s_out = BitSet([1, 2, 3, 4, 8, 9])
 
+@testset "Matrix division" begin
+    x = rand(2)
     b = A \ x
-    s_out = BitSet([1, 2, 3, 4, 8, 9])
     @test all(t -> SparseConnectivityTracer.gradient(t) == s_out, b)
+end
+@testset "Eigenvalues" begin
+    values, vectors = eigen(A)
+    @test size(values) == (2,)
+    @test size(vectors) == (2, 2)
+    @test all(t -> SparseConnectivityTracer.gradient(t) == s_out, values)
+    @test all(t -> SparseConnectivityTracer.gradient(t) == s_out, vectors)
 end
