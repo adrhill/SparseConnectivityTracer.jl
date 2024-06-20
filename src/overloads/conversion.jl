@@ -6,7 +6,6 @@ Base.promote_rule(::Type{N}, ::Type{T}) where {T<:AbstractTracer,N<:Real} = T
 
 Base.big(::Type{T})   where {T<:AbstractTracer} = T
 Base.widen(::Type{T}) where {T<:AbstractTracer} = T
-Base.float(::Type{T}) where {T<:AbstractTracer} = T
 
 Base.convert(::Type{T}, x::Real)   where {T<:AbstractTracer} = myempty(T)
 Base.convert(::Type{T}, t::T)      where {T<:AbstractTracer} = t
@@ -40,7 +39,6 @@ end
 
 Base.big(::Type{D})   where {P,T,D<:Dual{P,T}} = Dual{big(P),T}
 Base.widen(::Type{D}) where {P,T,D<:Dual{P,T}} = Dual{widen(P),T}
-Base.float(::Type{D}) where {P,T,D<:Dual{P,T}} = Dual{float(P),T}
 
 Base.convert(::Type{D}, x::Real) where {P,T,D<:Dual{P,T}}           = Dual(x, myempty(T))
 Base.convert(::Type{D}, d::D)    where {P,T,D<:Dual{P,T}}           = d
