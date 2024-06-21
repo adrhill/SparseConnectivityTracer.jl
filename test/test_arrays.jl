@@ -28,7 +28,9 @@ function test_full_patterns(f, x)
 end
 
 @testset "Scalar functions" begin
-    @testset "$f" for f in (det, logdet, logabsdet, norm, eigmax, eigmin)
+    @testset "$f" for f in (
+        det, logdet, A -> first(logabsdet(A)), A -> last(logabsdet(A)), norm, eigmax, eigmin
+    )
         @testset "$name" for (name, A) in TEST_MATRICES
             test_full_patterns(f, A)
         end
