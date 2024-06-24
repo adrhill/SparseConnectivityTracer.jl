@@ -1,7 +1,5 @@
 abstract type AbstractTracer <: Real end
 
-isshared(::Type{<:AbstractTracer}) = false
-
 #===================#
 # Set operations    #
 #===================#
@@ -195,7 +193,6 @@ gradient(d::Dual{P,T}) where {P,T<:GradientTracer}   = gradient(tracer(d))
 gradient(d::Dual{P,T}) where {P,T<:HessianTracer}    = gradient(tracer(d))
 hessian(d::Dual{P,T}) where {P,T<:HessianTracer}     = hessian(tracer(d))
 isemptytracer(d::Dual)                               = isemptytracer(tracer(d))
-isshared(d::Dual{P,T}) where {P,T<:HessianTracer}    = isshared(tracer(d))
 
 Dual{P,T}(d::Dual{P,T}) where {P<:Real,T<:AbstractTracer} = d
 Dual(primal::P, tracer::T) where {P,T} = Dual{P,T}(primal, tracer)
