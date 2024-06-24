@@ -171,8 +171,14 @@ end
 function LinearAlgebra.:^(A::AbstractMatrix{T}, p::Integer) where {T<:AbstractTracer}
     LinearAlgebra.checksquare(A)
     n = size(A, 1)
-    t = second_order_or(A)
-    return Fill(t, n, n)
+    if iszero(p)
+        return Fill(myempty(T), n, n)
+    elseif isone(p)
+        return A
+    else
+        t = second_order_or(A)
+        return Fill(t, n, n)
+    end
 end
 
 #==============#
