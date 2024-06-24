@@ -7,24 +7,32 @@
         return t
     else
         g_out, h_out = hessian_tracer_1_to_1_inner(
-            gradient(t), hessian(t), is_der1_zero, is_secondder_zero
+            gradient(t), hessian(t), is_der1_zero, is_secondder_zero; shared=isshared(T)
         )
         return T(g_out, h_out) # return tracer
     end
 end
 
 function hessian_tracer_1_to_1_inner(
-    sg::G, sh::H, is_der1_zero::Bool, is_secondder_zero::Bool
+    sg::G, sh::H, is_der1_zero::Bool, is_secondder_zero::Bool; shared::Bool
 ) where {I<:Integer,G<:AbstractSet{I},H<:AbstractSet{Tuple{I,I}}}
     sg_out = gradient_tracer_1_to_1_inner(sg, is_der1_zero)
-    sh_out = if is_der1_zero && is_secondder_zero
-        myempty(H)
-    elseif !is_der1_zero && is_secondder_zero
-        sh
-    elseif is_der1_zero && !is_secondder_zero
-        union_product!(myempty(H), sg, sg)
+    if shared
+        sh_out = if is_secondder_zero
+            sh
+        else
+            union_product!(sh, sg, sg)
+        end
     else
-        union_product!(copy(sh), sg, sg)
+        sh_out = if is_der1_zero && is_secondder_zero
+            myempty(H)
+        elseif !is_der1_zero && is_secondder_zero
+            sh
+        elseif is_der1_zero && !is_secondder_zero
+            union_product!(myempty(H), sg, sg)
+        else
+            union_product!(copy(sh), sg, sg)
+        end
     end
     return sg_out, sh_out # return sets
 end
@@ -65,7 +73,7 @@ end
     is_secondder_arg1_zero::Bool,
     is_der1_arg2_zero::Bool,
     is_secondder_arg2_zero::Bool,
-    is_der_cross_zero::Bool,
+    is_der_cross_zero::Bool;
 ) where {T<:HessianTracer}
     # TODO: add tests for isempty
     if tx.isempty && ty.isempty
@@ -84,7 +92,8 @@ end
             is_secondder_arg1_zero,
             is_der1_arg2_zero,
             is_secondder_arg2_zero,
-            is_der_cross_zero,
+            is_der_cross_zero;
+            shared=isshared(T),
         )
         return T(g_out, h_out) # return tracer
     end
@@ -99,12 +108,17 @@ function hessian_tracer_2_to_1_inner(
     is_secondder_arg1_zero::Bool,
     is_der1_arg2_zero::Bool,
     is_secondder_arg2_zero::Bool,
-    is_der_cross_zero::Bool,
+    is_der_cross_zero::Bool;
+    shared::Bool,
 ) where {I<:Integer,G<:AbstractSet{I},H<:AbstractSet{Tuple{I,I}}}
     sg_out = gradient_tracer_2_to_1_inner(sgx, sgy, is_der1_arg1_zero, is_der1_arg2_zero)
-    sh_out = myempty(H)
-    !is_der1_arg1_zero && union!(sh_out, shx)  # hessian alpha
-    !is_der1_arg2_zero && union!(sh_out, shy)  # hessian beta
+    if shared
+        sh_out = union!(shx, shy)
+    else
+        sh_out = myempty(H)
+        !is_der1_arg1_zero && union!(sh_out, shx)  # hessian alpha
+        !is_der1_arg2_zero && union!(sh_out, shy)  # hessian beta
+    end
     !is_secondder_arg1_zero && union_product!(sh_out, sgx, sgx)  # product alpha
     !is_secondder_arg2_zero && union_product!(sh_out, sgy, sgy)  # product beta
     !is_der_cross_zero && union_product!(sh_out, sgx, sgy)  # cross product 1

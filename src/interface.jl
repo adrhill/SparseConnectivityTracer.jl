@@ -1,6 +1,6 @@
 const DEFAULT_CONNECTIVITY_TRACER = ConnectivityTracer{BitSet}
 const DEFAULT_GRADIENT_TRACER = GradientTracer{BitSet}
-const DEFAULT_HESSIAN_TRACER = HessianTracer{BitSet,Set{Tuple{Int,Int}}}
+const DEFAULT_HESSIAN_TRACER = HessianTracer{BitSet,Set{Tuple{Int,Int}},false}
 
 #==================#
 # Enumerate inputs #
@@ -21,7 +21,7 @@ function trace_input(::Type{T}, x::Real, i::Integer) where {T<:Union{AbstractTra
 end
 function trace_input(::Type{T}, xs::AbstractArray, i) where {T<:Union{AbstractTracer,Dual}}
     indices = reshape(1:length(xs), size(xs)) .+ (i - 1)
-    return create_tracer.(T, xs, indices)
+    return create_tracers(T, xs, indices)
 end
 
 #=========================#

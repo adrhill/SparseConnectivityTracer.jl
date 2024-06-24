@@ -1,15 +1,17 @@
 using SparseConnectivityTracer
-using SparseConnectivityTracer: Dual, HessianTracer, MissingPrimalError, trace_input, empty
+using SparseConnectivityTracer:
+    Dual, HessianTracer, MissingPrimalError, trace_input, empty, isshared
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using ADTypes: hessian_sparsity
 using SpecialFunctions: erf, beta
 using Test
 
 HESSIAN_TRACERS = (
-    HessianTracer{BitSet,Set{Tuple{Int,Int}}},
-    HessianTracer{Set{Int},Set{Tuple{Int,Int}}},
-    HessianTracer{DuplicateVector{Int},DuplicateVector{Tuple{Int,Int}}},
-    HessianTracer{SortedVector{Int},SortedVector{Tuple{Int,Int}}},
+    HessianTracer{BitSet,Set{Tuple{Int,Int}},false},
+    HessianTracer{BitSet,Set{Tuple{Int,Int}},true},
+    HessianTracer{Set{Int},Set{Tuple{Int,Int}},false},
+    HessianTracer{DuplicateVector{Int},DuplicateVector{Tuple{Int,Int}},false},
+    HessianTracer{SortedVector{Int},SortedVector{Tuple{Int,Int}},false},
     # TODO: test on RecursiveSet
 )
 
@@ -99,20 +101,38 @@ HESSIAN_TRACERS = (
         ]
 
         h = hessian_sparsity(x -> copysign(x[1] * x[2], x[3] * x[4]), rand(4), method)
-        @test h == [
-            0 1 0 0
-            1 0 0 0
-            0 0 0 0
-            0 0 0 0
-        ]
+        if isshared(T)
+            @test h == [
+                0 1 0 0
+                1 0 0 0
+                0 0 0 1
+                0 0 1 0
+            ]
+        else
+            @test h == [
+                0 1 0 0
+                1 0 0 0
+                0 0 0 0
+                0 0 0 0
+            ]
+        end
 
         h = hessian_sparsity(x -> div(x[1] * x[2], x[3] * x[4]), rand(4), method)
-        @test h == [
-            0 0 0 0
-            0 0 0 0
-            0 0 0 0
-            0 0 0 0
-        ]
+        if isshared(T)
+            @test Matrix(h) == [
+                0 1 0 0
+                1 0 0 0
+                0 0 0 1
+                0 0 1 0
+            ]
+        else
+            @test h == [
+                0 0 0 0
+                0 0 0 0
+                0 0 0 0
+                0 0 0 0
+            ]
+        end
 
         h = hessian_sparsity(x -> sum(sincosd(x)), 1.0, method)
         @test h ≈ [1;;]
@@ -146,8 +166,30 @@ HESSIAN_TRACERS = (
             0 1 0 0 1
         ]
 
+        # Shared Hessian
+        function dead_end(x)
+            z = x[1] * x[2]
+            return x[3] * x[4]
+        end
+        h = hessian_sparsity(dead_end, rand(4), method)
+        if isshared(T)
+            @test h == [
+                0  1  0  0
+                1  0  0  0
+                0  0  0  1
+                0  0  1  0
+            ]
+        else
+            @test h == [
+                0  0  0  0
+                0  0  0  0
+                0  0  0  1
+                0  0  1  0
+            ]
+        end
+
         # Missing primal errors
-        @testset "MissingPrimalError on $f" for f in (
+        for f in (
             iseven,
             isfinite,
             isinf,
@@ -241,19 +283,59 @@ end
 
         f2(x) = ifelse(x[2] < x[3], x[1] * x[2], x[3] * x[4])
         h = hessian_sparsity(f2, [1 2 3 4], method)
-        @test h == [
-            0  1  0  0
-            1  0  0  0
-            0  0  0  0
-            0  0  0  0
-        ]
+        if isshared(T)
+            @test h == [
+                0  1  0  0
+                1  0  0  0
+                0  0  0  1
+                0  0  1  0
+            ]
+        else
+            @test h == [
+                0  1  0  0
+                1  0  0  0
+                0  0  0  0
+                0  0  0  0
+            ]
+        end
         h = hessian_sparsity(f2, [1 3 2 4], method)
-        @test h == [
-            0  0  0  0
-            0  0  0  0
-            0  0  0  1
-            0  0  1  0
-        ]
+        if isshared(T)
+            @test h == [
+                0  1  0  0
+                1  0  0  0
+                0  0  0  1
+                0  0  1  0
+            ]
+        else
+            @test h == [
+                0  0  0  0
+                0  0  0  0
+                0  0  0  1
+                0  0  1  0
+            ]
+        end
+
+        # Shared Hessian
+        function dead_end(x)
+            z = x[1] * x[2]
+            return x[3] * x[4]
+        end
+        h = hessian_sparsity(dead_end, rand(4), method)
+        if isshared(T)
+            @test h == [
+                0  1  0  0
+                1  0  0  0
+                0  0  0  1
+                0  0  1  0
+            ]
+        else
+            @test h == [
+                0  0  0  0
+                0  0  0  0
+                0  0  0  1
+                0  0  1  0
+            ]
+        end
 
         # Code coverage
         @test hessian_sparsity(typemax, 1, method) ≈ [0;;]
