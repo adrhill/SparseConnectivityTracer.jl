@@ -1,4 +1,5 @@
 import SparseConnectivityTracer as SCT
+using SparseConnectivityTracer
 using SparseConnectivityTracer: GradientTracer
 using LinearAlgebra: Symmetric, Diagonal
 using LinearAlgebra: det, logdet, logabsdet, norm, opnorm
@@ -53,7 +54,7 @@ end
         @testset "`SparseMatrixCSC` (3×3)" begin
             # first output
             test_full_patterns(A -> lad_first(sparse(A)), rand(3, 3))
-            test_full_patterns(A -> lad_first(spdiagm(A)), rand(3, 3))
+            test_full_patterns(A -> lad_first(spdiagm(A)), rand(3))
 
             # second output
             @test all(isone, connectivity_pattern(A -> lad_last(sparse(A)), rand(3, 3)))

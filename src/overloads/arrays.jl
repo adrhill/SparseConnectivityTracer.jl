@@ -82,21 +82,21 @@ end
 
 # Fix for issue #108
 function LinearAlgebra.det(A::AbstractMatrix{D}) where {D<:Dual}
-    P, T = split_dual_array(A)
-    p = LinearAlgebra.logdet(P)
-    t = LinearAlgebra.logdet(T)
+    primals, tracers = split_dual_array(A)
+    p = LinearAlgebra.logdet(primals)
+    t = LinearAlgebra.logdet(tracers)
     return D(p, t)
 end
 function LinearAlgebra.logdet(A::AbstractMatrix{D}) where {D<:Dual}
-    P, T = split_dual_array(A)
-    p = LinearAlgebra.logdet(P)
-    t = LinearAlgebra.logdet(T)
+    primals, tracers = split_dual_array(A)
+    p = LinearAlgebra.logdet(primals)
+    t = LinearAlgebra.logdet(tracers)
     return D(p, t)
 end
 function LinearAlgebra.logabsdet(A::AbstractMatrix{D}) where {D<:Dual}
-    P, T = split_dual_array(A)
-    p1, p2 = LinearAlgebra.logabsdet(P)
-    t1, t2 = LinearAlgebra.logabsdet(T)
+    primals, tracers = split_dual_array(A)
+    p1, p2 = LinearAlgebra.logabsdet(primals)
+    t1, t2 = LinearAlgebra.logabsdet(tracers)
     return (D(p1, t1), D(p2, t2))
 end
 
