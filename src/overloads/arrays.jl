@@ -80,26 +80,6 @@ function LinearAlgebra.logabsdet(A::AbstractMatrix{T}) where {T<:AbstractTracer}
     return (t1, t2)
 end
 
-# Fix for issue #108
-function LinearAlgebra.det(A::AbstractMatrix{D}) where {D<:Dual}
-    primals, tracers = split_dual_array(A)
-    p = LinearAlgebra.logdet(primals)
-    t = LinearAlgebra.logdet(tracers)
-    return D(p, t)
-end
-function LinearAlgebra.logdet(A::AbstractMatrix{D}) where {D<:Dual}
-    primals, tracers = split_dual_array(A)
-    p = LinearAlgebra.logdet(primals)
-    t = LinearAlgebra.logdet(tracers)
-    return D(p, t)
-end
-function LinearAlgebra.logabsdet(A::AbstractMatrix{D}) where {D<:Dual}
-    primals, tracers = split_dual_array(A)
-    p1, p2 = LinearAlgebra.logabsdet(primals)
-    t1, t2 = LinearAlgebra.logabsdet(tracers)
-    return (D(p1, t1), D(p2, t2))
-end
-
 ## Norm
 function LinearAlgebra.norm(A::AbstractArray{T}, p::Real=2) where {T<:AbstractTracer}
     return second_order_or(A)
@@ -179,6 +159,34 @@ function LinearAlgebra.:^(A::AbstractMatrix{T}, p::Integer) where {T<:AbstractTr
         t = second_order_or(A)
         return Fill(t, n, n)
     end
+end
+
+#==========================#
+# LinearAlgebra.jl on Dual #
+#==========================#
+
+# `Duals` should use LinearAlgebra's generic fallback implementations
+# to compute the "least conservative" sparsity patterns possible on a scalar level.
+
+# The following three methods are a temporary fix for issue #108.
+# TODO: instead overload `lu` on AbstractMatrix of Duals.
+function LinearAlgebra.det(A::AbstractMatrix{D}) where {D<:Dual}
+    primals, tracers = split_dual_array(A)
+    p = LinearAlgebra.logdet(primals)
+    t = LinearAlgebra.logdet(tracers)
+    return D(p, t)
+end
+function LinearAlgebra.logdet(A::AbstractMatrix{D}) where {D<:Dual}
+    primals, tracers = split_dual_array(A)
+    p = LinearAlgebra.logdet(primals)
+    t = LinearAlgebra.logdet(tracers)
+    return D(p, t)
+end
+function LinearAlgebra.logabsdet(A::AbstractMatrix{D}) where {D<:Dual}
+    primals, tracers = split_dual_array(A)
+    p1, p2 = LinearAlgebra.logabsdet(primals)
+    t1, t2 = LinearAlgebra.logabsdet(tracers)
+    return (D(p1, t1), D(p2, t2))
 end
 
 #==============#
