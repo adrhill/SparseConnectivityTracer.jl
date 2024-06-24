@@ -2,7 +2,7 @@ using BenchmarkTools
 
 using ADTypes: AbstractSparsityDetector, jacobian_sparsity
 using SparseConnectivityTracer
-using SparseConnectivityTracerBenchmarks: brusselator_2d_loop!
+using SparseConnectivityTracerBenchmarks.ODE: brusselator_2d_loop!
 
 using SparseArrays: sprand
 using SimpleDiffEq: ODEProblem, solve, SimpleEuler
