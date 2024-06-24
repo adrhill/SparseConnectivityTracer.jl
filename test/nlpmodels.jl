@@ -1,7 +1,10 @@
+using Dates: now
+using LinearAlgebra
 using OptimizationProblems
+using SparseArrays
 using Test
-
-include("definitions/nlpmodels_definitions.jl");
+using SparseConnectivityTracerBenchmarks.Optimization:
+    compute_jac_and_hess_sparsity_sct, compute_jac_and_hess_sparsity_and_value_jump
 
 function compare_patterns(
     truth::AbstractMatrix{<:Real}; sct::AbstractMatrix{Bool}, jump::AbstractMatrix{Bool}
@@ -33,7 +36,7 @@ Please look at the warnings displayed at the end.
 jac_inconsistencies = []
 hess_inconsistencies = []
 
-@testset "$name" for name in problem_names()
+@testset "$name" for name in Symbol.(OptimizationProblems.meta[!, :name])
     @info "$(now()) - $name"
 
     (jac_sparsity_sct, hess_sparsity_sct) = compute_jac_and_hess_sparsity_sct(name)

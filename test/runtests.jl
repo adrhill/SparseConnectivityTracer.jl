@@ -1,3 +1,6 @@
+using Pkg
+Pkg.develop(; path="../libs/SparseConnectivityTracerBenchmarks/")
+
 using SparseConnectivityTracer
 
 using Compat

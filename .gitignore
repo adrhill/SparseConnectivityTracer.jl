@@ -8,3 +8,4 @@
 /docs/src/index.md
 /benchmark/Manifest.toml
 /references/*
+/libs/SparseConnectivityTracerBenchmarks/Manifest.toml
