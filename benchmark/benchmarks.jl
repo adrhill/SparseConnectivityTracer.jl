@@ -1,5 +1,5 @@
 using Pkg
-Pkg.develop(; path="../libs/SparseConnectivityTracerBenchmarks/")
+Pkg.develop(; path=joinpath(@__DIR__, "..", "libs", "SparseConnectivityTracerBenchmarks"))
 
 using BenchmarkTools
 using SparseConnectivityTracer
