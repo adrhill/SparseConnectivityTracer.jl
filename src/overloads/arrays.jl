@@ -75,8 +75,9 @@ end
 LinearAlgebra.det(A::AbstractMatrix{T}) where {T<:AbstractTracer} = second_order_or(A)
 LinearAlgebra.logdet(A::AbstractMatrix{T}) where {T<:AbstractTracer} = second_order_or(A)
 function LinearAlgebra.logabsdet(A::AbstractMatrix{T}) where {T<:AbstractTracer}
-    t = second_order_or(A)
-    return (t, t)
+    t1 = second_order_or(A)
+    t2 = sign(t1) # corresponds to sign of det(A): set first- and second-order derivatives to zero
+    return (t1, t2)
 end
 
 # Fix for issue #108

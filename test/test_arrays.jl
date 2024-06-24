@@ -28,15 +28,40 @@ function test_full_patterns(f, x)
 end
 
 @testset "Scalar functions" begin
-    @testset "$f" for f in (
-        det, logdet, A -> first(logabsdet(A)), A -> last(logabsdet(A)), norm, eigmax, eigmin
-    )
+    @testset "$f" for f in (det, logdet, norm, eigmax, eigmin)
         @testset "$name" for (name, A) in TEST_MATRICES
             test_full_patterns(f, A)
         end
         @testset "`SparseMatrixCSC` (3×3)" begin
             test_full_patterns(A -> f(sparse(A)), rand(3, 3))
             test_full_patterns(A -> f(spdiagm(A)), rand(3))
+        end
+    end
+    @testset "logabsdet" begin
+        lad_first(A) = first(logabsdet(A))
+        lad_last(A) = last(logabsdet(A))
+
+        @testset "$name" for (name, A) in TEST_MATRICES
+            # first output
+            test_full_patterns(lad_first, A)
+
+            # second output
+            @test all(isone, connectivity_pattern(lad_last, A))
+            @test all(iszero, jacobian_pattern(lad_last, A))
+            @test all(iszero, hessian_pattern(lad_last, A))
+        end
+        @testset "`SparseMatrixCSC` (3×3)" begin
+            # first output
+            test_full_patterns(A -> lad_first(sparse(A)), rand(3, 3))
+            test_full_patterns(A -> lad_first(spdiagm(A)), rand(3, 3))
+
+            # second output
+            @test all(isone, connectivity_pattern(A -> lad_last(sparse(A)), rand(3, 3)))
+            @test all(isone, connectivity_pattern(A -> lad_last(spdiagm(A)), rand(3)))
+            @test all(iszero, jacobian_pattern(A -> lad_last(sparse(A)), rand(3, 3)))
+            @test all(iszero, jacobian_pattern(A -> lad_last(spdiagm(A)), rand(3)))
+            @test all(iszero, hessian_pattern(A -> lad_last(sparse(A)), rand(3, 3)))
+            @test all(iszero, hessian_pattern(A -> lad_last(spdiagm(A)), rand(3)))
         end
     end
     @testset "opnorm" begin
