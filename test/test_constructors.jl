@@ -21,10 +21,11 @@ GRADIENT_TRACERS = (
 )
 
 HESSIAN_TRACERS = (
-    HessianTracer{BitSet,Set{Tuple{Int,Int}}},
-    HessianTracer{Set{Int},Set{Tuple{Int,Int}}},
-    HessianTracer{DuplicateVector{Int},DuplicateVector{Tuple{Int,Int}}},
-    HessianTracer{SortedVector{Int},SortedVector{Tuple{Int,Int}}},
+    HessianTracer{BitSet,Set{Tuple{Int,Int}},false},
+    HessianTracer{BitSet,Set{Tuple{Int,Int}},true},
+    HessianTracer{Set{Int},Set{Tuple{Int,Int}},false},
+    HessianTracer{DuplicateVector{Int},DuplicateVector{Tuple{Int,Int}},false},
+    HessianTracer{SortedVector{Int},SortedVector{Tuple{Int,Int}},false},
     # TODO: test on RecursiveSet
 )
 
