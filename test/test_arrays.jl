@@ -82,9 +82,9 @@ end
 end
 
 @testset "Matrix-valued functions" begin
-    pow0(A) = sum(A^0)
-    pow1(A) = sum(A^1)
-    pow3(A) = sum(A^3)
+    pow0(A) = A^0
+    pow1(A) = A^1
+    pow3(A) = A^3
 
     # Functions that only work on square matrices
     @testset "$name" for (name, A) in TEST_SQUARE_MATRICES
@@ -110,11 +110,20 @@ end
         test_patterns(A -> pow3(sparse(A)), rand(3, 3); outsum=true)
 
         test_patterns(v -> exp(spdiagm(v)), rand(3); outsum=true)
-        test_patterns(
-            v -> pow0(spdiagm(v)), rand(3); outsum=true, con=iszero, jac=iszero, hes=iszero
-        )
-        test_patterns(v -> pow1(spdiagm(v)), rand(3); outsum=true, hes=iszero)
-        test_patterns(v -> pow3(spdiagm(v)), rand(3); outsum=true)
+
+        if VERSION >= v"1.10"
+            # issue with custom _mapreducezeros in SparseArrays on Julia 1.6
+            test_patterns(
+                v -> pow0(spdiagm(v)),
+                rand(3);
+                outsum=true,
+                con=iszero,
+                jac=iszero,
+                hes=iszero,
+            )
+            test_patterns(v -> pow1(spdiagm(v)), rand(3); outsum=true, hes=iszero)
+            test_patterns(v -> pow3(spdiagm(v)), rand(3); outsum=true)
+        end
     end
 
     # Functions that work on all matrices
