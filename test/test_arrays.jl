@@ -38,48 +38,51 @@ end
             test_full_patterns(A -> f(spdiagm(A)), rand(3))
         end
     end
-    @testset "logabsdet" begin
-        lad_first(A) = first(logabsdet(A))
-        lad_last(A) = last(logabsdet(A))
+    @testset "opnorm" begin
+        f(A) = opnorm(A, 1)
 
         @testset "$name" for (name, A) in TEST_MATRICES
-            # first output
-            test_full_patterns(lad_first, A)
-
-            # second output
-            @test all(isone, connectivity_pattern(lad_last, A))
-            @test all(iszero, jacobian_pattern(lad_last, A))
-            @test all(iszero, hessian_pattern(lad_last, A))
+            @test all(isone, connectivity_pattern(f, A))
+            @test all(isone, jacobian_pattern(f, A))
+            @test all(iszero, hessian_pattern(f, A))
         end
         @testset "`SparseMatrixCSC` (3×3)" begin
-            # first output
-            test_full_patterns(A -> lad_first(sparse(A)), rand(3, 3))
-            test_full_patterns(A -> lad_first(spdiagm(A)), rand(3))
+            @test all(isone, connectivity_pattern(A -> f(sparse(A)), rand(3, 3)))
+            @test all(isone, jacobian_pattern(A -> f(sparse(A)), rand(3, 3)))
+            @test all(iszero, hessian_pattern(A -> f(sparse(A)), rand(3, 3)))
 
-            # second output
-            @test all(isone, connectivity_pattern(A -> lad_last(sparse(A)), rand(3, 3)))
-            @test all(isone, connectivity_pattern(A -> lad_last(spdiagm(A)), rand(3)))
-            @test all(iszero, jacobian_pattern(A -> lad_last(sparse(A)), rand(3, 3)))
-            @test all(iszero, jacobian_pattern(A -> lad_last(spdiagm(A)), rand(3)))
-            @test all(iszero, hessian_pattern(A -> lad_last(sparse(A)), rand(3, 3)))
-            @test all(iszero, hessian_pattern(A -> lad_last(spdiagm(A)), rand(3)))
+            @test all(isone, connectivity_pattern(A -> f(spdiagm(A)), rand(3)))
+            @test all(isone, jacobian_pattern(A -> f(spdiagm(A)), rand(3)))
+            @test all(iszero, hessian_pattern(A -> f(spdiagm(A)), rand(3)))
         end
     end
-    @testset "opnorm" begin
-        @testset "$name" for (name, A) in TEST_MATRICES
-            @test all(isone, connectivity_pattern(a -> opnorm(a, 1), A))
-            @test all(isone, jacobian_pattern(a -> opnorm(a, 1), A))
-            @test all(iszero, hessian_pattern(a -> opnorm(a, 1), A))
-        end
-        @testset "`SparseMatrixCSC` (3×3)" begin
-            @test all(isone, connectivity_pattern(a -> opnorm(sparse(a), 1), rand(3, 3)))
-            @test all(isone, jacobian_pattern(a -> opnorm(sparse(a), 1), rand(3, 3)))
-            @test all(iszero, hessian_pattern(a -> opnorm(sparse(a), 1), rand(3, 3)))
+end
 
-            @test all(isone, connectivity_pattern(a -> opnorm(spdiagm(a), 1), rand(3)))
-            @test all(isone, jacobian_pattern(a -> opnorm(spdiagm(a), 1), rand(3)))
-            @test all(iszero, hessian_pattern(a -> opnorm(spdiagm(a), 1), rand(3)))
-        end
+@testset "logabsdet" begin
+    lad_first(A) = first(logabsdet(A))
+    lad_last(A) = last(logabsdet(A))
+
+    @testset "$name" for (name, A) in TEST_MATRICES
+        # first output
+        test_full_patterns(lad_first, A)
+
+        # second output
+        @test all(isone, connectivity_pattern(lad_last, A))
+        @test all(iszero, jacobian_pattern(lad_last, A))
+        @test all(iszero, hessian_pattern(lad_last, A))
+    end
+    @testset "`SparseMatrixCSC` (3×3)" begin
+        # first output
+        test_full_patterns(A -> lad_first(sparse(A)), rand(3, 3))
+        test_full_patterns(A -> lad_first(spdiagm(A)), rand(3))
+
+        # second output
+        @test all(isone, connectivity_pattern(A -> lad_last(sparse(A)), rand(3, 3)))
+        @test all(isone, connectivity_pattern(A -> lad_last(spdiagm(A)), rand(3)))
+        @test all(iszero, jacobian_pattern(A -> lad_last(sparse(A)), rand(3, 3)))
+        @test all(iszero, jacobian_pattern(A -> lad_last(spdiagm(A)), rand(3)))
+        @test all(iszero, hessian_pattern(A -> lad_last(sparse(A)), rand(3, 3)))
+        @test all(iszero, hessian_pattern(A -> lad_last(spdiagm(A)), rand(3)))
     end
 end
 
