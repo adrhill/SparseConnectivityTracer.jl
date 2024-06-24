@@ -30,13 +30,16 @@ function test_patterns(f, x; outsum=false, con=isone, jac=isone, hes=isone)
             _f = f
         end
         @testset "Connecivity pattern" begin
-            @test all(con, connectivity_pattern(_f, x))
+            pattern = connectivity_pattern(_f, x)
+            @test all(con, pattern)
         end
         @testset "Jacobian pattern" begin
-            @test all(jac, jacobian_pattern(_f, x))
+            pattern = jacobian_pattern(_f, x)
+            @test all(jac, pattern)
         end
         @testset "Hessian pattern" begin
-            @test all(hes, hessian_pattern(_f, x))
+            pattern = hessian_pattern(_f, x)
+            @test all(hes, pattern)
         end
     end
 end
