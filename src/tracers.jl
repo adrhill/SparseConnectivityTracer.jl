@@ -137,14 +137,10 @@ struct HessianTracer{G,H,shared} <: AbstractTracer
     ) where {G,H,shared}
         return new{G,H,shared}(gradient, hessian, isempty)
     end
-
-    function HessianTracer{G,H}(gradient::G, hessian::H, isempty::Bool=false) where {G,H}
-        return new{G,H,false}(gradient, hessian, isempty)
-    end
 end
 
-HessianTracer{G,H}(::Real) where {G,H} = myempty(HessianTracer{G,H})
-HessianTracer{G,H}(t::HessianTracer{G,H}) where {G,H} = t
+HessianTracer{G,H,shared}(::Real) where {G,H,shared} = myempty(HessianTracer{G,H,shared})
+HessianTracer{G,H,shared}(t::HessianTracer{G,H,shared}) where {G,H,shared} = t
 HessianTracer(t::HessianTracer) = t
 
 gradient(t::HessianTracer) = t.gradient
