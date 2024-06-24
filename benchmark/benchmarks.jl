@@ -17,12 +17,16 @@ for S1 in SET_TYPES
     S2 = Set{Tuple{Int,Int}}
 
     G = GradientTracer{S1}
-    H = HessianTracer{S1,S2}
+    H = HessianTracer{S1,S2,false}
+    H_shared = HessianTracer{S1,S2,true}
 
     SUITE["Jacobian"]["Global"][nameof(S1)] = jacbench(TracerSparsityDetector(G, H))
     SUITE["Jacobian"]["Local"][nameof(S1)] = jacbench(TracerLocalSparsityDetector(G, H))
     SUITE["Hessian"]["Global"][(nameof(S1), nameof(S2))] = hessbench(
         TracerSparsityDetector(G, H)
+    )
+    SUITE["Hessian"]["Global (shared)"][(nameof(S1), nameof(S2))] = hessbench(
+        TracerSparsityDetector(G, H_shared)
     )
     SUITE["Hessian"]["Local"][(nameof(S1), nameof(S2))] = hessbench(
         TracerLocalSparsityDetector(G, H)

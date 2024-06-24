@@ -1,6 +1,6 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer:
-    Dual, HessianTracer, MissingPrimalError, trace_input, empty, isshared
+    Dual, HessianTracer, MissingPrimalError, create_tracers, trace_input, empty, isshared
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using ADTypes: hessian_sparsity
 using SpecialFunctions: erf, beta
@@ -351,4 +351,26 @@ end
         @test hessian_sparsity(x -> zero(x)^ℯ, 1, method) ≈ [0;;]
         @test hessian_sparsity(x -> ℯ^zero(x), 1, method) ≈ [0;;]
     end
+end
+
+@testset "Shared HessianTracer - same objects" begin
+    H = HessianTracer{BitSet,Set{Tuple{Int,Int}},true}
+
+    function multi_output_for_shared_test(x::AbstractArray)
+        z = ones(eltype(x), size(x))
+        y1 = x[1]^2 * z[1]
+        y2 = z[2] * x[2]^2
+        y3 = x[1] * x[2]
+        y4 = z[1] * z[2]  # entirely new tracer
+        y = [y1, y2, y3, y4]
+        return y
+    end
+
+    x = rand(2)
+    xt = create_tracers(H, x, eachindex(x))
+    yt = multi_output_for_shared_test(xt)
+
+    @test yt[1].hessian === yt[2].hessian
+    @test yt[1].hessian === yt[3].hessian
+    @test_broken yt[1].hessian === yt[4].hessian
 end
