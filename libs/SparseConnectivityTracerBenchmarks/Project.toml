@@ -1,6 +1,6 @@
 name = "SparseConnectivityTracerBenchmarks"
 uuid = "fb1f6577-eb25-4e27-a243-7f62c22307d7"
-authors = ["Guillaume Dalle <22795598+gdalle@users.noreply.github.com>"]
+authors = ["Guillaume Dalle", "Adrian Hill"]
 version = "0.1.0"
 
 [deps]
