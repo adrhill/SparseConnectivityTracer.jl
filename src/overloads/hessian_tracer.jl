@@ -73,7 +73,7 @@ end
     is_secondder_arg1_zero::Bool,
     is_der1_arg2_zero::Bool,
     is_secondder_arg2_zero::Bool,
-    is_der_cross_zero::Bool;
+    is_der_cross_zero::Bool,
 ) where {T<:HessianTracer}
     # TODO: add tests for isempty
     if tx.isempty && ty.isempty
