@@ -22,23 +22,21 @@ TG = GradientTracer{S}
 
 # NOTE: we currently test for conservative patterns on array overloads
 # Changes making array overloads less convervative will break these tests, but are welcome!  
-function test_patterns(
-    f, x; sum_out=false, connectivity=isone, jacobian=isone, hessian=isone
-)
+function test_patterns(f, x; outsum=false, con=isone, jac=isone, hes=isone)
     @testset "$f" begin
-        if sum_out
+        if outsum
             _f(x) = sum(f(x))
         else
             _f = f
         end
         @testset "Connecivity pattern" begin
-            @test all(connectivity, connectivity_pattern(_f, x))
+            @test all(con, connectivity_pattern(_f, x))
         end
         @testset "Jacobian pattern" begin
-            @test all(jacobian, jacobian_pattern(_f, x))
+            @test all(jac, jacobian_pattern(_f, x))
         end
         @testset "Hessian pattern" begin
-            @test all(hessian, hessian_pattern(_f, x))
+            @test all(hes, hessian_pattern(_f, x))
         end
     end
 end
@@ -54,9 +52,9 @@ end
         test_patterns(norm, A)
         test_patterns(eigmax, A)
         test_patterns(eigmin, A)
-        test_patterns(opnorm1, A; hessian=iszero)
+        test_patterns(opnorm1, A; hes=iszero)
         test_patterns(logabsdet_first, A)
-        test_patterns(logabsdet_last, A; jacobian=iszero, hessian=iszero)
+        test_patterns(logabsdet_last, A; jac=iszero, hes=iszero)
     end
     @testset "`SparseMatrixCSC` (3×3)" begin
         # TODO: this is a temporary solution until sparse matrix inputs are supported (#28)
@@ -65,22 +63,18 @@ end
         test_patterns(A -> norm(sparse(A)), rand(3, 3))
         test_patterns(A -> eigmax(sparse(A)), rand(3, 3))
         test_patterns(A -> eigmin(sparse(A)), rand(3, 3))
-        test_patterns(A -> opnorm1(sparse(A)), rand(3, 3); hessian=iszero)
+        test_patterns(A -> opnorm1(sparse(A)), rand(3, 3); hes=iszero)
         test_patterns(A -> logabsdet_first(sparse(A)), rand(3, 3))
-        test_patterns(
-            A -> logabsdet_last(sparse(A)), rand(3, 3); jacobian=iszero, hessian=iszero
-        )
+        test_patterns(A -> logabsdet_last(sparse(A)), rand(3, 3); jac=iszero, hes=iszero)
 
         test_patterns(v -> det(spdiagm(v)), rand(3))
         test_patterns(v -> logdet(spdiagm(v)), rand(3))
         test_patterns(v -> norm(spdiagm(v)), rand(3))
         test_patterns(v -> eigmax(spdiagm(v)), rand(3))
         test_patterns(v -> eigmin(spdiagm(v)), rand(3))
-        test_patterns(v -> opnorm1(spdiagm(v)), rand(3); hessian=iszero)
+        test_patterns(v -> opnorm1(spdiagm(v)), rand(3); hes=iszero)
         test_patterns(v -> logabsdet_first(spdiagm(v)), rand(3))
-        test_patterns(
-            v -> logabsdet_last(spdiagm(v)), rand(3); jacobian=iszero, hessian=iszero
-        )
+        test_patterns(v -> logabsdet_last(spdiagm(v)), rand(3); jac=iszero, hes=iszero)
     end
 end
 
@@ -91,48 +85,41 @@ end
 
     # Functions that only work on square matrices
     @testset "$name" for (name, A) in TEST_SQUARE_MATRICES
-        test_patterns(inv, A; sum_out=true)
-        test_patterns(exp, A; sum_out=true)
-        test_patterns(
-            pow0, A; sum_out=true, connectivity=iszero, jacobian=iszero, hessian=iszero
-        )
-        test_patterns(pow1, A; sum_out=true, hessian=iszero)
-        test_patterns(pow3, A; sum_out=true)
+        test_patterns(inv, A; outsum=true)
+        test_patterns(exp, A; outsum=true)
+        test_patterns(pow0, A; outsum=true, con=iszero, jac=iszero, hes=iszero)
+        test_patterns(pow1, A; outsum=true, hes=iszero)
+        test_patterns(pow3, A; outsum=true)
     end
     @testset "`SparseMatrixCSC` (3×3)" begin
         # TODO: this is a temporary solution until sparse matrix inputs are supported (#28)
 
-        test_patterns(A -> exp(sparse(A)), rand(3, 3); sum_out=true)
+        test_patterns(A -> exp(sparse(A)), rand(3, 3); outsum=true)
         test_patterns(
             A -> pow0(sparse(A)),
             rand(3, 3);
-            sum_out=true,
-            connectivity=iszero,
-            jacobian=iszero,
-            hessian=iszero,
+            outsum=true,
+            con=iszero,
+            jac=iszero,
+            hes=iszero,
         )
-        test_patterns(A -> pow1(sparse(A)), rand(3, 3); sum_out=true, hessian=iszero)
-        test_patterns(A -> pow3(sparse(A)), rand(3, 3); sum_out=true)
+        test_patterns(A -> pow1(sparse(A)), rand(3, 3); outsum=true, hes=iszero)
+        test_patterns(A -> pow3(sparse(A)), rand(3, 3); outsum=true)
 
-        test_patterns(v -> exp(spdiagm(v)), rand(3); sum_out=true)
+        test_patterns(v -> exp(spdiagm(v)), rand(3); outsum=true)
         test_patterns(
-            v -> sumpow0(spdiagm(v)),
-            rand(3);
-            sum_out=true,
-            connectivity=iszero,
-            jacobian=iszero,
-            hessian=iszero,
+            v -> pow0(spdiagm(v)), rand(3); outsum=true, con=iszero, jac=iszero, hes=iszero
         )
-        test_patterns(v -> pow1(spdiagm(v)), rand(3); sum_out=true, hessian=iszero)
-        test_patterns(v -> pow3(spdiagm(v)), rand(3); sum_out=true)
+        test_patterns(v -> pow1(spdiagm(v)), rand(3); outsum=true, hes=iszero)
+        test_patterns(v -> pow3(spdiagm(v)), rand(3); outsum=true)
     end
 
     # Functions that work on all matrices
     @testset "$name" for (name, A) in TEST_MATRICES
-        test_patterns(pinv, A; sum_out=true)
+        test_patterns(pinv, A; outsum=true)
     end
     @testset "`SparseMatrixCSC` (3×4)" begin
-        test_patterns(A -> pinv(sparse(A)), rand(3, 4); sum_out=true)
+        test_patterns(A -> pinv(sparse(A)), rand(3, 4); outsum=true)
     end
 end
 
