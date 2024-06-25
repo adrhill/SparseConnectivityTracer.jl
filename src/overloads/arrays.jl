@@ -59,10 +59,9 @@ function split_dual_array(A::AbstractArray{D}) where {D<:Dual}
     return primals, tracers
 end
 function split_dual_array(A::SparseArrays.SparseMatrixCSC{D}) where {D<:Dual}
-    A = Matrix(A)
     primals = getproperty.(A, :primal)
     tracers = getproperty.(A, :tracer)
-    return sparse(primals), sparse(tracers)
+    return primals, tracers
 end
 
 #==================#
@@ -82,17 +81,21 @@ end
 
 ## Norm
 function LinearAlgebra.norm(A::AbstractArray{T}, p::Real=2) where {T<:AbstractTracer}
-    return second_order_or(A)
+    if isone(p) || isinf(p)
+        return first_order_or(A)
+    else
+        return second_order_or(A)
+    end
 end
 function LinearAlgebra.opnorm(A::AbstractArray{T}, p::Real=2) where {T<:AbstractTracer}
-    if isone(p)
+    if isone(p) || isinf(p)
         return first_order_or(A)
     else
         return second_order_or(A)
     end
 end
 function LinearAlgebra.opnorm(A::AbstractMatrix{T}, p::Real=2) where {T<:AbstractTracer}
-    if isone(p)
+    if isone(p) || isinf(p)
         return first_order_or(A)
     else
         return second_order_or(A)
@@ -147,7 +150,7 @@ function LinearAlgebra.:\(
     return Ainv * B
 end
 
-## Exponent
+## Exponential
 function LinearAlgebra.exp(A::AbstractMatrix{T}) where {T<:AbstractTracer}
     LinearAlgebra.checksquare(A)
     n = size(A, 1)
