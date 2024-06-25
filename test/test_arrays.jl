@@ -83,7 +83,6 @@ end
 
 @testset "Matrix-valued functions" begin
     pow0(A) = A^0
-    pow1(A) = A^1
     pow3(A) = A^3
 
     # Functions that only work on square matrices
@@ -91,7 +90,6 @@ end
         test_patterns(inv, A; outsum=true)
         test_patterns(exp, A; outsum=true)
         test_patterns(pow0, A; outsum=true, con=iszero, jac=iszero, hes=iszero)
-        test_patterns(pow1, A; outsum=true, hes=iszero)
         test_patterns(pow3, A; outsum=true)
     end
     @testset "`SparseMatrixCSC` (3×3)" begin
@@ -106,7 +104,6 @@ end
             jac=iszero,
             hes=iszero,
         )
-        test_patterns(A -> pow1(sparse(A)), rand(3, 3); outsum=true, hes=iszero)
         test_patterns(A -> pow3(sparse(A)), rand(3, 3); outsum=true)
 
         test_patterns(v -> exp(spdiagm(v)), rand(3); outsum=true)
@@ -121,7 +118,6 @@ end
                 jac=iszero,
                 hes=iszero,
             )
-            test_patterns(v -> pow1(spdiagm(v)), rand(3); outsum=true, hes=iszero)
             test_patterns(v -> pow3(spdiagm(v)), rand(3); outsum=true)
         end
     end

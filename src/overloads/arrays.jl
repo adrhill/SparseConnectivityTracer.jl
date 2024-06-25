@@ -161,8 +161,6 @@ function LinearAlgebra.:^(A::AbstractMatrix{T}, p::Integer) where {T<:AbstractTr
     n = size(A, 1)
     if iszero(p)
         return Fill(myempty(T), n, n)
-    elseif isone(p)
-        return A
     else
         t = second_order_or(A)
         return Fill(t, n, n)
