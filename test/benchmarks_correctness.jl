@@ -1,0 +1,4 @@
+using PkgJogger
+using SparseConnectivityTracer
+
+PkgJogger.@test_benchmarks SparseConnectivityTracer

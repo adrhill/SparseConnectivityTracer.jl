@@ -1,5 +1,7 @@
 using Pkg
-Pkg.develop(; path=joinpath(@__DIR__, "..", "libs", "SparseConnectivityTracerBenchmarks"))
+Pkg.develop(;
+    path=joinpath(@__DIR__, "..", "benchmark", "SparseConnectivityTracerBenchmarks")
+)
 
 using SparseConnectivityTracer
 
@@ -106,6 +108,13 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
         @info "Testing ADTypes integration..."
         @testset "ADTypes integration" begin
             include("adtypes.jl")
+        end
+    end
+
+    if GROUP in ("Core", "All")
+        @info "Testing benchmarks correctness..."
+        @testset "Benchmarks correctness" begin
+            include("benchmarks_correctness.jl")
         end
     end
 
