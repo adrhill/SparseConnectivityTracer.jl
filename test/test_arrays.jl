@@ -45,17 +45,26 @@ function test_patterns(f, x; outsum=false, con=isone, jac=isone, hes=isone)
 end
 
 @testset "Scalar functions" begin
+    norm1(A) = norm(A, 1)
+    norm2(A) = norm(A, 2)
+    norminf(A) = norm(A, Inf)
     opnorm1(A) = opnorm(A, 1)
+    opnorm2(A) = opnorm(A, 2)
+    opnorminf(A) = opnorm(A, Inf)
     logabsdet_first(A) = first(logabsdet(A))
     logabsdet_last(A) = last(logabsdet(A))
 
     @testset "$name" for (name, A) in TEST_MATRICES
         test_patterns(det, A)
         test_patterns(logdet, A)
-        test_patterns(norm, A)
+        test_patterns(norm1, A; hes=iszero)
+        test_patterns(norm2, A)
+        test_patterns(norminf, A; hes=iszero)
         test_patterns(eigmax, A)
         test_patterns(eigmin, A)
         test_patterns(opnorm1, A; hes=iszero)
+        test_patterns(opnorm2, A)
+        test_patterns(opnorminf, A; hes=iszero)
         test_patterns(logabsdet_first, A)
         test_patterns(logabsdet_last, A; jac=iszero, hes=iszero)
     end
