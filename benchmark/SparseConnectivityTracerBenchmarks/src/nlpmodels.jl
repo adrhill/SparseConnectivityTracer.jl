@@ -16,6 +16,8 @@ Package ecosystem overview: https://jso.dev/ecosystems/models/
   - OptimizationProblems.PureJuMP: spits out `JuMP.Model`
 =#
 
+optimization_problem_names() = Symbol.(OptimizationProblems.meta[!, :name])
+
 ## SCT
 
 #=
