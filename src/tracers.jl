@@ -4,7 +4,14 @@ abstract type AbstractTracer <: Real end
 # Set operations    #
 #===================#
 
-myempty(::Type{S}) where {S<:AbstractSet} = S()
+myempty(::Type{S}, ns::Vararg{Integer,N}) where {S<:AbstractSet,N} = S()
+
+myempty(::Type{SparseVector{Bool,Ti}}, n::Integer) where {Ti} = spzeros(Bool, Ti, n)
+
+function myempty(::Type{SparseMatrixCSC{Bool,Ti}}, m::Integer, n::Integer) where {Ti}
+    return spzeros(Bool, Ti, m, n)
+end
+
 seed(::Type{S}, i::Integer) where {S<:AbstractSet} = S(i)
 
 product(a::AbstractSet{I}, b::AbstractSet{I}) where {I} = Set((i, j) for i in a, j in b)
