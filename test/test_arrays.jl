@@ -18,7 +18,8 @@ TEST_SQUARE_MATRICES = Dict(
 TEST_MATRICES = merge(TEST_SQUARE_MATRICES, Dict("`Matrix` (3×4)" => rand(3, 4)))
 
 S = BitSet
-TG = GradientTracer{S}
+P = IndexSetVector{Int,S}
+TG = GradientTracer{P}
 
 # NOTE: we currently test for conservative patterns on array overloads
 # Changes making array overloads less convervative will break these tests, but are welcome!  
@@ -141,10 +142,10 @@ end
 end
 
 @testset "Matrix division" begin
-    t1 = TG(S([1, 3, 4]))
-    t2 = TG(S([2, 4]))
-    t3 = TG(S([8, 9]))
-    t4 = TG(S([8, 9]))
+    t1 = TG(P(S([1, 3, 4])))
+    t2 = TG(P(S([2, 4])))
+    t3 = TG(P(S([8, 9])))
+    t4 = TG(P(S([8, 9])))
     A = [t1 t2; t3 t4]
     s_out = S([1, 2, 3, 4, 8, 9])
 
@@ -154,10 +155,10 @@ end
 end
 
 @testset "Eigenvalues" begin
-    t1 = TG(S([1, 3, 4]))
-    t2 = TG(S([2, 4]))
-    t3 = TG(S([8, 9]))
-    t4 = TG(S([8, 9]))
+    t1 = TG(P(S([1, 3, 4])))
+    t2 = TG(P(S([2, 4])))
+    t3 = TG(P(S([8, 9])))
+    t4 = TG(P(S([8, 9])))
     A = [t1 t2; t3 t4]
     s_out = S([1, 2, 3, 4, 8, 9])
     values, vectors = eigen(A)
@@ -168,9 +169,9 @@ end
 end
 
 @testset "SparseMatrixCSC construction" begin
-    t1 = TG(S(1))
-    t2 = TG(S(2))
-    t3 = TG(S(3))
+    t1 = TG(P(S(1)))
+    t2 = TG(P(S(2)))
+    t3 = TG(P(S(3)))
     SA = sparse([t1 t2; t3 0])
     @test length(SA.nzval) == 3
 
