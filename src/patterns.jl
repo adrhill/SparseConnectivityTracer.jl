@@ -20,8 +20,8 @@ AbstractPattern
 Constructor for an empty pattern of type `P` representing a new number (usually an empty pattern).
 """
 myempty(::P) where {P<:AbstractPattern} = myempty(P)
-myempty(::T) where {P<:AbstractPattern,T<:AbstractTracer{P}} = T(myempty(P), true)
-myempty(::Type{T}) where {P<:AbstractPattern,T<:AbstractTracer{P}} = T(myempty(P), true)
+myempty(::T) where {P,T<:AbstractTracer{P}} = T(myempty(P), true)
+myempty(::Type{T}) where {P,T<:AbstractTracer{P}} = T(myempty(P), true)
 
 """
 seed(P, i)
@@ -89,6 +89,8 @@ struct IndexSetVector{I<:Integer,S<:AbstractSet{I}} <: AbstractVectorPattern
     "Set of indices represting non-zero entries ``i`` in a vector."
     vector::S
 end
+
+set(v::IndexSetVector) = v.vector
 
 Base.show(io::IO, s::IndexSetVector) = Base.show(io, s.vector)
 

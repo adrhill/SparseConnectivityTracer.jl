@@ -49,23 +49,23 @@ end
         return connectivity_tracer_1_to_1(ty, is_infl_arg2_zero)
     else
         i_out = connectivity_tracer_2_to_1_inner(
-            inputs(tx), inputs(ty), is_infl_arg1_zero, is_infl_arg2_zero
+            pattern(tx), pattern(ty), is_infl_arg1_zero, is_infl_arg2_zero
         )
         return T(i_out) # return tracer 
     end
 end
 
 function connectivity_tracer_2_to_1_inner(
-    sx::S, sy::S, is_infl_arg1_zero::Bool, is_infl_arg2_zero::Bool
-) where {S<:AbstractSet{<:Integer}}
+    px::P, py::P, is_infl_arg1_zero::Bool, is_infl_arg2_zero::Bool
+) where {P<:IndexSetVector}
     if is_infl_arg1_zero && is_infl_arg2_zero
-        return myempty(S)
+        return myempty(P)
     elseif !is_infl_arg1_zero && is_infl_arg2_zero
-        return sx
+        return px
     elseif is_infl_arg1_zero && !is_infl_arg2_zero
-        return sy
+        return py
     else
-        return union(sx, sy) # return set
+        return P(union(set(px), set(py))) # return pattern
     end
 end
 

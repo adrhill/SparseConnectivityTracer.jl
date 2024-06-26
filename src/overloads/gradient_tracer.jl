@@ -10,7 +10,12 @@
     end
 end
 
-# Called by HessianTracer with AbstractSet
+function gradient_tracer_1_to_1_inner(p::P, is_der1_zero::Bool) where {P<:IndexSetVector}
+    return P(gradient_tracer_1_to_1_inner(set(p), is_der1_zero)) # return pattern
+end
+
+# This is only required because it is called by HessianTracer with IndexSetHessian
+# Otherwise, we would just have the method on IndexSetVector above.
 function gradient_tracer_1_to_1_inner(
     s::S, is_der1_zero::Bool
 ) where {S<:AbstractSet{<:Integer}}
@@ -60,12 +65,22 @@ end
         return gradient_tracer_1_to_1(ty, is_der1_arg2_zero)
     else
         g_out = gradient_tracer_2_to_1_inner(
-            gradient(tx), gradient(ty), is_der1_arg1_zero, is_der1_arg2_zero
+            pattern(tx), pattern(ty), is_der1_arg1_zero, is_der1_arg2_zero
         )
         return T(g_out) # return tracer
     end
 end
 
+function gradient_tracer_2_to_1_inner(
+    px::P, py::P, is_der1_arg1_zero::Bool, is_der1_arg2_zero::Bool
+) where {P<:IndexSetVector}
+    return P(
+        gradient_tracer_2_to_1_inner(set(px), set(py), is_der1_arg1_zero, is_der1_arg2_zero)
+    ) # return pattern
+end
+
+# This is only required because it is called by HessianTracer with IndexSetHessian
+# Otherwise, we would just have the method on IndexSetVector above.
 function gradient_tracer_2_to_1_inner(
     sx::S, sy::S, is_der1_arg1_zero::Bool, is_der1_arg2_zero::Bool
 ) where {S<:AbstractSet{<:Integer}}

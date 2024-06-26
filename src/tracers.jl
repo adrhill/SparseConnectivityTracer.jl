@@ -31,8 +31,9 @@ ConnectivityTracer{P}(::Real) where {P} = myempty(ConnectivityTracer{P})
 ConnectivityTracer{P}(t::ConnectivityTracer{P}) where {P} = t
 ConnectivityTracer(t::ConnectivityTracer) = t
 
-inputs(t::ConnectivityTracer) = inputs(t.pattern)
 isemptytracer(t::ConnectivityTracer) = t.isempty
+pattern(t::ConnectivityTracer) = t.pattern
+inputs(t::ConnectivityTracer) = inputs(pattern(t))
 
 function Base.show(io::IO, t::ConnectivityTracer)
     print(io, typeof(t))
@@ -74,8 +75,9 @@ GradientTracer{P}(::Real) where {P} = myempty(GradientTracer{P})
 GradientTracer{P}(t::GradientTracer{P}) where {P} = t
 GradientTracer(t::GradientTracer) = t
 
-gradient(t::GradientTracer) = gradient(t.pattern)
 isemptytracer(t::GradientTracer) = t.isempty
+pattern(t::GradientTracer) = t.pattern
+gradient(t::GradientTracer) = gradient(pattern(t))
 
 function Base.show(io::IO, t::GradientTracer)
     print(io, typeof(t))
@@ -117,9 +119,10 @@ HessianTracer{P}(::Real) where {P} = myempty(HessianTracer{P})
 HessianTracer{P}(t::HessianTracer{P}) where {P} = t
 HessianTracer(t::HessianTracer) = t
 
-gradient(t::HessianTracer) = gradient(t.pattern)
-hessian(t::HessianTracer) = hessian(t.pattern)
 isemptytracer(t::HessianTracer) = t.isempty
+pattern(t::HessianTracer) = t.pattern
+gradient(t::HessianTracer) = gradient(pattern(t))
+hessian(t::HessianTracer) = hessian(pattern(t))
 
 function Base.show(io::IO, t::HessianTracer)
     print(io, typeof(t))
