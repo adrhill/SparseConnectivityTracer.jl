@@ -116,6 +116,7 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
         @test_throws TypeError connectivity_pattern(
             x -> x[1] > x[2] ? x[3] : x[4], [1.0, 2.0, 3.0, 4.0], T
         ) == [0 0 1 1;]
+        yield()
     end
 end
 
@@ -128,5 +129,6 @@ end
             x -> ifelse(x[2] < x[3], x[1] + x[2], x[3] * x[4]), [1 3 2 4], T
         ) == [0 0 1 1]
         @test local_connectivity_pattern(x -> 0, 1, T) ≈ [0;;]
+        yield()
     end
 end

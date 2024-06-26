@@ -89,6 +89,7 @@ end
                 correct_classification_1_to_1(op, random_input(op); atol=DEFAULT_ATOL) for
                 _ in 1:DEFAULT_TRIALS
             )
+            yield()
         end
     end
 end;
@@ -132,6 +133,7 @@ end
                     op, random_first_input(op), random_second_input(op); atol=DEFAULT_ATOL
                 ) for _ in 1:DEFAULT_TRIALS
             )
+            yield()
         end
     end
 end;
@@ -170,6 +172,7 @@ end
                 correct_classification_1_to_2(op, random_input(op); atol=DEFAULT_ATOL) for
                 _ in 1:DEFAULT_TRIALS
             )
+            yield()
         end
     end
 end;

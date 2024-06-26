@@ -22,4 +22,5 @@ end
 @testset "$T" for T in GRADIENT_TRACERS
     method = TracerSparsityDetector(; gradient_tracer_type=T)
     test_brusselator(method)
+    yield()
 end

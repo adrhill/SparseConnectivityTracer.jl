@@ -208,6 +208,7 @@ include("tracers_definitions.jl")
             1 1 0
             0 0 0
         ]
+        yield()
     end
 end
 
@@ -262,5 +263,6 @@ end
         @test hessian_sparsity(x -> (2//3)^zero(x), 1, method) ≈ [0;;]
         @test hessian_sparsity(x -> zero(x)^ℯ, 1, method) ≈ [0;;]
         @test hessian_sparsity(x -> ℯ^zero(x), 1, method) ≈ [0;;]
+        yield()
     end
 end

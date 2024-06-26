@@ -125,6 +125,7 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
         @test_throws TypeError jacobian_sparsity(
             x -> x[1] > x[2] ? x[3] : x[4], [1.0, 2.0, 3.0, 4.0], method
         ) == [0 0 1 1;]
+        yield()
     end
 end
 
@@ -249,5 +250,6 @@ end
         @test jacobian_sparsity(NNlib.softshrink, -1, method) ≈ [1;;]
         @test jacobian_sparsity(NNlib.softshrink, 0, method) ≈ [0;;]
         @test jacobian_sparsity(NNlib.softshrink, 1, method) ≈ [1;;]
+        yield()
     end
 end
