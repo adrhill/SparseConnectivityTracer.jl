@@ -27,10 +27,13 @@ jobs:
           - '1'
         group:
           - Core
+          - Benchmarks
           - NLPModels
         exclude:
           - version: '1.6'
             group: NLPModels
+          - version: '1.6'
+            group: Benchmarks
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
@@ -44,7 +47,7 @@ jobs:
           JULIA_SCT_TEST_GROUP: ${{ matrix.group }}
       - uses: julia-actions/julia-processcoverage@v1
         with:
-          directories: src,ext,test      
+          directories: src,ext,test,benchmark
       - uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

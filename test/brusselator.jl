@@ -3,6 +3,7 @@ using ADTypes: AbstractSparsityDetector
 using ReferenceTests
 using SparseConnectivityTracer
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
+using SparseConnectivityTracerBenchmarks.ODE: Brusselator!
 using Test
 
 GRADIENT_TRACERS = (
@@ -11,8 +12,6 @@ GRADIENT_TRACERS = (
     GradientTracer{DuplicateVector{Int}},
     GradientTracer{SortedVector{Int}},
 )
-
-include("definitions/brusselator_definition.jl")
 
 function test_brusselator(method::AbstractSparsityDetector)
     N = 6

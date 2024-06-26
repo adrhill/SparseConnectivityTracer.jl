@@ -1,18 +1,3 @@
-using ADTypes: ADTypes
-using SparseConnectivityTracer
-import SparseConnectivityTracer as SCT
-
-using ADNLPModels: ADNLPModels
-using NLPModels: NLPModels, AbstractNLPModel
-using NLPModelsJuMP: NLPModelsJuMP
-using OptimizationProblems: OptimizationProblems
-
-using Dates: now
-using LinearAlgebra
-using SparseArrays
-
-problem_names() = Symbol.(OptimizationProblems.meta[!, :name])
-
 #=
 Given an optimization problem `min f(x) s.t. c(x) <= 0`, we study
 
@@ -30,6 +15,8 @@ Package ecosystem overview: https://jso.dev/ecosystems/models/
   - OptimizationProblems.ADNLPProblems: spits out `ADNLPModel`
   - OptimizationProblems.PureJuMP: spits out `JuMP.Model`
 =#
+
+optimization_problem_names() = Symbol.(OptimizationProblems.meta[!, :name])
 
 ## SCT
 
