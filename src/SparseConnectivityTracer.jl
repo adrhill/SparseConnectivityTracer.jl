@@ -2,8 +2,12 @@ module SparseConnectivityTracer
 
 using ADTypes: ADTypes
 using Compat: Returns
+using SparseArrays: SparseArrays
 using SparseArrays: sparse
 using Random: AbstractRNG, SamplerType
+
+using LinearAlgebra: LinearAlgebra
+using FillArrays: Fill
 
 using DocStringExtensions
 
@@ -26,6 +30,7 @@ include("overloads/hessian_tracer.jl")
 include("overloads/ifelse_global.jl")
 include("overloads/dual.jl")
 include("overloads/overload_all.jl")
+include("overloads/arrays.jl")
 
 include("interface.jl")
 include("adtypes.jl")

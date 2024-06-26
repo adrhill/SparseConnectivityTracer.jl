@@ -34,7 +34,7 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
                     Aqua.test_all(
                         SparseConnectivityTracer;
                         ambiguities=false,
-                        deps_compat=(ignore=[:Random, :SparseArrays], check_extras=false),
+                        deps_compat=(check_extras=false,),
                         stale_deps=(ignore=[:Requires],),
                         persistent_tasks=false,
                     )
@@ -81,6 +81,9 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
             end
             @testset "HessianTracer" begin
                 include("test_hessian.jl")
+            end
+            @testset "Array overloads" begin
+                include("test_arrays.jl")
             end
         end
     end
