@@ -1,20 +1,20 @@
 using SparseConnectivityTracer:
     AbstractTracer, ConnectivityTracer, GradientTracer, HessianTracer, Dual
-using SparseConnectivityTracer: IndexSetVector, IndexSetHessian
+using SparseConnectivityTracer: IndexSetVectorPattern, IndexSetHessianPattern
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 
 VECTOR_PATTERNS = (
-    IndexSetVector{Int,BitSet},
-    IndexSetVector{Int,Set{Int}},
-    IndexSetVector{Int,DuplicateVector{Int}},
-    IndexSetVector{Int,SortedVector{Int}},
+    IndexSetVectorPattern{Int,BitSet},
+    IndexSetVectorPattern{Int,Set{Int}},
+    IndexSetVectorPattern{Int,DuplicateVector{Int}},
+    IndexSetVectorPattern{Int,SortedVector{Int}},
 )
 
 HESSIAN_PATTERNS = (
-    IndexSetHessian{Int,BitSet,Set{Tuple{Int,Int}}},
-    IndexSetHessian{Int,Set{Int},Set{Tuple{Int,Int}}},
-    IndexSetHessian{Int,DuplicateVector{Int},DuplicateVector{Tuple{Int,Int}}},
-    IndexSetHessian{Int,SortedVector{Int},SortedVector{Tuple{Int,Int}}},
+    IndexSetHessianPattern{Int,BitSet,Set{Tuple{Int,Int}}},
+    IndexSetHessianPattern{Int,Set{Int},Set{Tuple{Int,Int}}},
+    IndexSetHessianPattern{Int,DuplicateVector{Int},DuplicateVector{Tuple{Int,Int}}},
+    IndexSetHessianPattern{Int,SortedVector{Int},SortedVector{Tuple{Int,Int}}},
     # TODO: test on RecursiveSet
 )
 

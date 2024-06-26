@@ -13,7 +13,7 @@ end
 
 function hessian_tracer_1_to_1_inner(
     p::P, is_der1_zero::Bool, is_der2_zero::Bool
-) where {I,SG,SH,P<:IndexSetHessian{I,SG,SH}}
+) where {I,SG,SH,P<:IndexSetHessianPattern{I,SG,SH}}
     sg = gradient(p)
     sh = hessian(p)
     sg_out = gradient_tracer_1_to_1_inner(sg, is_der1_zero)
@@ -96,7 +96,7 @@ function hessian_tracer_2_to_1_inner(
     is_der1_arg2_zero::Bool,
     is_der2_arg2_zero::Bool,
     is_der_cross_zero::Bool,
-) where {I,SG,SH,P<:IndexSetHessian{I,SG,SH}}
+) where {I,SG,SH,P<:IndexSetHessianPattern{I,SG,SH}}
     sgx, shx = gradient(px), hessian(px)
     sgy, shy = gradient(py), hessian(py)
     sg_out = gradient_tracer_2_to_1_inner(sgx, sgy, is_der1_arg1_zero, is_der1_arg2_zero)

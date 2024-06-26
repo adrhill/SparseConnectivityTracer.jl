@@ -12,10 +12,10 @@
     function output_union(tx::T, ty::T) where {T<:AbstractTracer}
         return T(output_union(pattern(tx), pattern(ty))) # return tracer
     end
-    function output_union(px::P, py::P) where {P<:IndexSetVector}
+    function output_union(px::P, py::P) where {P<:IndexSetVectorPattern}
         return P(union(set(px), set(py))) # return pattern
     end
-    function output_union(px::P, py::P) where {P<:IndexSetHessian}
+    function output_union(px::P, py::P) where {P<:IndexSetHessianPattern}
         g_out = union(gradient(px), gradient(py))
         h_out = union(hessian(px), hessian(py))
         return P(g_out, h_out) # return pattern

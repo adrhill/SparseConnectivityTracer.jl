@@ -57,7 +57,7 @@ end
 
 function connectivity_tracer_2_to_1_inner(
     px::P, py::P, is_infl_arg1_zero::Bool, is_infl_arg2_zero::Bool
-) where {P<:IndexSetVector}
+) where {P<:IndexSetVectorPattern}
     if is_infl_arg1_zero && is_infl_arg2_zero
         return myempty(P)
     elseif !is_infl_arg1_zero && is_infl_arg2_zero

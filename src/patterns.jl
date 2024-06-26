@@ -7,9 +7,9 @@ Abstract supertype of all sparsity pattern representations.
 ```
 AbstractPattern
 ├── AbstractVectorPattern: used in GradientTracer, ConnectivityTracer
-│   └── IndexSetVector
+│   └── IndexSetVectorPattern
 └── AbstractHessianPattern: used in HessianTracer
-    └── IndexSetHessian
+    └── IndexSetHessianPattern
 ```
 """
 AbstractPattern
@@ -85,25 +85,25 @@ Vector sparsity pattern represented by an `AbstractSet` of indices ``{i}`` of no
 ## Fields
 $(TYPEDFIELDS)
 """
-struct IndexSetVector{I<:Integer,S<:AbstractSet{I}} <: AbstractVectorPattern
+struct IndexSetVectorPattern{I<:Integer,S<:AbstractSet{I}} <: AbstractVectorPattern
     "Set of indices represting non-zero entries ``i`` in a vector."
     vector::S
 end
 
-set(v::IndexSetVector) = v.vector
+set(v::IndexSetVectorPattern) = v.vector
 
-Base.show(io::IO, s::IndexSetVector) = Base.show(io, s.vector)
+Base.show(io::IO, s::IndexSetVectorPattern) = Base.show(io, s.vector)
 
-function myempty(::Type{IndexSetVector{I,S}}) where {I,S}
-    return IndexSetVector{I,S}(myempty(S))
+function myempty(::Type{IndexSetVectorPattern{I,S}}) where {I,S}
+    return IndexSetVectorPattern{I,S}(myempty(S))
 end
-function seed(::Type{IndexSetVector{I,S}}, i) where {I,S}
-    return IndexSetVector{I,S}(seed(S, i))
+function seed(::Type{IndexSetVectorPattern{I,S}}, i) where {I,S}
+    return IndexSetVectorPattern{I,S}(seed(S, i))
 end
 
 # Tracer compatibility
-inputs(s::IndexSetVector) = s.vector
-gradient(s::IndexSetVector) = s.vector
+inputs(s::IndexSetVectorPattern) = s.vector
+gradient(s::IndexSetVectorPattern) = s.vector
 
 #========================#
 # AbstractHessianPattern #
@@ -127,23 +127,23 @@ For use with [`HessianTracer`](@ref).
 abstract type AbstractHessianPattern <: AbstractPattern end
 
 """
-    IndexSetHessian(vector::AbstractVectorPattern, mat::AbstractMatrixPattern)
+    IndexSetHessianPattern(vector::AbstractVectorPattern, mat::AbstractMatrixPattern)
 
 Gradient and Hessian sparsity patterns constructed by combining two AbstractSets.
 """
-struct IndexSetHessian{I<:Integer,SG<:AbstractSet{I},SH<:AbstractSet{Tuple{I,I}}} <:
+struct IndexSetHessianPattern{I<:Integer,SG<:AbstractSet{I},SH<:AbstractSet{Tuple{I,I}}} <:
        AbstractHessianPattern
     gradient::SG
     hessian::SH
 end
 
-function myempty(::Type{IndexSetHessian{I,SG,SH}}) where {I,SG,SH}
-    return IndexSetHessian{I,SG,SH}(myempty(SG), myempty(SH))
+function myempty(::Type{IndexSetHessianPattern{I,SG,SH}}) where {I,SG,SH}
+    return IndexSetHessianPattern{I,SG,SH}(myempty(SG), myempty(SH))
 end
-function seed(::Type{IndexSetHessian{I,SG,SH}}, index) where {I,SG,SH}
-    return IndexSetHessian{I,SG,SH}(seed(SG, index), myempty(SH))
+function seed(::Type{IndexSetHessianPattern{I,SG,SH}}, index) where {I,SG,SH}
+    return IndexSetHessianPattern{I,SG,SH}(seed(SG, index), myempty(SH))
 end
 
 # Tracer compatibility
-gradient(s::IndexSetHessian) = s.gradient
-hessian(s::IndexSetHessian) = s.hessian
+gradient(s::IndexSetHessianPattern) = s.gradient
+hessian(s::IndexSetHessianPattern) = s.hessian
