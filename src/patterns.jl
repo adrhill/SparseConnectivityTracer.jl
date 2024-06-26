@@ -12,25 +12,7 @@ AbstractPattern
     └── IndexSetHessianPattern
 ```
 """
-AbstractPattern
-
-"""
-    myempty(P)
-
-Constructor for an empty pattern of type `P` representing a new number (usually an empty pattern).
-"""
-myempty(::P) where {P<:AbstractPattern} = myempty(P)
-myempty(::T) where {P,T<:AbstractTracer{P}} = T(myempty(P), true)
-myempty(::Type{T}) where {P,T<:AbstractTracer{P}} = T(myempty(P), true)
-
-"""
-seed(P, i)
-
-Constructor for a pattern of type `P` that only contains the given index `i`.
-"""
-seed(::P, i) where {P<:AbstractPattern} = seed(P, i)
-seed(::T, i) where {P<:AbstractPattern,T<:AbstractTracer{P}} = T(seed(P, i))
-seed(::Type{T}, i) where {P<:AbstractPattern,T<:AbstractTracer{P}} = T(seed(P, i))
+abstract type AbstractPattern end
 
 #==========================#
 # Utilities on AbstractSet #

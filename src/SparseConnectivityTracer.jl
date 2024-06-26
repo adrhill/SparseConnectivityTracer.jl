@@ -19,9 +19,6 @@ include("settypes/duplicatevector.jl")
 include("settypes/recursiveset.jl")
 include("settypes/sortedvector.jl")
 
-abstract type AbstractPattern end
-abstract type AbstractTracer{P<:AbstractPattern} <: Real end
-
 include("patterns.jl")
 include("tracers.jl")
 include("exceptions.jl")

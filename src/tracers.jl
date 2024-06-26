@@ -1,3 +1,5 @@
+abstract type AbstractTracer{P<:AbstractPattern} <: Real end
+
 #====================#
 # ConnectivityTracer #
 #====================#
@@ -183,13 +185,40 @@ end
 #===========#
 
 """
+  myempty(T)
+  myempty(tracer)
+  myempty(pattern)
+
+
+Constructor for an empty tracer or pattern of type `T` representing a new number (usually an empty pattern).
+"""
+myempty(::T) where {T<:AbstractTracer} = myempty(T)
+
+# myempty(::Type{T}) where {P,T<:AbstractTracer{P}}   = T(myempty(P), true) # JET complains about this
+myempty(::Type{T}) where {P,T<:ConnectivityTracer{P}} = T(myempty(P), true)
+myempty(::Type{T}) where {P,T<:GradientTracer{P}}     = T(myempty(P), true)
+myempty(::Type{T}) where {P,T<:HessianTracer{P}}      = T(myempty(P), true)
+
+"""
+  seed(T, i)
+  seed(tracer, i)
+  seed(pattern, i)
+
+Constructor for a tracer or pattern of type `T` that only contains the given index `i`.
+"""
+seed(::T, i) where {T<:AbstractTracer} = seed(T, i)
+
+# seed(::Type{T}, i) where {P,T<:AbstractTracer{P}}   = T(seed(P, i)) # JET complains about this
+seed(::Type{T}, i) where {P,T<:ConnectivityTracer{P}} = T(seed(P, i))
+seed(::Type{T}, i) where {P,T<:GradientTracer{P}}     = T(seed(P, i))
+seed(::Type{T}, i) where {P,T<:HessianTracer{P}}      = T(seed(P, i))
+
+"""
     create_tracer(T, index) where {T<:AbstractTracer}
 
 Convenience constructor for [`ConnectivityTracer`](@ref), [`GradientTracer`](@ref) and [`HessianTracer`](@ref) from input indices.
 """
-function create_tracer(
-    ::Type{T}, ::Real, index::Integer
-) where {P<:AbstractPattern,T<:AbstractTracer{P}}
+function create_tracer(::Type{T}, ::Real, index::Integer) where {P,T<:AbstractTracer{P}}
     return T(seed(P, index))
 end
 
