@@ -1,35 +1,12 @@
 # Test construction and conversions of internal tracer types
 using SparseConnectivityTracer:
     AbstractTracer, ConnectivityTracer, GradientTracer, HessianTracer, Dual
-using SparseConnectivityTracer: IndexSetVector, IndexSetHessian
 using SparseConnectivityTracer: inputs, primal, tracer, isemptytracer
 using SparseConnectivityTracer: myempty, name
-using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
-CONNECTIVITY_TRACERS = (
-    ConnectivityTracer{IndexSetVector{Int,BitSet}},
-    ConnectivityTracer{IndexSetVector{Int,Set{Int}}},
-    ConnectivityTracer{IndexSetVector{Int,DuplicateVector{Int}}},
-    ConnectivityTracer{IndexSetVector{Int,SortedVector{Int}}},
-)
-
-GRADIENT_TRACERS = (
-    GradientTracer{IndexSetVector{Int,BitSet}},
-    GradientTracer{IndexSetVector{Int,Set{Int}}},
-    GradientTracer{IndexSetVector{Int,DuplicateVector{Int}}},
-    GradientTracer{IndexSetVector{Int,SortedVector{Int}}},
-)
-
-HESSIAN_TRACERS = (
-    HessianTracer{IndexSetHessian{Int,BitSet,Set{Tuple{Int,Int}}}},
-    HessianTracer{IndexSetHessian{Int,Set{Int},Set{Tuple{Int,Int}}}},
-    HessianTracer{
-        IndexSetHessian{Int,DuplicateVector{Int},DuplicateVector{Tuple{Int,Int}}}
-    },
-    HessianTracer{IndexSetHessian{Int,SortedVector{Int},SortedVector{Tuple{Int,Int}}}},
-    # TODO: test on RecursiveSet
-)
+# Load definitions of CONNECTIVITY_TRACERS, GRADIENT_TRACERS, HESSIAN_TRACERS
+include("tracers_definitions.jl")
 
 function test_nested_duals(::Type{T}) where {T<:AbstractTracer}
     # Putting Duals into Duals is prohibited

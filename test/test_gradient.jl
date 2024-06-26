@@ -1,18 +1,13 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer: GradientTracer, Dual, MissingPrimalError, trace_input
-using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using ADTypes: jacobian_sparsity
 using LinearAlgebra: det, dot, logdet
 using SpecialFunctions: erf, beta
 using NNlib: NNlib
 using Test
 
-GRADIENT_TRACERS = (
-    GradientTracer{BitSet},
-    GradientTracer{Set{Int}},
-    GradientTracer{DuplicateVector{Int}},
-    GradientTracer{SortedVector{Int}},
-)
+# Load definitions of CONNECTIVITY_TRACERS, GRADIENT_TRACERS, HESSIAN_TRACERS
+include("tracers_definitions.jl")
 
 NNLIB_ACTIVATIONS_S = (
     NNlib.σ,
