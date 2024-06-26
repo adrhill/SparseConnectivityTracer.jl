@@ -111,7 +111,7 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
         end
     end
 
-    if GROUP in ("Core", "All")
+    if GROUP in ("Benchmarks", "All")
         @info "Testing benchmarks correctness..."
         @testset "Benchmarks correctness" begin
             include("benchmarks_correctness.jl")

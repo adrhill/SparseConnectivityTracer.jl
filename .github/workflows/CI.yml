@@ -27,10 +27,13 @@ jobs:
           - '1'
         group:
           - Core
+          - Benchmarks
           - NLPModels
         exclude:
           - version: '1.6'
             group: NLPModels
+          - version: '1.6'
+            group: Benchmarks
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
