@@ -31,11 +31,13 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
             @info "Testing formalities..."
             if VERSION >= v"1.10"
                 @testset "Code formatting" begin
+                    @info "...with JuliaFormatter.jl"
                     @test JuliaFormatter.format(
                         SparseConnectivityTracer; verbose=false, overwrite=false
                     )
                 end
                 @testset "Aqua tests" begin
+                    @info "...with Aqua.jl"
                     Aqua.test_all(
                         SparseConnectivityTracer;
                         ambiguities=false,
@@ -45,6 +47,7 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
                     )
                 end
                 @testset "JET tests" begin
+                    @info "...with JET.jl"
                     JET.test_package(SparseConnectivityTracer; target_defined_modules=true)
                 end
             end
