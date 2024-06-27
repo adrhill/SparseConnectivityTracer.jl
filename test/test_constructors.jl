@@ -3,30 +3,10 @@ using SparseConnectivityTracer:
     AbstractTracer, ConnectivityTracer, GradientTracer, HessianTracer, Dual
 using SparseConnectivityTracer: inputs, primal, tracer, isemptytracer
 using SparseConnectivityTracer: myempty, name
-using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
-CONNECTIVITY_TRACERS = (
-    ConnectivityTracer{BitSet},
-    ConnectivityTracer{Set{Int}},
-    ConnectivityTracer{DuplicateVector{Int}},
-    ConnectivityTracer{SortedVector{Int}},
-)
-
-GRADIENT_TRACERS = (
-    GradientTracer{BitSet},
-    GradientTracer{Set{Int}},
-    GradientTracer{DuplicateVector{Int}},
-    GradientTracer{SortedVector{Int}},
-)
-
-HESSIAN_TRACERS = (
-    HessianTracer{BitSet,Set{Tuple{Int,Int}}},
-    HessianTracer{Set{Int},Set{Tuple{Int,Int}}},
-    HessianTracer{DuplicateVector{Int},DuplicateVector{Tuple{Int,Int}}},
-    HessianTracer{SortedVector{Int},SortedVector{Tuple{Int,Int}}},
-    # TODO: test on RecursiveSet
-)
+# Load definitions of CONNECTIVITY_TRACERS, GRADIENT_TRACERS, HESSIAN_TRACERS
+include("tracers_definitions.jl")
 
 function test_nested_duals(::Type{T}) where {T<:AbstractTracer}
     # Putting Duals into Duals is prohibited

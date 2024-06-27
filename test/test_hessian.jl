@@ -1,17 +1,11 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer: Dual, HessianTracer, MissingPrimalError, trace_input, empty
-using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using ADTypes: hessian_sparsity
 using SpecialFunctions: erf, beta
 using Test
 
-HESSIAN_TRACERS = (
-    HessianTracer{BitSet,Set{Tuple{Int,Int}}},
-    HessianTracer{Set{Int},Set{Tuple{Int,Int}}},
-    HessianTracer{DuplicateVector{Int},DuplicateVector{Tuple{Int,Int}}},
-    HessianTracer{SortedVector{Int},SortedVector{Tuple{Int,Int}}},
-    # TODO: test on RecursiveSet
-)
+# Load definitions of CONNECTIVITY_TRACERS, GRADIENT_TRACERS, HESSIAN_TRACERS
+include("tracers_definitions.jl")
 
 @testset "Global Hessian" begin
     @testset "Default hessian_pattern" begin
@@ -214,6 +208,7 @@ HESSIAN_TRACERS = (
             1 1 0
             0 0 0
         ]
+        yield()
     end
 end
 
@@ -268,5 +263,6 @@ end
         @test hessian_sparsity(x -> (2//3)^zero(x), 1, method) ≈ [0;;]
         @test hessian_sparsity(x -> zero(x)^ℯ, 1, method) ≈ [0;;]
         @test hessian_sparsity(x -> ℯ^zero(x), 1, method) ≈ [0;;]
+        yield()
     end
 end

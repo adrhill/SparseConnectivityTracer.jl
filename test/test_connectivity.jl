@@ -1,17 +1,12 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer: ConnectivityTracer, Dual, MissingPrimalError, trace_input
-using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using LinearAlgebra: det, dot, logdet
 using SpecialFunctions: erf, beta
 using NNlib: NNlib
 using Test
 
-CONNECTIVITY_TRACERS = (
-    ConnectivityTracer{BitSet},
-    ConnectivityTracer{Set{Int}},
-    ConnectivityTracer{DuplicateVector{Int}},
-    ConnectivityTracer{SortedVector{Int}},
-)
+# Load definitions of CONNECTIVITY_TRACERS, GRADIENT_TRACERS, HESSIAN_TRACERS
+include("tracers_definitions.jl")
 
 NNLIB_ACTIVATIONS_S = (
     NNlib.σ,
@@ -121,6 +116,7 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
         @test_throws TypeError connectivity_pattern(
             x -> x[1] > x[2] ? x[3] : x[4], [1.0, 2.0, 3.0, 4.0], T
         ) == [0 0 1 1;]
+        yield()
     end
 end
 
@@ -133,5 +129,6 @@ end
             x -> ifelse(x[2] < x[3], x[1] + x[2], x[3] * x[4]), [1 3 2 4], T
         ) == [0 0 1 1]
         @test local_connectivity_pattern(x -> 0, 1, T) ≈ [0;;]
+        yield()
     end
 end

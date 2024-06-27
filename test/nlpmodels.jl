@@ -67,6 +67,7 @@ hess_inconsistencies = []
             push!(hess_inconsistencies, (name, message))
         end
     end
+    yield()
 end;
 
 if !isempty(jac_inconsistencies) || !isempty(hess_inconsistencies)

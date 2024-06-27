@@ -19,6 +19,7 @@ include("settypes/duplicatevector.jl")
 include("settypes/recursiveset.jl")
 include("settypes/sortedvector.jl")
 
+include("patterns.jl")
 include("tracers.jl")
 include("exceptions.jl")
 include("operators.jl")

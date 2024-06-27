@@ -1,18 +1,13 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer: GradientTracer, Dual, MissingPrimalError, trace_input
-using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using ADTypes: jacobian_sparsity
 using LinearAlgebra: det, dot, logdet
 using SpecialFunctions: erf, beta
 using NNlib: NNlib
 using Test
 
-GRADIENT_TRACERS = (
-    GradientTracer{BitSet},
-    GradientTracer{Set{Int}},
-    GradientTracer{DuplicateVector{Int}},
-    GradientTracer{SortedVector{Int}},
-)
+# Load definitions of CONNECTIVITY_TRACERS, GRADIENT_TRACERS, HESSIAN_TRACERS
+include("tracers_definitions.jl")
 
 NNLIB_ACTIVATIONS_S = (
     NNlib.σ,
@@ -130,6 +125,7 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
         @test_throws TypeError jacobian_sparsity(
             x -> x[1] > x[2] ? x[3] : x[4], [1.0, 2.0, 3.0, 4.0], method
         ) == [0 0 1 1;]
+        yield()
     end
 end
 
@@ -254,5 +250,6 @@ end
         @test jacobian_sparsity(NNlib.softshrink, -1, method) ≈ [1;;]
         @test jacobian_sparsity(NNlib.softshrink, 0, method) ≈ [0;;]
         @test jacobian_sparsity(NNlib.softshrink, 1, method) ≈ [1;;]
+        yield()
     end
 end

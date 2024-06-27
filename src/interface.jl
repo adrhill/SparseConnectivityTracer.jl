@@ -1,6 +1,8 @@
-const DEFAULT_CONNECTIVITY_TRACER = ConnectivityTracer{BitSet}
-const DEFAULT_GRADIENT_TRACER = GradientTracer{BitSet}
-const DEFAULT_HESSIAN_TRACER = HessianTracer{BitSet,Set{Tuple{Int,Int}}}
+const DEFAULT_CONNECTIVITY_TRACER = ConnectivityTracer{IndexSetGradientPattern{Int,BitSet}}
+const DEFAULT_GRADIENT_TRACER = GradientTracer{IndexSetGradientPattern{Int,BitSet}}
+const DEFAULT_HESSIAN_TRACER = HessianTracer{
+    IndexSetHessianPattern{Int,BitSet,Set{Tuple{Int,Int}}}
+}
 
 #==================#
 # Enumerate inputs #
