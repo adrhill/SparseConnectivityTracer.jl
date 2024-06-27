@@ -2,6 +2,11 @@
 
 ## Version `v0.6.0`
 * ![BREAKING][badge-breaking] Remove `ConnectivityTracer` ([#140][pr-140])
+* ![BREAKING][badge-breaking] Remove legacy interface ([#140][pr-140])
+    * instead of `jacobian_pattern(f, x)`, use `jacobian_sparsity(f, x, TracerSparsityDetector())`
+    * instead of `hessian_pattern(f, x)`, use `hessian_sparsity(f, x, TracerSparsityDetector())`
+    * instead of `local_jacobian_pattern(f, x)`, use `jacobian_sparsity(f, x, TracerLocalSparsityDetector())`
+    * instead of `local_hessian_pattern(f, x)`, use `hessian_sparsity(f, x, TracerLocalSparsityDetector())`
 * ![Bugfix][badge-bugfix] Remove overloads on `similar` to reduce amount of invalidations  ([#132][pr-132])
 * ![Enhancement][badge-enhancement] Add array overloads ([#131][pr-131])
 * ![Enhancement][badge-enhancement] Generalize sparsity pattern representations ([#139][pr-139], [#119][pr-119])
