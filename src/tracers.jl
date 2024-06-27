@@ -53,11 +53,6 @@ $(TYPEDEF)
 
 ## Fields
 $(TYPEDFIELDS)
-
-## Internals
-
-The last type parameter `shared` is a `Bool` indicating whether the `hessian` field of this object should be shared among all intermediate scalar quantities involved in a function.
-It is not yet part of the public API, and users should always set it to `false`.
 """
 struct HessianTracer{P<:AbstractHessianPattern} <: AbstractTracer{P}
     "Sparse representation of non-zero entries in the gradient and the Hessian."

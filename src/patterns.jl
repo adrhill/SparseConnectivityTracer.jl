@@ -9,8 +9,7 @@ AbstractPattern
 ├── AbstractGradientPattern: used in GradientTracer
 │   └── IndexSetGradientPattern
 └── AbstractHessianPattern: used in HessianTracer
-    ├── IndexSetHessianPattern
-    └── SharedIndexSetHessianPattern
+    └── IndexSetHessianPattern
 ```
 """
 abstract type AbstractPattern end
@@ -141,8 +140,11 @@ Hessian sparsity pattern represented by:
 * an `AbstractSet` of index tuples ``(i,j)`` of non-zero values representing second-order sparsity
 
 ## Fields
-
 $(TYPEDFIELDS)
+
+## Internals
+
+The last type parameter `shared` is a `Bool` indicating whether the `hessian` field of this object should be shared among all intermediate scalar quantities involved in a function.
 """
 struct IndexSetHessianPattern{
     I<:Integer,SG<:AbstractSet{I},SH<:AbstractSet{Tuple{I,I}},mutating
