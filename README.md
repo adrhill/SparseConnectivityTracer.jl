@@ -8,9 +8,6 @@
 
 Fast Jacobian and Hessian sparsity detection via operator-overloading.
 
-> [!WARNING]
-> This package is in early development. Expect frequent breaking changes and refer to the stable documentation.
-
 ## Installation 
 To install this package, open the Julia REPL and run 
 
