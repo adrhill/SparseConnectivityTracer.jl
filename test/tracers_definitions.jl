@@ -1,13 +1,13 @@
 using SparseConnectivityTracer:
     AbstractTracer, ConnectivityTracer, GradientTracer, HessianTracer, Dual
-using SparseConnectivityTracer: IndexSetVectorPattern, IndexSetHessianPattern
+using SparseConnectivityTracer: IndexSetGradientPattern, IndexSetHessianPattern
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 
 VECTOR_PATTERNS = (
-    IndexSetVectorPattern{Int,BitSet},
-    IndexSetVectorPattern{Int,Set{Int}},
-    IndexSetVectorPattern{Int,DuplicateVector{Int}},
-    IndexSetVectorPattern{Int,SortedVector{Int}},
+    IndexSetGradientPattern{Int,BitSet},
+    IndexSetGradientPattern{Int,Set{Int}},
+    IndexSetGradientPattern{Int,DuplicateVector{Int}},
+    IndexSetGradientPattern{Int,SortedVector{Int}},
 )
 
 HESSIAN_PATTERNS = (

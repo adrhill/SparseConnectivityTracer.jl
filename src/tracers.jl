@@ -14,7 +14,7 @@ For a higher-level interface, refer to [`connectivity_pattern`](@ref).
 ## Fields
 $(TYPEDFIELDS)
 """
-struct ConnectivityTracer{P<:AbstractVectorPattern} <: AbstractTracer{P}
+struct ConnectivityTracer{P<:AbstractGradientPattern} <: AbstractTracer{P}
     "Sparse representation of connected inputs."
     pattern::P
     "Indicator whether pattern in tracer contains only zeros."
@@ -62,7 +62,7 @@ For a higher-level interface, refer to [`jacobian_pattern`](@ref).
 ## Fields
 $(TYPEDFIELDS)
 """
-struct GradientTracer{P<:AbstractVectorPattern} <: AbstractTracer{P}
+struct GradientTracer{P<:AbstractGradientPattern} <: AbstractTracer{P}
     "Sparse representation of non-zero entries in the gradient."
     pattern::P
     "Indicator whether gradient in tracer contains only zeros."
@@ -184,14 +184,6 @@ end
 # Utilities #
 #===========#
 
-"""
-  myempty(T)
-  myempty(tracer)
-  myempty(pattern)
-
-
-Constructor for an empty tracer or pattern of type `T` representing a new number (usually an empty pattern).
-"""
 myempty(::T) where {T<:AbstractTracer} = myempty(T)
 
 # myempty(::Type{T}) where {P,T<:AbstractTracer{P}}   = T(myempty(P), true) # JET complains about this
@@ -199,13 +191,6 @@ myempty(::Type{T}) where {P,T<:ConnectivityTracer{P}} = T(myempty(P), true)
 myempty(::Type{T}) where {P,T<:GradientTracer{P}}     = T(myempty(P), true)
 myempty(::Type{T}) where {P,T<:HessianTracer{P}}      = T(myempty(P), true)
 
-"""
-  seed(T, i)
-  seed(tracer, i)
-  seed(pattern, i)
-
-Constructor for a tracer or pattern of type `T` that only contains the given index `i`.
-"""
 seed(::T, i) where {T<:AbstractTracer} = seed(T, i)
 
 # seed(::Type{T}, i) where {P,T<:AbstractTracer{P}}   = T(seed(P, i)) # JET complains about this

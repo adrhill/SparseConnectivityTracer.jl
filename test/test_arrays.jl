@@ -18,7 +18,7 @@ TEST_SQUARE_MATRICES = Dict(
 TEST_MATRICES = merge(TEST_SQUARE_MATRICES, Dict("`Matrix` (3×4)" => rand(3, 4)))
 
 S = BitSet
-P = IndexSetVectorPattern{Int,S}
+P = IndexSetGradientPattern{Int,S}
 TG = GradientTracer{P}
 
 # NOTE: we currently test for conservative patterns on array overloads

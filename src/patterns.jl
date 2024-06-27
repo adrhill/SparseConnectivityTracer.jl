@@ -6,13 +6,32 @@ Abstract supertype of all sparsity pattern representations.
 ## Type hierarchy
 ```
 AbstractPattern
-├── AbstractVectorPattern: used in GradientTracer, ConnectivityTracer
-│   └── IndexSetVectorPattern
+├── AbstractGradientPattern: used in GradientTracer, ConnectivityTracer
+│   └── IndexSetGradientPattern
 └── AbstractHessianPattern: used in HessianTracer
     └── IndexSetHessianPattern
 ```
 """
 abstract type AbstractPattern end
+
+"""
+  myempty(T)
+  myempty(tracer)
+  myempty(pattern)
+
+
+Constructor for an empty tracer or pattern of type `T` representing a new number (usually an empty pattern).
+"""
+myempty
+
+"""
+  seed(T, i)
+  seed(tracer, i)
+  seed(pattern, i)
+
+Constructor for a tracer or pattern of type `T` that only contains the given index `i`.
+"""
+seed
 
 #==========================#
 # Utilities on AbstractSet #
@@ -37,27 +56,26 @@ function union_product!(
 end
 
 #=======================#
-# AbstractVectorPattern #
+# AbstractGradientPattern #
 #=======================#
 
-# For use with ConnectivityTracer and GradientTracer.
+# For use with GradientTracer.
 
 """
-    AbstractVectorPattern <: AbstractPattern
+    AbstractGradientPattern <: AbstractPattern
 
 Abstract supertype of sparsity patterns representing a vector.
-For use with [`ConnectivityTracer`](@ref) and [`GradientTracer`](@ref).
+For use with [`GradientTracer`](@ref).
 
 ## Expected interface
 
 * `myempty(::Type{MyPattern})`: return a pattern representing a new number (usually an empty pattern)
 * `seed(::Type{MyPattern}, i::Integer)`: return an pattern that only contains the given index `i`
-* `inputs(p::MyPattern)`: return non-zero indices `i` for use with `ConnectivityTracer`
 * `gradient(p::MyPattern)`: return non-zero indices `i` for use with `GradientTracer`
 
 Note that besides their names, the last two functions are usually identical.
 """
-abstract type AbstractVectorPattern <: AbstractPattern end
+abstract type AbstractGradientPattern <: AbstractPattern end
 
 """
 $(TYPEDEF)
@@ -67,25 +85,25 @@ Vector sparsity pattern represented by an `AbstractSet` of indices ``{i}`` of no
 ## Fields
 $(TYPEDFIELDS)
 """
-struct IndexSetVectorPattern{I<:Integer,S<:AbstractSet{I}} <: AbstractVectorPattern
+struct IndexSetGradientPattern{I<:Integer,S<:AbstractSet{I}} <: AbstractGradientPattern
     "Set of indices represting non-zero entries ``i`` in a vector."
-    vector::S
+    gradient::S
 end
 
-set(v::IndexSetVectorPattern) = v.vector
+set(v::IndexSetGradientPattern) = v.gradient
 
-Base.show(io::IO, s::IndexSetVectorPattern) = Base.show(io, s.vector)
+Base.show(io::IO, p::IndexSetGradientPattern) = Base.show(io, set(p))
 
-function myempty(::Type{IndexSetVectorPattern{I,S}}) where {I,S}
-    return IndexSetVectorPattern{I,S}(myempty(S))
+function myempty(::Type{IndexSetGradientPattern{I,S}}) where {I,S}
+    return IndexSetGradientPattern{I,S}(myempty(S))
 end
-function seed(::Type{IndexSetVectorPattern{I,S}}, i) where {I,S}
-    return IndexSetVectorPattern{I,S}(seed(S, i))
+function seed(::Type{IndexSetGradientPattern{I,S}}, i) where {I,S}
+    return IndexSetGradientPattern{I,S}(seed(S, i))
 end
 
 # Tracer compatibility
-inputs(s::IndexSetVectorPattern) = s.vector
-gradient(s::IndexSetVectorPattern) = s.vector
+inputs(s::IndexSetGradientPattern) = s.gradient
+gradient(s::IndexSetGradientPattern) = s.gradient
 
 #========================#
 # AbstractHessianPattern #
@@ -109,7 +127,7 @@ For use with [`HessianTracer`](@ref).
 abstract type AbstractHessianPattern <: AbstractPattern end
 
 """
-    IndexSetHessianPattern(vector::AbstractVectorPattern, mat::AbstractMatrixPattern)
+    IndexSetHessianPattern(vector::AbstractGradientPattern, mat::AbstractMatrixPattern)
 
 Gradient and Hessian sparsity patterns constructed by combining two AbstractSets.
 """

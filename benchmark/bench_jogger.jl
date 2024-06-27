@@ -4,7 +4,7 @@ Pkg.develop(; path=joinpath(@__DIR__, "SparseConnectivityTracerBenchmarks"))
 using BenchmarkTools
 using SparseConnectivityTracer
 using SparseConnectivityTracer: GradientTracer, HessianTracer
-using SparseConnectivityTracer: IndexSetVectorPattern, IndexSetHessianPattern
+using SparseConnectivityTracer: IndexSetGradientPattern, IndexSetHessianPattern
 using SparseConnectivityTracer: DuplicateVector, SortedVector, RecursiveSet
 
 SET_TYPES = (BitSet, Set{Int}, DuplicateVector{Int}, RecursiveSet{Int}, SortedVector{Int})
@@ -20,7 +20,7 @@ suite["OptimizationProblems"] = optbench([:britgas])
 for S1 in SET_TYPES
     S2 = Set{Tuple{Int,Int}}
 
-    PG = IndexSetVectorPattern{Int,S1}
+    PG = IndexSetGradientPattern{Int,S1}
     PH = IndexSetHessianPattern{Int,S1,S2}
 
     G = GradientTracer{PG}

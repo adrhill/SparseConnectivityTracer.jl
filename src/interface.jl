@@ -1,5 +1,5 @@
-const DEFAULT_CONNECTIVITY_TRACER = ConnectivityTracer{IndexSetVectorPattern{Int,BitSet}}
-const DEFAULT_GRADIENT_TRACER = GradientTracer{IndexSetVectorPattern{Int,BitSet}}
+const DEFAULT_CONNECTIVITY_TRACER = ConnectivityTracer{IndexSetGradientPattern{Int,BitSet}}
+const DEFAULT_GRADIENT_TRACER = GradientTracer{IndexSetGradientPattern{Int,BitSet}}
 const DEFAULT_HESSIAN_TRACER = HessianTracer{
     IndexSetHessianPattern{Int,BitSet,Set{Tuple{Int,Int}}}
 }
