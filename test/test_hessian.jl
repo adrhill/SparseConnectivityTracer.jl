@@ -1,14 +1,16 @@
 using SparseConnectivityTracer
-using SparseConnectivityTracer: Dual, HessianTracer, MissingPrimalError, trace_input, empty
+using SparseConnectivityTracer: Dual, HessianTracer, MissingPrimalError
+using SparseConnectivityTracer: trace_input, create_tracers, pattern, isshared
 using ADTypes: hessian_sparsity
 using SpecialFunctions: erf, beta
 using Test
 
-# Load definitions of GRADIENT_TRACERS and HESSIAN_TRACERS
+# Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
 include("tracers_definitions.jl")
 
 @testset "Global Hessian" begin
-    @testset "$T" for T in HESSIAN_TRACERS
+    @testset "$P" for P in HESSIAN_PATTERNS
+        T = HessianTracer{P}
         method = TracerSparsityDetector(; hessian_tracer_type=T)
 
         @test hessian_sparsity(identity, rand(), method) ≈ [0;;]
@@ -243,7 +245,8 @@ include("tracers_definitions.jl")
 end
 
 @testset "Local Hessian" begin
-    @testset "$T" for T in HESSIAN_TRACERS
+    @testset "$P" for P in HESSIAN_PATTERNS
+        T = HessianTracer{P}
         method = TracerLocalSparsityDetector(; hessian_tracer_type=T)
 
         f1(x) = x[1] + x[2] * x[3] + 1 / x[4] + x[2] * max(x[1], x[5])
@@ -337,8 +340,8 @@ end
     end
 end
 
-@testset "Shared HessianTracer - same objects" begin
-    H = HessianTracer{BitSet,Set{Tuple{Int,Int}},true}
+@testset "Shared IndexSetHessianPattern - same objects" begin
+    H = HessianTracer{IndexSetHessianPattern{Int,BitSet,Set{Tuple{Int,Int}},true}}
 
     function multi_output_for_shared_test(x::AbstractArray)
         z = ones(eltype(x), size(x))
@@ -354,7 +357,7 @@ end
     xt = create_tracers(H, x, eachindex(x))
     yt = multi_output_for_shared_test(xt)
 
-    @test yt[1].hessian === yt[2].hessian
-    @test yt[1].hessian === yt[3].hessian
-    @test_broken yt[1].hessian === yt[4].hessian
+    @test pattern(yt[1]).hessian === pattern(yt[2]).hessian
+    @test pattern(yt[1]).hessian === pattern(yt[3]).hessian
+    @test_broken pattern(yt[1]).hessian === pattern(yt[4]).hessian
 end

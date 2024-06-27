@@ -136,76 +136,32 @@ end
 # Utilities #
 #===========#
 
-myempty(::T) where {T<:AbstractTracer} = myempty(T)
+# isshared(::Type{T}) where {P,T<:GradientTracer{P}} = isshared(P) # no shared AbstractGradientPattern yet
+isshared(::Type{T}) where {P,T<:HessianTracer{P}} = isshared(P)
 
-# myempty(::Type{T}) where {P,T<:AbstractTracer{P}}   = T(myempty(P), true) # JET complains about this
+myempty(::T) where {T<:AbstractTracer} = myempty(T)
+# myempty(::Type{T}) where {P,T<:AbstractTracer{P}} = T(myempty(P), true) # JET complains about this
 myempty(::Type{T}) where {P,T<:GradientTracer{P}} = T(myempty(P), true)
 myempty(::Type{T}) where {P,T<:HessianTracer{P}}  = T(myempty(P), true)
-
-seed(::T, i) where {T<:AbstractTracer} = seed(T, i)
-
-# seed(::Type{T}, i) where {P,T<:AbstractTracer{P}}   = T(seed(P, i)) # JET complains about this
-seed(::Type{T}, i) where {P,T<:GradientTracer{P}} = T(seed(P, i))
-seed(::Type{T}, i) where {P,T<:HessianTracer{P}}  = T(seed(P, i))
-
-"""
-    create_tracer(T, index)
-
-Convenience constructor for [`GradientTracer`](@ref) and [`HessianTracer`](@ref) from input indices.
-"""
-function create_tracer(::Type{T}, ::Real, index::Integer) where {P,T<:AbstractTracer{P}}
-    return T(seed(P, index))
-end
-
-function create_tracer(::Type{Dual{P,T}}, primal::Real, index::Integer) where {P,T}
-    return Dual(primal, create_tracer(T, primal, index))
-end
-
-function create_tracer(::Type{ConnectivityTracer{I}}, ::Real, index::Integer) where {I}
-    return ConnectivityTracer{I}(seed(I, index))
-end
-function create_tracer(::Type{GradientTracer{G}}, ::Real, index::Integer) where {G}
-    return GradientTracer{G}(seed(G, index))
-end
-function create_tracer(
-    ::Type{HessianTracer{G,H,shared}}, ::Real, index::Integer
-) where {G,H,shared}
-    return HessianTracer{G,H,shared}(seed(G, index), myempty(H))
-end
 
 """
     create_tracers(T, xs, indices)
 
-Convenience constructor for [`ConnectivityTracer`](@ref), [`GradientTracer`](@ref), [`HessianTracer`](@ref) and [`Dual`](@ref) from multiple inputs and their indices.
-
-Allows the creation of shared tracer fields (sofar only for the Hessian).
+Convenience constructor for [`GradientTracer`](@ref), [`HessianTracer`](@ref) and [`Dual`](@ref) 
+from multiple inputs `xs` and their indices `is`.
 """
 function create_tracers(
     ::Type{T}, xs::AbstractArray{<:Real,N}, indices::AbstractArray{<:Integer,N}
-) where {T<:Union{AbstractTracer,Dual},N}
-    return create_tracer.(T, xs, indices)
+) where {P<:AbstractPattern,T<:AbstractTracer{P},N}
+    patterns = create_patterns(P, xs, indices)
+    return T.(patterns)
 end
 
 function create_tracers(
-    ::Type{HessianTracer{G,H,true}},
-    xs::AbstractArray{<:Real,N},
-    indices::AbstractArray{<:Integer,N},
-) where {G,H,N}
-    sh = myempty(H)  # shared
-    return map(indices) do index
-        HessianTracer{G,H,true}(seed(G, index), sh)
-    end
-end
-
-function create_tracers(
-    ::Type{Dual{P,HessianTracer{G,H,true}}},
-    xs::AbstractArray{<:Real,N},
-    indices::AbstractArray{<:Integer,N},
-) where {P<:Real,G,H,N}
-    sh = myempty(H)  # shared
-    return map(xs, indices) do x, index
-        Dual(x, HessianTracer{G,H,true}(seed(G, index), sh))
-    end
+    ::Type{D}, xs::AbstractArray{<:Real,N}, indices::AbstractArray{<:Integer,N}
+) where {P,T,D<:Dual{P,T},N}
+    tracers = create_tracers(T, xs, indices)
+    return D.(xs, tracers)
 end
 
 # Pretty-printing of Dual tracers

@@ -9,10 +9,19 @@ AbstractPattern
 ├── AbstractGradientPattern: used in GradientTracer
 │   └── IndexSetGradientPattern
 └── AbstractHessianPattern: used in HessianTracer
-    └── IndexSetHessianPattern
+    ├── IndexSetHessianPattern
+    └── SharedIndexSetHessianPattern
 ```
 """
 abstract type AbstractPattern end
+
+"""
+    isshared(pattern)
+
+Indicates whether patterns share memory (mutate).
+"""
+isshared(::P) where {P<:AbstractPattern} = isshared(P)
+isshared(::Type{P}) where {P<:AbstractPattern} = false
 
 """
   myempty(T)
@@ -25,13 +34,11 @@ Constructor for an empty tracer or pattern of type `T` representing a new number
 myempty
 
 """
-  seed(T, i)
-  seed(tracer, i)
-  seed(pattern, i)
+    create_patterns(P, xs, is)
 
-Constructor for a tracer or pattern of type `T` that only contains the given index `i`.
+Convenience constructor for patterns of type `P` for multiple inputs `xs` and their indices `is`.
 """
-seed
+create_patterns
 
 #==========================#
 # Utilities on AbstractSet #
@@ -69,18 +76,17 @@ For use with [`GradientTracer`](@ref).
 
 ## Expected interface
 
-* `myempty(::Type{MyPattern})`: return a pattern representing a new number (usually an empty pattern)
-* `seed(::Type{MyPattern}, i::Integer)`: return an pattern that only contains the given index `i`
-* `gradient(p::MyPattern)`: return non-zero indices `i` for use with `GradientTracer`
-
-Note that besides their names, the last two functions are usually identical.
+* [`myempty`](@ref)
+* [`create_patterns`](@ref)
+* `gradient(p::MyPattern)`: return non-zero indices `i` in the gradient representation
+* [`isshared`](@ref) in case the pattern is shared (mutates). Defaults to false.
 """
 abstract type AbstractGradientPattern <: AbstractPattern end
 
 """
 $(TYPEDEF)
 
-Vector sparsity pattern represented by an `AbstractSet` of indices ``{i}`` of non-zero values.
+Gradient sparsity pattern represented by an `AbstractSet` of indices ``{i}`` of non-zero values.
 
 ## Fields
 $(TYPEDFIELDS)
@@ -97,8 +103,9 @@ Base.show(io::IO, p::IndexSetGradientPattern) = Base.show(io, set(p))
 function myempty(::Type{IndexSetGradientPattern{I,S}}) where {I,S}
     return IndexSetGradientPattern{I,S}(myempty(S))
 end
-function seed(::Type{IndexSetGradientPattern{I,S}}, i) where {I,S}
-    return IndexSetGradientPattern{I,S}(seed(S, i))
+function create_patterns(::Type{P}, xs, is) where {I,S,P<:IndexSetGradientPattern{I,S}}
+    sets = seed.(S, is)
+    return P.(sets)
 end
 
 # Tracer compatibility
@@ -118,29 +125,42 @@ For use with [`HessianTracer`](@ref).
 
 ## Expected interface
 
-* `myempty(::Type{MyPattern})`: return a pattern representing a new number (usually an empty pattern)
-* `seed(::Type{MyPattern}, i::Integer)`: return an pattern that only contains the given index `i` in the first-order representation
+* [`myempty`](@ref)
+* [`create_patterns`](@ref)
 * `gradient(p::MyPattern)`: return non-zero indices `i` in the first-order representation
 * `hessian(p::MyPattern)`: return non-zero indices `(i, j)` in the second-order representation
+* [`isshared`](@ref) in case the pattern is shared (mutates). Defaults to false.
 """
 abstract type AbstractHessianPattern <: AbstractPattern end
 
 """
-    IndexSetHessianPattern(vector::AbstractGradientPattern, mat::AbstractMatrixPattern)
+$(TYPEDEF)
 
-Gradient and Hessian sparsity patterns constructed by combining two AbstractSets.
+Hessian sparsity pattern represented by:
+* an `AbstractSet` of indices ``i`` of non-zero values representing first-order sparsity
+* an `AbstractSet` of index tuples ``(i,j)`` of non-zero values representing second-order sparsity
+
+## Fields
+
+$(TYPEDFIELDS)
 """
-struct IndexSetHessianPattern{I<:Integer,SG<:AbstractSet{I},SH<:AbstractSet{Tuple{I,I}}} <:
-       AbstractHessianPattern
+struct IndexSetHessianPattern{
+    I<:Integer,SG<:AbstractSet{I},SH<:AbstractSet{Tuple{I,I}},mutating
+} <: AbstractHessianPattern
     gradient::SG
     hessian::SH
 end
+isshared(::Type{IndexSetHessianPattern{I,SG,SH,true}}) where {I,SG,SH} = true
 
-function myempty(::Type{IndexSetHessianPattern{I,SG,SH}}) where {I,SG,SH}
-    return IndexSetHessianPattern{I,SG,SH}(myempty(SG), myempty(SH))
+function myempty(::Type{P}) where {I,SG,SH,M,P<:IndexSetHessianPattern{I,SG,SH,M}}
+    return P(myempty(SG), myempty(SH))
 end
-function seed(::Type{IndexSetHessianPattern{I,SG,SH}}, index) where {I,SG,SH}
-    return IndexSetHessianPattern{I,SG,SH}(seed(SG, index), myempty(SH))
+function create_patterns(
+    ::Type{P}, xs, is
+) where {I,SG,SH,M,P<:IndexSetHessianPattern{I,SG,SH,M}}
+    gradients = seed.(SG, is)
+    hessian = myempty(SH)
+    return P.(gradients, Ref(hessian))
 end
 
 # Tracer compatibility

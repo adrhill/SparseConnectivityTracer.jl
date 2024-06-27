@@ -6,7 +6,7 @@ using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using SparseConnectivityTracerBenchmarks.ODE: Brusselator!
 using Test
 
-# Load definitions of GRADIENT_TRACERS and HESSIAN_TRACERS
+# Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
 include("tracers_definitions.jl")
 
 function test_brusselator(method::AbstractSparsityDetector)

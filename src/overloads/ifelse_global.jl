@@ -15,13 +15,18 @@
     function output_union(px::P, py::P) where {P<:IndexSetGradientPattern}
         return P(union(set(px), set(py))) # return pattern
     end
-    function output_union(px::P, py::P) where {G,H,shared,P<:IndexSetHessianPattern{G,H,shared}}
+    function output_union(
+        px::P, py::P
+    ) where {I,SG,SH,P<:IndexSetHessianPattern{I,SG,SH,false}} # non-mutating
         g_out = union(gradient(px), gradient(py))
-        h_out = if shared
-            union!(hessian(tx), hessian(ty))
-        else
-            union(hessian(px), hessian(py))
-        end
+        h_out = union(hessian(px), hessian(py))
+        return P(g_out, h_out) # return pattern
+    end
+    function output_union(
+        px::P, py::P
+    ) where {I,SG,SH,P<:IndexSetHessianPattern{I,SG,SH,true}} # mutating
+        g_out = union(gradient(px), gradient(py))
+        h_out = union!(hessian(px), hessian(py))
         return P(g_out, h_out) # return pattern
     end
 
