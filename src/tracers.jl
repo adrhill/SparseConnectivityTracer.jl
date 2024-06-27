@@ -9,8 +9,6 @@ $(TYPEDEF)
 
 `Real` number type keeping track of non-zero gradient entries.
 
-For a higher-level interface, refer to [`jacobian_pattern`](@ref).
-
 ## Fields
 $(TYPEDFIELDS)
 """
@@ -52,8 +50,6 @@ end
 $(TYPEDEF)
 
 `Real` number type keeping track of non-zero gradient and Hessian entries.
-
-For a higher-level interface, refer to [`hessian_pattern`](@ref).
 
 ## Fields
 $(TYPEDFIELDS)

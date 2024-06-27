@@ -7,12 +7,7 @@ function Base.showerror(io::IO, e::MissingPrimalError)
     println(io, "Function ", e.fn, " requires primal value(s).")
     print(
         io,
-        "A dual-number tracer for local sparsity detection can be used via `",
-        str_local_pattern_fn(e.tracer),
-        "`.",
+        "A dual-number tracer for local sparsity detection can be used via `TracerLocalSparsityDetector`.",
     )
     return nothing
 end
-
-str_local_pattern_fn(::GradientTracer) = "local_jacobian_pattern"
-str_local_pattern_fn(::HessianTracer)  = "local_hessian_pattern"
