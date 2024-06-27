@@ -1,6 +1,6 @@
 module SparseConnectivityTracer
 
-using ADTypes: ADTypes
+using ADTypes: ADTypes, jacobian_sparsity, hessian_sparsity
 using Compat: Returns
 using SparseArrays: SparseArrays
 using SparseArrays: sparse
@@ -35,12 +35,10 @@ include("overloads/arrays.jl")
 include("interface.jl")
 include("adtypes.jl")
 
-export jacobian_pattern, local_jacobian_pattern
-export hessian_pattern, local_hessian_pattern
-
-# ADTypes interface
 export TracerSparsityDetector
 export TracerLocalSparsityDetector
+# Reexport ADTypes interface
+export jacobian_sparsity, hessian_sparsity
 
 function __init__()
     @static if !isdefined(Base, :get_extension)
