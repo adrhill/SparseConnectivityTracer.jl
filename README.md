@@ -21,17 +21,19 @@ julia> ]add SparseConnectivityTracer
 ## Examples
 ### Jacobian
 
-For functions `y = f(x)` and `f!(y, x)`, the sparsity pattern of the Jacobian of $f$ can be obtained
-by computing a single forward-pass through `f`:
+For functions `y = f(x)` and `f!(y, x)`, the sparsity pattern of the Jacobian can be obtained
+by computing a single forward-pass through the function:
 
 ```julia-repl
 julia> using SparseConnectivityTracer
+
+julia> detector = TracerSparsityDetector();
 
 julia> x = rand(3);
 
 julia> f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])];
 
-julia> jacobian_pattern(f, x)
+julia> jacobian_sparsity(f, x, detector)
 3×3 SparseArrays.SparseMatrixCSC{Bool, Int64} with 4 stored entries:
  1  ⋅  ⋅
  1  1  ⋅
@@ -43,11 +45,13 @@ As a larger example, let's compute the sparsity pattern from a convolutional lay
 ```julia-repl
 julia> using SparseConnectivityTracer, Flux
 
+julia> detector = TracerSparsityDetector();
+
 julia> x = rand(28, 28, 3, 1);
 
 julia> layer = Conv((3, 3), 3 => 2);
 
-julia> jacobian_pattern(layer, x)
+julia> jacobian_sparsity(layer, x, detector)
 1352×2352 SparseArrays.SparseMatrixCSC{Bool, Int64} with 36504 stored entries:
 ⎡⠙⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠻⣷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⎤
 ⎢⠀⠀⠙⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⎥
@@ -64,7 +68,7 @@ julia> jacobian_pattern(layer, x)
 ⎣⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠛⢿⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣷⣄⎦
 ```
 
-The type of index set `S` that is internally used to keep track of connectivity can be specified via `jacobian_pattern(f, x, S)`, defaulting to `BitSet`. 
+The type of index set `S` that is internally used to keep track of connectivity can be specified via `jacobian_sparsity(f, x, S)`, defaulting to `BitSet`. 
 For high-dimensional functions, `Set{Int64}` can be more efficient .
 
 ### Hessian
@@ -77,7 +81,7 @@ julia> x = rand(5);
 
 julia> f(x) = x[1] + x[2]*x[3] + 1/x[4] + 1*x[5];
 
-julia> hessian_pattern(f, x)
+julia> hessian_sparsity(f, x, detector)
 5×5 SparseArrays.SparseMatrixCSC{Bool, Int64} with 3 stored entries:
  ⋅  ⋅  ⋅  ⋅  ⋅
  ⋅  ⋅  1  ⋅  ⋅
@@ -87,7 +91,7 @@ julia> hessian_pattern(f, x)
 
 julia> g(x) = f(x) + x[2]^x[5];
 
-julia> hessian_pattern(g, x)
+julia> hessian_sparsity(g, x, detector)
 5×5 SparseArrays.SparseMatrixCSC{Bool, Int64} with 7 stored entries:
  ⋅  ⋅  ⋅  ⋅  ⋅
  ⋅  1  1  ⋅  1
@@ -100,29 +104,39 @@ For more detailled examples, take a look at the [documentation](https://adrianhi
 
 ### Local tracing
 
-The functions `jacobian_pattern`, `hessian_pattern` and `connectivity_pattern` return conservative sparsity patterns over the entire input domain of `x`. 
-They are not compatible with functions that require information about the primal values of a computation (e.g. `iszero`, `>`, `==`).
+`TracerSparsityDetector` returns conservative sparsity patterns over the entire input domain of `x`. 
+It is not compatible with functions that require information about the primal values of a computation (e.g. `iszero`, `>`, `==`).
 
-To compute a less conservative sparsity pattern at an input point `x`, use `local_jacobian_pattern`, `local_hessian_pattern` and `local_connectivity_pattern` instead.
-Note that these patterns depend on the input `x`:
+To compute a less conservative sparsity pattern at an input point `x`, use `TracerLocalSparsityDetector` instead.
+Note that patterns computed with `TracerLocalSparsityDetector` depend on the input `x`:
 
 ```julia-repl
+julia> using SparseConnectivityTracer, ADTypes
+
+julia> detector = TracerLocalSparsityDetector();
+
 julia> f(x) = ifelse(x[2] < x[3], x[1] ^ x[2], x[3] * x[4]);
 
-julia> local_hessian_pattern(f, [1 2 3 4])
+julia> hessian_sparsity(f, [1 2 3 4], detector)
 4×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 4 stored entries:
  1  1  ⋅  ⋅
  1  1  ⋅  ⋅
  ⋅  ⋅  ⋅  ⋅
  ⋅  ⋅  ⋅  ⋅
 
-julia> local_hessian_pattern(f, [1 3 2 4])
+julia> hessian_sparsity(f, [1 3 2 4], detector)
 4×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 2 stored entries:
  ⋅  ⋅  ⋅  ⋅
  ⋅  ⋅  ⋅  ⋅
  ⋅  ⋅  ⋅  1
  ⋅  ⋅  1  ⋅
 ```
+
+## ADTypes.jl compatibility
+SparseConnectivityTracer uses [ADTypes.jl](https://github.com/SciML/ADTypes.jl)'s interface for [sparsity detection](https://sciml.github.io/ADTypes.jl/stable/#Sparsity-detector),
+making it compatible with [DifferentiationInterface.jl](https://github.com/gdalle/DifferentiationInterface.jl)'s [sparse automatic differentiation](https://gdalle.github.io/DifferentiationInterface.jl/DifferentiationInterface/stable/tutorial2/) functionality.
+
+In fact, the functions `jacobian_sparsity` and `hessian_sparsity` are re-exported from ADTypes.
 
 ## Related packages
 * [SparseDiffTools.jl](https://github.com/JuliaDiff/SparseDiffTools.jl): automatic sparsity detection via Symbolics.jl and Cassette.jl
