@@ -7,4 +7,5 @@
 /docs/build/
 /docs/src/index.md
 /benchmark/Manifest.toml
+/benchmark/SparseConnectivityTracerBenchmarks/Manifest.toml
 /references/*

@@ -6,12 +6,8 @@ using SparseConnectivityTracer
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
-GRADIENT_TRACERS = (
-    GradientTracer{BitSet},
-    GradientTracer{Set{Int}},
-    GradientTracer{DuplicateVector{Int}},
-    GradientTracer{SortedVector{Int}},
-)
+# Load definitions of GRADIENT_TRACERS and HESSIAN_TRACERS
+include("tracers_definitions.jl")
 
 const INPUT_FLUX = reshape(
     [

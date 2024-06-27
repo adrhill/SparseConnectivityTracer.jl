@@ -2,6 +2,7 @@ using BenchmarkTools
 
 using ADTypes: AbstractSparsityDetector, jacobian_sparsity
 using SparseConnectivityTracer
+using SparseConnectivityTracerBenchmarks.ODE: Brusselator!, brusselator_2d_loop!
 
 using SparseArrays: sprand
 using SimpleDiffEq: ODEProblem, solve, SimpleEuler
@@ -48,8 +49,6 @@ function jacbench_sparsemul(method)
 end
 
 ## Brusselator
-
-include("../test/definitions/brusselator_definition.jl")
 
 function jacbench_brusselator(method)
     suite = BenchmarkGroup()

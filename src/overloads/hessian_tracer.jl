@@ -1,21 +1,21 @@
 ## 1-to-1
 
 @noinline function hessian_tracer_1_to_1(
-    t::T, is_der1_zero::Bool, is_secondder_zero::Bool
+    t::T, is_der1_zero::Bool, is_der2_zero::Bool
 ) where {T<:HessianTracer}
     if isemptytracer(t) # TODO: add test
         return t
     else
-        g_out, h_out = hessian_tracer_1_to_1_inner(
-            gradient(t), hessian(t), is_der1_zero, is_secondder_zero; shared=isshared(T)
-        )
-        return T(g_out, h_out) # return tracer
+        p_out = hessian_tracer_1_to_1_inner(pattern(t), is_der1_zero, is_der2_zero)
+        return T(p_out) # return tracer
     end
 end
 
 function hessian_tracer_1_to_1_inner(
-    sg::G, sh::H, is_der1_zero::Bool, is_secondder_zero::Bool; shared::Bool
-) where {I<:Integer,G<:AbstractSet{I},H<:AbstractSet{Tuple{I,I}}}
+    p::P, is_der1_zero::Bool, is_der2_zero::Bool; shared::Bool
+) where {I,SG,SH,P<:IndexSetHessianPattern{I,SG,SH}}
+    sg = gradient(p)
+    sh = hessian(p)
     sg_out = gradient_tracer_1_to_1_inner(sg, is_der1_zero)
     if shared
         sh_out = if is_secondder_zero
@@ -34,7 +34,7 @@ function hessian_tracer_1_to_1_inner(
             union_product!(copy(sh), sg, sg)
         end
     end
-    return sg_out, sh_out # return sets
+    return P(sg_out, sh_out) # return pattern
 end
 
 function overload_hessian_1_to_1(M, op)
@@ -70,60 +70,56 @@ end
     tx::T,
     ty::T,
     is_der1_arg1_zero::Bool,
-    is_secondder_arg1_zero::Bool,
+    is_der2_arg1_zero::Bool,
     is_der1_arg2_zero::Bool,
-    is_secondder_arg2_zero::Bool,
+    is_der2_arg2_zero::Bool,
     is_der_cross_zero::Bool,
 ) where {T<:HessianTracer}
     # TODO: add tests for isempty
     if tx.isempty && ty.isempty
         return tx # empty tracer
     elseif ty.isempty
-        return hessian_tracer_1_to_1(tx, is_der1_arg1_zero, is_secondder_arg1_zero)
+        return hessian_tracer_1_to_1(tx, is_der1_arg1_zero, is_der2_arg1_zero)
     elseif tx.isempty
-        return hessian_tracer_1_to_1(ty, is_der1_arg2_zero, is_secondder_arg2_zero)
+        return hessian_tracer_1_to_1(ty, is_der1_arg2_zero, is_der2_arg2_zero)
     else
-        g_out, h_out = hessian_tracer_2_to_1_inner(
-            gradient(tx),
-            hessian(tx),
-            gradient(ty),
-            hessian(ty),
+        p_out = hessian_tracer_2_to_1_inner(
+            pattern(tx),
+            pattern(ty),
             is_der1_arg1_zero,
-            is_secondder_arg1_zero,
+            is_der2_arg1_zero,
             is_der1_arg2_zero,
-            is_secondder_arg2_zero,
-            is_der_cross_zero;
-            shared=isshared(T),
+            is_der2_arg2_zero,
+            is_der_cross_zero,
         )
-        return T(g_out, h_out) # return tracer
+        return T(p_out) # return tracer
     end
 end
 
 function hessian_tracer_2_to_1_inner(
-    sgx::G,
-    shx::H,
-    sgy::G,
-    shy::H,
+    px::P,
+    py::P,
     is_der1_arg1_zero::Bool,
-    is_secondder_arg1_zero::Bool,
+    is_der2_arg1_zero::Bool,
     is_der1_arg2_zero::Bool,
-    is_secondder_arg2_zero::Bool,
-    is_der_cross_zero::Bool;
-    shared::Bool,
-) where {I<:Integer,G<:AbstractSet{I},H<:AbstractSet{Tuple{I,I}}}
+    is_der2_arg2_zero::Bool,
+    is_der_cross_zero::Bool,
+) where {I,SG,SH,P<:IndexSetHessianPattern{I,SG,SH}}
+    sgx, shx = gradient(px), hessian(px)
+    sgy, shy = gradient(py), hessian(py)
     sg_out = gradient_tracer_2_to_1_inner(sgx, sgy, is_der1_arg1_zero, is_der1_arg2_zero)
     if shared
         sh_out = union!(shx, shy)
     else
-        sh_out = myempty(H)
+        sh_out = myempty(SH)
         !is_der1_arg1_zero && union!(sh_out, shx)  # hessian alpha
         !is_der1_arg2_zero && union!(sh_out, shy)  # hessian beta
     end
-    !is_secondder_arg1_zero && union_product!(sh_out, sgx, sgx)  # product alpha
-    !is_secondder_arg2_zero && union_product!(sh_out, sgy, sgy)  # product beta
+    !is_der2_arg1_zero && union_product!(sh_out, sgx, sgx)  # product alpha
+    !is_der2_arg2_zero && union_product!(sh_out, sgy, sgy)  # product beta
     !is_der_cross_zero && union_product!(sh_out, sgx, sgy)  # cross product 1
     !is_der_cross_zero && union_product!(sh_out, sgy, sgx)  # cross product 2
-    return sg_out, sh_out # return sets
+    return P(sg_out, sh_out) # return pattern
 end
 
 function overload_hessian_2_to_1(M, op)

@@ -1,7 +1,7 @@
 using BenchmarkTools
 using OptimizationProblems: ADNLPProblems
-
-include("../test/definitions/nlpmodels_definitions.jl")
+using SparseConnectivityTracerBenchmarks.Optimization:
+    compute_jac_sparsity_sct, compute_hess_sparsity_sct
 
 function optbench(names::Vector{Symbol})
     suite = BenchmarkGroup()

@@ -1,3 +1,8 @@
+using Pkg
+Pkg.develop(;
+    path=joinpath(@__DIR__, "..", "benchmark", "SparseConnectivityTracerBenchmarks")
+)
+
 using SparseConnectivityTracer
 
 using Compat
@@ -26,20 +31,23 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
             @info "Testing formalities..."
             if VERSION >= v"1.10"
                 @testset "Code formatting" begin
+                    @info "...with JuliaFormatter.jl"
                     @test JuliaFormatter.format(
                         SparseConnectivityTracer; verbose=false, overwrite=false
                     )
                 end
                 @testset "Aqua tests" begin
+                    @info "...with Aqua.jl"
                     Aqua.test_all(
                         SparseConnectivityTracer;
                         ambiguities=false,
-                        deps_compat=(ignore=[:Random, :SparseArrays], check_extras=false),
+                        deps_compat=(check_extras=false,),
                         stale_deps=(ignore=[:Requires],),
                         persistent_tasks=false,
                     )
                 end
                 @testset "JET tests" begin
+                    @info "...with JET.jl"
                     JET.test_package(SparseConnectivityTracer; target_defined_modules=true)
                 end
             end
@@ -73,14 +81,14 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
             @testset "Tracer Construction" begin
                 include("test_constructors.jl")
             end
-            @testset "ConnectivityTracer" begin
-                include("test_connectivity.jl")
-            end
             @testset "GradientTracer" begin
                 include("test_gradient.jl")
             end
             @testset "HessianTracer" begin
                 include("test_hessian.jl")
+            end
+            @testset "Array overloads" begin
+                include("test_arrays.jl")
             end
         end
     end
@@ -103,6 +111,13 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
         @info "Testing ADTypes integration..."
         @testset "ADTypes integration" begin
             include("adtypes.jl")
+        end
+    end
+
+    if GROUP in ("Benchmarks", "All")
+        @info "Testing benchmarks correctness..."
+        @testset "Benchmarks correctness" begin
+            include("benchmarks_correctness.jl")
         end
     end
 

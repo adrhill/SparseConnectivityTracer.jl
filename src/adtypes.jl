@@ -23,7 +23,7 @@ julia> using ADTypes, SparseConnectivityTracer
 
 julia> f(x) = x[1] + x[2]*x[3] + 1/x[4];
 
-julia> ADTypes.hessian_sparsity(f, rand(4), TracerSparsityDetector())
+julia> hessian_sparsity(f, rand(4), TracerSparsityDetector())
 4×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 3 stored entries:
  ⋅  ⋅  ⋅  ⋅
  ⋅  ⋅  1  ⋅
@@ -46,15 +46,15 @@ function TracerSparsityDetector(;
 end
 
 function ADTypes.jacobian_sparsity(f, x, ::TracerSparsityDetector{TG,TH}) where {TG,TH}
-    return jacobian_pattern(f, x, TG)
+    return _jacobian_sparsity(f, x, TG)
 end
 
 function ADTypes.jacobian_sparsity(f!, y, x, ::TracerSparsityDetector{TG,TH}) where {TG,TH}
-    return jacobian_pattern(f!, y, x, TG)
+    return _jacobian_sparsity(f!, y, x, TG)
 end
 
 function ADTypes.hessian_sparsity(f, x, ::TracerSparsityDetector{TG,TH}) where {TG,TH}
-    return hessian_pattern(f, x, TH)
+    return _hessian_sparsity(f, x, TH)
 end
 
 """
@@ -72,13 +72,13 @@ julia> using ADTypes, SparseConnectivityTracer
 
 julia> f(x) = x[1] > x[2] ? x[1:3] : x[2:4];
 
-julia> ADTypes.jacobian_sparsity(f, [1.0, 2.0, 3.0, 4.0], TracerLocalSparsityDetector())
+julia> jacobian_sparsity(f, [1.0, 2.0, 3.0, 4.0], TracerLocalSparsityDetector())
 3×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 3 stored entries:
  ⋅  1  ⋅  ⋅
  ⋅  ⋅  1  ⋅
  ⋅  ⋅  ⋅  1
 
-julia> ADTypes.jacobian_sparsity(f, [2.0, 1.0, 3.0, 4.0], TracerLocalSparsityDetector())
+julia> jacobian_sparsity(f, [2.0, 1.0, 3.0, 4.0], TracerLocalSparsityDetector())
 3×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 3 stored entries:
  1  ⋅  ⋅  ⋅
  ⋅  1  ⋅  ⋅
@@ -90,7 +90,7 @@ julia> using ADTypes, SparseConnectivityTracer
 
 julia> f(x) = x[1] + max(x[2], x[3]) * x[3] + 1/x[4];
 
-julia> ADTypes.hessian_sparsity(f, [1.0, 2.0, 3.0, 4.0], TracerLocalSparsityDetector())
+julia> hessian_sparsity(f, [1.0, 2.0, 3.0, 4.0], TracerLocalSparsityDetector())
 4×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 2 stored entries:
  ⋅  ⋅  ⋅  ⋅
  ⋅  ⋅  ⋅  ⋅
@@ -113,15 +113,15 @@ function TracerLocalSparsityDetector(;
 end
 
 function ADTypes.jacobian_sparsity(f, x, ::TracerLocalSparsityDetector{TG,TH}) where {TG,TH}
-    return local_jacobian_pattern(f, x, TG)
+    return _local_jacobian_sparsity(f, x, TG)
 end
 
 function ADTypes.jacobian_sparsity(
     f!, y, x, ::TracerLocalSparsityDetector{TG,TH}
 ) where {TG,TH}
-    return local_jacobian_pattern(f!, y, x, TG)
+    return _local_jacobian_sparsity(f!, y, x, TG)
 end
 
 function ADTypes.hessian_sparsity(f, x, ::TracerLocalSparsityDetector{TG,TH}) where {TG,TH}
-    return local_hessian_pattern(f, x, TH)
+    return _local_hessian_sparsity(f, x, TH)
 end

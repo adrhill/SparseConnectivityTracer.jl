@@ -9,20 +9,20 @@
     end
 
     ## output union on scalar outputs
-    function output_union(tx::T, ty::T) where {T<:ConnectivityTracer}
-        return T(union(inputs(tx), inputs(ty)))
+    function output_union(tx::T, ty::T) where {T<:AbstractTracer}
+        return T(output_union(pattern(tx), pattern(ty))) # return tracer
     end
-    function output_union(tx::T, ty::T) where {T<:GradientTracer}
-        return T(union(gradient(tx), gradient(ty)))
+    function output_union(px::P, py::P) where {P<:IndexSetGradientPattern}
+        return P(union(set(px), set(py))) # return pattern
     end
-    function output_union(tx::T, ty::T) where {G,H,shared,T<:HessianTracer{G,H,shared}}
-        g_out = union(gradient(tx), gradient(ty))
+    function output_union(px::P, py::P) where {G,H,shared,P<:IndexSetHessianPattern{G,H,shared}}
+        g_out = union(gradient(px), gradient(py))
         h_out = if shared
             union!(hessian(tx), hessian(ty))
         else
-            union(hessian(tx), hessian(ty))
+            union(hessian(px), hessian(py))
         end
-        return T(g_out, h_out)
+        return P(g_out, h_out) # return pattern
     end
 
     output_union(tx::AbstractTracer, y) = tx
@@ -54,7 +54,6 @@ for op in (isequal, isapprox, isless, ==, <, >, <=, >=)
     @eval is_der_cross_zero_global(::$T) = true
 
     op_symb = nameof(op)
-    SparseConnectivityTracer.eval(overload_connectivity_2_to_1(:Base, op_symb))
     SparseConnectivityTracer.eval(overload_gradient_2_to_1(:Base, op_symb))
     SparseConnectivityTracer.eval(overload_hessian_2_to_1(:Base, op_symb))
 end

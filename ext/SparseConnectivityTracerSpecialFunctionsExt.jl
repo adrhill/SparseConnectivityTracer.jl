@@ -61,7 +61,6 @@ ops_1_to_1_s = (
 
 for op in ops_1_to_1_s
     T = typeof(op)
-    @eval SCT.is_infl_zero_global(::$T) = false
     @eval SCT.is_der1_zero_global(::$T) = false
     @eval SCT.is_der2_zero_global(::$T) = false
 end
