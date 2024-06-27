@@ -14,9 +14,6 @@ function second_order_or(ts::AbstractArray{T}) where {T<:AbstractTracer}
     return reduce(second_order_or, ts; init=myempty(T))
 end
 
-function second_order_or(a::T, b::T) where {T<:ConnectivityTracer}
-    return connectivity_tracer_2_to_1(a, b, false, false)
-end
 function second_order_or(a::T, b::T) where {T<:GradientTracer}
     return gradient_tracer_2_to_1(a, b, false, false)
 end
@@ -38,9 +35,6 @@ reduce(+, tracers)
 function first_order_or(ts::AbstractArray{T}) where {T<:AbstractTracer}
     # TODO: improve performance
     return reduce(first_order_or, ts; init=myempty(T))
-end
-function first_order_or(a::T, b::T) where {T<:ConnectivityTracer}
-    return connectivity_tracer_2_to_1(a, b, false, false)
 end
 function first_order_or(a::T, b::T) where {T<:GradientTracer}
     return gradient_tracer_2_to_1(a, b, false, false)

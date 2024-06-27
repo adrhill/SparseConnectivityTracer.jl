@@ -25,7 +25,6 @@ include("exceptions.jl")
 include("operators.jl")
 
 include("overloads/conversion.jl")
-include("overloads/connectivity_tracer.jl")
 include("overloads/gradient_tracer.jl")
 include("overloads/hessian_tracer.jl")
 include("overloads/ifelse_global.jl")
@@ -36,7 +35,6 @@ include("overloads/arrays.jl")
 include("interface.jl")
 include("adtypes.jl")
 
-export connectivity_pattern, local_connectivity_pattern
 export jacobian_pattern, local_jacobian_pattern
 export hessian_pattern, local_hessian_pattern
 

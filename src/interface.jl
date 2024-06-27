@@ -1,4 +1,3 @@
-const DEFAULT_CONNECTIVITY_TRACER = ConnectivityTracer{IndexSetGradientPattern{Int,BitSet}}
 const DEFAULT_GRADIENT_TRACER = GradientTracer{IndexSetGradientPattern{Int,BitSet}}
 const DEFAULT_HESSIAN_TRACER = HessianTracer{
     IndexSetHessianPattern{Int,BitSet,Set{Tuple{Int,Int}}}
@@ -14,7 +13,7 @@ const DEFAULT_HESSIAN_TRACER = HessianTracer{
 
 
 Enumerates input indices and constructs the specified type `T` of tracer.
-Supports [`ConnectivityTracer`](@ref), [`GradientTracer`](@ref) and [`HessianTracer`](@ref).
+Supports [`GradientTracer`](@ref), [`HessianTracer`](@ref) and [`Dual`](@ref).
 """
 trace_input(::Type{T}, x) where {T<:Union{AbstractTracer,Dual}} = trace_input(T, x, 1)
 
@@ -50,138 +49,6 @@ to_array(x::AbstractArray) = x
 _tracer_or_number(x::Real) = x
 _tracer_or_number(d::Dual) = tracer(d)
 
-#====================#
-# ConnectivityTracer #
-#====================#
-
-"""
-    connectivity_pattern(f, x)
-    connectivity_pattern(f, x, T)
-
-Enumerates inputs `x` and primal outputs `y = f(x)` and returns sparse matrix `C` of size `(m, n)`
-where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
-
-The type of `ConnectivityTracer` can be specified as an optional argument and defaults to `$DEFAULT_CONNECTIVITY_TRACER`.
-
-## Example
-
-```jldoctest
-julia> x = rand(3);
-
-julia> f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sign(x[3])];
-
-julia> connectivity_pattern(f, x)
-3×3 SparseArrays.SparseMatrixCSC{Bool, Int64} with 4 stored entries:
- 1  ⋅  ⋅
- 1  1  ⋅
- ⋅  ⋅  1
-```
-"""
-function connectivity_pattern(
-    f, x, ::Type{T}=DEFAULT_CONNECTIVITY_TRACER
-) where {T<:ConnectivityTracer}
-    xt, yt = trace_function(T, f, x)
-    return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
-end
-
-"""
-    connectivity_pattern(f!, y, x)
-    connectivity_pattern(f!, y, x, T)
-
-Enumerates inputs `x` and primal outputs `y` after `f!(y, x)` and returns sparse matrix `C` of size `(m, n)`
-where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
-
-The type of `ConnectivityTracer` can be specified as an optional argument and defaults to `$DEFAULT_CONNECTIVITY_TRACER`.
-"""
-function connectivity_pattern(
-    f!, y, x, ::Type{T}=DEFAULT_CONNECTIVITY_TRACER
-) where {T<:ConnectivityTracer}
-    xt, yt = trace_function(T, f!, y, x)
-    return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
-end
-
-"""
-    local_connectivity_pattern(f, x)
-    local_connectivity_pattern(f, x, P)
-
-Enumerates inputs `x` and primal outputs `y = f(x)` and returns sparse matrix `C` of size `(m, n)`
-where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
-
-Unlike [`connectivity_pattern`](@ref), this function supports control flow and comparisons.
-
-The type of `ConnectivityTracer` can be specified as an optional argument and defaults to `$DEFAULT_CONNECTIVITY_TRACER`.
-
-## Example
-
-```jldoctest
-julia> f(x) = ifelse(x[2] < x[3], x[1] + x[2], x[3] * x[4]);
-
-julia> x = [1 2 3 4];
-
-julia> local_connectivity_pattern(f, x)
-1×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 2 stored entries:
- 1  1  ⋅  ⋅
-
-julia> x = [1 3 2 4];
-
-julia> local_connectivity_pattern(f, x)
-1×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 2 stored entries:
- ⋅  ⋅  1  1
-```
-"""
-function local_connectivity_pattern(
-    f, x, ::Type{T}=DEFAULT_CONNECTIVITY_TRACER
-) where {T<:ConnectivityTracer}
-    D = Dual{eltype(x),T}
-    xt, yt = trace_function(D, f, x)
-    return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
-end
-
-"""
-    local_connectivity_pattern(f!, y, x)
-    local_connectivity_pattern(f!, y, x, T)
-
-Enumerates inputs `x` and primal outputs `y` after `f!(y, x)` and returns sparse matrix `C` of size `(m, n)`
-where `C[i, j]` is true if the compute graph connects the `i`-th entry in `y` to the `j`-th entry in `x`.
-
-Unlike [`connectivity_pattern`](@ref), this function supports control flow and comparisons.
-
-
-The type of `ConnectivityTracer` can be specified as an optional argument and defaults to `$DEFAULT_CONNECTIVITY_TRACER`.
-"""
-function local_connectivity_pattern(
-    f!, y, x, ::Type{T}=DEFAULT_CONNECTIVITY_TRACER
-) where {T<:ConnectivityTracer}
-    D = Dual{eltype(x),T}
-    xt, yt = trace_function(D, f!, y, x)
-    return connectivity_pattern_to_mat(to_array(xt), to_array(yt))
-end
-
-function connectivity_pattern_to_mat(
-    xt::AbstractArray{T}, yt::AbstractArray{<:Real}
-) where {T<:ConnectivityTracer}
-    n, m = length(xt), length(yt)
-    I = Int[] # row indices
-    J = Int[] # column indices
-    V = Bool[]   # values
-    for (i, y) in enumerate(yt)
-        if y isa T && !isemptytracer(y)
-            for j in inputs(y)
-                push!(I, i)
-                push!(J, j)
-                push!(V, true)
-            end
-        end
-    end
-    return sparse(I, J, V, m, n)
-end
-
-function connectivity_pattern_to_mat(
-    xt::AbstractArray{D}, yt::AbstractArray{<:Real}
-) where {P,T<:ConnectivityTracer,D<:Dual{P,T}}
-    return connectivity_pattern_to_mat(tracer.(xt), _tracer_or_number.(yt))
-end
-
 #================#
 # GradientTracer #
 #================#
@@ -192,7 +59,7 @@ end
 
 Compute the sparsity pattern of the Jacobian of `y = f(x)`.
 
-The type of `GradientTracer` can be specified as an optional argument and defaults to `$DEFAULT_CONNECTIVITY_TRACER`.
+The type of [`GradientTracer`](@ref) can be specified as an optional argument and defaults to `$DEFAULT_GRADIENT_TRACER`.
 
 ## Example
 
@@ -219,7 +86,7 @@ end
 
 Compute the sparsity pattern of the Jacobian of `f!(y, x)`.
 
-The type of `GradientTracer` can be specified as an optional argument and defaults to `$DEFAULT_GRADIENT_TRACER`.
+The type of [`GradientTracer`](@ref) can be specified as an optional argument and defaults to `$DEFAULT_GRADIENT_TRACER`.
 """
 function jacobian_pattern(
     f!, y, x, ::Type{T}=DEFAULT_GRADIENT_TRACER
@@ -234,7 +101,7 @@ end
 
 Compute the local sparsity pattern of the Jacobian of `y = f(x)` at `x`.
 
-The type of `GradientTracer` can be specified as an optional argument and defaults to `$DEFAULT_GRADIENT_TRACER`.
+The type of [`GradientTracer`](@ref) can be specified as an optional argument and defaults to `$DEFAULT_GRADIENT_TRACER`.
 
 ## Example
 
@@ -264,7 +131,7 @@ end
 
 Compute the local sparsity pattern of the Jacobian of `f!(y, x)` at `x`.
 
-The type of `GradientTracer` can be specified as an optional argument and defaults to `$DEFAULT_GRADIENT_TRACER`.
+The type of [`GradientTracer`](@ref) can be specified as an optional argument and defaults to `$DEFAULT_GRADIENT_TRACER`.
 """
 function local_jacobian_pattern(
     f!, y, x, ::Type{T}=DEFAULT_GRADIENT_TRACER
@@ -309,7 +176,7 @@ end
 
 Computes the sparsity pattern of the Hessian of a scalar function `y = f(x)`.
 
-The type of `HessianTracer` can be specified as an optional argument and defaults to `$DEFAULT_HESSIAN_TRACER`.
+The type of [`HessianTracer`](@ref) can be specified as an optional argument and defaults to `$DEFAULT_HESSIAN_TRACER`.
 
 ## Example
 
@@ -348,7 +215,7 @@ end
 
 Computes the local sparsity pattern of the Hessian of a scalar function `y = f(x)` at `x`.
 
-The type of `HessianTracer` can be specified as an optional argument and defaults to `$DEFAULT_HESSIAN_TRACER`.
+The type of [`HessianTracer`](@ref) can be specified as an optional argument and defaults to `$DEFAULT_HESSIAN_TRACER`.
 
 ## Example
 

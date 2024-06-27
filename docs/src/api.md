@@ -58,7 +58,6 @@ SparseConnectivityTracer works by pushing `Real` number types called tracers thr
 Currently, three tracer types are provided:
 
 ```@docs
-SparseConnectivityTracer.ConnectivityTracer
 SparseConnectivityTracer.GradientTracer
 SparseConnectivityTracer.HessianTracer
 ```

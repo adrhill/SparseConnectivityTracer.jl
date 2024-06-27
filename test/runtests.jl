@@ -81,9 +81,6 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
             @testset "Tracer Construction" begin
                 include("test_constructors.jl")
             end
-            @testset "ConnectivityTracer" begin
-                include("test_connectivity.jl")
-            end
             @testset "GradientTracer" begin
                 include("test_gradient.jl")
             end

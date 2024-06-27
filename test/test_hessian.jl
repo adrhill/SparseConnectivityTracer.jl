@@ -4,7 +4,7 @@ using ADTypes: hessian_sparsity
 using SpecialFunctions: erf, beta
 using Test
 
-# Load definitions of CONNECTIVITY_TRACERS, GRADIENT_TRACERS, HESSIAN_TRACERS
+# Load definitions of GRADIENT_TRACERS and HESSIAN_TRACERS
 include("tracers_definitions.jl")
 
 @testset "Global Hessian" begin

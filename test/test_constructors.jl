@@ -1,11 +1,10 @@
 # Test construction and conversions of internal tracer types
-using SparseConnectivityTracer:
-    AbstractTracer, ConnectivityTracer, GradientTracer, HessianTracer, Dual
-using SparseConnectivityTracer: inputs, primal, tracer, isemptytracer
+using SparseConnectivityTracer: AbstractTracer, GradientTracer, HessianTracer, Dual
+using SparseConnectivityTracer: primal, tracer, isemptytracer
 using SparseConnectivityTracer: myempty, name
 using Test
 
-# Load definitions of CONNECTIVITY_TRACERS, GRADIENT_TRACERS, HESSIAN_TRACERS
+# Load definitions of GRADIENT_TRACERS and HESSIAN_TRACERS
 include("tracers_definitions.jl")
 
 function test_nested_duals(::Type{T}) where {T<:AbstractTracer}
@@ -156,28 +155,6 @@ function test_similar(::Type{D}) where {P,T,D<:Dual{P,T}}
     B5 = similar(B, D, 5, 6)
     @test eltype(B5) == D
     @test size(B5) == (5, 6)
-end
-
-@testset "ConnectivityTracer" begin
-    P = Float32
-    DUAL_CONNECTIVITY_TRACERS = [Dual{P,T} for T in CONNECTIVITY_TRACERS]
-    ALL_CONNECTIVITY_TRACERS = (CONNECTIVITY_TRACERS..., DUAL_CONNECTIVITY_TRACERS...)
-
-    @testset "Nested Duals on HessianTracer" for T in CONNECTIVITY_TRACERS
-        test_nested_duals(T)
-    end
-    @testset "Constant functions on $T" for T in ALL_CONNECTIVITY_TRACERS
-        test_constant_functions(T)
-    end
-    @testset "Type conversions on $T" for T in ALL_CONNECTIVITY_TRACERS
-        test_type_conversion_functions(T)
-    end
-    @testset "Type casting on $T" for T in ALL_CONNECTIVITY_TRACERS
-        test_type_casting(T)
-    end
-    @testset "similar on $T" for T in ALL_CONNECTIVITY_TRACERS
-        test_similar(T)
-    end
 end
 
 @testset "GradientTracer" begin

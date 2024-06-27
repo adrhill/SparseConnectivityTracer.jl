@@ -50,7 +50,6 @@ for op in (isequal, isapprox, isless, ==, <, >, <=, >=)
     @eval is_der_cross_zero_global(::$T) = true
 
     op_symb = nameof(op)
-    SparseConnectivityTracer.eval(overload_connectivity_2_to_1(:Base, op_symb))
     SparseConnectivityTracer.eval(overload_gradient_2_to_1(:Base, op_symb))
     SparseConnectivityTracer.eval(overload_hessian_2_to_1(:Base, op_symb))
 end

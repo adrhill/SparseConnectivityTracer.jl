@@ -6,7 +6,7 @@ using SpecialFunctions: erf, beta
 using NNlib: NNlib
 using Test
 
-# Load definitions of CONNECTIVITY_TRACERS, GRADIENT_TRACERS, HESSIAN_TRACERS
+# Load definitions of GRADIENT_TRACERS and HESSIAN_TRACERS
 include("tracers_definitions.jl")
 
 NNLIB_ACTIVATIONS_S = (

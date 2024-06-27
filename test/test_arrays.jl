@@ -8,7 +8,7 @@ using LinearAlgebra: inv, pinv
 using SparseArrays: sparse, spdiagm
 using Test
 
-PATTERN_FUNCTIONS = (connectivity_pattern, jacobian_pattern, hessian_pattern)
+PATTERN_FUNCTIONS = (jacobian_pattern, hessian_pattern)
 
 TEST_SQUARE_MATRICES = Dict(
     "`Matrix` (3×3)" => rand(3, 3),
@@ -29,10 +29,6 @@ function test_patterns(f, x; outsum=false, con=isone, jac=isone, hes=isone)
             _f(x) = sum(f(x))
         else
             _f = f
-        end
-        @testset "Connecivity pattern" begin
-            pattern = connectivity_pattern(_f, x)
-            @test all(con, pattern)
         end
         @testset "Jacobian pattern" begin
             pattern = jacobian_pattern(_f, x)
