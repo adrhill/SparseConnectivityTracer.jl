@@ -111,7 +111,7 @@ To compute a less conservative sparsity pattern at an input point `x`, use `Trac
 Note that patterns computed with `TracerLocalSparsityDetector` depend on the input `x`:
 
 ```julia-repl
-julia> using SparseConnectivityTracer, ADTypes
+julia> using SparseConnectivityTracer
 
 julia> detector = TracerLocalSparsityDetector();
 
