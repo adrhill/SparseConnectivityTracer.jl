@@ -10,44 +10,18 @@ CollapsedDocStrings = true
 
 ## ADTypes Interface
 
-For package developers, we recommend using the [ADTypes.jl](https://github.com/SciML/ADTypes.jl) interface.
+SparseConnectivityTracer uses [ADTypes.jl](https://github.com/SciML/ADTypes.jl)'s interface for [sparsity detection](https://sciml.github.io/ADTypes.jl/stable/#Sparsity-detector).
+In fact, the functions `jacobian_sparsity` and `hessian_sparsity` are re-exported from ADTypes.
 
-To compute global sparsity patterns of `f(x)` over the entire input domain `x`, use
+To compute **global** sparsity patterns of `f(x)` over the entire input domain `x`, use
 ```@docs
 TracerSparsityDetector
 ```
 
-To compute local sparsity patterns of `f(x)` at a specific input `x`, use
+To compute **local** sparsity patterns of `f(x)` at a specific input `x`, use
 ```@docs
 TracerLocalSparsityDetector
 ```
-
-## Legacy Interface
-
-### Global sparsity 
-
-The following functions can be used to compute global sparsity patterns of `f(x)` over the entire input domain `x`.
-
-```@docs
-connectivity_pattern
-jacobian_pattern
-hessian_pattern
-```
-
-[`TracerSparsityDetector`](@ref) is the ADTypes equivalent of these functions.
-
-### Local sparsity
-
-The following functions can be used to compute local sparsity patterns of `f(x)` at a specific input `x`.
-Note that these patterns are sparser than global patterns but need to be recomputed when `x` changes.
-
-```@docs
-local_connectivity_pattern
-local_jacobian_pattern
-local_hessian_pattern
-```
-
-[`TracerLocalSparsityDetector`](@ref) is the ADTypes equivalent of these functions.
 
 ## Internals
 
@@ -55,10 +29,9 @@ local_hessian_pattern
     Internals may change without warning in a future release of SparseConnectivityTracer.
 
 SparseConnectivityTracer works by pushing `Real` number types called tracers through generic functions.
-Currently, three tracer types are provided:
+Currently, two tracer types are provided:
 
 ```@docs
-SparseConnectivityTracer.ConnectivityTracer
 SparseConnectivityTracer.GradientTracer
 SparseConnectivityTracer.HessianTracer
 ```
@@ -68,12 +41,4 @@ which keeps track of the primal computation and allows tracing through compariso
 
 ```@docs
 SparseConnectivityTracer.Dual
-```
-
-We also define alternative pseudo-set types that can deliver faster `union`:
-
-```@docs
-SparseConnectivityTracer.DuplicateVector
-SparseConnectivityTracer.RecursiveSet
-SparseConnectivityTracer.SortedVector
 ```

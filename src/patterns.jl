@@ -6,7 +6,7 @@ Abstract supertype of all sparsity pattern representations.
 ## Type hierarchy
 ```
 AbstractPattern
-├── AbstractGradientPattern: used in GradientTracer, ConnectivityTracer
+├── AbstractGradientPattern: used in GradientTracer
 │   └── IndexSetGradientPattern
 └── AbstractHessianPattern: used in HessianTracer
     └── IndexSetHessianPattern
@@ -102,7 +102,6 @@ function seed(::Type{IndexSetGradientPattern{I,S}}, i) where {I,S}
 end
 
 # Tracer compatibility
-inputs(s::IndexSetGradientPattern) = s.gradient
 gradient(s::IndexSetGradientPattern) = s.gradient
 
 #========================#

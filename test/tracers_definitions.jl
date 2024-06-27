@@ -1,5 +1,4 @@
-using SparseConnectivityTracer:
-    AbstractTracer, ConnectivityTracer, GradientTracer, HessianTracer, Dual
+using SparseConnectivityTracer: AbstractTracer, GradientTracer, HessianTracer, Dual
 using SparseConnectivityTracer: IndexSetGradientPattern, IndexSetHessianPattern
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 
@@ -18,6 +17,5 @@ HESSIAN_PATTERNS = (
     # TODO: test on RecursiveSet
 )
 
-CONNECTIVITY_TRACERS = (ConnectivityTracer{P} for P in VECTOR_PATTERNS)
 GRADIENT_TRACERS = (GradientTracer{P} for P in VECTOR_PATTERNS)
 HESSIAN_TRACERS = (HessianTracer{P} for P in HESSIAN_PATTERNS)

@@ -8,7 +8,8 @@ using LinearAlgebra: inv, pinv
 using SparseArrays: sparse, spdiagm
 using Test
 
-PATTERN_FUNCTIONS = (connectivity_pattern, jacobian_pattern, hessian_pattern)
+PATTERN_FUNCTIONS = (jacobian_sparsity, hessian_sparsity)
+detector_global = TracerSparsityDetector()
 
 TEST_SQUARE_MATRICES = Dict(
     "`Matrix` (3×3)" => rand(3, 3),
@@ -30,16 +31,12 @@ function test_patterns(f, x; outsum=false, con=isone, jac=isone, hes=isone)
         else
             _f = f
         end
-        @testset "Connecivity pattern" begin
-            pattern = connectivity_pattern(_f, x)
-            @test all(con, pattern)
-        end
         @testset "Jacobian pattern" begin
-            pattern = jacobian_pattern(_f, x)
+            pattern = jacobian_sparsity(_f, x, detector_global)
             @test all(jac, pattern)
         end
         @testset "Hessian pattern" begin
-            pattern = hessian_pattern(_f, x)
+            pattern = hessian_sparsity(_f, x, detector_global)
             @test all(hes, pattern)
         end
     end

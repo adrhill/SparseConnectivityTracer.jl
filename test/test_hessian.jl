@@ -4,20 +4,10 @@ using ADTypes: hessian_sparsity
 using SpecialFunctions: erf, beta
 using Test
 
-# Load definitions of CONNECTIVITY_TRACERS, GRADIENT_TRACERS, HESSIAN_TRACERS
+# Load definitions of GRADIENT_TRACERS and HESSIAN_TRACERS
 include("tracers_definitions.jl")
 
 @testset "Global Hessian" begin
-    @testset "Default hessian_pattern" begin
-        h = hessian_pattern(x -> x[1] / x[2] + x[3] / 1 + 1 / x[4], rand(4))
-        @test h == [
-            0 1 0 0
-            1 1 0 0
-            0 0 0 0
-            0 0 0 1
-        ]
-    end
-
     @testset "$T" for T in HESSIAN_TRACERS
         method = TracerSparsityDetector(; hessian_tracer_type=T)
 
