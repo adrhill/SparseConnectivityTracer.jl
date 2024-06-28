@@ -21,7 +21,7 @@ function hessian_tracer_1_to_1_inner(
         myempty(SH)
     elseif !is_der1_zero && is_der2_zero
         sh
-    elseif is_der1_zero && is_der2_zero
+    elseif is_der1_zero && !is_der2_zero
         union_product!(myempty(SH), sg, sg)
     else
         union_product!(copy(sh), sg, sg)

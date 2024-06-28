@@ -17,7 +17,7 @@ abstract type AbstractPattern end
 """
     isshared(pattern)
 
-Indicates whether patterns share memory (mutate).
+Indicates whether patterns share memory, allowing operators to mutate their arguments.
 """
 isshared(::P) where {P<:AbstractPattern} = isshared(P)
 isshared(::Type{P}) where {P<:AbstractPattern} = false
@@ -55,8 +55,8 @@ product(a::AbstractSet{I}, b::AbstractSet{I}) where {I<:Integer} =
     Set((i, j) for i in a, j in b)
 
 function union_product!(
-    hessian::SH, gradient_x::SG, gradient_y::SG
-) where {I<:Integer,SG<:AbstractSet{I},SH<:AbstractSet{Tuple{I,I}}}
+    hessian::H, gradient_x::G, gradient_y::G
+) where {I<:Integer,G<:AbstractSet{I},H<:AbstractSet{Tuple{I,I}}}
     hxy = product(gradient_x, gradient_y)
     return union!(hessian, hxy)
 end
@@ -147,21 +147,21 @@ $(TYPEDFIELDS)
 The last type parameter `shared` is a `Bool` indicating whether the `hessian` field of this object should be shared among all intermediate scalar quantities involved in a function.
 """
 struct IndexSetHessianPattern{
-    I<:Integer,SG<:AbstractSet{I},SH<:AbstractSet{Tuple{I,I}},mutating
+    I<:Integer,G<:AbstractSet{I},H<:AbstractSet{Tuple{I,I}},shared
 } <: AbstractHessianPattern
-    gradient::SG
-    hessian::SH
+    gradient::G
+    hessian::H
 end
-isshared(::Type{IndexSetHessianPattern{I,SG,SH,true}}) where {I,SG,SH} = true
+isshared(::Type{IndexSetHessianPattern{I,G,H,true}}) where {I,G,H} = true
 
-function myempty(::Type{P}) where {I,SG,SH,M,P<:IndexSetHessianPattern{I,SG,SH,M}}
-    return P(myempty(SG), myempty(SH))
+function myempty(::Type{P}) where {I,G,H,S,P<:IndexSetHessianPattern{I,G,H,S}}
+    return P(myempty(G), myempty(H))
 end
 function create_patterns(
     ::Type{P}, xs, is
-) where {I,SG,SH,M,P<:IndexSetHessianPattern{I,SG,SH,M}}
-    gradients = seed.(SG, is)
-    hessian = myempty(SH)
+) where {I,G,H,S,P<:IndexSetHessianPattern{I,G,H,S}}
+    gradients = seed.(G, is)
+    hessian = myempty(H)
     return P.(gradients, Ref(hessian))
 end
 
