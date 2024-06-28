@@ -6,7 +6,7 @@ using SparseConnectivityTracer
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
-# Load definitions of GRADIENT_TRACERS and HESSIAN_TRACERS
+# Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
 include("tracers_definitions.jl")
 
 const INPUT_FLUX = reshape(

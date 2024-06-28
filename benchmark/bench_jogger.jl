@@ -21,7 +21,7 @@ for S1 in SET_TYPES
     S2 = Set{Tuple{Int,Int}}
 
     PG = IndexSetGradientPattern{Int,S1}
-    PH = IndexSetHessianPattern{Int,S1,S2}
+    PH = IndexSetHessianPattern{Int,S1,S2,false}
 
     G = GradientTracer{PG}
     H = HessianTracer{PH}

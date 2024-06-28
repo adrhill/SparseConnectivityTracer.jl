@@ -1,6 +1,6 @@
 const DEFAULT_GRADIENT_TRACER = GradientTracer{IndexSetGradientPattern{Int,BitSet}}
 const DEFAULT_HESSIAN_TRACER = HessianTracer{
-    IndexSetHessianPattern{Int,BitSet,Set{Tuple{Int,Int}}}
+    IndexSetHessianPattern{Int,BitSet,Set{Tuple{Int,Int}},false}
 }
 
 #==================#
@@ -9,20 +9,19 @@ const DEFAULT_HESSIAN_TRACER = HessianTracer{
 
 """
     trace_input(T, x)
-    trace_input(T, x)
-
+    trace_input(T, xs)
 
 Enumerates input indices and constructs the specified type `T` of tracer.
 Supports [`GradientTracer`](@ref), [`HessianTracer`](@ref) and [`Dual`](@ref).
 """
-trace_input(::Type{T}, x) where {T<:Union{AbstractTracer,Dual}} = trace_input(T, x, 1)
+trace_input(::Type{T}, xs) where {T<:Union{AbstractTracer,Dual}} = trace_input(T, xs, 1)
 
-function trace_input(::Type{T}, x::Real, i::Integer) where {T<:Union{AbstractTracer,Dual}}
-    return create_tracer(T, x, i)
-end
 function trace_input(::Type{T}, xs::AbstractArray, i) where {T<:Union{AbstractTracer,Dual}}
-    indices = reshape(1:length(xs), size(xs)) .+ (i - 1)
-    return create_tracer.(T, xs, indices)
+    is = reshape(1:length(xs), size(xs)) .+ (i - 1)
+    return create_tracers(T, xs, is)
+end
+function trace_input(::Type{T}, x::Real, i::Integer) where {T<:Union{AbstractTracer,Dual}}
+    return only(create_tracers(T, [x], [i]))
 end
 
 #=========================#
