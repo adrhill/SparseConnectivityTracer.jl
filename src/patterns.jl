@@ -17,11 +17,12 @@ abstract type AbstractPattern end
 """
     isshared(pattern)
 
-Indicates whether patterns share memory and allow operators to mutate their `AbstractTracer` arguments. 
-If `false`, operators are prohibited from mutating `AbstractTracer` arguments.
+Indicates whether patterns **always** share memory and whether operators are **allowed** to mutate their `AbstractTracer` arguments. 
+
+If `false`, patterns **can** share memory and operators are **prohibited** from mutating `AbstractTracer` arguments.
 
 ## Note
-In practice, this memory sharing is limited to second-order information in `AbstractHessianPattern`.
+In practice, memory sharing is limited to second-order information in `AbstractHessianPattern`.
 """
 isshared(::P) where {P<:AbstractPattern} = isshared(P)
 isshared(::Type{P}) where {P<:AbstractPattern} = false
