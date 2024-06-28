@@ -52,11 +52,6 @@ function split_dual_array(A::AbstractArray{D}) where {D<:Dual}
     tracers = getproperty.(A, :tracer)
     return primals, tracers
 end
-function split_dual_array(A::SparseArrays.SparseMatrixCSC{D}) where {D<:Dual}
-    primals = getproperty.(A, :primal)
-    tracers = getproperty.(A, :tracer)
-    return primals, tracers
-end
 
 #==================#
 # LinearAlgebra.jl #
@@ -189,7 +184,7 @@ end
 # SparseArrays #
 #==============#
 
-# helper function needed in sparsematrix, sparsevector and higherorderfns
+# Helper function needed in SparseArrays's sparsematrix, sparsevector and higherorderfns.
 # On Tracers, `iszero` and `!iszero` don't return a boolean, 
 # but we need a function that does to handle the structure of the array.
 SparseArrays._iszero(t::AbstractTracer) = isemptytracer(t)
