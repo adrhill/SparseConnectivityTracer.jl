@@ -17,7 +17,11 @@ abstract type AbstractPattern end
 """
     isshared(pattern)
 
-Indicates whether patterns share memory, allowing operators to mutate their arguments.
+Indicates whether patterns share memory and allow operators to mutate their `AbstractTracer` arguments. 
+If `false`, operators are prohibited from mutating `AbstractTracer` arguments.
+
+## Note
+In practice, this memory sharing is limited to second-order information in `AbstractHessianPattern`.
 """
 isshared(::P) where {P<:AbstractPattern} = isshared(P)
 isshared(::Type{P}) where {P<:AbstractPattern} = false
@@ -162,6 +166,8 @@ function create_patterns(
 ) where {I,G,H,S,P<:IndexSetHessianPattern{I,G,H,S}}
     gradients = seed.(G, is)
     hessian = myempty(H)
+    # Even if `shared=false`, sharing a single reference to `hessian` is allowed upon initialization, 
+    # since mutation is prohibited when `isshared` is false.
     return P.(gradients, Ref(hessian))
 end
 
