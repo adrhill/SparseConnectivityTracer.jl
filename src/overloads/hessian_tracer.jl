@@ -23,19 +23,20 @@ function hessian_tracer_1_to_1_inner(
         sh
     elseif is_der1_zero && !is_der2_zero
         union_product!(myempty(SH), sg, sg)
-    else
+    else # !is_der1_zero && !is_der2_zero
         union_product!(copy(sh), sg, sg)
     end
     return P(sg_out, sh_out) # return pattern
 end
 
-# NOTE: mutates its argument p and should arguably be called `hessian_tracer_1_to_1_inner!`
+# NOTE: mutates argument p and should arguably be called `hessian_tracer_1_to_1_inner!`
 function hessian_tracer_1_to_1_inner(
     p::P, is_der1_zero::Bool, is_der2_zero::Bool
 ) where {I,SG,SH,P<:IndexSetHessianPattern{I,SG,SH,true}}
     sg = gradient(p)
     sh = hessian(p)
     sg_out = gradient_tracer_1_to_1_inner(sg, is_der1_zero)
+    # shared Hessian patterns can't remove second-order information, only add to it.
     sh_out = if is_der2_zero
         sh
     else
