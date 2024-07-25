@@ -187,8 +187,11 @@ end
 # Helper function needed in SparseArrays's sparsematrix, sparsevector and higherorderfns.
 # On Tracers, `iszero` and `!iszero` don't return a boolean, 
 # but we need a function that does to handle the structure of the array.
-SparseArrays._iszero(t::AbstractTracer) = isemptytracer(t)
-SparseArrays._iszero(d::Dual) = isemptytracer(tracer(d)) && iszero(primal(d))
 
-SparseArrays._isnotzero(t::AbstractTracer) = !isemptytracer(t)
-SparseArrays._isnotzero(d::Dual) = !isemptytracer(tracer(d)) || !iszero(primal(d))
+if VERSION >= v"1.9" # _iszero was added in JuliaSparse/SparseArrays.jl#177
+    SparseArrays._iszero(t::AbstractTracer) = isemptytracer(t)
+    SparseArrays._iszero(d::Dual) = isemptytracer(tracer(d)) && iszero(primal(d))
+
+    SparseArrays._isnotzero(t::AbstractTracer) = !isemptytracer(t)
+    SparseArrays._isnotzero(d::Dual) = !isemptytracer(tracer(d)) || !iszero(primal(d))
+end
