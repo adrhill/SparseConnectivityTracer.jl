@@ -66,25 +66,30 @@ end
         test_patterns(logabsdet_first, A)
         test_patterns(logabsdet_last, A; jac=iszero, hes=iszero)
     end
-    @testset "`SparseMatrixCSC` (3×3)" begin
-        # TODO: this is a temporary solution until sparse matrix inputs are supported (#28)
-        test_patterns(A -> det(sparse(A)), rand(3, 3))
-        test_patterns(A -> logdet(sparse(A)), rand(3, 3))
-        test_patterns(A -> norm(sparse(A)), rand(3, 3))
-        test_patterns(A -> eigmax(sparse(A)), rand(3, 3))
-        test_patterns(A -> eigmin(sparse(A)), rand(3, 3))
-        test_patterns(A -> opnorm1(sparse(A)), rand(3, 3); hes=iszero)
-        test_patterns(A -> logabsdet_first(sparse(A)), rand(3, 3))
-        test_patterns(A -> logabsdet_last(sparse(A)), rand(3, 3); jac=iszero, hes=iszero)
 
-        test_patterns(v -> det(spdiagm(v)), rand(3))
-        test_patterns(v -> logdet(spdiagm(v)), rand(3))
-        test_patterns(v -> norm(spdiagm(v)), rand(3))
-        test_patterns(v -> eigmax(spdiagm(v)), rand(3))
-        test_patterns(v -> eigmin(spdiagm(v)), rand(3))
-        test_patterns(v -> opnorm1(spdiagm(v)), rand(3); hes=iszero)
-        test_patterns(v -> logabsdet_first(spdiagm(v)), rand(3))
-        test_patterns(v -> logabsdet_last(spdiagm(v)), rand(3); jac=iszero, hes=iszero)
+    if VERSION >= v"1.9"
+        @testset "`SparseMatrixCSC` (3×3)" begin
+            # TODO: this is a temporary solution until sparse matrix inputs are supported (#28)
+            test_patterns(A -> det(sparse(A)), rand(3, 3))
+            test_patterns(A -> logdet(sparse(A)), rand(3, 3))
+            test_patterns(A -> norm(sparse(A)), rand(3, 3))
+            test_patterns(A -> eigmax(sparse(A)), rand(3, 3))
+            test_patterns(A -> eigmin(sparse(A)), rand(3, 3))
+            test_patterns(A -> opnorm1(sparse(A)), rand(3, 3); hes=iszero)
+            test_patterns(A -> logabsdet_first(sparse(A)), rand(3, 3))
+            test_patterns(
+                A -> logabsdet_last(sparse(A)), rand(3, 3); jac=iszero, hes=iszero
+            )
+
+            test_patterns(v -> det(spdiagm(v)), rand(3))
+            test_patterns(v -> logdet(spdiagm(v)), rand(3))
+            test_patterns(v -> norm(spdiagm(v)), rand(3))
+            test_patterns(v -> eigmax(spdiagm(v)), rand(3))
+            test_patterns(v -> eigmin(spdiagm(v)), rand(3))
+            test_patterns(v -> opnorm1(spdiagm(v)), rand(3); hes=iszero)
+            test_patterns(v -> logabsdet_first(spdiagm(v)), rand(3))
+            test_patterns(v -> logabsdet_last(spdiagm(v)), rand(3); jac=iszero, hes=iszero)
+        end
     end
 end
 
@@ -99,33 +104,36 @@ end
         test_patterns(pow0, A; outsum=true, con=iszero, jac=iszero, hes=iszero)
         test_patterns(pow3, A; outsum=true)
     end
-    @testset "`SparseMatrixCSC` (3×3)" begin
-        # TODO: this is a temporary solution until sparse matrix inputs are supported (#28)
 
-        test_patterns(A -> exp(sparse(A)), rand(3, 3); outsum=true)
-        test_patterns(
-            A -> pow0(sparse(A)),
-            rand(3, 3);
-            outsum=true,
-            con=iszero,
-            jac=iszero,
-            hes=iszero,
-        )
-        test_patterns(A -> pow3(sparse(A)), rand(3, 3); outsum=true)
+    if VERSION >= v"1.9"
+        @testset "`SparseMatrixCSC` (3×3)" begin
+            # TODO: this is a temporary solution until sparse matrix inputs are supported (#28)
 
-        test_patterns(v -> exp(spdiagm(v)), rand(3); outsum=true)
-
-        if VERSION >= v"1.10"
-            # issue with custom _mapreducezeros in SparseArrays on Julia 1.6
+            test_patterns(A -> exp(sparse(A)), rand(3, 3); outsum=true)
             test_patterns(
-                v -> pow0(spdiagm(v)),
-                rand(3);
+                A -> pow0(sparse(A)),
+                rand(3, 3);
                 outsum=true,
                 con=iszero,
                 jac=iszero,
                 hes=iszero,
             )
-            test_patterns(v -> pow3(spdiagm(v)), rand(3); outsum=true)
+            test_patterns(A -> pow3(sparse(A)), rand(3, 3); outsum=true)
+
+            test_patterns(v -> exp(spdiagm(v)), rand(3); outsum=true)
+
+            if VERSION >= v"1.10"
+                # issue with custom _mapreducezeros in SparseArrays on Julia 1.6
+                test_patterns(
+                    v -> pow0(spdiagm(v)),
+                    rand(3);
+                    outsum=true,
+                    con=iszero,
+                    jac=iszero,
+                    hes=iszero,
+                )
+                test_patterns(v -> pow3(spdiagm(v)), rand(3); outsum=true)
+            end
         end
     end
 
@@ -133,8 +141,10 @@ end
     @testset "$name" for (name, A) in TEST_MATRICES
         test_patterns(pinv, A; outsum=true)
     end
-    @testset "`SparseMatrixCSC` (3×4)" begin
-        test_patterns(A -> pinv(sparse(A)), rand(3, 4); outsum=true)
+    if VERSION >= v"1.9"
+        @testset "`SparseMatrixCSC` (3×4)" begin
+            test_patterns(A -> pinv(sparse(A)), rand(3, 4); outsum=true)
+        end
     end
 end
 
@@ -165,13 +175,15 @@ end
     @test all(t -> SCT.gradient(t) == s_out, vectors)
 end
 
-@testset "SparseMatrixCSC construction" begin
-    t1 = TG(P(S(1)))
-    t2 = TG(P(S(2)))
-    t3 = TG(P(S(3)))
-    SA = sparse([t1 t2; t3 0])
-    @test length(SA.nzval) == 3
+if VERSION >= v"1.9"
+    @testset "SparseMatrixCSC construction" begin
+        t1 = TG(P(S(1)))
+        t2 = TG(P(S(2)))
+        t3 = TG(P(S(3)))
+        SA = sparse([t1 t2; t3 0])
+        @test length(SA.nzval) == 3
 
-    res = opnorm(SA, 1)
-    @test SCT.gradient(res) == S([1, 2, 3])
+        res = opnorm(SA, 1)
+        @test SCT.gradient(res) == S([1, 2, 3])
+    end
 end

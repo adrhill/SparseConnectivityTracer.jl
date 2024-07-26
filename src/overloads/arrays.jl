@@ -52,11 +52,6 @@ function split_dual_array(A::AbstractArray{D}) where {D<:Dual}
     tracers = getproperty.(A, :tracer)
     return primals, tracers
 end
-function split_dual_array(A::SparseArrays.SparseMatrixCSC{D}) where {D<:Dual}
-    primals = getproperty.(A, :primal)
-    tracers = getproperty.(A, :tracer)
-    return primals, tracers
-end
 
 #==================#
 # LinearAlgebra.jl #
@@ -75,13 +70,6 @@ end
 
 ## Norm
 function LinearAlgebra.norm(A::AbstractArray{T}, p::Real=2) where {T<:AbstractTracer}
-    if isone(p) || isinf(p)
-        return first_order_or(A)
-    else
-        return second_order_or(A)
-    end
-end
-function LinearAlgebra.opnorm(A::AbstractArray{T}, p::Real=2) where {T<:AbstractTracer}
     if isone(p) || isinf(p)
         return first_order_or(A)
     else
@@ -196,31 +184,14 @@ end
 # SparseArrays #
 #==============#
 
-# Conversion of matrices of tracers to SparseMatrixCSC has to be rewritten 
-# due to use of `count(_isnotzero, M)` in SparseArrays.jl
-#
-# Code modified from MIT licensed SparseArrays.jl source:
-# https://github.com/JuliaSparse/SparseArrays.jl/blob/45dfe459ede2fa1419e7068d4bda92d9d22bd44d/src/sparsematrix.jl#L901-L920
-# Copyright (c) 2009-2024: Jeff Bezanson, Stefan Karpinski, Viral B. Shah, and other contributors: https://github.com/JuliaLang/julia/contributors
-function SparseArrays.SparseMatrixCSC{Tv,Ti}(
-    M::StridedMatrix{Tv}
-) where {Tv<:AbstractTracer,Ti}
-    nz = count(!isemptytracer, M)
-    colptr = zeros(Ti, size(M, 2) + 1)
-    nzval = Vector{Tv}(undef, nz)
-    rowval = Vector{Ti}(undef, nz)
-    colptr[1] = 1
-    cnt = 1
-    @inbounds for j in 1:size(M, 2)
-        for i in 1:size(M, 1)
-            v = M[i, j]
-            if !isemptytracer(v)
-                rowval[cnt] = i
-                nzval[cnt] = v
-                cnt += 1
-            end
-        end
-        colptr[j + 1] = cnt
-    end
-    return SparseArrays.SparseMatrixCSC(size(M, 1), size(M, 2), colptr, rowval, nzval)
+# Helper function needed in SparseArrays's sparsematrix, sparsevector and higherorderfns.
+# On Tracers, `iszero` and `!iszero` don't return a boolean, 
+# but we need a function that does to handle the structure of the array.
+
+if VERSION >= v"1.9" # _iszero was added in JuliaSparse/SparseArrays.jl#177
+    SparseArrays._iszero(t::AbstractTracer) = isemptytracer(t)
+    SparseArrays._iszero(d::Dual) = isemptytracer(tracer(d)) && iszero(primal(d))
+
+    SparseArrays._isnotzero(t::AbstractTracer) = !isemptytracer(t)
+    SparseArrays._isnotzero(d::Dual) = !isemptytracer(tracer(d)) || !iszero(primal(d))
 end
