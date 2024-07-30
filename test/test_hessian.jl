@@ -20,6 +20,7 @@ include("tracers_definitions.jl")
         @test hessian_sparsity(x -> x * 1, rand(), method) ≈ [0;;]
 
         # Code coverage
+        @test hessian_sparsity(sign, 1, method) ≈ [0;;]
         @test hessian_sparsity(typemax, 1, method) ≈ [0;;]
         @test hessian_sparsity(x -> x^(2//3), 1, method) ≈ [1;;]
         @test hessian_sparsity(x -> (2//3)^x, 1, method) ≈ [1;;]
@@ -324,6 +325,7 @@ end
         end
 
         # Code coverage
+        @test hessian_sparsity(sign, 1, method) ≈ [0;;]
         @test hessian_sparsity(typemax, 1, method) ≈ [0;;]
         @test hessian_sparsity(x -> x^(2//3), 1, method) ≈ [1;;]
         @test hessian_sparsity(x -> (2//3)^x, 1, method) ≈ [1;;]
