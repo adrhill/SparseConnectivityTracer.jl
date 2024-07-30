@@ -22,6 +22,9 @@ function hessian_tracer_1_to_1_inner(
     elseif !is_der1_zero && is_der2_zero
         sh
     elseif is_der1_zero && !is_der2_zero
+        # TODO: this branch of the code currently isn't tested.
+        # Covering it would require a scalar 1-to-1 function with local overloads, 
+        # such that ∂f/∂x == 0 and ∂²f/∂x² != 0.
         union_product!(myempty(SH), sg, sg)
     else # !is_der1_zero && !is_der2_zero
         union_product!(copy(sh), sg, sg)
