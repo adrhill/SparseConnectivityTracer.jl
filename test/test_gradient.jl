@@ -6,7 +6,7 @@ using SpecialFunctions: erf, beta
 using NNlib: NNlib
 using Test
 
-# Load definitions of GRADIENT_TRACERS and HESSIAN_TRACERS
+# Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
 include("tracers_definitions.jl")
 
 NNLIB_ACTIVATIONS_S = (
@@ -39,7 +39,8 @@ NNLIB_ACTIVATIONS_F = (
 NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
 
 @testset "Jacobian Global" begin
-    @testset "$T" for T in GRADIENT_TRACERS
+    @testset "$P" for P in GRADIENT_PATTERNS
+        T = GradientTracer{P}
         method = TracerSparsityDetector(; gradient_tracer_type=T)
 
         f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])]
@@ -130,7 +131,8 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
 end
 
 @testset "Jacobian Local" begin
-    @testset "$T" for T in GRADIENT_TRACERS
+    @testset "$P" for P in GRADIENT_PATTERNS
+        T = GradientTracer{P}
         method = TracerLocalSparsityDetector(; gradient_tracer_type=T)
 
         # Multiplication

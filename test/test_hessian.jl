@@ -1,14 +1,16 @@
 using SparseConnectivityTracer
-using SparseConnectivityTracer: Dual, HessianTracer, MissingPrimalError, trace_input, empty
+using SparseConnectivityTracer: Dual, HessianTracer, MissingPrimalError
+using SparseConnectivityTracer: trace_input, create_tracers, pattern, isshared
 using ADTypes: hessian_sparsity
 using SpecialFunctions: erf, beta
 using Test
 
-# Load definitions of GRADIENT_TRACERS and HESSIAN_TRACERS
+# Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
 include("tracers_definitions.jl")
 
 @testset "Global Hessian" begin
-    @testset "$T" for T in HESSIAN_TRACERS
+    @testset "$P" for P in HESSIAN_PATTERNS
+        T = HessianTracer{P}
         method = TracerSparsityDetector(; hessian_tracer_type=T)
 
         @test hessian_sparsity(identity, rand(), method) ≈ [0;;]
@@ -18,6 +20,7 @@ include("tracers_definitions.jl")
         @test hessian_sparsity(x -> x * 1, rand(), method) ≈ [0;;]
 
         # Code coverage
+        @test hessian_sparsity(sign, 1, method) ≈ [0;;]
         @test hessian_sparsity(typemax, 1, method) ≈ [0;;]
         @test hessian_sparsity(x -> x^(2//3), 1, method) ≈ [1;;]
         @test hessian_sparsity(x -> (2//3)^x, 1, method) ≈ [1;;]
@@ -83,20 +86,38 @@ include("tracers_definitions.jl")
         ]
 
         h = hessian_sparsity(x -> copysign(x[1] * x[2], x[3] * x[4]), rand(4), method)
-        @test h == [
-            0 1 0 0
-            1 0 0 0
-            0 0 0 0
-            0 0 0 0
-        ]
+        if isshared(T)
+            @test h == [
+                0 1 0 0
+                1 0 0 0
+                0 0 0 1
+                0 0 1 0
+            ]
+        else
+            @test h == [
+                0 1 0 0
+                1 0 0 0
+                0 0 0 0
+                0 0 0 0
+            ]
+        end
 
         h = hessian_sparsity(x -> div(x[1] * x[2], x[3] * x[4]), rand(4), method)
-        @test h == [
-            0 0 0 0
-            0 0 0 0
-            0 0 0 0
-            0 0 0 0
-        ]
+        if isshared(T)
+            @test Matrix(h) == [
+                0 1 0 0
+                1 0 0 0
+                0 0 0 1
+                0 0 1 0
+            ]
+        else
+            @test h == [
+                0 0 0 0
+                0 0 0 0
+                0 0 0 0
+                0 0 0 0
+            ]
+        end
 
         h = hessian_sparsity(x -> sum(sincosd(x)), 1.0, method)
         @test h ≈ [1;;]
@@ -130,8 +151,30 @@ include("tracers_definitions.jl")
             0 1 0 0 1
         ]
 
+        # Shared Hessian
+        function dead_end(x)
+            z = x[1] * x[2]
+            return x[3] * x[4]
+        end
+        h = hessian_sparsity(dead_end, rand(4), method)
+        if isshared(T)
+            @test h == [
+                0  1  0  0
+                1  0  0  0
+                0  0  0  1
+                0  0  1  0
+            ]
+        else
+            @test h == [
+                0  0  0  0
+                0  0  0  0
+                0  0  0  1
+                0  0  1  0
+            ]
+        end
+
         # Missing primal errors
-        @testset "MissingPrimalError on $f" for f in (
+        for f in (
             iseven,
             isfinite,
             isinf,
@@ -203,7 +246,8 @@ include("tracers_definitions.jl")
 end
 
 @testset "Local Hessian" begin
-    @testset "$T" for T in HESSIAN_TRACERS
+    @testset "$P" for P in HESSIAN_PATTERNS
+        T = HessianTracer{P}
         method = TracerLocalSparsityDetector(; hessian_tracer_type=T)
 
         f1(x) = x[1] + x[2] * x[3] + 1 / x[4] + x[2] * max(x[1], x[5])
@@ -226,21 +270,62 @@ end
 
         f2(x) = ifelse(x[2] < x[3], x[1] * x[2], x[3] * x[4])
         h = hessian_sparsity(f2, [1 2 3 4], method)
-        @test h == [
-            0  1  0  0
-            1  0  0  0
-            0  0  0  0
-            0  0  0  0
-        ]
+        if isshared(T)
+            @test h == [
+                0  1  0  0
+                1  0  0  0
+                0  0  0  1
+                0  0  1  0
+            ]
+        else
+            @test h == [
+                0  1  0  0
+                1  0  0  0
+                0  0  0  0
+                0  0  0  0
+            ]
+        end
         h = hessian_sparsity(f2, [1 3 2 4], method)
-        @test h == [
-            0  0  0  0
-            0  0  0  0
-            0  0  0  1
-            0  0  1  0
-        ]
+        if isshared(T)
+            @test h == [
+                0  1  0  0
+                1  0  0  0
+                0  0  0  1
+                0  0  1  0
+            ]
+        else
+            @test h == [
+                0  0  0  0
+                0  0  0  0
+                0  0  0  1
+                0  0  1  0
+            ]
+        end
+
+        # Shared Hessian
+        function dead_end(x)
+            z = x[1] * x[2]
+            return x[3] * x[4]
+        end
+        h = hessian_sparsity(dead_end, rand(4), method)
+        if isshared(T)
+            @test h == [
+                0  1  0  0
+                1  0  0  0
+                0  0  0  1
+                0  0  1  0
+            ]
+        else
+            @test h == [
+                0  0  0  0
+                0  0  0  0
+                0  0  0  1
+                0  0  1  0
+            ]
+        end
 
         # Code coverage
+        @test hessian_sparsity(sign, 1, method) ≈ [0;;]
         @test hessian_sparsity(typemax, 1, method) ≈ [0;;]
         @test hessian_sparsity(x -> x^(2//3), 1, method) ≈ [1;;]
         @test hessian_sparsity(x -> (2//3)^x, 1, method) ≈ [1;;]
@@ -255,4 +340,26 @@ end
         @test hessian_sparsity(x -> ℯ^zero(x), 1, method) ≈ [0;;]
         yield()
     end
+end
+
+@testset "Shared IndexSetHessianPattern - same objects" begin
+    H = HessianTracer{IndexSetHessianPattern{Int,BitSet,Set{Tuple{Int,Int}},true}}
+
+    function multi_output_for_shared_test(x::AbstractArray)
+        z = ones(eltype(x), size(x))
+        y1 = x[1]^2 * z[1]
+        y2 = z[2] * x[2]^2
+        y3 = x[1] * x[2]
+        y4 = z[1] * z[2]  # entirely new tracer
+        y = [y1, y2, y3, y4]
+        return y
+    end
+
+    x = rand(2)
+    xt = create_tracers(H, x, eachindex(x))
+    yt = multi_output_for_shared_test(xt)
+
+    @test pattern(yt[1]).hessian === pattern(yt[2]).hessian
+    @test pattern(yt[1]).hessian === pattern(yt[3]).hessian
+    @test_broken pattern(yt[1]).hessian === pattern(yt[4]).hessian
 end

@@ -13,7 +13,7 @@ end
 
 function hessian_tracer_1_to_1_inner(
     p::P, is_der1_zero::Bool, is_der2_zero::Bool
-) where {I,SG,SH,P<:IndexSetHessianPattern{I,SG,SH}}
+) where {I,SG,SH,P<:IndexSetHessianPattern{I,SG,SH,false}}
     sg = gradient(p)
     sh = hessian(p)
     sg_out = gradient_tracer_1_to_1_inner(sg, is_der1_zero)
@@ -22,9 +22,28 @@ function hessian_tracer_1_to_1_inner(
     elseif !is_der1_zero && is_der2_zero
         sh
     elseif is_der1_zero && !is_der2_zero
+        # TODO: this branch of the code currently isn't tested.
+        # Covering it would require a scalar 1-to-1 function with local overloads, 
+        # such that ∂f/∂x == 0 and ∂²f/∂x² != 0.
         union_product!(myempty(SH), sg, sg)
-    else
+    else # !is_der1_zero && !is_der2_zero
         union_product!(copy(sh), sg, sg)
+    end
+    return P(sg_out, sh_out) # return pattern
+end
+
+# NOTE: mutates argument p and should arguably be called `hessian_tracer_1_to_1_inner!`
+function hessian_tracer_1_to_1_inner(
+    p::P, is_der1_zero::Bool, is_der2_zero::Bool
+) where {I,SG,SH,P<:IndexSetHessianPattern{I,SG,SH,true}}
+    sg = gradient(p)
+    sh = hessian(p)
+    sg_out = gradient_tracer_1_to_1_inner(sg, is_der1_zero)
+    # shared Hessian patterns can't remove second-order information, only add to it.
+    sh_out = if is_der2_zero
+        sh
+    else
+        union_product!(sh, sg, sg)
     end
     return P(sg_out, sh_out) # return pattern
 end
@@ -96,13 +115,37 @@ function hessian_tracer_2_to_1_inner(
     is_der1_arg2_zero::Bool,
     is_der2_arg2_zero::Bool,
     is_der_cross_zero::Bool,
-) where {I,SG,SH,P<:IndexSetHessianPattern{I,SG,SH}}
+) where {I,SG,SH,P<:IndexSetHessianPattern{I,SG,SH,false}}
     sgx, shx = gradient(px), hessian(px)
     sgy, shy = gradient(py), hessian(py)
     sg_out = gradient_tracer_2_to_1_inner(sgx, sgy, is_der1_arg1_zero, is_der1_arg2_zero)
     sh_out = myempty(SH)
     !is_der1_arg1_zero && union!(sh_out, shx)  # hessian alpha
     !is_der1_arg2_zero && union!(sh_out, shy)  # hessian beta
+    !is_der2_arg1_zero && union_product!(sh_out, sgx, sgx)  # product alpha
+    !is_der2_arg2_zero && union_product!(sh_out, sgy, sgy)  # product beta
+    !is_der_cross_zero && union_product!(sh_out, sgx, sgy)  # cross product 1
+    !is_der_cross_zero && union_product!(sh_out, sgy, sgx)  # cross product 2
+    return P(sg_out, sh_out) # return pattern
+end
+
+# NOTE: mutates arguments px and py and should arguably be called `hessian_tracer_1_to_1_inner!`
+function hessian_tracer_2_to_1_inner(
+    px::P,
+    py::P,
+    is_der1_arg1_zero::Bool,
+    is_der2_arg1_zero::Bool,
+    is_der1_arg2_zero::Bool,
+    is_der2_arg2_zero::Bool,
+    is_der_cross_zero::Bool,
+) where {I,SG,SH,P<:IndexSetHessianPattern{I,SG,SH,true}}
+    sgx, shx = gradient(px), hessian(px)
+    sgy, shy = gradient(py), hessian(py)
+
+    shx !== shy && error("Expected shared Hessians, got $shx, $shy.")
+    sh_out = shx # union of shx and shy can be skipped since they are the same object
+    sg_out = gradient_tracer_2_to_1_inner(sgx, sgy, is_der1_arg1_zero, is_der1_arg2_zero)
+
     !is_der2_arg1_zero && union_product!(sh_out, sgx, sgx)  # product alpha
     !is_der2_arg2_zero && union_product!(sh_out, sgy, sgy)  # product beta
     !is_der_cross_zero && union_product!(sh_out, sgx, sgy)  # cross product 1

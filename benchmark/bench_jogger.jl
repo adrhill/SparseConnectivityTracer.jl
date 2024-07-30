@@ -20,9 +20,10 @@ suite["OptimizationProblems"] = optbench([:britgas])
 for S1 in SET_TYPES
     S2 = Set{Tuple{Int,Int}}
 
+    # Non-shared tracers 
+    shared = false
     PG = IndexSetGradientPattern{Int,S1}
-    PH = IndexSetHessianPattern{Int,S1,S2}
-
+    PH = IndexSetHessianPattern{Int,S1,S2,shared}
     G = GradientTracer{PG}
     H = HessianTracer{PH}
 
@@ -33,5 +34,16 @@ for S1 in SET_TYPES
     )
     suite["Hessian"]["Local"][(nameof(S1), nameof(S2))] = hessbench(
         TracerLocalSparsityDetector(G, H)
+    )
+
+    # Shared tracers 
+    shared = true
+    PG = IndexSetGradientPattern{Int,S1}
+    PH = IndexSetHessianPattern{Int,S1,S2,shared}
+    G = GradientTracer{PG}
+    H = HessianTracer{PH}
+
+    suite["Hessian"]["Global (shared)"][(nameof(S1), nameof(S2))] = hessbench(
+        TracerSparsityDetector(G, H)
     )
 end
