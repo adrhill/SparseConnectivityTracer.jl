@@ -1,25 +1,27 @@
 # SparseConnectivityTracer.jl
 
 ## Version `v0.6.0`
-* ![BREAKING][badge-breaking] Remove `ConnectivityTracer` ([#140][pr-140])
-* ![BREAKING][badge-breaking] Remove legacy interface ([#140][pr-140])
+* ![BREAKING][badge-breaking] Remove `ConnectivityTracer` ([#140])
+* ![BREAKING][badge-breaking] Remove legacy interface ([#140])
     * instead of `jacobian_pattern(f, x)`, use `jacobian_sparsity(f, x, TracerSparsityDetector())`
     * instead of `hessian_pattern(f, x)`, use `hessian_sparsity(f, x, TracerSparsityDetector())`
     * instead of `local_jacobian_pattern(f, x)`, use `jacobian_sparsity(f, x, TracerLocalSparsityDetector())`
     * instead of `local_hessian_pattern(f, x)`, use `hessian_sparsity(f, x, TracerLocalSparsityDetector())`
-* ![Bugfix][badge-bugfix] Remove overloads on `similar` to reduce amount of invalidations  ([#132][pr-132])
-* ![Enhancement][badge-enhancement] Add array overloads ([#131][pr-131])
-* ![Enhancement][badge-enhancement] Generalize sparsity pattern representations ([#139][pr-139], [#119][pr-119])
-* ![Enhancement][badge-enhancement] Reduce allocations of new tracers ([#128][pr-128])
-* ![Enhancement][badge-enhancement] Reduce compile times ([#119][pr-119])
+* ![Bugfix][badge-bugfix] Remove overloads on `similar` to reduce amount of invalidations ([#132])
+* ![Bugfix][badge-bugfix] Fix sparse array construction ([#142])
+* ![Enhancement][badge-enhancement] Add array overloads ([#131])
+* ![Enhancement][badge-enhancement] Generalize sparsity pattern representations ([#139], [#119])
+* ![Enhancement][badge-enhancement] Reduce allocations of new tracers ([#128])
+* ![Enhancement][badge-enhancement] Reduce compile times ([#119])
 
-[pr-140]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/140
-[pr-139]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/139
-[pr-132]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/132
-[pr-131]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/131
-[pr-128]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/128
-[pr-126]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/126
-[pr-119]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/119
+[#142]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/142
+[#140]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/140
+[#139]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/139
+[#132]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/132
+[#131]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/131
+[#128]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/128
+[#126]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/126
+[#119]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/119
 
 <!--
 # Badges
