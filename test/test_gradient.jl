@@ -82,6 +82,7 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
             isfinite,
             isinf,
             isinteger,
+            isless,
             ismissing,
             isnan,
             isnothing,

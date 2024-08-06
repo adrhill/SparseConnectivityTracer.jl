@@ -5,6 +5,7 @@ for fn in (
     :isfinite,
     :isinf,
     :isinteger,
+    :isless,
     :ismissing,
     :isnan,
     :isnothing,
