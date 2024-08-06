@@ -90,6 +90,9 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
             @testset "Array overloads" begin
                 include("test_arrays.jl")
             end
+            @testset "ComponentArrays" begin
+                include("componentarrays.jl")
+            end
         end
     end
 

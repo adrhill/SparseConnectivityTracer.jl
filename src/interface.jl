@@ -17,7 +17,8 @@ Supports [`GradientTracer`](@ref), [`HessianTracer`](@ref) and [`Dual`](@ref).
 trace_input(::Type{T}, xs) where {T<:Union{AbstractTracer,Dual}} = trace_input(T, xs, 1)
 
 function trace_input(::Type{T}, xs::AbstractArray, i) where {T<:Union{AbstractTracer,Dual}}
-    is = reshape(1:length(xs), size(xs)) .+ (i - 1)
+    is = similar(xs, Int)  # same array type as xs
+    is .= reshape(1:length(xs), size(xs)) .+ (i - 1)
     return create_tracers(T, xs, is)
 end
 function trace_input(::Type{T}, x::Real, i::Integer) where {T<:Union{AbstractTracer,Dual}}
