@@ -179,6 +179,7 @@ include("tracers_definitions.jl")
             isfinite,
             isinf,
             isinteger,
+            isless,
             ismissing,
             isnan,
             isnothing,
