@@ -43,6 +43,10 @@ random_input(::typeof(sincosd)) = 180 * rand()
 random_first_input(op) = random_input(op)
 random_second_input(op) = random_input(op)
 
+## Skip tests on functions that don't support ForwardDiff's Dual numbers
+
+correct_classification_1_to_1(op::typeof(!), x; atol) = true
+
 ## Derivatives and special cases
 
 both_derivatives_1_to_1(op, x) = derivative(op, x), second_derivative(op, x)
