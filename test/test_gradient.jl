@@ -52,6 +52,7 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
         x = rand(2)
         g(x) = [x[1] * x[2], ceil(x[1] * x[2]), x[1] * round(x[2])]
         @test jacobian_sparsity(g, x, method) == [1 1; 0 0; 1 0]
+        @test jacobian_sparsity(!, true, method) ≈ [0;;]
 
         # Code coverage
         @test jacobian_sparsity(x -> [sincos(x)...], 1, method) ≈ [1; 1]

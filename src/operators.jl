@@ -85,7 +85,7 @@ end
 # ∂²f/∂x² == 0
 ops_1_to_1_z = (
     round, floor, ceil, trunc,
-    sign,
+    sign, !
 )
 for op in ops_1_to_1_z
     T = typeof(op)
