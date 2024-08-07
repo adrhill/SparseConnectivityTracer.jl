@@ -152,6 +152,7 @@ function hessian_pattern_to_mat(xt::AbstractArray{T}, yt::T) where {T<:HessianTr
             push!(V, true)
         end
     end
+    # Since we return a `Symmetric` Hessian, the inner sparse matrix only _needs_ to contain index-tuples (i,j) with i≤j.
     h = Symmetric(sparse(I, J, V, n, n))
     return h
 end
