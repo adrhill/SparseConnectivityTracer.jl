@@ -36,5 +36,7 @@ Base.iterate(dv::DuplicateVector)             = iterate(collect(dv))
 Base.iterate(dv::DuplicateVector, i::Integer) = iterate(collect(dv), i)
 
 function product(a::DuplicateVector{T}, b::DuplicateVector{T}) where {T}
-    return DuplicateVector{Tuple{T,T}}(vec(collect(Iterators.product(a.data, b.data))))
+    return DuplicateVector{Tuple{T,T}}(
+        vec(collect((i, j) for i in a.data, j in b.data if i <= j))
+    )
 end

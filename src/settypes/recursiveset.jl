@@ -92,5 +92,7 @@ Base.iterate(rs::RecursiveSet, i::Integer) = iterate(collect(rs), i)
 
 function product(a::RecursiveSet{T}, b::RecursiveSet{T}) where {T}
     # TODO: slow
-    return RecursiveSet{Tuple{T,T}}(vec(collect(Iterators.product(collect(a), collect(b)))))
+    return RecursiveSet{Tuple{T,T}}(
+        vec(collect((i, j) for i in collect(a), j in collect(b) if i <= j))
+    )
 end
