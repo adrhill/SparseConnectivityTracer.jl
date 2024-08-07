@@ -6,7 +6,7 @@ using SparseArrays: SparseArrays
 using SparseArrays: sparse
 using Random: AbstractRNG, SamplerType
 
-using LinearAlgebra: LinearAlgebra
+using LinearAlgebra: LinearAlgebra, Symmetric, Diagonal
 using FillArrays: Fill
 
 using DocStringExtensions
