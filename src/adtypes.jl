@@ -24,7 +24,7 @@ julia> using ADTypes, SparseConnectivityTracer
 julia> f(x) = x[1] + x[2]*x[3] + 1/x[4];
 
 julia> hessian_sparsity(f, rand(4), TracerSparsityDetector())
-4×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 3 stored entries:
+4×4 LinearAlgebra.Symmetric{Bool, SparseArrays.SparseMatrixCSC{Bool, Int64}}:
  ⋅  ⋅  ⋅  ⋅
  ⋅  ⋅  1  ⋅
  ⋅  1  ⋅  ⋅
@@ -91,7 +91,7 @@ julia> using ADTypes, SparseConnectivityTracer
 julia> f(x) = x[1] + max(x[2], x[3]) * x[3] + 1/x[4];
 
 julia> hessian_sparsity(f, [1.0, 2.0, 3.0, 4.0], TracerLocalSparsityDetector())
-4×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 2 stored entries:
+4×4 LinearAlgebra.Symmetric{Bool, SparseArrays.SparseMatrixCSC{Bool, Int64}}:
  ⋅  ⋅  ⋅  ⋅
  ⋅  ⋅  ⋅  ⋅
  ⋅  ⋅  1  ⋅
