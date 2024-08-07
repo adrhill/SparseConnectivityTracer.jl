@@ -21,7 +21,7 @@ using Test
     x = rand(5)
     f(x) = x[1] + x[2] * x[3] + 1 / x[4] + 1 * x[5]
     H2 = hessian_sparsity(f, x, sd)
-    @test H2 isa Symmetric{Bool,SparseMatrixCSC{Bool,Int}}
+    @test H2 isa SparseMatrixCSC{Bool,Int}
     @test H2 ≈ [
         0 0 0 0 0
         0 0 1 0 0
