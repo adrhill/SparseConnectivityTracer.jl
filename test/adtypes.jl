@@ -1,6 +1,5 @@
 using ADTypes: jacobian_sparsity, hessian_sparsity
 using SparseConnectivityTracer
-using LinearAlgebra: Symmetric
 using SparseArrays
 using Test
 

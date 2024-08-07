@@ -150,10 +150,13 @@ function hessian_pattern_to_mat(xt::AbstractArray{T}, yt::T) where {T<:HessianTr
             push!(I, i)
             push!(J, j)
             push!(V, true)
+            # TODO: return `Symmetric` instead on next breaking release
+            push!(I, j)
+            push!(J, i)
+            push!(V, true)
         end
     end
-    # Since we return a `Symmetric` Hessian, the inner sparse matrix only _needs_ to contain index-tuples (i,j) with i≤j.
-    h = Symmetric(sparse(I, J, V, n, n))
+    h = sparse(I, J, V, n, n)
     return h
 end
 
