@@ -16,9 +16,9 @@ Supports [`GradientTracer`](@ref), [`HessianTracer`](@ref) and [`Dual`](@ref).
 """
 trace_input(::Type{T}, xs) where {T<:Union{AbstractTracer,Dual}} = trace_input(T, xs, 1)
 
-# If possible, this should call `similar` and have a function signature `A -> A`.
-# For some array types like `Symmetric`, this function signature isn't possible, 
-# e.g. because symmetry doesn't hold for the index matrix.
+# If possible, this should call `similar` and have the function signature `A{T} -> A{Int}`.
+# For some array types, this function signature isn't possible, 
+# e.g. on `Symmetric`, where symmetry doesn't hold for the index matrix.
 allocate_index_matrix(A::AbstractArray) = similar(A, Int)
 allocate_index_matrix(A::Symmetric) = Matrix{Int}(undef, size(A)...)
 allocate_index_matrix(A::Diagonal) = Matrix{Int}(undef, size(A)...)
