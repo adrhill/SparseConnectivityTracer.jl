@@ -56,8 +56,10 @@ seed(::Type{S}, i::Integer) where {S<:AbstractSet} = S(i)
 
 Inner product of set-like inputs `a` and `b`.
 """
-product(a::AbstractSet{I}, b::AbstractSet{I}) where {I<:Integer} =
-    Set((i, j) for i in a, j in b)
+function product(a::AbstractSet{I}, b::AbstractSet{I}) where {I<:Integer}
+    # Since we return `Symmetric` Hessian, we only have to keep track of index-tuples (i,j) with i≤j.
+    return Set((i, j) for i in a, j in b if i <= j)
+end
 
 function union_product!(
     hessian::H, gradient_x::G, gradient_y::G

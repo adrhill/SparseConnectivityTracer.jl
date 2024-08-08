@@ -13,5 +13,6 @@ using Test
     @test length(y) == 4
     @test sort(collect(y)) == [1, 3, 5, 7]
     @test sort(collect(copy(y))) == [1, 3, 5, 7]
-    @test length(collect(product(y, y))) == 16
+    P = collect(product(y, y)) # (1,1), (1,3), (1,5), (1,7), (3,3), (3,5), (3,7), (5,5), (5,7), (7,7)
+    @test length(P) == 10
 end

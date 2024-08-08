@@ -150,6 +150,10 @@ function hessian_pattern_to_mat(xt::AbstractArray{T}, yt::T) where {T<:HessianTr
             push!(I, i)
             push!(J, j)
             push!(V, true)
+            # TODO: return `Symmetric` instead on next breaking release
+            push!(I, j)
+            push!(J, i)
+            push!(V, true)
         end
     end
     h = sparse(I, J, V, n, n)

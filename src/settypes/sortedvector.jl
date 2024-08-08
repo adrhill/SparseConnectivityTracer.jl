@@ -93,6 +93,6 @@ Base.iterate(v::SortedVector)             = iterate(v.data)
 Base.iterate(v::SortedVector, i::Integer) = iterate(v.data, i)
 
 function product(v1::SortedVector{T}, v2::SortedVector{T}) where {T}
-    prod_data = vec(collect(Iterators.product(v1.data, v2.data)))
+    prod_data = vec(collect((i, j) for i in v1.data, j in v2.data if i <= j))
     return SortedVector{Tuple{T,T}}(prod_data; sorted=true)
 end
