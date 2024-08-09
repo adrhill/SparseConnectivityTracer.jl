@@ -134,6 +134,7 @@ end
 shared(::Type{T}) where {P,T<:HessianTracer{P}} = shared(P)
 
 myempty(::T) where {T<:AbstractTracer} = myempty(T)
+
 myempty(::Type{GradientTracer{P}}) where {P} = GradientTracer{P}(myempty(P), true)
 myempty(::Type{HessianTracer{P}}) where {P}  = HessianTracer{P}(myempty(P), true)
 

@@ -6,6 +6,7 @@ using SparseConnectivityTracer
 using SparseConnectivityTracer: GradientTracer, HessianTracer
 using SparseConnectivityTracer: IndexSetGradientPattern, IndexSetHessianPattern
 using SparseConnectivityTracer: DuplicateVector, SortedVector, RecursiveSet
+using SparseConnectivityTracer: Shared, NotShared
 
 SET_TYPES = (BitSet, Set{Int}, DuplicateVector{Int}, RecursiveSet{Int}, SortedVector{Int})
 
@@ -21,9 +22,8 @@ for S1 in SET_TYPES
     S2 = Set{Tuple{Int,Int}}
 
     # Non-shared tracers 
-    shared = false
     PG = IndexSetGradientPattern{Int,S1}
-    PH = IndexSetHessianPattern{Int,S1,S2,shared}
+    PH = IndexSetHessianPattern{Int,S1,S2,NotShared}
     G = GradientTracer{PG}
     H = HessianTracer{PH}
 
@@ -37,9 +37,8 @@ for S1 in SET_TYPES
     )
 
     # Shared tracers 
-    shared = true
     PG = IndexSetGradientPattern{Int,S1}
-    PH = IndexSetHessianPattern{Int,S1,S2,shared}
+    PH = IndexSetHessianPattern{Int,S1,S2,Shared}
     G = GradientTracer{PG}
     H = HessianTracer{PH}
 

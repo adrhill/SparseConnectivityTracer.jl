@@ -13,18 +13,18 @@ GRADIENT_PATTERNS = (
 
 HESSIAN_PATTERNS_SHARED = (
     IndexSetHessianPattern{Int,BitSet,Set{Tuple{Int,Int}},Shared},
-    DictHessianPattern{Int,Set{Int},Dict{Int,Set{Int}},Shared},
+    DictHessianPattern{Int,BitSet,Dict{Int,BitSet},Shared},
 )
 HESSIAN_PATTERNS_NOTSHARED = (
     IndexSetHessianPattern{Int,BitSet,Set{Tuple{Int,Int}},NotShared},
-    IndexSetHessianPattern{Int,Set{Int},Set{Tuple{Int,Int}},NotShared},
+    IndexSetHessianPattern{Int,BitSet,Set{Tuple{Int,Int}},NotShared},
     IndexSetHessianPattern{
         Int,DuplicateVector{Int},DuplicateVector{Tuple{Int,Int}},NotShared
     },
     IndexSetHessianPattern{Int,SortedVector{Int},SortedVector{Tuple{Int,Int}},NotShared},
     # TODO: test on RecursiveSet
-    DictHessianPattern{Int,Set{Int},Dict{Int,Set{Int}},NotShared},
     DictHessianPattern{Int,BitSet,Dict{Int,BitSet},NotShared},
+    DictHessianPattern{Int,Set{Int},Dict{Int,Set{Int}},NotShared},
 )
 HESSIAN_PATTERNS = union(HESSIAN_PATTERNS_SHARED, HESSIAN_PATTERNS_NOTSHARED)
 
