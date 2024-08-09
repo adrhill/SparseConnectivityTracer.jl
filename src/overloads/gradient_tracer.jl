@@ -13,7 +13,7 @@ end
 function gradient_tracer_1_to_1_inner(
     p::P, is_der1_zero::Bool
 ) where {P<:IndexSetGradientPattern}
-    return P(gradient_tracer_1_to_1_inner(set(p), is_der1_zero)) # return pattern
+    return P(gradient_tracer_1_to_1_inner(gradient(p), is_der1_zero)) # return pattern
 end
 
 # This is only required because it is called by HessianTracer with IndexSetHessianPattern
@@ -77,7 +77,9 @@ function gradient_tracer_2_to_1_inner(
     px::P, py::P, is_der1_arg1_zero::Bool, is_der1_arg2_zero::Bool
 ) where {P<:IndexSetGradientPattern}
     return P(
-        gradient_tracer_2_to_1_inner(set(px), set(py), is_der1_arg1_zero, is_der1_arg2_zero)
+        gradient_tracer_2_to_1_inner(
+            gradient(px), gradient(py), is_der1_arg1_zero, is_der1_arg2_zero
+        ),
     ) # return pattern
 end
 

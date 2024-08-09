@@ -131,8 +131,7 @@ end
 # Utilities #
 #===========#
 
-# isshared(::Type{T}) where {P,T<:GradientTracer{P}} = isshared(P) # no shared AbstractGradientPattern yet
-isshared(::Type{T}) where {P,T<:HessianTracer{P}} = isshared(P)
+shared(::Type{T}) where {P,T<:HessianTracer{P}} = shared(P)
 
 myempty(::T) where {T<:AbstractTracer} = myempty(T)
 # myempty(::Type{T}) where {P,T<:AbstractTracer{P}} = T(myempty(P), true) # JET complains about this

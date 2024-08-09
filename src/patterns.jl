@@ -15,17 +15,25 @@ AbstractPattern
 abstract type AbstractPattern end
 
 """
-    isshared(pattern)
+    shared(pattern)
 
-Indicates whether patterns **always** share memory and whether operators are **allowed** to mutate their `AbstractTracer` arguments. 
+Indicates whether patterns **always** share memory and whether operators are **allowed** to mutate their `AbstractTracer` arguments.
+Returns either the `Shared()` or `NotShared()` trait.
 
-If `false`, patterns **can** share memory and operators are **prohibited** from mutating `AbstractTracer` arguments.
+If `NotShared()`, patterns **can** share memory and operators are **prohibited** from mutating `AbstractTracer` arguments.
 
 ## Note
 In practice, memory sharing is limited to second-order information in `AbstractHessianPattern`.
 """
-isshared(::P) where {P<:AbstractPattern} = isshared(P)
-isshared(::Type{P}) where {P<:AbstractPattern} = false
+shared(::P) where {P<:AbstractPattern} = shared(P)
+shared(::Type{P}) where {P<:AbstractPattern} = NotShared()
+
+abstract type SharingBehavior end
+struct Shared <: SharingBehavior end
+struct NotShared <: SharingBehavior end
+
+Base.Bool(::Shared) = true
+Base.Bool(::NotShared) = false
 
 """
   myempty(T)
@@ -58,10 +66,11 @@ Return a representation of non-zero values ``∇²f(x)_{ij} ≠ 0`` in the Hessi
 """
 hessian
 
-#==========================#
-# Utilities on AbstractSet #
-#==========================#
+#===========#
+# Utilities #
+#===========#
 
+myempty(::S) where {S<:AbstractSet} = S()
 myempty(::Type{S}) where {S<:AbstractSet} = S()
 seed(::Type{S}, i::Integer) where {S<:AbstractSet} = S(i)
 
@@ -71,7 +80,7 @@ seed(::Type{S}, i::Integer) where {S<:AbstractSet} = S(i)
 Inner product of set-like inputs `a` and `b`.
 """
 function product(a::AbstractSet{I}, b::AbstractSet{I}) where {I<:Integer}
-    # Since we return `Symmetric` Hessian, we only have to keep track of index-tuples (i,j) with i≤j.
+    # Since the Hessian is symmetric, we only have to keep track of index-tuples (i,j) with i≤j.
     return Set((i, j) for i in a, j in b if i <= j)
 end
 
@@ -116,9 +125,7 @@ struct IndexSetGradientPattern{I<:Integer,S<:AbstractSet{I}} <: AbstractGradient
     gradient::S
 end
 
-set(v::IndexSetGradientPattern) = v.gradient
-
-Base.show(io::IO, p::IndexSetGradientPattern) = Base.show(io, set(p))
+Base.show(io::IO, p::IndexSetGradientPattern) = Base.show(io, gradient(p))
 
 function myempty(::Type{IndexSetGradientPattern{I,S}}) where {I,S}
     return IndexSetGradientPattern{I,S}(myempty(S))
@@ -149,7 +156,7 @@ For use with [`HessianTracer`](@ref).
 * [`create_patterns`](@ref)
 * [`gradient`](@ref)
 * [`hessian`](@ref)
-* [`isshared`](@ref) in case the pattern is shared (mutates). Defaults to false.
+* [`shared`](@ref) in case the pattern is shared (mutates). Defaults to `NotShared()`.
 """
 abstract type AbstractHessianPattern <: AbstractPattern end
 
@@ -162,18 +169,18 @@ Hessian sparsity pattern represented by two sets.
 $(TYPEDFIELDS)
 
 ## Internals
-
 The last type parameter `shared` is a `Bool` indicating whether the `hessian` field of this object should be shared among all intermediate scalar quantities involved in a function.
 """
 struct IndexSetHessianPattern{
-    I<:Integer,G<:AbstractSet{I},H<:AbstractSet{Tuple{I,I}},shared
+    I<:Integer,G<:AbstractSet{I},H<:AbstractSet{Tuple{I,I}},shared<:SharingBehavior
 } <: AbstractHessianPattern
     "Set of indices ``i`` of non-zero values ``∇f(x)_i ≠ 0`` in the gradient."
     gradient::G
     "Set of index-tuples ``(i, j)`` of non-zero values ``∇²f(x)_{ij} ≠ 0`` in the Hessian."
     hessian::H
 end
-isshared(::Type{IndexSetHessianPattern{I,G,H,true}}) where {I,G,H} = true
+shared(::Type{IndexSetHessianPattern{I,G,H,Shared}}) where {I,G,H}    = Shared()
+shared(::Type{IndexSetHessianPattern{I,G,H,NotShared}}) where {I,G,H} = NotShared()
 
 function myempty(::Type{P}) where {I,G,H,S,P<:IndexSetHessianPattern{I,G,H,S}}
     return P(myempty(G), myempty(H))

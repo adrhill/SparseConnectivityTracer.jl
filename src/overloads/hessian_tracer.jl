@@ -1,32 +1,38 @@
 ## 1-to-1
 
+# 𝟙[∇γ]  = 𝟙[∂φ]⋅𝟙[∇α]
+# 𝟙[∇²γ] = 𝟙[∂φ]⋅𝟙[∇²α] ∨ 𝟙[∂²φ]⋅(𝟙[∇α] ∨ 𝟙[∇α]ᵀ)
+
 @noinline function hessian_tracer_1_to_1(
     t::T, is_der1_zero::Bool, is_der2_zero::Bool
-) where {T<:HessianTracer}
+) where {P<:AbstractHessianPattern,T<:HessianTracer{P}}
     if isemptytracer(t) # TODO: add test
         return t
     else
-        p_out = hessian_tracer_1_to_1_inner(pattern(t), is_der1_zero, is_der2_zero)
+        p_out = hessian_tracer_1_to_1_inner(
+            pattern(t), is_der1_zero, is_der2_zero, shared(P)
+        )
         return T(p_out) # return tracer
     end
 end
 
 function hessian_tracer_1_to_1_inner(
-    p::P, is_der1_zero::Bool, is_der2_zero::Bool
-) where {I,SG,SH,P<:IndexSetHessianPattern{I,SG,SH,false}}
+    p::P, is_der1_zero::Bool, is_der2_zero::Bool, ::NotShared
+) where {P<:AbstractHessianPattern}
     sg = gradient(p)
     sh = hessian(p)
-    sg_out = gradient_tracer_1_to_1_inner(sg, is_der1_zero)
-    sh_out = if is_der1_zero && is_der2_zero
-        myempty(SH)
-    elseif !is_der1_zero && is_der2_zero
+
+    sg_out = gradient_tracer_1_to_1_inner(sg, is_der1_zero) # 𝟙[∇γ] = 𝟙[∂φ]⋅𝟙[∇α]
+    sh_out = if is_der1_zero && is_der2_zero # 𝟙[∇²γ] = 0
+        myempty(sh)
+    elseif !is_der1_zero && is_der2_zero # 𝟙[∇²γ] = 𝟙[∂φ]⋅𝟙[∇²α]
         sh
-    elseif is_der1_zero && !is_der2_zero
+    elseif is_der1_zero && !is_der2_zero # 𝟙[∇²γ] = 𝟙[∇α] ∨ 𝟙[∇α]ᵀ
         # TODO: this branch of the code currently isn't tested.
         # Covering it would require a scalar 1-to-1 function with local overloads, 
         # such that ∂f/∂x == 0 and ∂²f/∂x² != 0.
-        union_product!(myempty(SH), sg, sg)
-    else # !is_der1_zero && !is_der2_zero
+        union_product!(myempty(sh), sg, sg)
+    else # !is_der1_zero && !is_der2_zero,  𝟙[∇²γ] = 𝟙[∇²α] ∨ (𝟙[∇α] ∨ 𝟙[∇α]ᵀ)
         union_product!(copy(sh), sg, sg)
     end
     return P(sg_out, sh_out) # return pattern
@@ -34,15 +40,16 @@ end
 
 # NOTE: mutates argument p and should arguably be called `hessian_tracer_1_to_1_inner!`
 function hessian_tracer_1_to_1_inner(
-    p::P, is_der1_zero::Bool, is_der2_zero::Bool
-) where {I,SG,SH,P<:IndexSetHessianPattern{I,SG,SH,true}}
+    p::P, is_der1_zero::Bool, is_der2_zero::Bool, ::Shared
+) where {P<:AbstractHessianPattern}
     sg = gradient(p)
-    sh = hessian(p)
     sg_out = gradient_tracer_1_to_1_inner(sg, is_der1_zero)
+
     # shared Hessian patterns can't remove second-order information, only add to it.
-    sh_out = if is_der2_zero
+    sh = hessian(p)
+    sh_out = if is_der2_zero  # 𝟙[∇²γ] = 𝟙[∂φ]⋅𝟙[∇²α]
         sh
-    else
+    else # 𝟙[∇²γ] = 𝟙[∇²α] ∨ (𝟙[∇α] ∨ 𝟙[∇α]ᵀ)
         union_product!(sh, sg, sg)
     end
     return P(sg_out, sh_out) # return pattern
@@ -85,7 +92,7 @@ end
     is_der1_arg2_zero::Bool,
     is_der2_arg2_zero::Bool,
     is_der_cross_zero::Bool,
-) where {T<:HessianTracer}
+) where {P<:AbstractHessianPattern,T<:HessianTracer{P}}
     # TODO: add tests for isempty
     if tx.isempty && ty.isempty
         return tx # empty tracer
@@ -102,6 +109,7 @@ end
             is_der1_arg2_zero,
             is_der2_arg2_zero,
             is_der_cross_zero,
+            shared(P),
         )
         return T(p_out) # return tracer
     end
@@ -115,11 +123,12 @@ function hessian_tracer_2_to_1_inner(
     is_der1_arg2_zero::Bool,
     is_der2_arg2_zero::Bool,
     is_der_cross_zero::Bool,
-) where {I,SG,SH,P<:IndexSetHessianPattern{I,SG,SH,false}}
+    ::NotShared,
+) where {P<:AbstractHessianPattern}
     sgx, shx = gradient(px), hessian(px)
     sgy, shy = gradient(py), hessian(py)
     sg_out = gradient_tracer_2_to_1_inner(sgx, sgy, is_der1_arg1_zero, is_der1_arg2_zero)
-    sh_out = myempty(SH)
+    sh_out = myempty(shx)
     !is_der1_arg1_zero && union!(sh_out, shx)  # hessian alpha
     !is_der1_arg2_zero && union!(sh_out, shy)  # hessian beta
     !is_der2_arg1_zero && union_product!(sh_out, sgx, sgx)  # product alpha
@@ -138,7 +147,8 @@ function hessian_tracer_2_to_1_inner(
     is_der1_arg2_zero::Bool,
     is_der2_arg2_zero::Bool,
     is_der_cross_zero::Bool,
-) where {I,SG,SH,P<:IndexSetHessianPattern{I,SG,SH,true}}
+    ::Shared,
+) where {P<:AbstractHessianPattern}
     sgx, shx = gradient(px), hessian(px)
     sgy, shy = gradient(py), hessian(py)
 

@@ -1,6 +1,6 @@
 const DEFAULT_GRADIENT_TRACER = GradientTracer{IndexSetGradientPattern{Int,BitSet}}
 const DEFAULT_HESSIAN_TRACER = HessianTracer{
-    IndexSetHessianPattern{Int,BitSet,Set{Tuple{Int,Int}},false}
+    IndexSetHessianPattern{Int,BitSet,Set{Tuple{Int,Int}},NotShared}
 }
 
 #==================#
