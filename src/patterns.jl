@@ -44,6 +44,20 @@ Convenience constructor for patterns of type `P` for multiple inputs `xs` and th
 """
 create_patterns
 
+"""
+    gradient(pattern)
+    
+Return a representation of non-zero values ``∇f(x)_{i} ≠ 0`` in the gradient.
+"""
+gradient
+
+"""
+    hessian(pattern)
+    
+Return a representation of non-zero values ``∇²f(x)_{ij} ≠ 0`` in the Hessian.
+"""
+hessian
+
 #==========================#
 # Utilities on AbstractSet #
 #==========================#
@@ -84,7 +98,7 @@ For use with [`GradientTracer`](@ref).
 
 * [`myempty`](@ref)
 * [`create_patterns`](@ref)
-* `gradient(p::MyPattern)`: return non-zero indices `i` in the gradient representation
+* [`gradient`](@ref)
 * [`isshared`](@ref) in case the pattern is shared (mutates). Defaults to false.
 """
 abstract type AbstractGradientPattern <: AbstractPattern end
@@ -92,13 +106,13 @@ abstract type AbstractGradientPattern <: AbstractPattern end
 """
 $(TYPEDEF)
 
-Gradient sparsity pattern represented by an `AbstractSet` of indices ``{i}`` of non-zero values.
+Gradient sparsity pattern represented by a set.
 
 ## Fields
 $(TYPEDFIELDS)
 """
 struct IndexSetGradientPattern{I<:Integer,S<:AbstractSet{I}} <: AbstractGradientPattern
-    "Set of indices represting non-zero entries ``i`` in a vector."
+    "Set of indices ``i`` of non-zero values ``∇f(x)_i ≠ 0`` in the gradient."
     gradient::S
 end
 
@@ -133,8 +147,8 @@ For use with [`HessianTracer`](@ref).
 
 * [`myempty`](@ref)
 * [`create_patterns`](@ref)
-* `gradient(p::MyPattern)`: return non-zero indices `i` in the first-order representation
-* `hessian(p::MyPattern)`: return non-zero indices `(i, j)` in the second-order representation
+* [`gradient`](@ref)
+* [`hessian`](@ref)
 * [`isshared`](@ref) in case the pattern is shared (mutates). Defaults to false.
 """
 abstract type AbstractHessianPattern <: AbstractPattern end
@@ -142,9 +156,7 @@ abstract type AbstractHessianPattern <: AbstractPattern end
 """
 $(TYPEDEF)
 
-Hessian sparsity pattern represented by:
-* an `AbstractSet` of indices ``i`` of non-zero values representing first-order sparsity
-* an `AbstractSet` of index tuples ``(i,j)`` of non-zero values representing second-order sparsity
+Hessian sparsity pattern represented by two sets.
 
 ## Fields
 $(TYPEDFIELDS)
@@ -156,7 +168,9 @@ The last type parameter `shared` is a `Bool` indicating whether the `hessian` fi
 struct IndexSetHessianPattern{
     I<:Integer,G<:AbstractSet{I},H<:AbstractSet{Tuple{I,I}},shared
 } <: AbstractHessianPattern
+    "Set of indices ``i`` of non-zero values ``∇f(x)_i ≠ 0`` in the gradient."
     gradient::G
+    "Set of index-tuples ``(i, j)`` of non-zero values ``∇²f(x)_{ij} ≠ 0`` in the Hessian."
     hessian::H
 end
 isshared(::Type{IndexSetHessianPattern{I,G,H,true}}) where {I,G,H} = true
