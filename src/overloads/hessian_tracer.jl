@@ -129,8 +129,8 @@ function hessian_tracer_2_to_1_inner(
     sgy, shy = gradient(py), hessian(py)
     sg_out = gradient_tracer_2_to_1_inner(sgx, sgy, is_der1_arg1_zero, is_der1_arg2_zero)
     sh_out = myempty(shx)
-    !is_der1_arg1_zero && union!(sh_out, shx)  # hessian alpha
-    !is_der1_arg2_zero && union!(sh_out, shy)  # hessian beta
+    !is_der1_arg1_zero && myunion!(sh_out, shx)  # hessian alpha
+    !is_der1_arg2_zero && myunion!(sh_out, shy)  # hessian beta
     !is_der2_arg1_zero && union_product!(sh_out, sgx, sgx)  # product alpha
     !is_der2_arg2_zero && union_product!(sh_out, sgy, sgy)  # product beta
     !is_der_cross_zero && union_product!(sh_out, sgx, sgy)  # cross product 1

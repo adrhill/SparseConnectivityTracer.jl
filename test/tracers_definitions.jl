@@ -1,5 +1,6 @@
 using SparseConnectivityTracer: AbstractTracer, GradientTracer, HessianTracer, Dual
-using SparseConnectivityTracer: IndexSetGradientPattern, IndexSetHessianPattern
+using SparseConnectivityTracer: IndexSetGradientPattern
+using SparseConnectivityTracer: IndexSetHessianPattern, DictHessianPattern
 using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using SparseConnectivityTracer: Shared, NotShared
 
@@ -12,6 +13,7 @@ GRADIENT_PATTERNS = (
 
 HESSIAN_PATTERNS_SHARED = (
     IndexSetHessianPattern{Int,BitSet,Set{Tuple{Int,Int}},Shared},
+    DictHessianPattern{Int,Set{Int},Dict{Int,Set{Int}},Shared},
 )
 HESSIAN_PATTERNS_NOTSHARED = (
     IndexSetHessianPattern{Int,BitSet,Set{Tuple{Int,Int}},NotShared},
@@ -21,6 +23,8 @@ HESSIAN_PATTERNS_NOTSHARED = (
     },
     IndexSetHessianPattern{Int,SortedVector{Int},SortedVector{Tuple{Int,Int}},NotShared},
     # TODO: test on RecursiveSet
+    DictHessianPattern{Int,Set{Int},Dict{Int,Set{Int}},NotShared},
+    DictHessianPattern{Int,BitSet,Dict{Int,BitSet},NotShared},
 )
 HESSIAN_PATTERNS = union(HESSIAN_PATTERNS_SHARED, HESSIAN_PATTERNS_NOTSHARED)
 

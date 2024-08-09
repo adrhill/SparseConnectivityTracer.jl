@@ -72,7 +72,27 @@ hessian
 
 myempty(::S) where {S<:AbstractSet} = S()
 myempty(::Type{S}) where {S<:AbstractSet} = S()
+myempty(::D) where {D<:AbstractDict} = D()
+myempty(::Type{D}) where {D<:AbstractDict} = D()
 seed(::Type{S}, i::Integer) where {S<:AbstractSet} = S(i)
+
+myunion!(a::S, b::S) where {S<:AbstractSet} = union!(a, b)
+function myunion!(a::D, b::D) where {I<:Integer,S<:AbstractSet{I},D<:AbstractDict{I,S}}
+    for k in keys(b)
+        if haskey(a, k)
+            union!(a[k], b[k])
+        else
+            push!(a, k => b[k])
+        end
+    end
+    return a
+end
+
+# convert to set of index tuples
+tuple_set(s::AbstractSet{Tuple{I,I}}) where {I<:Integer} = s
+function tuple_set(d::AbstractDict{I,S}) where {I<:Integer,S<:AbstractSet{I}}
+    return Set((k, v) for k in keys(d) for v in d[k])
+end
 
 """"
     product(a::S{T}, b::S{T})::S{Tuple{T,T}}
@@ -105,6 +125,22 @@ for S in (:DuplicateVector, :SortedVector, :RecursiveSet)
         hxy = product(gradient_x, gradient_y)
         return union!(hessian, hxy)
     end
+end
+
+function union_product!(
+    hessian::AbstractDict{I,S}, gradient_x::S, gradient_y::S
+) where {I<:Integer,S<:AbstractSet{I}}
+    for i in gradient_x
+        if !haskey(hessian, i)
+            push!(hessian, i => S())
+        end
+        for j in gradient_y
+            if i <= j # symmetric Hessian
+                push!(hessian[i], j)
+            end
+        end
+    end
+    return hessian
 end
 
 #=======================#
@@ -188,7 +224,7 @@ $(TYPEDFIELDS)
 The last type parameter `shared` is a `Bool` indicating whether the `hessian` field of this object should be shared among all intermediate scalar quantities involved in a function.
 """
 struct IndexSetHessianPattern{
-    I<:Integer,G<:AbstractSet{I},H<:AbstractSet{Tuple{I,I}},shared<:SharingBehavior
+    I<:Integer,G<:AbstractSet{I},H<:AbstractSet{Tuple{I,I}},SB<:SharingBehavior
 } <: AbstractHessianPattern
     "Set of indices ``i`` of non-zero values ``∇f(x)_i ≠ 0`` in the gradient."
     gradient::G
@@ -206,7 +242,7 @@ function create_patterns(
 ) where {I,G,H,S,P<:IndexSetHessianPattern{I,G,H,S}}
     gradients = seed.(G, is)
     hessian = myempty(H)
-    # Even if `shared=false`, sharing a single reference to `hessian` is allowed upon initialization, 
+    # Even if `NotShared`, sharing a single reference to `hessian` is allowed upon initialization, 
     # since mutation is prohibited when `isshared` is false.
     return P.(gradients, Ref(hessian))
 end
@@ -214,3 +250,40 @@ end
 # Tracer compatibility
 gradient(s::IndexSetHessianPattern) = s.gradient
 hessian(s::IndexSetHessianPattern) = s.hessian
+
+"""
+$(TYPEDEF)
+
+Hessian sparsity pattern represented by a set and a dictionary.
+
+## Fields
+$(TYPEDFIELDS)
+
+## Internals
+The last type parameter `shared` is a `Bool` indicating whether the `hessian` field of this object should be shared among all intermediate scalar quantities involved in a function.
+"""
+struct DictHessianPattern{
+    I<:Integer,S<:AbstractSet{I},D<:AbstractDict{I,S},shared<:SharingBehavior
+} <: AbstractHessianPattern
+    "Set of indices ``i`` of non-zero values ``∇f(x)_i ≠ 0`` in the gradient."
+    gradient::S
+    "Dictionary representing index-tuples ``(i, j)`` of non-zero values ``∇²f(x)_{ij} ≠ 0`` in the Hessian. For a given key ``i``, values in the set ``{j}`` represent index-tuples ``{i, j}``."
+    hessian::D
+end
+shared(::Type{DictHessianPattern{I,S,D,Shared}}) where {I,S,D}    = Shared()
+shared(::Type{DictHessianPattern{I,S,D,NotShared}}) where {I,S,D} = NotShared()
+
+function myempty(::Type{DictHessianPattern{I,S,D,SB}}) where {I,S,D,SB}
+    return DictHessianPattern{I,S,D,SB}(myempty(S), myempty(D))
+end
+function create_patterns(::Type{P}, xs, is) where {I,S,D,SB,P<:DictHessianPattern{I,S,D,SB}}
+    gradients = seed.(S, is)
+    hessian = myempty(D)
+    # Even if `NotShared`, sharing a single reference to `hessian` is allowed upon initialization, 
+    # since mutation is prohibited when `isshared` is false.
+    return P.(gradients, Ref(hessian))
+end
+
+# Tracer compatibility
+gradient(p::DictHessianPattern) = p.gradient
+hessian(p::DictHessianPattern) = p.hessian

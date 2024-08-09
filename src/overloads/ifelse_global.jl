@@ -20,14 +20,21 @@
         return output_union(px, py, shared(P))
     end
 
+    function output_union(px::P, py::P, ::Shared) where {P<:AbstractHessianPattern}
+        g_out = union(gradient(px), gradient(py))
+        hx, hy = hessian(px), hessian(py)
+        hx !== hy && error("Expected shared Hessians, got $hx, $hy.")
+        return P(g_out, hx) # return pattern
+    end
+
     function output_union(px::P, py::P, ::NotShared) where {P<:IndexSetHessianPattern}
         g_out = union(gradient(px), gradient(py))
         h_out = union(hessian(px), hessian(py))
         return P(g_out, h_out) # return pattern
     end
-    function output_union(px::P, py::P, ::Shared) where {P<:IndexSetHessianPattern}
+    function output_union(px::P, py::P, ::NotShared) where {P<:DictHessianPattern}
         g_out = union(gradient(px), gradient(py))
-        h_out = union!(hessian(px), hessian(py))
+        h_out = myunion!(deepcopy(hessian(px)), hessian(py))
         return P(g_out, h_out) # return pattern
     end
 
