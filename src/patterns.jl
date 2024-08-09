@@ -234,8 +234,8 @@ end
 shared(::Type{IndexSetHessianPattern{I,G,H,Shared}}) where {I,G,H}    = Shared()
 shared(::Type{IndexSetHessianPattern{I,G,H,NotShared}}) where {I,G,H} = NotShared()
 
-function myempty(::Type{P}) where {I,G,H,S,P<:IndexSetHessianPattern{I,G,H,S}}
-    return P(myempty(G), myempty(H))
+function myempty(::Type{IndexSetHessianPattern{I,G,H,SB}}) where {I,G,H,SB}
+    return IndexSetHessianPattern{I,G,H,SB}(myempty(G), myempty(H))
 end
 function create_patterns(
     ::Type{P}, xs, is
