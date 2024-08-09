@@ -87,8 +87,24 @@ end
 function union_product!(
     hessian::H, gradient_x::G, gradient_y::G
 ) where {I<:Integer,G<:AbstractSet{I},H<:AbstractSet{Tuple{I,I}}}
-    hxy = product(gradient_x, gradient_y)
-    return union!(hessian, hxy)
+    for i in gradient_x
+        for j in gradient_y
+            if i <= j # symmetric Hessian
+                push!(hessian, (i, j))
+            end
+        end
+    end
+    return hessian
+end
+
+# Some custom set types don't support `push!`
+for S in (:DuplicateVector, :SortedVector, :RecursiveSet)
+    @eval function union_product!(
+        hessian::$S{Tuple{I,I}}, gradient_x::$S{I}, gradient_y::$S{I}
+    ) where {I<:Integer}
+        hxy = product(gradient_x, gradient_y)
+        return union!(hessian, hxy)
+    end
 end
 
 #=======================#
