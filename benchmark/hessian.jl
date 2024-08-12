@@ -1,9 +1,7 @@
 using BenchmarkTools
-
-using ADTypes: hessian_sparsity
 using SparseConnectivityTracer
 
-using SparseArrays: sprand
+using Random: MersenneTwister
 
 #=
 Test cases taken from the article:
@@ -62,7 +60,7 @@ struct RandomSparsity
 end
 
 function RandomSparsity(N::Integer, K::Integer)
-    rand_sets = [rand(1:N, K) for i in 1:N]
+    rand_sets = [rand(MersenneTwister(123 + i), 1:N, K) for i in 1:N]
     return RandomSparsity(rand_sets)
 end
 
