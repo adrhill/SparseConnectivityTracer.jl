@@ -48,7 +48,7 @@ function hessbench_arrowhead(method)
     ]
         x = rand(N)
         f = ArrowHead(K)
-        suite["(N=$N, K=$K)"] = @benchmarkable hessian_sparsity($f, $x, $method)
+        suite["N=$N, K=$K"] = @benchmarkable hessian_sparsity($f, $x, $method)
     end
     return suite
 end
@@ -86,7 +86,7 @@ function hessbench_randomsparsity(method)
     ]
         x = rand(N)
         f = RandomSparsity(N, K)
-        suite["(N=$N, K=$K)"] = @benchmarkable hessian_sparsity($f, $x, $method)
+        suite["N=$N, K=$K"] = @benchmarkable hessian_sparsity($f, $x, $method)
     end
     return suite
 end
