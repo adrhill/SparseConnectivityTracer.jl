@@ -3,46 +3,22 @@ Pkg.develop(; path=joinpath(@__DIR__, "SparseConnectivityTracerBenchmarks"))
 
 using BenchmarkTools
 using SparseConnectivityTracer
-using SparseConnectivityTracer: GradientTracer, HessianTracer
-using SparseConnectivityTracer: IndexSetGradientPattern, IndexSetHessianPattern
-using SparseConnectivityTracer: DuplicateVector, SortedVector, RecursiveSet
-using SparseConnectivityTracer: Shared, NotShared
-
-SET_TYPES = (BitSet, Set{Int}, DuplicateVector{Int}, RecursiveSet{Int}, SortedVector{Int})
+using SparseConnectivityTracer: HessianTracer, DictHessianPattern, Shared
 
 include("jacobian.jl")
 include("hessian.jl")
 include("nlpmodels.jl")
 
 suite = BenchmarkGroup()
-
 suite["OptimizationProblems"] = optbench([:britgas])
 
-for S1 in SET_TYPES
-    S2 = Set{Tuple{Int,Int}}
+suite["Jacobian"]["Global"] = jacbench(TracerSparsityDetector())
+suite["Jacobian"]["Local"] = jacbench(TracerLocalSparsityDetector())
+suite["Hessian"]["Global"] = hessbench(TracerSparsityDetector())
+suite["Hessian"]["Local"] = hessbench(TracerLocalSparsityDetector())
 
-    # Non-shared tracers 
-    PG = IndexSetGradientPattern{Int,S1}
-    PH = IndexSetHessianPattern{Int,S1,S2,NotShared}
-    G = GradientTracer{PG}
-    H = HessianTracer{PH}
-
-    suite["Jacobian"]["Global"][nameof(S1)] = jacbench(TracerSparsityDetector(G, H))
-    suite["Jacobian"]["Local"][nameof(S1)] = jacbench(TracerLocalSparsityDetector(G, H))
-    suite["Hessian"]["Global"][(nameof(S1), nameof(S2))] = hessbench(
-        TracerSparsityDetector(G, H)
-    )
-    suite["Hessian"]["Local"][(nameof(S1), nameof(S2))] = hessbench(
-        TracerLocalSparsityDetector(G, H)
-    )
-
-    # Shared tracers 
-    PG = IndexSetGradientPattern{Int,S1}
-    PH = IndexSetHessianPattern{Int,S1,S2,Shared}
-    G = GradientTracer{PG}
-    H = HessianTracer{PH}
-
-    suite["Hessian"]["Global (shared)"][(nameof(S1), nameof(S2))] = hessbench(
-        TracerSparsityDetector(G, H)
-    )
-end
+# Shared tracers 
+PH = DictHessianPattern{Int,BitSet,Dict{Int,BitSet},Shared}
+H = HessianTracer{PH}
+method = TracerSparsityDetector(; hessian_tracer_type=H)
+suite["Hessian"]["Global (shared)"] = hessbench(method)
