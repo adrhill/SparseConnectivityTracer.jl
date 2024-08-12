@@ -1,5 +1,13 @@
 # SparseConnectivityTracer.jl
 
+## Version `v0.6.1`
+* ![Enhancement][badge-enhancement] Improve performance of Hessian pattern tracing by an order of magniture:
+  * Internally represent Hessian patterns with dictionaries ([#155], [#158])
+  * Increase performance via symmetry of Hessian ([#151])
+* ![Feature][badge-feature] Support ComponentArrays ([#146])
+* ![Feature][badge-feature] Support boolean not (`!`) ([#150])
+* ![Feature][badge-feature] Support `isless` ([#149])
+
 ## Version `v0.6.0`
 * ![BREAKING][badge-breaking] Remove `ConnectivityTracer` ([#140])
 * ![BREAKING][badge-breaking] Remove legacy interface ([#140])
@@ -14,6 +22,12 @@
 * ![Enhancement][badge-enhancement] Reduce allocations of new tracers ([#128])
 * ![Enhancement][badge-enhancement] Reduce compile times ([#119])
 
+[#158]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/158
+[#155]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/155
+[#151]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/151
+[#150]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/150
+[#149]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/149
+[#146]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/146
 [#142]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/142
 [#140]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/140
 [#139]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/139
