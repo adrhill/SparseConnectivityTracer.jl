@@ -18,7 +18,11 @@ suite["Hessian"]["Global"] = hessbench(TracerSparsityDetector())
 suite["Hessian"]["Local"] = hessbench(TracerLocalSparsityDetector())
 
 # Shared tracers 
-PH = DictHessianPattern{Int,BitSet,Dict{Int,BitSet},Shared}
-H = HessianTracer{PH}
-method = TracerSparsityDetector(; hessian_tracer_type=H)
-suite["Hessian"]["Global (shared)"] = hessbench(method)
+P = DictHessianPattern{Int,BitSet,Dict{Int,BitSet},Shared}
+H = HessianTracer{P}
+suite["Hessian"]["Global shared"] = hessbench(
+    TracerSparsityDetector(; hessian_tracer_type=H)
+)
+suite["Hessian"]["Local shared"] = hessbench(
+    TracerLocalSparsityDetector(; hessian_tracer_type=H)
+)
