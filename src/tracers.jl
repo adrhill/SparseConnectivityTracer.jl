@@ -131,13 +131,12 @@ end
 # Utilities #
 #===========#
 
-# isshared(::Type{T}) where {P,T<:GradientTracer{P}} = isshared(P) # no shared AbstractGradientPattern yet
-isshared(::Type{T}) where {P,T<:HessianTracer{P}} = isshared(P)
+shared(::Type{T}) where {P,T<:HessianTracer{P}} = shared(P)
 
 myempty(::T) where {T<:AbstractTracer} = myempty(T)
-# myempty(::Type{T}) where {P,T<:AbstractTracer{P}} = T(myempty(P), true) # JET complains about this
-myempty(::Type{T}) where {P,T<:GradientTracer{P}} = T(myempty(P), true)
-myempty(::Type{T}) where {P,T<:HessianTracer{P}}  = T(myempty(P), true)
+
+myempty(::Type{GradientTracer{P}}) where {P} = GradientTracer{P}(myempty(P), true)
+myempty(::Type{HessianTracer{P}}) where {P}  = HessianTracer{P}(myempty(P), true)
 
 """
     create_tracers(T, xs, indices)

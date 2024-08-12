@@ -1,6 +1,6 @@
 const DEFAULT_GRADIENT_TRACER = GradientTracer{IndexSetGradientPattern{Int,BitSet}}
 const DEFAULT_HESSIAN_TRACER = HessianTracer{
-    IndexSetHessianPattern{Int,BitSet,Set{Tuple{Int,Int}},false}
+    IndexSetHessianPattern{Int,BitSet,Set{Tuple{Int,Int}},NotShared}
 }
 
 #==================#
@@ -146,7 +146,7 @@ function hessian_pattern_to_mat(xt::AbstractArray{T}, yt::T) where {T<:HessianTr
     V = Bool[]   # values
 
     if !isemptytracer(yt)
-        for (i, j) in hessian(yt)
+        for (i, j) in tuple_set(hessian(yt))
             push!(I, i)
             push!(J, j)
             push!(V, true)

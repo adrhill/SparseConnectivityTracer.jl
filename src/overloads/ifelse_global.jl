@@ -13,20 +13,28 @@
         return T(output_union(pattern(tx), pattern(ty))) # return tracer
     end
     function output_union(px::P, py::P) where {P<:IndexSetGradientPattern}
-        return P(union(set(px), set(py))) # return pattern
+        return P(union(gradient(px), gradient(py))) # return pattern
     end
-    function output_union(
-        px::P, py::P
-    ) where {I,SG,SH,P<:IndexSetHessianPattern{I,SG,SH,false}} # non-mutating
+
+    function output_union(px::P, py::P) where {P<:AbstractHessianPattern}
+        return output_union(px, py, shared(P))
+    end
+
+    function output_union(px::P, py::P, ::Shared) where {P<:AbstractHessianPattern}
+        g_out = union(gradient(px), gradient(py))
+        hx, hy = hessian(px), hessian(py)
+        hx !== hy && error("Expected shared Hessians, got $hx, $hy.")
+        return P(g_out, hx) # return pattern
+    end
+
+    function output_union(px::P, py::P, ::NotShared) where {P<:IndexSetHessianPattern}
         g_out = union(gradient(px), gradient(py))
         h_out = union(hessian(px), hessian(py))
         return P(g_out, h_out) # return pattern
     end
-    function output_union(
-        px::P, py::P
-    ) where {I,SG,SH,P<:IndexSetHessianPattern{I,SG,SH,true}} # mutating
+    function output_union(px::P, py::P, ::NotShared) where {P<:DictHessianPattern}
         g_out = union(gradient(px), gradient(py))
-        h_out = union!(hessian(px), hessian(py))
+        h_out = myunion!(deepcopy(hessian(px)), hessian(py))
         return P(g_out, h_out) # return pattern
     end
 
