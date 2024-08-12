@@ -40,7 +40,7 @@ function jacbench_sparsemul(method)
     for n in [50], p in [0.01, 0.25], depth in [5]
         x = rand(n)
         f = IteratedSparseMul(; n, p, depth)
-        suite["(n=$n, p=$p, depth=$depth)"] = @benchmarkable jacobian_sparsity(
+        suite["n=$n, p=$p, depth=$depth"] = @benchmarkable jacobian_sparsity(
             $f, $x, $method
         )
     end
@@ -75,7 +75,7 @@ function jacbench_conv(method)
     layer = Conv((5, 5), 3 => 2)
     suite = BenchmarkGroup()
     for N in (28, 128)
-        suite["size=$(N)x$(N)x3"] = @benchmarkable jacobian_sparsity(
+        suite["N=$N"] = @benchmarkable jacobian_sparsity(
             $layer, $(rand(N, N, 3, 1)), $method
         )
     end
