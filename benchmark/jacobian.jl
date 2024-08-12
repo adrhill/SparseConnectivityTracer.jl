@@ -1,9 +1,8 @@
 using BenchmarkTools
-
-using ADTypes: AbstractSparsityDetector, jacobian_sparsity
 using SparseConnectivityTracer
 using SparseConnectivityTracerBenchmarks.ODE: Brusselator!, brusselator_2d_loop!
 
+using Random: MersenneTwister
 using SparseArrays: sprand
 using SimpleDiffEq: ODEProblem, solve, SimpleEuler
 using Flux: Conv
@@ -23,7 +22,7 @@ struct IteratedSparseMul{M<:AbstractMatrix}
 end
 
 function IteratedSparseMul(; n::Integer, p::Real=0.1, depth::Integer=5)
-    As = [sprand(n, n, p) for _ in 1:depth]
+    As = [sprand(MersenneTwister(123 + i), n, n, p) for i in 1:depth]
     return IteratedSparseMul(As)
 end
 
