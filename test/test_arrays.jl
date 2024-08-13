@@ -1,7 +1,7 @@
 import SparseConnectivityTracer as SCT
 using SparseConnectivityTracer
-using SparseConnectivityTracer: GradientTracer
-using LinearAlgebra: Symmetric, Diagonal
+using SparseConnectivityTracer: GradientTracer, IndexSetGradientPattern
+using LinearAlgebra: Symmetric, Diagonal, diagind
 using LinearAlgebra: det, logdet, logabsdet, norm, opnorm
 using LinearAlgebra: eigen, eigmax, eigmin
 using LinearAlgebra: inv, pinv
@@ -33,11 +33,36 @@ function test_patterns(f, x; outsum=false, con=isone, jac=isone, hes=isone)
         end
         @testset "Jacobian pattern" begin
             pattern = jacobian_sparsity(_f, x, detector_global)
-            @test all(jac, pattern)
+            if x isa Diagonal
+                di = diagind(x)
+                for (i, p) in enumerate(pattern)
+                    if i in di
+                        @test jac(p)
+                    else 
+                        @test iszero(p)
+                    end
+                end
+            else
+                @test all(jac, pattern)
+            end
         end
         @testset "Hessian pattern" begin
             pattern = hessian_sparsity(_f, x, detector_global)
-            @test all(hes, pattern)
+            if x isa Diagonal
+                di = diagind(x)
+                for I in CartesianIndices(x)
+                    i, j = Tuple(I)
+                    p = pattern[I]
+
+                    if i in di && j in di
+                        @test hes(p)
+                    else 
+                        @test iszero(p)
+                    end
+                end
+            else
+                @test all(hes, pattern)
+            end
         end
     end
 end
