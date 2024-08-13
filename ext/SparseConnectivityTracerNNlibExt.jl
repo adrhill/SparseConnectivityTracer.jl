@@ -43,12 +43,12 @@ for op in ops_1_to_1_s
     @eval SCT.is_der2_zero_global(::$T) = false
 end
 
-SCT.is_der2_zero_local(::typeof(celu)) = x > 0
-SCT.is_der2_zero_local(::typeof(elu)) = x > 0
-SCT.is_der2_zero_local(::typeof(selu)) = x > 0
+SCT.is_der2_zero_local(::typeof(celu), x) = x > 0
+SCT.is_der2_zero_local(::typeof(elu), x) = x > 0
+SCT.is_der2_zero_local(::typeof(selu), x) = x > 0
 
-SCT.is_der1_zero_local(::typeof(hardswish)) = x < -3
-SCT.is_der2_zero_local(::typeof(hardswish)) = x < -3 || x > 3
+SCT.is_der1_zero_local(::typeof(hardswish), x) = x < -3
+SCT.is_der2_zero_local(::typeof(hardswish), x) = x < -3 || x > 3
 
 # ops_1_to_1_f:
 # x -> f  != 0
