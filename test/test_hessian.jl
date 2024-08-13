@@ -1,9 +1,11 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer: Dual, HessianTracer, MissingPrimalError
 using SparseConnectivityTracer: trace_input, create_tracers, pattern, shared
+using Test
+
+using Random: rand, GLOBAL_RNG
 using SpecialFunctions: erf, beta
 using NNlib: NNlib
-using Test
 
 # Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
 include("tracers_definitions.jl")
@@ -41,6 +43,10 @@ H(f, x) = hessian_sparsity(f, x, method)
         @test H(x -> round(Float16, x), 1.1) ≈ [0;;]
         @test H(x -> round(x, RoundNearestTiesAway), 1.1) ≈ [0;;]
         @test H(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
+
+        # Random
+        @test H(x -> rand(typeof(x)), 1) ≈ [0;;]
+        @test H(x -> rand(GLOBAL_RNG, typeof(x)), 1) ≈ [0;;]
 
         @test H(x -> x[1] / x[2] + x[3] / 1 + 1 / x[4], rand(4)) == [
             0 1 0 0
@@ -337,6 +343,10 @@ end
         @test H(x -> round(Bool, x), 1.1) ≈ [0;;]
         @test H(x -> round(x, RoundNearestTiesAway), 1.1) ≈ [0;;]
         @test H(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
+
+        # Random
+        @test H(x -> rand(typeof(x)), 1) ≈ [0;;]
+        @test H(x -> rand(GLOBAL_RNG, typeof(x)), 1) ≈ [0;;]
 
         # Test special cases on empty tracer
         @test H(x -> zero(x)^(2//3), 1) ≈ [0;;]

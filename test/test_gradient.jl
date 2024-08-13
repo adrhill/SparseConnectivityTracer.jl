@@ -1,9 +1,11 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer: GradientTracer, Dual, MissingPrimalError, trace_input
+using Test
+
+using Random: rand, GLOBAL_RNG
 using LinearAlgebra: det, dot, logdet
 using SpecialFunctions: erf, beta
 using NNlib: NNlib
-using Test
 
 # Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
 include("tracers_definitions.jl")
@@ -80,6 +82,8 @@ REAL_TYPES = (Float64, Int, Bool, UInt8, Float16, Rational{Int})
         @test J(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
 
         # Random
+        @test J(x -> rand(typeof(x)), 1) ≈ [0;;]
+        @test J(x -> rand(GLOBAL_RNG, typeof(x)), 1) ≈ [0;;]
 
         # Linear Algebra
         @test J(x -> dot(x[1:2], x[4:5]), rand(5)) == [1 1 0 1 1]
@@ -219,6 +223,10 @@ end
         @test J(x -> round(Bool, x), 1.1) ≈ [0;;]
         @test J(x -> round(x, RoundNearestTiesAway), 1.1) ≈ [0;;]
         @test J(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
+
+        # Random
+        @test J(x -> rand(typeof(x)), 1) ≈ [0;;]
+        @test J(x -> rand(GLOBAL_RNG, typeof(x)), 1) ≈ [0;;]
 
         # Linear algebra
         @test J(logdet, [1.0 -1.0; 2.0 2.0]) == [1 1 1 1]  # (#68)
