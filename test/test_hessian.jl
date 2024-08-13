@@ -32,8 +32,15 @@ H(f, x) = hessian_sparsity(f, x, method)
         @test H(x -> (2//3)^x, 1) ≈ [1;;]
         @test H(x -> x^ℯ, 1) ≈ [1;;]
         @test H(x -> ℯ^x, 1) ≈ [1;;]
-        @test H(x -> round(x, RoundNearestTiesUp), 1) ≈ [0;;]
         @test H(x -> 0, 1) ≈ [0;;]
+
+        # Round
+        @test H(round, 1.1) ≈ [0;;]
+        @test H(x -> round(Int, x), 1.1) ≈ [0;;]
+        @test H(x -> round(Bool, x), 1.1) ≈ [0;;]
+        @test H(x -> round(Float16, x), 1.1) ≈ [0;;]
+        @test H(x -> round(x, RoundNearestTiesAway), 1.1) ≈ [0;;]
+        @test H(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
 
         @test H(x -> x[1] / x[2] + x[3] / 1 + 1 / x[4], rand(4)) == [
             0 1 0 0
@@ -323,6 +330,13 @@ end
         @test H(x -> x^ℯ, 1) ≈ [1;;]
         @test H(x -> ℯ^x, 1) ≈ [1;;]
         @test H(x -> 0, 1) ≈ [0;;]
+
+        # Round
+        @test H(round, 1.1) ≈ [0;;]
+        @test H(x -> round(Int, x), 1.1) ≈ [0;;]
+        @test H(x -> round(Bool, x), 1.1) ≈ [0;;]
+        @test H(x -> round(x, RoundNearestTiesAway), 1.1) ≈ [0;;]
+        @test H(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
 
         # Test special cases on empty tracer
         @test H(x -> zero(x)^(2//3), 1) ≈ [0;;]

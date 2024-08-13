@@ -337,7 +337,7 @@ function Base.round(
     return Dual(p, t)
 end
 
-for RR in (Integer, Bool)
+for RR in (Real, Integer, Bool)
     Base.round(::Type{R}, ::T) where {R<:RR,T<:HessianTracer} = myempty(T)
     function Base.round(::Type{R}, d::D) where {R<:RR,P,T<:HessianTracer,D<:Dual{P,T}}
         p = round(R, primal(d))

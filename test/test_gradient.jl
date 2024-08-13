@@ -63,7 +63,6 @@ REAL_TYPES = (Float64, Int, Bool, UInt8, Float16, Rational{Int})
         @test J(x -> (2//3)^x, 1) ≈ [1;;]
         @test J(x -> x^ℯ, 1) ≈ [1;;]
         @test J(x -> ℯ^x, 1) ≈ [1;;]
-        @test J(x -> round(x, RoundNearestTiesUp), 1) ≈ [0;;]
         @test J(x -> 0, 1) ≈ [0;;]
 
         # Test special cases on empty tracer
@@ -71,6 +70,16 @@ REAL_TYPES = (Float64, Int, Bool, UInt8, Float16, Rational{Int})
         @test J(x -> (2//3)^zero(x), 1) ≈ [0;;]
         @test J(x -> zero(x)^ℯ, 1) ≈ [0;;]
         @test J(x -> ℯ^zero(x), 1) ≈ [0;;]
+
+        # Round
+        @test J(round, 1.1) ≈ [0;;]
+        @test J(x -> round(Int, x), 1.1) ≈ [0;;]
+        @test J(x -> round(Bool, x), 1.1) ≈ [0;;]
+        @test J(x -> round(Float16, x), 1.1) ≈ [0;;]
+        @test J(x -> round(x, RoundNearestTiesAway), 1.1) ≈ [0;;]
+        @test J(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
+
+        # Random
 
         # Linear Algebra
         @test J(x -> dot(x[1:2], x[4:5]), rand(5)) == [1 1 0 1 1]
@@ -202,8 +211,14 @@ end
         @test J(x -> (2//3)^x, 1) ≈ [1;;]
         @test J(x -> x^ℯ, 1) ≈ [1;;]
         @test J(x -> ℯ^x, 1) ≈ [1;;]
-        @test J(x -> round(x, RoundNearestTiesUp), 1) ≈ [0;;]
         @test J(x -> 0, 1) ≈ [0;;]
+
+        # Round
+        @test J(round, 1.1) ≈ [0;;]
+        @test J(x -> round(Int, x), 1.1) ≈ [0;;]
+        @test J(x -> round(Bool, x), 1.1) ≈ [0;;]
+        @test J(x -> round(x, RoundNearestTiesAway), 1.1) ≈ [0;;]
+        @test J(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
 
         # Linear algebra
         @test J(logdet, [1.0 -1.0; 2.0 2.0]) == [1 1 1 1]  # (#68)
@@ -231,7 +246,7 @@ end
         @test J(NNlib.swish, 0) ≈ [1;;]
         @test J(NNlib.swish, 5) ≈ [1;;]
 
-        @test J(NNlib.hardswish, -5) ≈ [1;;]
+        @test J(NNlib.hardswish, -5) ≈ [0;;]
         @test J(NNlib.hardswish, 0) ≈ [1;;]
         @test J(NNlib.hardswish, 5) ≈ [1;;]
 
