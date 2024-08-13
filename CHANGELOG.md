@@ -1,7 +1,8 @@
 # SparseConnectivityTracer.jl
 
 ## Version `v0.6.1`
-* ![Enhancement][badge-enhancement] Improve performance of Hessian pattern tracing by an order of magniture:
+
+* ![Enhancement][badge-enhancement] Improve the performance of Hessian pattern tracing by an order of magnitude:
   * Internally represent Hessian patterns with dictionaries ([#155], [#158])
   * Increase performance via symmetry of Hessian ([#151])
 * ![Feature][badge-feature] Support ComponentArrays ([#146])
@@ -9,6 +10,7 @@
 * ![Feature][badge-feature] Support `isless` ([#149])
 
 ## Version `v0.6.0`
+
 * ![BREAKING][badge-breaking] Remove `ConnectivityTracer` ([#140])
 * ![BREAKING][badge-breaking] Remove legacy interface ([#140])
     * instead of `jacobian_pattern(f, x)`, use `jacobian_sparsity(f, x, TracerSparsityDetector())`
@@ -21,6 +23,15 @@
 * ![Enhancement][badge-enhancement] Generalize sparsity pattern representations ([#139], [#119])
 * ![Enhancement][badge-enhancement] Reduce allocations of new tracers ([#128])
 * ![Enhancement][badge-enhancement] Reduce compile times ([#119])
+
+[badge-breaking]: https://img.shields.io/badge/BREAKING-red.svg
+[badge-deprecation]: https://img.shields.io/badge/deprecation-orange.svg
+[badge-feature]: https://img.shields.io/badge/feature-green.svg
+[badge-enhancement]: https://img.shields.io/badge/enhancement-blue.svg
+[badge-bugfix]: https://img.shields.io/badge/bugfix-purple.svg
+[badge-experimental]: https://img.shields.io/badge/experimental-lightgrey.svg
+[badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
+[badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
 [#158]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/158
 [#155]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/155
@@ -48,13 +59,3 @@
 ![Maintenance][badge-maintenance]
 ![Documentation][badge-docs]
 -->
-
-[badge-breaking]: https://img.shields.io/badge/BREAKING-red.svg
-[badge-deprecation]: https://img.shields.io/badge/deprecation-orange.svg
-[badge-feature]: https://img.shields.io/badge/feature-green.svg
-[badge-enhancement]: https://img.shields.io/badge/enhancement-blue.svg
-[badge-bugfix]: https://img.shields.io/badge/bugfix-purple.svg
-[badge-security]: https://img.shields.io/badge/security-black.svg
-[badge-experimental]: https://img.shields.io/badge/experimental-lightgrey.svg
-[badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
-[badge-docs]: https://img.shields.io/badge/docs-orange.svg
