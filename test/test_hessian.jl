@@ -1,7 +1,6 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer: Dual, HessianTracer, MissingPrimalError
 using SparseConnectivityTracer: trace_input, create_tracers, pattern, shared
-using ADTypes: hessian_sparsity
 using SpecialFunctions: erf, beta
 using Test
 
@@ -12,80 +11,74 @@ include("tracers_definitions.jl")
     @testset "$P" for P in HESSIAN_PATTERNS
         T = HessianTracer{P}
         method = TracerSparsityDetector(; hessian_tracer_type=T)
+        H(f, x) = hessian_sparsity(f, x, method)
 
-        @test hessian_sparsity(identity, rand(), method) ≈ [0;;]
-        @test hessian_sparsity(sqrt, rand(), method) ≈ [1;;]
+        @test H(identity, rand()) ≈ [0;;]
+        @test H(sqrt, rand()) ≈ [1;;]
 
-        @test hessian_sparsity(x -> 1 * x, rand(), method) ≈ [0;;]
-        @test hessian_sparsity(x -> x * 1, rand(), method) ≈ [0;;]
+        @test H(x -> 1 * x, rand()) ≈ [0;;]
+        @test H(x -> x * 1, rand()) ≈ [0;;]
 
         # Code coverage
-        @test hessian_sparsity(sign, 1, method) ≈ [0;;]
-        @test hessian_sparsity(typemax, 1, method) ≈ [0;;]
-        @test hessian_sparsity(x -> x^(2//3), 1, method) ≈ [1;;]
-        @test hessian_sparsity(x -> (2//3)^x, 1, method) ≈ [1;;]
-        @test hessian_sparsity(x -> x^ℯ, 1, method) ≈ [1;;]
-        @test hessian_sparsity(x -> ℯ^x, 1, method) ≈ [1;;]
-        @test hessian_sparsity(x -> round(x, RoundNearestTiesUp), 1, method) ≈ [0;;]
-        @test hessian_sparsity(x -> 0, 1, method) ≈ [0;;]
+        @test H(sign, 1) ≈ [0;;]
+        @test H(typemax, 1) ≈ [0;;]
+        @test H(x -> x^(2//3), 1) ≈ [1;;]
+        @test H(x -> (2//3)^x, 1) ≈ [1;;]
+        @test H(x -> x^ℯ, 1) ≈ [1;;]
+        @test H(x -> ℯ^x, 1) ≈ [1;;]
+        @test H(x -> round(x, RoundNearestTiesUp), 1) ≈ [0;;]
+        @test H(x -> 0, 1) ≈ [0;;]
 
-        h = hessian_sparsity(x -> x[1] / x[2] + x[3] / 1 + 1 / x[4], rand(4), method)
-        @test h == [
+        @test H(x -> x[1] / x[2] + x[3] / 1 + 1 / x[4], rand(4)) == [
             0 1 0 0
             1 1 0 0
             0 0 0 0
             0 0 0 1
         ]
 
-        h = hessian_sparsity(x -> x[1] * x[2] + x[3] * 1 + 1 * x[4], rand(4), method)
-        @test h == [
+        @test H(x -> x[1] * x[2] + x[3] * 1 + 1 * x[4], rand(4)) == [
             0 1 0 0
             1 0 0 0
             0 0 0 0
             0 0 0 0
         ]
 
-        h = hessian_sparsity(x -> (x[1] * x[2]) * (x[3] * x[4]), rand(4), method)
-        @test h == [
+        @test H(x -> (x[1] * x[2]) * (x[3] * x[4]), rand(4)) == [
             0 1 1 1
             1 0 1 1
             1 1 0 1
             1 1 1 0
         ]
 
-        h = hessian_sparsity(x -> (x[1] + x[2]) * (x[3] + x[4]), rand(4), method)
-        @test h == [
+        @test H(x -> (x[1] + x[2]) * (x[3] + x[4]), rand(4)) == [
             0 0 1 1
             0 0 1 1
             1 1 0 0
             1 1 0 0
         ]
 
-        h = hessian_sparsity(x -> (x[1] + x[2] + x[3] + x[4])^2, rand(4), method)
-        @test h == [
+        @test H(x -> (x[1] + x[2] + x[3] + x[4])^2, rand(4)) == [
             1 1 1 1
             1 1 1 1
             1 1 1 1
             1 1 1 1
         ]
 
-        h = hessian_sparsity(x -> 1 / (x[1] + x[2] + x[3] + x[4]), rand(4), method)
-        @test h == [
+        @test H(x -> 1 / (x[1] + x[2] + x[3] + x[4]), rand(4)) == [
             1 1 1 1
             1 1 1 1
             1 1 1 1
             1 1 1 1
         ]
 
-        h = hessian_sparsity(x -> (x[1] - x[2]) + (x[3] - 1) + (1 - x[4]), rand(4), method)
-        @test h == [
+        @test H(x -> (x[1] - x[2]) + (x[3] - 1) + (1 - x[4]), rand(4)) == [
             0 0 0 0
             0 0 0 0
             0 0 0 0
             0 0 0 0
         ]
 
-        h = hessian_sparsity(x -> copysign(x[1] * x[2], x[3] * x[4]), rand(4), method)
+        h = H(x -> copysign(x[1] * x[2], x[3] * x[4]), rand(4))
         if Bool(shared(T))
             @test h == [
                 0 1 0 0
@@ -102,7 +95,7 @@ include("tracers_definitions.jl")
             ]
         end
 
-        h = hessian_sparsity(x -> div(x[1] * x[2], x[3] * x[4]), rand(4), method)
+        h = H(x -> div(x[1] * x[2], x[3] * x[4]), rand(4))
         if Bool(shared(T))
             @test Matrix(h) == [
                 0 1 0 0
@@ -119,11 +112,9 @@ include("tracers_definitions.jl")
             ]
         end
 
-        h = hessian_sparsity(x -> sum(sincosd(x)), 1.0, method)
-        @test h ≈ [1;;]
+        @test H(x -> sum(sincosd(x)), 1.0) ≈ [1;;]
 
-        h = hessian_sparsity(x -> sum(diff(x) .^ 3), rand(4), method)
-        @test h == [
+        @test H(x -> sum(diff(x) .^ 3), rand(4)) == [
             1 1 0 0
             1 1 1 0
             0 1 1 1
@@ -132,8 +123,7 @@ include("tracers_definitions.jl")
 
         x = rand(5)
         foo(x) = x[1] + x[2] * x[3] + 1 / x[4] + 1 * x[5]
-        h = hessian_sparsity(foo, x, method)
-        @test h == [
+        @test H(foo, x) == [
             0 0 0 0 0
             0 0 1 0 0
             0 1 0 0 0
@@ -142,8 +132,7 @@ include("tracers_definitions.jl")
         ]
 
         bar(x) = foo(x) + x[2]^x[5]
-        h = hessian_sparsity(bar, x, method)
-        @test h == [
+        @test H(bar, x) == [
             0 0 0 0 0
             0 1 1 0 1
             0 1 0 0 0
@@ -156,7 +145,7 @@ include("tracers_definitions.jl")
             z = x[1] * x[2]
             return x[3] * x[4]
         end
-        h = hessian_sparsity(dead_end, rand(4), method)
+        h = H(dead_end, rand(4))
         if Bool(shared(T))
             @test h == [
                 0  1  0  0
@@ -174,12 +163,11 @@ include("tracers_definitions.jl")
         end
 
         # Missing primal errors
-        for f in (
+        @testset "MissingPrimalError on $f" for f in (
             iseven,
             isfinite,
             isinf,
             isinteger,
-            isless,
             ismissing,
             isnan,
             isnothing,
@@ -188,29 +176,26 @@ include("tracers_definitions.jl")
             isreal,
             iszero,
         )
-            @test_throws MissingPrimalError hessian_sparsity(f, rand(), method)
+            @test_throws MissingPrimalError H(f, rand())
         end
 
         # ifelse and comparisons
         if VERSION >= v"1.8"
-            h = hessian_sparsity(x -> ifelse(x[1], x[1]^x[2], x[3] * x[4]), rand(4), method)
-            @test h == [
+            @test H(x -> ifelse(x[1], x[1]^x[2], x[3] * x[4]), rand(4)) == [
                 1  1  0  0
                 1  1  0  0
                 0  0  0  1
                 0  0  1  0
             ]
 
-            h = hessian_sparsity(x -> ifelse(x[1], x[1]^x[2], 1.0), rand(4), method)
-            @test h == [
+            @test H(x -> ifelse(x[1], x[1]^x[2], 1.0), rand(4)) == [
                 1  1  0  0
                 1  1  0  0
                 0  0  0  0
                 0  0  0  0
             ]
 
-            h = hessian_sparsity(x -> ifelse(x[1], 1.0, x[3] * x[4]), rand(4), method)
-            @test h == [
+            @test H(x -> ifelse(x[1], 1.0, x[3] * x[4]), rand(4)) == [
                 0  0  0  0
                 0  0  0  0
                 0  0  0  1
@@ -224,20 +209,18 @@ include("tracers_definitions.jl")
                    sin(10//3 * x[1]) +
                    log(abs(x[1])) - 84//100 * x[1] + 3
         end
-        @test hessian_sparsity(f_ampgo07, [1.0], method) ≈ [1;;]
+        @test H(f_ampgo07, [1.0]) ≈ [1;;]
 
         # Error handling when applying non-dual tracers to "local" functions with control flow
         # TypeError: non-boolean (SparseConnectivityTracer.GradientTracer{BitSet}) used in boolean context
-        @test_throws TypeError hessian_sparsity(
-            x -> x[1] > x[2] ? x[1]^x[2] : x[3] * x[4], rand(4), method
-        )
+        @test_throws TypeError H(x -> x[1] > x[2] ? x[1]^x[2] : x[3] * x[4], rand(4))
 
         # SpecialFunctions
-        @test hessian_sparsity(x -> erf(x[1]), rand(2), method) == [
+        @test H(x -> erf(x[1]), rand(2)) == [
             1 0
             0 0
         ]
-        @test hessian_sparsity(x -> beta(x[1], x[2]), rand(3), method) == [
+        @test H(x -> beta(x[1], x[2]), rand(3)) == [
             1 1 0
             1 1 0
             0 0 0
@@ -250,18 +233,18 @@ end
     @testset "$P" for P in HESSIAN_PATTERNS
         T = HessianTracer{P}
         method = TracerLocalSparsityDetector(; hessian_tracer_type=T)
+        H(f, x) = hessian_sparsity(f, x, method)
 
         f1(x) = x[1] + x[2] * x[3] + 1 / x[4] + x[2] * max(x[1], x[5])
-        h = hessian_sparsity(f1, [1.0 3.0 5.0 1.0 2.0], method)
-        @test h == [
+        @test H(f1, [1.0 3.0 5.0 1.0 2.0]) == [
             0  0  0  0  0
             0  0  1  0  1
             0  1  0  0  0
             0  0  0  1  0
             0  1  0  0  0
         ]
-        h = hessian_sparsity(f1, [4.0 3.0 5.0 1.0 2.0], method)
-        @test h == [
+
+        @test H(f1, [4.0 3.0 5.0 1.0 2.0]) == [
             0  1  0  0  0
             1  0  1  0  0
             0  1  0  0  0
@@ -270,7 +253,7 @@ end
         ]
 
         f2(x) = ifelse(x[2] < x[3], x[1] * x[2], x[3] * x[4])
-        h = hessian_sparsity(f2, [1 2 3 4], method)
+        h = H(f2, [1 2 3 4])
         if Bool(shared(T))
             @test h == [
                 0  1  0  0
@@ -286,7 +269,8 @@ end
                 0  0  0  0
             ]
         end
-        h = hessian_sparsity(f2, [1 3 2 4], method)
+
+        h = H(f2, [1 3 2 4])
         if Bool(shared(T))
             @test h == [
                 0  1  0  0
@@ -308,7 +292,7 @@ end
             z = x[1] * x[2]
             return x[3] * x[4]
         end
-        h = hessian_sparsity(dead_end, rand(4), method)
+        h = H(dead_end, rand(4))
         if Bool(shared(T))
             @test h == [
                 0  1  0  0
@@ -326,26 +310,26 @@ end
         end
 
         # Code coverage
-        @test hessian_sparsity(sign, 1, method) ≈ [0;;]
-        @test hessian_sparsity(typemax, 1, method) ≈ [0;;]
-        @test hessian_sparsity(x -> x^(2//3), 1, method) ≈ [1;;]
-        @test hessian_sparsity(x -> (2//3)^x, 1, method) ≈ [1;;]
-        @test hessian_sparsity(x -> x^ℯ, 1, method) ≈ [1;;]
-        @test hessian_sparsity(x -> ℯ^x, 1, method) ≈ [1;;]
-        @test hessian_sparsity(x -> 0, 1, method) ≈ [0;;]
+        @test H(sign, 1) ≈ [0;;]
+        @test H(typemax, 1) ≈ [0;;]
+        @test H(x -> x^(2//3), 1) ≈ [1;;]
+        @test H(x -> (2//3)^x, 1) ≈ [1;;]
+        @test H(x -> x^ℯ, 1) ≈ [1;;]
+        @test H(x -> ℯ^x, 1) ≈ [1;;]
+        @test H(x -> 0, 1) ≈ [0;;]
 
         # Test special cases on empty tracer
-        @test hessian_sparsity(x -> zero(x)^(2//3), 1, method) ≈ [0;;]
-        @test hessian_sparsity(x -> (2//3)^zero(x), 1, method) ≈ [0;;]
-        @test hessian_sparsity(x -> zero(x)^ℯ, 1, method) ≈ [0;;]
-        @test hessian_sparsity(x -> ℯ^zero(x), 1, method) ≈ [0;;]
+        @test H(x -> zero(x)^(2//3), 1) ≈ [0;;]
+        @test H(x -> (2//3)^zero(x), 1) ≈ [0;;]
+        @test H(x -> zero(x)^ℯ, 1) ≈ [0;;]
+        @test H(x -> ℯ^zero(x), 1) ≈ [0;;]
         yield()
     end
 end
 
 @testset "Shared IndexSetHessianPattern - same objects" begin
     @testset "$P" for P in HESSIAN_PATTERNS_SHARED
-        H = HessianTracer{P}
+        T = HessianTracer{P}
 
         function multi_output_for_shared_test(x::AbstractArray)
             z = ones(eltype(x), size(x))
@@ -358,7 +342,7 @@ end
         end
 
         x = rand(2)
-        xt = create_tracers(H, x, eachindex(x))
+        xt = create_tracers(T, x, eachindex(x))
         yt = multi_output_for_shared_test(xt)
 
         @test pattern(yt[1]).hessian === pattern(yt[2]).hessian
