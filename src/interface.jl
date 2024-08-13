@@ -21,12 +21,16 @@ trace_input(::Type{T}, xs) where {T<:Union{AbstractTracer,Dual}} = trace_input(T
 # e.g. on `Symmetric`, where symmetry doesn't hold for the index matrix.
 allocate_index_matrix(A::AbstractArray) = similar(A, Int)
 allocate_index_matrix(A::Symmetric) = Matrix{Int}(undef, size(A)...)
-allocate_index_matrix(A::Diagonal) = Matrix{Int}(undef, size(A)...)
 
 function trace_input(::Type{T}, xs::AbstractArray, i) where {T<:Union{AbstractTracer,Dual}}
     is = allocate_index_matrix(xs)
     is .= reshape(1:length(xs), size(xs)) .+ (i - 1)
     return create_tracers(T, xs, is)
+end
+
+function trace_input(::Type{T}, xs::Diagonal, i) where {T<:Union{AbstractTracer,Dual}}
+    ts = create_tracers(T, diag(xs), diagind(xs))
+    return Diagonal(ts)
 end
 
 function trace_input(::Type{T}, x::Real, i::Integer) where {T<:Union{AbstractTracer,Dual}}
