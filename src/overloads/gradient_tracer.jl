@@ -211,23 +211,41 @@ for S in (Integer, Rational, Irrational{:ℯ})
     Base.:^(::S, t::T) where {T<:GradientTracer} = t
     function Base.:^(d::D, y::S) where {P,T<:GradientTracer,D<:Dual{P,T}}
         x = primal(d)
-        t = tracer(d)
+        t = gradient_tracer_1_to_1(tracer(d), false)
         return Dual(x^y, t)
     end
     function Base.:^(x::S, d::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
         y = primal(d)
-        t = tracer(d)
+        t = gradient_tracer_1_to_1(tracer(d), false)
         return Dual(x^y, t)
     end
 end
 
 ## Rounding
-Base.round(t::T, ::RoundingMode; kwargs...) where {T<:GradientTracer} = myempty(T)
+Base.round(::T, ::RoundingMode; kwargs...) where {T<:GradientTracer} = myempty(T)
 function Base.round(
     d::D, mode::RoundingMode; kwargs...
 ) where {P,T<:GradientTracer,D<:Dual{P,T}}
-    return Dual(round(primal(d), mode; kwargs...), myempty(T))
+    p = round(primal(d), mode; kwargs...)
+    t = myempty(T)
+    return Dual(p, t)
+end
+
+for RR in (Integer, Bool)
+    Base.round(::Type{R}, ::T) where {R<:RR,T<:GradientTracer} = myempty(T)
+    function Base.round(::Type{R}, d::D) where {R<:RR,P,T<:GradientTracer,D<:Dual{P,T}}
+        p = round(R, primal(d))
+        t = myempty(T)
+        return Dual(p, t)
+    end
 end
 
 ## Random numbers 
-Base.rand(::AbstractRNG, ::SamplerType{T}) where {T<:GradientTracer} = myempty(T)  # TODO: was missing Base, add tests
+Base.rand(::AbstractRNG, ::SamplerType{T}) where {T<:GradientTracer} = myempty(T)
+function Base.rand(
+    rng::AbstractRNG, ::SamplerType{D}
+) where {P,T<:GradientTracer,D<:Dual{P,T}}
+    p = rand(rng, P)
+    t = myempty(T)
+    return Dual(p, t)
+end
