@@ -1,5 +1,11 @@
 # SparseConnectivityTracer.jl
 
+## Version `v0.6.2`
+
+* ![Feature][badge-feature] More methods for `round` and `rand` ([#162])
+* ![Bugfix][badge-bugfix] Fix Hessian on NNlib activation functions ([#162])
+* ![Bugfix][badge-bugfix] Fix `isless` ([#161])
+
 ## Version `v0.6.1`
 
 * ![Enhancement][badge-enhancement] Improve the performance of Hessian pattern tracing by an order of magnitude:
@@ -33,6 +39,8 @@
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#162]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/162
+[#161]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/161
 [#158]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/158
 [#155]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/155
 [#151]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/151

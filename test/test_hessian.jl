@@ -1,11 +1,19 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer: Dual, HessianTracer, MissingPrimalError
 using SparseConnectivityTracer: trace_input, create_tracers, pattern, shared
-using SpecialFunctions: erf, beta
 using Test
+
+using Random: rand, GLOBAL_RNG
+using SpecialFunctions: erf, beta
+using NNlib: NNlib
 
 # Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
 include("tracers_definitions.jl")
+
+# This exists to be able to quickly run tests in the REPL.
+# NOTE: H gets overwritten inside the testsets.
+method = TracerSparsityDetector()
+H(f, x) = hessian_sparsity(f, x, method)
 
 @testset "Global Hessian" begin
     @testset "$P" for P in HESSIAN_PATTERNS
@@ -26,8 +34,19 @@ include("tracers_definitions.jl")
         @test H(x -> (2//3)^x, 1) ≈ [1;;]
         @test H(x -> x^ℯ, 1) ≈ [1;;]
         @test H(x -> ℯ^x, 1) ≈ [1;;]
-        @test H(x -> round(x, RoundNearestTiesUp), 1) ≈ [0;;]
         @test H(x -> 0, 1) ≈ [0;;]
+
+        # Round
+        @test H(round, 1.1) ≈ [0;;]
+        @test H(x -> round(Int, x), 1.1) ≈ [0;;]
+        @test H(x -> round(Bool, x), 1.1) ≈ [0;;]
+        @test H(x -> round(Float16, x), 1.1) ≈ [0;;]
+        @test H(x -> round(x, RoundNearestTiesAway), 1.1) ≈ [0;;]
+        @test H(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
+
+        # Random
+        @test H(x -> rand(typeof(x)), 1) ≈ [0;;]
+        @test H(x -> rand(GLOBAL_RNG, typeof(x)), 1) ≈ [0;;]
 
         @test H(x -> x[1] / x[2] + x[3] / 1 + 1 / x[4], rand(4)) == [
             0 1 0 0
@@ -318,11 +337,59 @@ end
         @test H(x -> ℯ^x, 1) ≈ [1;;]
         @test H(x -> 0, 1) ≈ [0;;]
 
+        # Round
+        @test H(round, 1.1) ≈ [0;;]
+        @test H(x -> round(Int, x), 1.1) ≈ [0;;]
+        @test H(x -> round(Bool, x), 1.1) ≈ [0;;]
+        @test H(x -> round(x, RoundNearestTiesAway), 1.1) ≈ [0;;]
+        @test H(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
+
+        # Random
+        @test H(x -> rand(typeof(x)), 1) ≈ [0;;]
+        @test H(x -> rand(GLOBAL_RNG, typeof(x)), 1) ≈ [0;;]
+
         # Test special cases on empty tracer
         @test H(x -> zero(x)^(2//3), 1) ≈ [0;;]
         @test H(x -> (2//3)^zero(x), 1) ≈ [0;;]
         @test H(x -> zero(x)^ℯ, 1) ≈ [0;;]
         @test H(x -> ℯ^zero(x), 1) ≈ [0;;]
+
+        # NNlib extension
+        @test H(NNlib.relu, -1) ≈ [0;;]
+        @test H(NNlib.relu, 1) ≈ [0;;]
+        @test H(NNlib.elu, -1) ≈ [1;;]
+        @test H(NNlib.elu, 1) ≈ [0;;]
+        @test H(NNlib.celu, -1) ≈ [1;;]
+        @test H(NNlib.celu, 1) ≈ [0;;]
+        @test H(NNlib.selu, -1) ≈ [1;;]
+        @test H(NNlib.selu, 1) ≈ [0;;]
+
+        @test H(NNlib.relu6, -1) ≈ [0;;]
+        @test H(NNlib.relu6, 1) ≈ [0;;]
+        @test H(NNlib.relu6, 7) ≈ [0;;]
+
+        @test H(NNlib.trelu, 0.9) ≈ [0;;]
+        @test H(NNlib.trelu, 1.1) ≈ [0;;]
+
+        @test H(NNlib.swish, -5) ≈ [1;;]
+        @test H(NNlib.swish, 0) ≈ [1;;]
+        @test H(NNlib.swish, 5) ≈ [1;;]
+
+        @test H(NNlib.hardswish, -5) ≈ [0;;]
+        @test H(NNlib.hardswish, 0) ≈ [1;;]
+        @test H(NNlib.hardswish, 5) ≈ [0;;]
+
+        @test H(NNlib.hardσ, -4) ≈ [0;;]
+        @test H(NNlib.hardσ, 0) ≈ [0;;]
+        @test H(NNlib.hardσ, 4) ≈ [0;;]
+
+        @test H(NNlib.hardtanh, -2) ≈ [0;;]
+        @test H(NNlib.hardtanh, 0) ≈ [0;;]
+        @test H(NNlib.hardtanh, 2) ≈ [0;;]
+
+        @test H(NNlib.softshrink, -1) ≈ [0;;]
+        @test H(NNlib.softshrink, 0) ≈ [0;;]
+        @test H(NNlib.softshrink, 1) ≈ [0;;]
         yield()
     end
 end

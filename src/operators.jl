@@ -1,8 +1,7 @@
 ## Operator definitions
 
 # We use a system of letters to categorize operators:
-#   i: independence - no influence at all
-#   z: influence but first- and second-order derivatives (FOD, SOD) are zero
+#   z: first- and second-order derivatives (FOD, SOD) are zero
 #   f: FOD ∂f/∂x is non-zero, SOD ∂²f/∂x² is zero 
 #   s: FOD ∂f/∂x is non-zero, SOD ∂²f/∂x² is non-zero
 #   c: Cross-derivative ∂²f/∂x∂y is non-zero

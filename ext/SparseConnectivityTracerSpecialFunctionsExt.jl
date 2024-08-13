@@ -101,8 +101,6 @@ ops_2_to_1_ssc = (
 
 for op in ops_2_to_1_ssc
     T = typeof(op)
-    @eval SCT.is_infl_arg1_zero_global(::$T) = false
-    @eval SCT.is_infl_arg2_zero_global(::$T) = false
     @eval SCT.is_der1_arg1_zero_global(::$T) = false
     @eval SCT.is_der2_arg1_zero_global(::$T) = false
     @eval SCT.is_der1_arg2_zero_global(::$T) = false

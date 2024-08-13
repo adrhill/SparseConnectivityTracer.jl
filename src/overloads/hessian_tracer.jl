@@ -329,6 +329,29 @@ end
 
 ## Rounding
 Base.round(t::T, ::RoundingMode; kwargs...) where {T<:HessianTracer} = myempty(T)
+function Base.round(
+    d::D, mode::RoundingMode; kwargs...
+) where {P,T<:HessianTracer,D<:Dual{P,T}}
+    p = round(primal(d), mode; kwargs...)
+    t = myempty(T)
+    return Dual(p, t)
+end
+
+for RR in (Real, Integer, Bool)
+    Base.round(::Type{R}, ::T) where {R<:RR,T<:HessianTracer} = myempty(T)
+    function Base.round(::Type{R}, d::D) where {R<:RR,P,T<:HessianTracer,D<:Dual{P,T}}
+        p = round(R, primal(d))
+        t = myempty(T)
+        return Dual(p, t)
+    end
+end
 
 ## Random numbers
-Base.rand(::AbstractRNG, ::SamplerType{T}) where {T<:HessianTracer} = myempty(T)  # TODO: was missing Base, add tests
+Base.rand(::AbstractRNG, ::SamplerType{T}) where {T<:HessianTracer} = myempty(T)
+function Base.rand(
+    rng::AbstractRNG, ::SamplerType{D}
+) where {P,T<:HessianTracer,D<:Dual{P,T}}
+    p = rand(rng, P)
+    t = myempty(T)
+    return Dual(p, t)
+end
