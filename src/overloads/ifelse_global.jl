@@ -58,8 +58,6 @@ end
 # Overload only on AbstractTracer, not Dual 
 for op in (isequal, isapprox, isless, ==, <, >, <=, >=)
     T = typeof(op)
-    @eval is_infl_arg1_zero_global(::$T) = false
-    @eval is_infl_arg2_zero_global(::$T) = false
     @eval is_der1_arg1_zero_global(::$T) = true
     @eval is_der2_arg1_zero_global(::$T) = true
     @eval is_der1_arg2_zero_global(::$T) = true
