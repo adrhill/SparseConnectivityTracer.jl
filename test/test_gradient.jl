@@ -213,6 +213,12 @@ end
         # NNlib extension
         @test J(NNlib.relu, -1) ≈ [0;;]
         @test J(NNlib.relu, 1) ≈ [1;;]
+        @test J(NNlib.elu, -1) ≈ [1;;]
+        @test J(NNlib.elu, 1) ≈ [1;;]
+        @test J(NNlib.celu, -1) ≈ [1;;]
+        @test J(NNlib.celu, 1) ≈ [1;;]
+        @test J(NNlib.selu, -1) ≈ [1;;]
+        @test J(NNlib.selu, 1) ≈ [1;;]
 
         @test J(NNlib.relu6, -1) ≈ [0;;]
         @test J(NNlib.relu6, 1) ≈ [1;;]
@@ -220,6 +226,14 @@ end
 
         @test J(NNlib.trelu, 0.9) ≈ [0;;]
         @test J(NNlib.trelu, 1.1) ≈ [1;;]
+
+        @test J(NNlib.swish, -5) ≈ [1;;]
+        @test J(NNlib.swish, 0) ≈ [1;;]
+        @test J(NNlib.swish, 5) ≈ [1;;]
+
+        @test J(NNlib.hardswish, -5) ≈ [1;;]
+        @test J(NNlib.hardswish, 0) ≈ [1;;]
+        @test J(NNlib.hardswish, 5) ≈ [1;;]
 
         @test J(NNlib.hardσ, -4) ≈ [0;;]
         @test J(NNlib.hardσ, 0) ≈ [1;;]
