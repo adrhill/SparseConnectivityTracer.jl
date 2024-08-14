@@ -29,6 +29,18 @@ struct SumOutputs{F}
     f::F
 end
 (s::SumOutputs)(x) = sum(s.f(x))
+
+norm1(A) = norm(A, 1)
+norm2(A) = norm(A, 2)
+norminf(A) = norm(A, Inf)
+opnorm1(A) = opnorm(A, 1)
+opnorm2(A) = opnorm(A, 2)
+opnorminf(A) = opnorm(A, Inf)
+logabsdet_first(A) = first(logabsdet(A))
+logabsdet_last(A) = last(logabsdet(A))
+pow0(A) = A^0
+pow3(A) = A^3
+
 #===================#
 # Testing utilities #
 #===================#
@@ -105,15 +117,6 @@ arrayname(A) = "$(typeof(A)) $(size(A))"
 #=================#
 
 @testset "Scalar functions" begin
-    norm1(A) = norm(A, 1)
-    norm2(A) = norm(A, 2)
-    norminf(A) = norm(A, Inf)
-    opnorm1(A) = opnorm(A, 1)
-    opnorm2(A) = opnorm(A, 2)
-    opnorminf(A) = opnorm(A, Inf)
-    logabsdet_first(A) = first(logabsdet(A))
-    logabsdet_last(A) = last(logabsdet(A))
-
     @testset "det $(arrayname(A))" for A in NONDIAG_MATRICES
         testJ1(det, A)
         testH1(det, A)
@@ -236,9 +239,6 @@ arrayname(A) = "$(typeof(A)) $(size(A))"
 end
 
 @testset "Matrix-valued functions" begin
-    pow0(A) = A^0
-    pow3(A) = A^3
-
     # Functions that only work on square matrices
     @testset "inv $(arrayname(A))" for A in NONDIAG_SQUARE_MATRICES
         testJ1(inv, A)
@@ -275,14 +275,9 @@ end
             0  0  0  0  0  0  0  0  1
         ]
     end
-    @testset "pow0 $(arrayname(A))" for A in NONDIAG_SQUARE_MATRICES
+    @testset "pow0 $(arrayname(A))" for A in SQUARE_MATRICES
         testJ0(pow0, A)
         testH0(pow0, A)
-    end
-    @testset "pow0 $(arrayname(A))" for A in DIAG_SQUARE_MATRICES
-        # TODO: these should be zero and are currently too conservative
-        @test_broken all(iszero, Jsum(pow0, A))
-        @test_broken all(iszero, Hsum(pow0, A))
     end
     @testset "pow3 $(arrayname(A))" for A in SQUARE_MATRICES
         testJ1(pow3, A)

@@ -162,6 +162,12 @@ function LinearAlgebra.:^(A::AbstractMatrix{T}, p::Integer) where {T<:AbstractTr
     end
 end
 
+function Base.literal_pow(::typeof(^), D::Diagonal{T}, ::Val{0}) where {T<:AbstractTracer}
+    ts = similar(D.diag)
+    ts .= myempty(T)
+    return Diagonal(ts)
+end
+
 #==========================#
 # LinearAlgebra.jl on Dual #
 #==========================#
