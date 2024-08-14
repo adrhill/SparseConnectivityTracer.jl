@@ -73,6 +73,11 @@ REAL_TYPES = (Float64, Int, Bool, UInt8, Float16, Rational{Int})
         @test J(x -> zero(x)^ℯ, 1) ≈ [0;;]
         @test J(x -> ℯ^zero(x), 1) ≈ [0;;]
 
+        # Conversions
+        @testset "Conversion to $T" for T in REAL_TYPES
+            @test J(x -> convert(T, x), 1.0) ≈ [1;;]
+        end
+
         # Round
         @test J(round, 1.1) ≈ [0;;]
         @test J(x -> round(Int, x), 1.1) ≈ [0;;]
@@ -216,6 +221,11 @@ end
         @test J(x -> x^ℯ, 1) ≈ [1;;]
         @test J(x -> ℯ^x, 1) ≈ [1;;]
         @test J(x -> 0, 1) ≈ [0;;]
+
+        # Conversions
+        @testset "Conversion to $T" for T in REAL_TYPES
+            @test J(x -> convert(T, x), 1.0) ≈ [1;;]
+        end
 
         # Round
         @test J(round, 1.1) ≈ [0;;]
