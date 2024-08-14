@@ -1,71 +1,108 @@
 import SparseConnectivityTracer as SCT
 using SparseConnectivityTracer
 using SparseConnectivityTracer: GradientTracer, IndexSetGradientPattern
+using Test
+
 using LinearAlgebra: Symmetric, Diagonal, diagind
 using LinearAlgebra: det, logdet, logabsdet, norm, opnorm
 using LinearAlgebra: eigen, eigmax, eigmin
 using LinearAlgebra: inv, pinv
 using SparseArrays: sparse, spdiagm
-using Test
 
-PATTERN_FUNCTIONS = (jacobian_sparsity, hessian_sparsity)
-detector_global = TracerSparsityDetector()
+#=========================#
+# Weird function wrappers #
+#=========================#
 
-TEST_SQUARE_MATRICES = Dict(
-    "`Matrix` (3×3)" => rand(3, 3),
-    "`Symmetric` (3×3)" => Symmetric(rand(3, 3)),
-    "`Diagonal` (3×3)" => Diagonal(rand(3)),
-)
-TEST_MATRICES = merge(TEST_SQUARE_MATRICES, Dict("`Matrix` (3×4)" => rand(3, 4)))
+# These print better stack traces than lambda functions.
 
-S = BitSet
-P = IndexSetGradientPattern{Int,S}
-TG = GradientTracer{P}
+struct SparsifyInput{F}
+    f::F
+end
+(s::SparsifyInput)(x) = s.f(sparse(x))
 
-# NOTE: we currently test for conservative patterns on array overloads
-# Changes making array overloads less convervative will break these tests, but are welcome!  
-function test_patterns(f, x; outsum=false, con=isone, jac=isone, hes=isone)
-    @testset "$f" begin
-        if outsum
-            _f(x) = sum(f(x))
-        else
-            _f = f
-        end
-        @testset "Jacobian pattern" begin
-            pattern = jacobian_sparsity(_f, x, detector_global)
-            if x isa Diagonal
-                di = diagind(x)
-                for (i, p) in enumerate(pattern)
-                    if i in di
-                        @test jac(p)
-                    else 
-                        @test iszero(p)
-                    end
-                end
+struct SpdiagmifyInput{F}
+    f::F
+end
+(s::SpdiagmifyInput)(x) = s.f(spdiagm(x))
+
+struct SumOutputs{F}
+    f::F
+end
+(s::SumOutputs)(x) = sum(s.f(x))
+#===================#
+# Testing utilities #
+#===================#
+
+method = TracerSparsityDetector()
+
+test_all_one(A) = @test all(isone, A)
+test_all_zero(A) = @test all(iszero, A)
+
+# Short-hand for Jacobian pattern of `x -> sum(f(A))`
+Jsum(f, A) = jacobian_sparsity(SumOutputs(f), A, method)
+# Test whether all entries in Jacobian are zero
+testJ0(f, A) = @testset "Jacobian" test_all_zero(Jsum(f, A))
+# Test whether all entries in Jacobian are one where inputs were non-zero.
+testJ1(f, A) = @testset "Jacobian" test_all_one(Jsum(f, A))
+function testJ1(f, A::Diagonal)
+    @testset "Jacobian" begin
+        jac = Jsum(f, A)
+        di = diagind(A)
+        for (i, x) in enumerate(jac)
+            if i in di
+                @test isone(x)
             else
-                @test all(jac, pattern)
-            end
-        end
-        @testset "Hessian pattern" begin
-            pattern = hessian_sparsity(_f, x, detector_global)
-            if x isa Diagonal
-                di = diagind(x)
-                for I in CartesianIndices(x)
-                    i, j = Tuple(I)
-                    p = pattern[I]
-
-                    if i in di && j in di
-                        @test hes(p)
-                    else 
-                        @test iszero(p)
-                    end
-                end
-            else
-                @test all(hes, pattern)
+                @test iszero(x)
             end
         end
     end
 end
+
+# Short-hand for Hessian pattern of `x -> sum(f(A))`
+Hsum(f, A) = hessian_sparsity(SumOutputs(f), A, method)
+# Test whether all entries in Hessian are zero
+testH0(f, A) = @testset "Hessian" test_all_zero(Hsum(f, A))
+# Test whether all entries in Hessian are one where inputs were non-zero.
+testH1(f, A) = @testset "Hessian" test_all_one(Hsum(f, A))
+function testH1(f, A::Diagonal)
+    @testset "Hessian" begin
+        hess = Hsum(f, A)
+        di = diagind(A)
+
+        for I in CartesianIndices(A)
+            i, j = Tuple(I)
+            x = hess[I]
+
+            if i in di && j in di
+                @test isone(x)
+            else
+                @test iszero(x)
+            end
+        end
+    end
+end
+
+#===================#
+# Arrays to test on #
+#===================#
+
+mat33 = rand(3, 3)
+mat34 = rand(3, 4)
+sym33 = Symmetric(rand(3, 3))
+dia33 = Diagonal(rand(3))
+
+ALL_MATRICES = (mat33, mat34, sym33, dia33)
+SQUARE_MATRICES = (mat33, sym33, dia33)
+NONDIAG_MATRICES = (mat33, mat34, sym33)
+NONDIAG_SQUARE_MATRICES = (mat33, sym33)
+DIAG_MATRICES = (dia33,)
+DIAG_SQUARE_MATRICES = (dia33,)
+
+arrayname(A) = "$(typeof(A)) $(size(A))"
+
+#=================#
+# TEST START HERE #
+#=================#
 
 @testset "Scalar functions" begin
     norm1(A) = norm(A, 1)
@@ -77,43 +114,123 @@ end
     logabsdet_first(A) = first(logabsdet(A))
     logabsdet_last(A) = last(logabsdet(A))
 
-    @testset "$name" for (name, A) in TEST_MATRICES
-        test_patterns(det, A)
-        test_patterns(logdet, A)
-        test_patterns(norm1, A; hes=iszero)
-        test_patterns(norm2, A)
-        test_patterns(norminf, A; hes=iszero)
-        test_patterns(eigmax, A)
-        test_patterns(eigmin, A)
-        test_patterns(opnorm1, A; hes=iszero)
-        test_patterns(opnorm2, A)
-        test_patterns(opnorminf, A; hes=iszero)
-        test_patterns(logabsdet_first, A)
-        test_patterns(logabsdet_last, A; jac=iszero, hes=iszero)
+    @testset "det $(arrayname(A))" for A in NONDIAG_MATRICES
+        testJ1(det, A)
+        testH1(det, A)
+    end
+    @testset "det $(arrayname(A))" for A in DIAG_MATRICES
+        @test Jsum(det, A) == [1 0 0 0 1 0 0 0 1;]
+        @test Hsum(det, A) == [
+            0  0  0  0  1  0  0  0  1
+            0  0  0  0  0  0  0  0  0
+            0  0  0  0  0  0  0  0  0
+            0  0  0  0  0  0  0  0  0
+            1  0  0  0  0  0  0  0  1
+            0  0  0  0  0  0  0  0  0
+            0  0  0  0  0  0  0  0  0
+            0  0  0  0  0  0  0  0  0
+            1  0  0  0  1  0  0  0  0
+        ]
+    end
+    @testset "logdet $(arrayname(A))" for A in ALL_MATRICES
+        testJ1(logdet, A)
+        testH1(logdet, A)
+    end
+    @testset "norm(A, 1) $(arrayname(A))" for A in ALL_MATRICES
+        testJ1(norm1, A)
+        testH0(norm1, A)
+    end
+    @testset "norm(A, 2) $(arrayname(A))" for A in ALL_MATRICES
+        testJ1(norm2, A)
+        testH1(norm2, A)
+    end
+    @testset "norm(A, Inf) $(arrayname(A))" for A in ALL_MATRICES
+        testJ1(norminf, A)
+        testH0(norminf, A)
+    end
+    @testset "eigmax $(arrayname(A))" for A in ALL_MATRICES
+        testJ1(eigmax, A)
+        testH1(eigmax, A)
+    end
+    @testset "eigmin $(arrayname(A))" for A in ALL_MATRICES
+        testJ1(eigmin, A)
+        testH1(eigmin, A)
+    end
+    @testset "opnorm(A, 1) $(arrayname(A))" for A in ALL_MATRICES
+        testJ1(opnorm1, A)
+        testH0(opnorm1, A)
+    end
+    @testset "opnorm(A, 2) $(arrayname(A))" for A in ALL_MATRICES
+        testJ1(opnorm2, A)
+        testH1(opnorm2, A)
+    end
+    @testset "opnorm(A, Inf) $(arrayname(A))" for A in ALL_MATRICES
+        testJ1(opnorminf, A)
+        testH0(opnorminf, A)
+    end
+    @testset "first(logabsdet(A)) $(arrayname(A))" for A in ALL_MATRICES
+        testJ1(logabsdet_first, A)
+        testH1(logabsdet_first, A)
+    end
+    @testset "last(logabsdet(A)) $(arrayname(A))" for A in ALL_MATRICES
+        testJ0(logabsdet_last, A)
+        testH0(logabsdet_last, A)
     end
 
     if VERSION >= v"1.9"
         @testset "`SparseMatrixCSC` (3×3)" begin
-            # TODO: this is a temporary solution until sparse matrix inputs are supported (#28)
-            test_patterns(A -> det(sparse(A)), rand(3, 3))
-            test_patterns(A -> logdet(sparse(A)), rand(3, 3))
-            test_patterns(A -> norm(sparse(A)), rand(3, 3))
-            test_patterns(A -> eigmax(sparse(A)), rand(3, 3))
-            test_patterns(A -> eigmin(sparse(A)), rand(3, 3))
-            test_patterns(A -> opnorm1(sparse(A)), rand(3, 3); hes=iszero)
-            test_patterns(A -> logabsdet_first(sparse(A)), rand(3, 3))
-            test_patterns(
-                A -> logabsdet_last(sparse(A)), rand(3, 3); jac=iszero, hes=iszero
-            )
+            A = rand(3, 3)
+            v = rand(3)
 
-            test_patterns(v -> det(spdiagm(v)), rand(3))
-            test_patterns(v -> logdet(spdiagm(v)), rand(3))
-            test_patterns(v -> norm(spdiagm(v)), rand(3))
-            test_patterns(v -> eigmax(spdiagm(v)), rand(3))
-            test_patterns(v -> eigmin(spdiagm(v)), rand(3))
-            test_patterns(v -> opnorm1(spdiagm(v)), rand(3); hes=iszero)
-            test_patterns(v -> logabsdet_first(spdiagm(v)), rand(3))
-            test_patterns(v -> logabsdet_last(spdiagm(v)), rand(3); jac=iszero, hes=iszero)
+            # TODO: this is a temporary solution until sparse matrix inputs are supported (#28)
+            @testset "det" begin
+                testJ1(SparsifyInput(det), A)
+                testH1(SparsifyInput(det), A)
+                testJ1(SpdiagmifyInput(det), v)
+                testH1(SpdiagmifyInput(det), v)
+            end
+            @testset "logdet" begin
+                testJ1(SparsifyInput(logdet), A)
+                testH1(SparsifyInput(logdet), A)
+                testJ1(SpdiagmifyInput(logdet), v)
+                testH1(SpdiagmifyInput(logdet), v)
+            end
+            @testset "norm" begin
+                testJ1(SparsifyInput(norm), A)
+                testH1(SparsifyInput(norm), A)
+                testJ1(SpdiagmifyInput(norm), v)
+                testH1(SpdiagmifyInput(norm), v)
+            end
+            @testset "eigmax" begin
+                testJ1(SparsifyInput(eigmax), A)
+                testH1(SparsifyInput(eigmax), A)
+                testJ1(SpdiagmifyInput(eigmax), v)
+                testH1(SpdiagmifyInput(eigmax), v)
+            end
+            @testset "eigmin" begin
+                testJ1(SparsifyInput(eigmin), A)
+                testH1(SparsifyInput(eigmin), A)
+                testJ1(SpdiagmifyInput(eigmin), v)
+                testH1(SpdiagmifyInput(eigmin), v)
+            end
+            @testset "opnorm(x, 1)" begin
+                testJ1(SparsifyInput(opnorm1), A)
+                testH0(SparsifyInput(opnorm1), A)
+                testJ1(SpdiagmifyInput(opnorm1), v)
+                testH0(SpdiagmifyInput(opnorm1), v)
+            end
+            @testset "first(logabsdet(x))" begin
+                testJ1(SparsifyInput(logabsdet_first), A)
+                testH1(SparsifyInput(logabsdet_first), A)
+                testJ1(SpdiagmifyInput(logabsdet_first), v)
+                testH1(SpdiagmifyInput(logabsdet_first), v)
+            end
+            @testset "last(logabsdet(x))" begin
+                testJ0(SparsifyInput(logabsdet_last), A)
+                testH0(SparsifyInput(logabsdet_last), A)
+                testJ0(SpdiagmifyInput(logabsdet_last), v)
+                testH0(SpdiagmifyInput(logabsdet_last), v)
+            end
         end
     end
 end
@@ -123,55 +240,101 @@ end
     pow3(A) = A^3
 
     # Functions that only work on square matrices
-    @testset "$name" for (name, A) in TEST_SQUARE_MATRICES
-        test_patterns(inv, A; outsum=true)
-        test_patterns(exp, A; outsum=true)
-        test_patterns(pow0, A; outsum=true, con=iszero, jac=iszero, hes=iszero)
-        test_patterns(pow3, A; outsum=true)
+    @testset "inv $(arrayname(A))" for A in NONDIAG_SQUARE_MATRICES
+        testJ1(inv, A)
+        testH1(inv, A)
+    end
+    @testset "inv $(arrayname(A))" for A in DIAG_SQUARE_MATRICES
+        @test Hsum(inv, A) == [
+            1  0  0  0  0  0  0  0  0
+            0  0  0  0  0  0  0  0  0
+            0  0  0  0  0  0  0  0  0
+            0  0  0  0  0  0  0  0  0
+            0  0  0  0  1  0  0  0  0
+            0  0  0  0  0  0  0  0  0
+            0  0  0  0  0  0  0  0  0
+            0  0  0  0  0  0  0  0  0
+            0  0  0  0  0  0  0  0  1
+        ]
+    end
+    @testset "exp $(arrayname(A))" for A in NONDIAG_SQUARE_MATRICES
+        testJ1(exp, A)
+        testH1(exp, A)
+    end
+    @testset "exp $(arrayname(A))" for A in DIAG_SQUARE_MATRICES
+        testJ1(exp, A)
+        @test Hsum(exp, A) == [
+            1  0  0  0  0  0  0  0  0
+            0  0  0  0  0  0  0  0  0
+            0  0  0  0  0  0  0  0  0
+            0  0  0  0  0  0  0  0  0
+            0  0  0  0  1  0  0  0  0
+            0  0  0  0  0  0  0  0  0
+            0  0  0  0  0  0  0  0  0
+            0  0  0  0  0  0  0  0  0
+            0  0  0  0  0  0  0  0  1
+        ]
+    end
+    @testset "pow0 $(arrayname(A))" for A in NONDIAG_SQUARE_MATRICES
+        testJ0(pow0, A)
+        testH0(pow0, A)
+    end
+    @testset "pow0 $(arrayname(A))" for A in DIAG_SQUARE_MATRICES
+        # TODO: these should be zero and are currently too conservative
+        @test_broken all(iszero, Jsum(pow0, A))
+        @test_broken all(iszero, Hsum(pow0, A))
+    end
+    @testset "pow3 $(arrayname(A))" for A in SQUARE_MATRICES
+        testJ1(pow3, A)
+        testH1(pow3, A)
     end
 
     if VERSION >= v"1.9"
+        A = rand(3, 3)
+        v = rand(3)
+
         @testset "`SparseMatrixCSC` (3×3)" begin
             # TODO: this is a temporary solution until sparse matrix inputs are supported (#28)
 
-            test_patterns(A -> exp(sparse(A)), rand(3, 3); outsum=true)
-            test_patterns(
-                A -> pow0(sparse(A)),
-                rand(3, 3);
-                outsum=true,
-                con=iszero,
-                jac=iszero,
-                hes=iszero,
-            )
-            test_patterns(A -> pow3(sparse(A)), rand(3, 3); outsum=true)
+            testJ1(SparsifyInput(exp), A)
+            testH1(SparsifyInput(exp), A)
 
-            test_patterns(v -> exp(spdiagm(v)), rand(3); outsum=true)
+            testJ0(SparsifyInput(pow0), A)
+            testH0(SparsifyInput(pow0), A)
+
+            testJ1(SparsifyInput(pow3), A)
+            testH1(SparsifyInput(pow3), A)
+
+            testJ1(SpdiagmifyInput(exp), v)
+            testH1(SpdiagmifyInput(exp), v)
 
             if VERSION >= v"1.10"
                 # issue with custom _mapreducezeros in SparseArrays on Julia 1.6
-                test_patterns(
-                    v -> pow0(spdiagm(v)),
-                    rand(3);
-                    outsum=true,
-                    con=iszero,
-                    jac=iszero,
-                    hes=iszero,
-                )
-                test_patterns(v -> pow3(spdiagm(v)), rand(3); outsum=true)
+                testJ0(SpdiagmifyInput(pow0), v)
+                testH0(SpdiagmifyInput(pow0), v)
+
+                testJ1(SpdiagmifyInput(pow3), v)
+                testH1(SpdiagmifyInput(pow3), v)
             end
         end
     end
 
     # Functions that work on all matrices
-    @testset "$name" for (name, A) in TEST_MATRICES
-        test_patterns(pinv, A; outsum=true)
+    @testset "pinv $(arrayname(A))" for A in ALL_MATRICES
+        testJ1(pinv, A)
+        testH1(pinv, A)
     end
     if VERSION >= v"1.9"
         @testset "`SparseMatrixCSC` (3×4)" begin
-            test_patterns(A -> pinv(sparse(A)), rand(3, 4); outsum=true)
+            testJ1(SparsifyInput(pinv), rand(3, 4))
+            testH1(SparsifyInput(pinv), rand(3, 4))
         end
     end
 end
+
+S = BitSet
+P = IndexSetGradientPattern{Int,S}
+TG = GradientTracer{P}
 
 @testset "Matrix division" begin
     t1 = TG(P(S([1, 3, 4])))
