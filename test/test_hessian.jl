@@ -36,6 +36,13 @@ H(f, x) = hessian_sparsity(f, x, method)
         @test H(x -> ℯ^x, 1) ≈ [1;;]
         @test H(x -> 0, 1) ≈ [0;;]
 
+        # Conversions
+        @testset "Conversion to $T" for T in REAL_TYPES
+            @test H(x -> convert(T, x), 1.0) ≈ [0;;]
+            @test H(x -> convert(T, x^2), 1.0) ≈ [1;;]
+            @test H(x -> convert(T, x)^2, 1.0) ≈ [1;;]
+        end
+
         # Round
         @test H(round, 1.1) ≈ [0;;]
         @test H(x -> round(Int, x), 1.1) ≈ [0;;]
@@ -336,6 +343,13 @@ end
         @test H(x -> x^ℯ, 1) ≈ [1;;]
         @test H(x -> ℯ^x, 1) ≈ [1;;]
         @test H(x -> 0, 1) ≈ [0;;]
+
+        # Conversions
+        @testset "Conversion to $T" for T in REAL_TYPES
+            @test H(x -> convert(T, x), 1.0) ≈ [0;;]
+            @test H(x -> convert(T, x^2), 1.0) ≈ [1;;]
+            @test H(x -> convert(T, x)^2, 1.0) ≈ [1;;]
+        end
 
         # Round
         @test H(round, 1.1) ≈ [0;;]
