@@ -116,6 +116,15 @@ function LinearAlgebra.inv(A::StridedMatrix{T}) where {T<:AbstractTracer}
     t = second_order_or(A)
     return Fill(t, size(A)...)
 end
+function LinearAlgebra.inv(D::Diagonal{T}) where {T<:AbstractTracer}
+    ts_in = D.diag
+    ts_out = similar(ts_in)
+    for i in 1:length(ts_out)
+        ts_out[i] = inv(ts_in[i])
+    end
+    return Diagonal(ts_out)
+end
+
 function LinearAlgebra.pinv(
     A::AbstractMatrix{T}; atol::Real=0.0, rtol::Real=0.0
 ) where {T<:AbstractTracer}
@@ -123,6 +132,7 @@ function LinearAlgebra.pinv(
     t = second_order_or(A)
     return Fill(t, m, n)
 end
+LinearAlgebra.pinv(D::Diagonal{T}) where {T<:AbstractTracer} = LinearAlgebra.inv(D)
 
 ## Division
 function LinearAlgebra.:\(
@@ -150,6 +160,12 @@ function LinearAlgebra.:^(A::AbstractMatrix{T}, p::Integer) where {T<:AbstractTr
         t = second_order_or(A)
         return Fill(t, n, n)
     end
+end
+
+function Base.literal_pow(::typeof(^), D::Diagonal{T}, ::Val{0}) where {T<:AbstractTracer}
+    ts = similar(D.diag)
+    ts .= myempty(T)
+    return Diagonal(ts)
 end
 
 #==========================#
