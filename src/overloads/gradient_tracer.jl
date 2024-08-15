@@ -226,17 +226,13 @@ Base.round(::T, ::RoundingMode; kwargs...) where {T<:GradientTracer} = myempty(T
 function Base.round(
     d::D, mode::RoundingMode; kwargs...
 ) where {P,T<:GradientTracer,D<:Dual{P,T}}
-    p = round(primal(d), mode; kwargs...)
-    t = myempty(T)
-    return Dual(p, t)
+    return round(primal(d), mode; kwargs...) # only return primal
 end
 
 for RR in (Real, Integer, Bool)
     Base.round(::Type{R}, ::T) where {R<:RR,T<:GradientTracer} = myempty(T)
     function Base.round(::Type{R}, d::D) where {R<:RR,P,T<:GradientTracer,D<:Dual{P,T}}
-        p = round(R, primal(d))
-        t = myempty(T)
-        return Dual(p, t)
+        return round(R, primal(d)) # only return primal
     end
 end
 
@@ -245,7 +241,5 @@ Base.rand(::AbstractRNG, ::SamplerType{T}) where {T<:GradientTracer} = myempty(T
 function Base.rand(
     rng::AbstractRNG, ::SamplerType{D}
 ) where {P,T<:GradientTracer,D<:Dual{P,T}}
-    p = rand(rng, P)
-    t = myempty(T)
-    return Dual(p, t)
+    return rand(rng, P) # only return primal
 end
