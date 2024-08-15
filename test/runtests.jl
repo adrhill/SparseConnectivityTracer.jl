@@ -5,16 +5,11 @@ Pkg.develop(;
 
 using SparseConnectivityTracer
 
-using Compat
 using Test
-using ReferenceTests
 using JuliaFormatter
 using Aqua
 using JET
 using Documenter
-
-using LinearAlgebra
-using Random
 
 DocMeta.setdocmeta!(
     SparseConnectivityTracer,
