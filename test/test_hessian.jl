@@ -9,11 +9,16 @@ using NNlib: NNlib
 
 # Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
 include("tracers_definitions.jl")
+REAL_TYPES = (Float64, Int, Bool, UInt8, Float16, Rational{Int})
 
-# This exists to be able to quickly run tests in the REPL.
+# These exists to be able to quickly run tests in the REPL.
 # NOTE: H gets overwritten inside the testsets.
 method = TracerSparsityDetector()
 H(f, x) = hessian_sparsity(f, x, method)
+
+P = first(HESSIAN_PATTERNS)
+T = HessianTracer{P}
+D = Dual{Int,T}
 
 @testset "Global Hessian" begin
     @testset "$P" for P in HESSIAN_PATTERNS

@@ -50,6 +50,14 @@ function Base.convert(::Type{Dual{P1,T}}, d::Dual{P2,T}) where {P1,P2,T}
     return Dual(convert(P1, primal(d)), tracer(d))
 end
 
+# Explicit type conversions
+for T in (:Int, :Integer, :Float64, :Float32)
+    @eval function Base.$T(d::Dual)
+        isemptytracer(d) || throw(InexactError(Symbol($T), $T, d))
+        $T(primal(d))
+    end
+end
+
 ## Constants
 # These are methods defined on types. Methods on variables are in operators.jl 
 Base.zero(::Type{D})        where {P,T,D<:Dual{P,T}} = D(zero(P),        myempty(T))
