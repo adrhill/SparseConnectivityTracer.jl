@@ -143,9 +143,9 @@ function union_product!(
     return hessian
 end
 
-#=======================#
+#=========================#
 # AbstractGradientPattern #
-#=======================#
+#=========================#
 
 # For use with GradientTracer.
 

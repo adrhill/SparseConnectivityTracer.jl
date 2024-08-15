@@ -1,7 +1,7 @@
 # Test construction and conversions of internal tracer types
 using SparseConnectivityTracer: AbstractTracer, GradientTracer, HessianTracer, Dual
-using SparseConnectivityTracer: primal, tracer, isemptytracer
-using SparseConnectivityTracer: myempty, name
+using SparseConnectivityTracer: primal, tracer, isemptytracer, myempty, name
+using SparseConnectivityTracer: IndexSetGradientPattern
 using Test
 
 # Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
@@ -198,5 +198,31 @@ end
     end
     @testset "similar on $T" for T in ALL_HESSIAN_TRACERS
         test_similar(T)
+    end
+end
+
+@testset "Explicit type conversions on Dual" begin
+    @testset "$T" for T in union(GRADIENT_TRACERS, HESSIAN_TRACERS)
+        P = IndexSetGradientPattern{Int,BitSet}
+        T = GradientTracer{P}
+
+        p       = P(BitSet(2))
+        t_full  = T(p)
+        t_empty = myempty(T)
+        d_full  = Dual(1.0, t_full)
+        d_empty = Dual(1.0, t_empty)
+
+        @testset "Non-empty tracer" begin
+            @testset "$TOUT" for TOUT in (Int, Integer, Float64, Float32)
+                @test_throws InexactError TOUT(d_full)
+            end
+        end
+        @testset "Empty tracer" begin
+            @testset "$TOUT" for TOUT in (Int, Integer, Float64, Float32)
+                out = TOUT(d_empty)
+                @test out isa TOUT # not a Dual!
+                @test isone(out)
+            end
+        end
     end
 end
