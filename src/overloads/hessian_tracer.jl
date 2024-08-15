@@ -58,7 +58,7 @@ end
 function overload_hessian_1_to_1(op)
     M = parentmodule(op)
     SCT = SparseConnectivityTracer
-    return quote
+    @eval begin
         ## HessianTracer
         function $M.$op(t::$SCT.HessianTracer)
             is_der1_zero = $SCT.is_der1_zero_global($M.$op)
@@ -164,7 +164,7 @@ end
 function overload_hessian_2_to_1(op)
     M = parentmodule(op)
     SCT = SparseConnectivityTracer
-    return quote
+    @eval begin
         ## HessianTracer
         function $M.$op(tx::T, ty::T) where {T<:$SCT.HessianTracer}
             is_der1_arg1_zero = $SCT.is_der1_arg1_zero_global($M.$op)
@@ -265,7 +265,7 @@ end
 function overload_hessian_1_to_2(op)
     M = parentmodule(op)
     SCT = SparseConnectivityTracer
-    return quote
+    @eval begin
         ## HessianTracer
         function $M.$op(t::$SCT.HessianTracer)
             is_der1_out1_zero = $SCT.is_der1_out1_zero_global($M.$op)
