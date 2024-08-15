@@ -232,5 +232,7 @@ Base.rand(::AbstractRNG, ::SamplerType{T}) where {T<:GradientTracer} = myempty(T
 function Base.rand(
     rng::AbstractRNG, ::SamplerType{D}
 ) where {P,T<:GradientTracer,D<:Dual{P,T}}
-    return rand(rng, P) # only return primal
+    p = rand(rng, P)
+    t = myempty(T)
+    return Dual(p, t)
 end
