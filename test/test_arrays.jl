@@ -47,15 +47,19 @@ pow3(A) = A^3
 
 method = TracerSparsityDetector()
 
-test_all_one(A) = @test all(isone, A)
-test_all_zero(A) = @test all(iszero, A)
+allone(A) = all(isone, A)
+allzero(A) = all(iszero, A)
 
 # Short-hand for Jacobian pattern of `x -> sum(f(A))`
 Jsum(f, A) = jacobian_sparsity(SumOutputs(f), A, method)
 # Test whether all entries in Jacobian are zero
-testJ0(f, A) = @testset "Jacobian" test_all_zero(Jsum(f, A))
+testJ0(f, A) = @testset "Jacobian" begin
+    @test allzero(Jsum(f, A))
+end
 # Test whether all entries in Jacobian are one where inputs were non-zero.
-testJ1(f, A) = @testset "Jacobian" test_all_one(Jsum(f, A))
+testJ1(f, A) = @testset "Jacobian" begin
+    @test allone(Jsum(f, A))
+end
 function testJ1(f, A::Diagonal)
     @testset "Jacobian" begin
         jac = Jsum(f, A)
@@ -73,9 +77,13 @@ end
 # Short-hand for Hessian pattern of `x -> sum(f(A))`
 Hsum(f, A) = hessian_sparsity(SumOutputs(f), A, method)
 # Test whether all entries in Hessian are zero
-testH0(f, A) = @testset "Hessian" test_all_zero(Hsum(f, A))
+testH0(f, A) = @testset "Hessian" begin
+    @test allzero(Hsum(f, A))
+end
 # Test whether all entries in Hessian are one where inputs were non-zero.
-testH1(f, A) = @testset "Hessian" test_all_one(Hsum(f, A))
+testH1(f, A) = @testset "Hessian" begin
+    @test allone(Hsum(f, A))
+end
 function testH1(f, A::Diagonal)
     @testset "Hessian" begin
         hess = Hsum(f, A)
