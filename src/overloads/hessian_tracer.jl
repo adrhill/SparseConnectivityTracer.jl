@@ -58,17 +58,14 @@ end
 function overload_hessian_1_to_1(M, op)
     SCT = SparseConnectivityTracer
     return quote
+        ## HessianTracer
         function $M.$op(t::$SCT.HessianTracer)
             is_der1_zero = $SCT.is_der1_zero_global($M.$op)
             is_der2_zero = $SCT.is_der2_zero_global($M.$op)
             return $SCT.hessian_tracer_1_to_1(t, is_der1_zero, is_der2_zero)
         end
-    end
-end
 
-function overload_hessian_1_to_1_dual(M, op)
-    SCT = SparseConnectivityTracer
-    return quote
+        ## Dual
         function $M.$op(d::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
             x = $SCT.primal(d)
             p_out = $M.$op(x)
@@ -166,6 +163,7 @@ end
 function overload_hessian_2_to_1(M, op)
     SCT = SparseConnectivityTracer
     return quote
+        ## HessianTracer
         function $M.$op(tx::T, ty::T) where {T<:$SCT.HessianTracer}
             is_der1_arg1_zero = $SCT.is_der1_arg1_zero_global($M.$op)
             is_der2_arg1_zero = $SCT.is_der2_arg1_zero_global($M.$op)
@@ -194,12 +192,8 @@ function overload_hessian_2_to_1(M, op)
             is_der2_arg2_zero = $SCT.is_der2_arg2_zero_global($M.$op)
             return $SCT.hessian_tracer_1_to_1(ty, is_der1_arg2_zero, is_der2_arg2_zero)
         end
-    end
-end
 
-function overload_hessian_2_to_1_dual(M, op)
-    SCT = SparseConnectivityTracer
-    return quote
+        ## Dual
         function $M.$op(dx::D, dy::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
             x = $SCT.primal(dx)
             y = $SCT.primal(dy)
@@ -269,6 +263,7 @@ end
 function overload_hessian_1_to_2(M, op)
     SCT = SparseConnectivityTracer
     return quote
+        ## HessianTracer
         function $M.$op(t::$SCT.HessianTracer)
             is_der1_out1_zero = $SCT.is_der1_out1_zero_global($M.$op)
             is_der2_out1_zero = $SCT.is_der2_out1_zero_global($M.$op)
@@ -282,12 +277,8 @@ function overload_hessian_1_to_2(M, op)
                 is_der2_out2_zero,
             )
         end
-    end
-end
 
-function overload_hessian_1_to_2_dual(M, op)
-    SCT = SparseConnectivityTracer
-    return quote
+        ## Dual
         function $M.$op(d::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
             x = $SCT.primal(d)
             p_out1, p_out2 = $M.$op(x)
