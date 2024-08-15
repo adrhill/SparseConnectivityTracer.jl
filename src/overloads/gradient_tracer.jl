@@ -28,7 +28,8 @@ function gradient_tracer_1_to_1_inner(
     end
 end
 
-function overload_gradient_1_to_1(M, op)
+function overload_gradient_1_to_1(op)
+    M = parentmodule(op)
     SCT = SparseConnectivityTracer
     return quote
         ## GradientTracer
@@ -96,7 +97,8 @@ function gradient_tracer_2_to_1_inner(
     end
 end
 
-function overload_gradient_2_to_1(M, op)
+function overload_gradient_2_to_1(op)
+    M = parentmodule(op)
     SCT = SparseConnectivityTracer
     return quote
         ## GradientTracer
@@ -168,7 +170,8 @@ end
     end
 end
 
-function overload_gradient_1_to_2(M, op)
+function overload_gradient_1_to_2(op)
+    M = parentmodule(op)
     SCT = SparseConnectivityTracer
     return quote
         ## GradientTracer

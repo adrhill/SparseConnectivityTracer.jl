@@ -1,27 +1,34 @@
-function overload_all(M)
-    exprs_1_to_1 = [
-        quote
-            $(overload_gradient_1_to_1(M, op))
-            $(overload_hessian_1_to_1(M, op))
-        end for op in nameof.(list_operators_1_to_1(Val(M)))
-    ]
-    exprs_2_to_1 = [
-        quote
-            $(overload_gradient_2_to_1(M, op))
-            $(overload_hessian_2_to_1(M, op))
-        end for op in nameof.(list_operators_2_to_1(Val(M)))
-    ]
-    exprs_1_to_2 = [
-        quote
-            $(overload_gradient_1_to_2(M, op))
-            $(overload_hessian_1_to_2(M, op))
-        end for op in nameof.(list_operators_1_to_2(Val(M)))
-    ]
-    return quote
-        $(exprs_1_to_1...)
-        $(exprs_2_to_1...)
-        $(exprs_1_to_2...)
-    end
-end
+# for overload in (
+#     overload_gradient_1_to_1,
+#     overload_gradient_2_to_1,
+#     overload_gradient_1_to_2,
+#     overload_hessian_1_to_1,
+#     overload_hessian_2_to_1,
+#     overload_hessian_1_to_2,
+# )
+#     @eval function $overload(ops::Tuple)
+#         for op in ops
+#             $overload(op)
+#         end
+#     end
+# end
 
-eval(overload_all(:Base))
+# overload_gradient_1_to_1(ops_1_to_1)
+# overload_gradient_2_to_1(ops_2_to_1)
+# overload_gradient_1_to_2(ops_1_to_2)
+# overload_hessian_1_to_1(ops_1_to_1)
+# overload_hessian_2_to_1(ops_2_to_1)
+# overload_hessian_1_to_2(ops_1_to_2)
+
+for op in ops_1_to_1
+    overload_gradient_1_to_1(op)
+    overload_hessian_1_to_1(op)
+end
+for op in ops_2_to_1
+    overload_gradient_2_to_1(op)
+    overload_hessian_2_to_1(op)
+end
+for op in ops_1_to_2
+    overload_gradient_1_to_2(op)
+    overload_hessian_1_to_2(op)
+end

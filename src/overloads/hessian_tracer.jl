@@ -55,7 +55,8 @@ function hessian_tracer_1_to_1_inner(
     return P(g_out, h_out) # return pattern
 end
 
-function overload_hessian_1_to_1(M, op)
+function overload_hessian_1_to_1(op)
+    M = parentmodule(op)
     SCT = SparseConnectivityTracer
     return quote
         ## HessianTracer
@@ -160,7 +161,8 @@ function hessian_tracer_2_to_1_inner(
     return P(g_out, h_out) # return pattern
 end
 
-function overload_hessian_2_to_1(M, op)
+function overload_hessian_2_to_1(op)
+    M = parentmodule(op)
     SCT = SparseConnectivityTracer
     return quote
         ## HessianTracer
@@ -260,7 +262,8 @@ end
     end
 end
 
-function overload_hessian_1_to_2(M, op)
+function overload_hessian_1_to_2(op)
+    M = parentmodule(op)
     SCT = SparseConnectivityTracer
     return quote
         ## HessianTracer
