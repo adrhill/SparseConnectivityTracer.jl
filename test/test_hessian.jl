@@ -26,121 +26,152 @@ D = Dual{Int,T}
         method = TracerSparsityDetector(; hessian_tracer_type=T)
         H(f, x) = hessian_sparsity(f, x, method)
 
-        @test H(identity, rand()) ≈ [0;;]
-        @test H(sqrt, rand()) ≈ [1;;]
+        @testset "Trivial examples" begin
+            @test H(identity, rand()) ≈ [0;;]
+            @test H(sqrt, rand()) ≈ [1;;]
 
-        @test H(x -> 1 * x, rand()) ≈ [0;;]
-        @test H(x -> x * 1, rand()) ≈ [0;;]
+            @test H(x -> 1 * x, rand()) ≈ [0;;]
+            @test H(x -> x * 1, rand()) ≈ [0;;]
+        end
 
         # Code coverage
-        @test H(sign, 1) ≈ [0;;]
-        @test H(typemax, 1) ≈ [0;;]
-        @test H(x -> x^(2//3), 1) ≈ [1;;]
-        @test H(x -> (2//3)^x, 1) ≈ [1;;]
-        @test H(x -> x^ℯ, 1) ≈ [1;;]
-        @test H(x -> ℯ^x, 1) ≈ [1;;]
-        @test H(x -> 0, 1) ≈ [0;;]
+        @testset "Miscellaneous" begin
+            @test H(sign, 1) ≈ [0;;]
+            @test H(typemax, 1) ≈ [0;;]
+            @test H(x -> x^(2//3), 1) ≈ [1;;]
+            @test H(x -> (2//3)^x, 1) ≈ [1;;]
+            @test H(x -> x^ℯ, 1) ≈ [1;;]
+            @test H(x -> ℯ^x, 1) ≈ [1;;]
+            @test H(x -> 0, 1) ≈ [0;;]
+        end
 
         # Conversions
-        @testset "Conversion to $T" for T in REAL_TYPES
-            @test H(x -> convert(T, x), 1.0) ≈ [0;;]
-            @test H(x -> convert(T, x^2), 1.0) ≈ [1;;]
-            @test H(x -> convert(T, x)^2, 1.0) ≈ [1;;]
+        @testset "Conversion" begin
+            @testset "to $T" for T in REAL_TYPES
+                @test H(x -> convert(T, x), 1.0) ≈ [0;;]
+                @test H(x -> convert(T, x^2), 1.0) ≈ [1;;]
+                @test H(x -> convert(T, x)^2, 1.0) ≈ [1;;]
+            end
         end
 
-        # Round
-        @test H(round, 1.1) ≈ [0;;]
-        @test H(x -> round(Int, x), 1.1) ≈ [0;;]
-        @test H(x -> round(Bool, x), 1.1) ≈ [0;;]
-        @test H(x -> round(Float16, x), 1.1) ≈ [0;;]
-        @test H(x -> round(x, RoundNearestTiesAway), 1.1) ≈ [0;;]
-        @test H(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
+        @testset "Round" begin
+            @test H(round, 1.1) ≈ [0;;]
+            @test H(x -> round(Int, x), 1.1) ≈ [0;;]
+            @test H(x -> round(Bool, x), 1.1) ≈ [0;;]
+            @test H(x -> round(Float16, x), 1.1) ≈ [0;;]
+            @test H(x -> round(x, RoundNearestTiesAway), 1.1) ≈ [0;;]
+            @test H(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
+        end
 
-        # Random
-        @test H(x -> rand(typeof(x)), 1) ≈ [0;;]
-        @test H(x -> rand(GLOBAL_RNG, typeof(x)), 1) ≈ [0;;]
+        @testset "Random" begin
+            @test H(x -> rand(typeof(x)), 1) ≈ [0;;]
+            @test H(x -> rand(GLOBAL_RNG, typeof(x)), 1) ≈ [0;;]
+        end
 
-        @test H(x -> x[1] / x[2] + x[3] / 1 + 1 / x[4], rand(4)) == [
-            0 1 0 0
-            1 1 0 0
-            0 0 0 0
-            0 0 0 1
-        ]
-
-        @test H(x -> x[1] * x[2] + x[3] * 1 + 1 * x[4], rand(4)) == [
-            0 1 0 0
-            1 0 0 0
-            0 0 0 0
-            0 0 0 0
-        ]
-
-        @test H(x -> (x[1] * x[2]) * (x[3] * x[4]), rand(4)) == [
-            0 1 1 1
-            1 0 1 1
-            1 1 0 1
-            1 1 1 0
-        ]
-
-        @test H(x -> (x[1] + x[2]) * (x[3] + x[4]), rand(4)) == [
-            0 0 1 1
-            0 0 1 1
-            1 1 0 0
-            1 1 0 0
-        ]
-
-        @test H(x -> (x[1] + x[2] + x[3] + x[4])^2, rand(4)) == [
-            1 1 1 1
-            1 1 1 1
-            1 1 1 1
-            1 1 1 1
-        ]
-
-        @test H(x -> 1 / (x[1] + x[2] + x[3] + x[4]), rand(4)) == [
-            1 1 1 1
-            1 1 1 1
-            1 1 1 1
-            1 1 1 1
-        ]
-
-        @test H(x -> (x[1] - x[2]) + (x[3] - 1) + (1 - x[4]), rand(4)) == [
-            0 0 0 0
-            0 0 0 0
-            0 0 0 0
-            0 0 0 0
-        ]
-
-        h = H(x -> copysign(x[1] * x[2], x[3] * x[4]), rand(4))
-        if Bool(shared(T))
-            @test h == [
+        @testset "Basic operators" begin
+            @test H(x -> x[1] / x[2] + x[3] / 1 + 1 / x[4], rand(4)) == [
                 0 1 0 0
-                1 0 0 0
+                1 1 0 0
+                0 0 0 0
                 0 0 0 1
-                0 0 1 0
             ]
-        else
-            @test h == [
+
+            @test H(x -> x[1] * x[2] + x[3] * 1 + 1 * x[4], rand(4)) == [
                 0 1 0 0
                 1 0 0 0
                 0 0 0 0
                 0 0 0 0
+            ]
+
+            @test H(x -> (x[1] * x[2]) * (x[3] * x[4]), rand(4)) == [
+                0 1 1 1
+                1 0 1 1
+                1 1 0 1
+                1 1 1 0
+            ]
+
+            @test H(x -> (x[1] + x[2]) * (x[3] + x[4]), rand(4)) == [
+                0 0 1 1
+                0 0 1 1
+                1 1 0 0
+                1 1 0 0
+            ]
+
+            @test H(x -> (x[1] + x[2] + x[3] + x[4])^2, rand(4)) == [
+                1 1 1 1
+                1 1 1 1
+                1 1 1 1
+                1 1 1 1
+            ]
+
+            @test H(x -> 1 / (x[1] + x[2] + x[3] + x[4]), rand(4)) == [
+                1 1 1 1
+                1 1 1 1
+                1 1 1 1
+                1 1 1 1
+            ]
+
+            @test H(x -> (x[1] - x[2]) + (x[3] - 1) + (1 - x[4]), rand(4)) == [
+                0 0 0 0
+                0 0 0 0
+                0 0 0 0
+                0 0 0 0
+            ]
+
+            x = rand(5)
+            foo(x) = x[1] + x[2] * x[3] + 1 / x[4] + 1 * x[5]
+            @test H(foo, x) == [
+                0 0 0 0 0
+                0 0 1 0 0
+                0 1 0 0 0
+                0 0 0 1 0
+                0 0 0 0 0
+            ]
+
+            bar(x) = foo(x) + x[2]^x[5]
+            @test H(bar, x) == [
+                0 0 0 0 0
+                0 1 1 0 1
+                0 1 0 0 0
+                0 0 0 1 0
+                0 1 0 0 1
             ]
         end
 
-        h = H(x -> div(x[1] * x[2], x[3] * x[4]), rand(4))
-        if Bool(shared(T))
-            @test Matrix(h) == [
-                0 1 0 0
-                1 0 0 0
-                0 0 0 1
-                0 0 1 0
-            ]
-        else
-            @test h == [
-                0 0 0 0
-                0 0 0 0
-                0 0 0 0
-                0 0 0 0
-            ]
+        @testset "Zero derivatives" begin
+            h = H(x -> copysign(x[1] * x[2], x[3] * x[4]), rand(4))
+            if Bool(shared(T))
+                @test h == [
+                    0 1 0 0
+                    1 0 0 0
+                    0 0 0 1
+                    0 0 1 0
+                ]
+            else
+                @test h == [
+                    0 1 0 0
+                    1 0 0 0
+                    0 0 0 0
+                    0 0 0 0
+                ]
+            end
+
+            h = H(x -> div(x[1] * x[2], x[3] * x[4]), rand(4))
+            if Bool(shared(T))
+                @test Matrix(h) == [
+                    0 1 0 0
+                    1 0 0 0
+                    0 0 0 1
+                    0 0 1 0
+                ]
+            else
+                @test h == [
+                    0 0 0 0
+                    0 0 0 0
+                    0 0 0 0
+                    0 0 0 0
+                ]
+            end
         end
 
         @test H(x -> sum(sincosd(x)), 1.0) ≈ [1;;]
@@ -150,25 +181,6 @@ D = Dual{Int,T}
             1 1 1 0
             0 1 1 1
             0 0 1 1
-        ]
-
-        x = rand(5)
-        foo(x) = x[1] + x[2] * x[3] + 1 / x[4] + 1 * x[5]
-        @test H(foo, x) == [
-            0 0 0 0 0
-            0 0 1 0 0
-            0 1 0 0 0
-            0 0 0 1 0
-            0 0 0 0 0
-        ]
-
-        bar(x) = foo(x) + x[2]^x[5]
-        @test H(bar, x) == [
-            0 0 0 0 0
-            0 1 1 0 1
-            0 1 0 0 0
-            0 0 0 1 0
-            0 1 0 0 1
         ]
 
         # Shared Hessian
@@ -194,68 +206,72 @@ D = Dual{Int,T}
         end
 
         # Missing primal errors
-        @testset "MissingPrimalError on $f" for f in (
-            iseven,
-            isfinite,
-            isinf,
-            isinteger,
-            ismissing,
-            isnan,
-            isnothing,
-            isodd,
-            isone,
-            isreal,
-            iszero,
-        )
-            @test_throws MissingPrimalError H(f, rand())
+        @testset "MissingPrimalError" begin
+            @testset "$f" for f in (
+                iseven,
+                isfinite,
+                isinf,
+                isinteger,
+                ismissing,
+                isnan,
+                isnothing,
+                isodd,
+                isone,
+                isreal,
+                iszero,
+            )
+                @test_throws MissingPrimalError H(f, rand())
+            end
         end
 
         # ifelse and comparisons
-        if VERSION >= v"1.8"
-            @test H(x -> ifelse(x[1], x[1]^x[2], x[3] * x[4]), rand(4)) == [
-                1  1  0  0
-                1  1  0  0
-                0  0  0  1
-                0  0  1  0
-            ]
+        @testset "ifelse and comparisons" begin
+            if VERSION >= v"1.8"
+                @test H(x -> ifelse(x[1], x[1]^x[2], x[3] * x[4]), rand(4)) == [
+                    1  1  0  0
+                    1  1  0  0
+                    0  0  0  1
+                    0  0  1  0
+                ]
 
-            @test H(x -> ifelse(x[1], x[1]^x[2], 1.0), rand(4)) == [
-                1  1  0  0
-                1  1  0  0
-                0  0  0  0
-                0  0  0  0
-            ]
+                @test H(x -> ifelse(x[1], x[1]^x[2], 1.0), rand(4)) == [
+                    1  1  0  0
+                    1  1  0  0
+                    0  0  0  0
+                    0  0  0  0
+                ]
 
-            @test H(x -> ifelse(x[1], 1.0, x[3] * x[4]), rand(4)) == [
-                0  0  0  0
-                0  0  0  0
-                0  0  0  1
-                0  0  1  0
+                @test H(x -> ifelse(x[1], 1.0, x[3] * x[4]), rand(4)) == [
+                    0  0  0  0
+                    0  0  0  0
+                    0  0  0  1
+                    0  0  1  0
+                ]
+            end
+
+            function f_ampgo07(x)
+                return (x[1] <= 0) * convert(eltype(x), Inf) +
+                       sin(x[1]) +
+                       sin(10//3 * x[1]) +
+                       log(abs(x[1])) - 84//100 * x[1] + 3
+            end
+            @test H(f_ampgo07, [1.0]) ≈ [1;;]
+
+            # Error handling when applying non-dual tracers to "local" functions with control flow
+            # TypeError: non-boolean (SparseConnectivityTracer.GradientTracer{BitSet}) used in boolean context
+            @test_throws TypeError H(x -> x[1] > x[2] ? x[1]^x[2] : x[3] * x[4], rand(4))
+
+            # SpecialFunctions
+            @test H(x -> erf(x[1]), rand(2)) == [
+                1 0
+                0 0
+            ]
+            @test H(x -> beta(x[1], x[2]), rand(3)) == [
+                1 1 0
+                1 1 0
+                0 0 0
             ]
         end
-
-        function f_ampgo07(x)
-            return (x[1] <= 0) * convert(eltype(x), Inf) +
-                   sin(x[1]) +
-                   sin(10//3 * x[1]) +
-                   log(abs(x[1])) - 84//100 * x[1] + 3
-        end
-        @test H(f_ampgo07, [1.0]) ≈ [1;;]
-
-        # Error handling when applying non-dual tracers to "local" functions with control flow
-        # TypeError: non-boolean (SparseConnectivityTracer.GradientTracer{BitSet}) used in boolean context
-        @test_throws TypeError H(x -> x[1] > x[2] ? x[1]^x[2] : x[3] * x[4], rand(4))
-
-        # SpecialFunctions
-        @test H(x -> erf(x[1]), rand(2)) == [
-            1 0
-            0 0
-        ]
-        @test H(x -> beta(x[1], x[2]), rand(3)) == [
-            1 1 0
-            1 1 0
-            0 0 0
-        ]
         yield()
     end
 end
