@@ -43,6 +43,15 @@ D = Dual{Int,T}
             @test H(x -> x^ℯ, 1) ≈ [1;;]
             @test H(x -> ℯ^x, 1) ≈ [1;;]
             @test H(x -> 0, 1) ≈ [0;;]
+
+            @test H(x -> sum(sincosd(x)), 1.0) ≈ [1;;]
+
+            @test H(x -> sum(diff(x) .^ 3), rand(4)) == [
+                1 1 0 0
+                1 1 1 0
+                0 1 1 1
+                0 0 1 1
+            ]
         end
 
         # Conversions
@@ -174,35 +183,28 @@ D = Dual{Int,T}
             end
         end
 
-        @test H(x -> sum(sincosd(x)), 1.0) ≈ [1;;]
+        @testset "shared Hessian" begin
+            function dead_end(x)
+                z = x[1] * x[2]
+                return x[3] * x[4]
+            end
+            h = H(dead_end, rand(4))
 
-        @test H(x -> sum(diff(x) .^ 3), rand(4)) == [
-            1 1 0 0
-            1 1 1 0
-            0 1 1 1
-            0 0 1 1
-        ]
-
-        # Shared Hessian
-        function dead_end(x)
-            z = x[1] * x[2]
-            return x[3] * x[4]
-        end
-        h = H(dead_end, rand(4))
-        if Bool(shared(T))
-            @test h == [
-                0  1  0  0
-                1  0  0  0
-                0  0  0  1
-                0  0  1  0
-            ]
-        else
-            @test h == [
-                0  0  0  0
-                0  0  0  0
-                0  0  0  1
-                0  0  1  0
-            ]
+            if Bool(shared(T))
+                @test h == [
+                    0  1  0  0
+                    1  0  0  0
+                    0  0  0  1
+                    0  0  1  0
+                ]
+            else
+                @test h == [
+                    0  0  0  0
+                    0  0  0  0
+                    0  0  0  1
+                    0  0  1  0
+                ]
+            end
         end
 
         # Missing primal errors
@@ -224,7 +226,6 @@ D = Dual{Int,T}
             end
         end
 
-        # ifelse and comparisons
         @testset "ifelse and comparisons" begin
             if VERSION >= v"1.8"
                 @test H(x -> ifelse(x[1], x[1]^x[2], x[3] * x[4]), rand(4)) == [
@@ -260,8 +261,9 @@ D = Dual{Int,T}
             # Error handling when applying non-dual tracers to "local" functions with control flow
             # TypeError: non-boolean (SparseConnectivityTracer.GradientTracer{BitSet}) used in boolean context
             @test_throws TypeError H(x -> x[1] > x[2] ? x[1]^x[2] : x[3] * x[4], rand(4))
+        end
 
-            # SpecialFunctions
+        @testset "SpecialFunctions.jl" begin
             @test H(x -> erf(x[1]), rand(2)) == [
                 1 0
                 0 0
@@ -282,149 +284,158 @@ end
         method = TracerLocalSparsityDetector(; hessian_tracer_type=T)
         H(f, x) = hessian_sparsity(f, x, method)
 
-        f1(x) = x[1] + x[2] * x[3] + 1 / x[4] + x[2] * max(x[1], x[5])
-        @test H(f1, [1.0 3.0 5.0 1.0 2.0]) == [
-            0  0  0  0  0
-            0  0  1  0  1
-            0  1  0  0  0
-            0  0  0  1  0
-            0  1  0  0  0
-        ]
-
-        @test H(f1, [4.0 3.0 5.0 1.0 2.0]) == [
-            0  1  0  0  0
-            1  0  1  0  0
-            0  1  0  0  0
-            0  0  0  1  0
-            0  0  0  0  0
-        ]
-
-        f2(x) = ifelse(x[2] < x[3], x[1] * x[2], x[3] * x[4])
-        h = H(f2, [1 2 3 4])
-        if Bool(shared(T))
-            @test h == [
-                0  1  0  0
-                1  0  0  0
-                0  0  0  1
-                0  0  1  0
+        @testset "Trivial examples" begin
+            f1(x) = x[1] + x[2] * x[3] + 1 / x[4] + x[2] * max(x[1], x[5])
+            @test H(f1, [1.0 3.0 5.0 1.0 2.0]) == [
+                0  0  0  0  0
+                0  0  1  0  1
+                0  1  0  0  0
+                0  0  0  1  0
+                0  1  0  0  0
             ]
-        else
-            @test h == [
-                0  1  0  0
-                1  0  0  0
-                0  0  0  0
-                0  0  0  0
+
+            @test H(f1, [4.0 3.0 5.0 1.0 2.0]) == [
+                0  1  0  0  0
+                1  0  1  0  0
+                0  1  0  0  0
+                0  0  0  1  0
+                0  0  0  0  0
             ]
+
+            f2(x) = ifelse(x[2] < x[3], x[1] * x[2], x[3] * x[4])
+            h = H(f2, [1 2 3 4])
+            if Bool(shared(T))
+                @test h == [
+                    0  1  0  0
+                    1  0  0  0
+                    0  0  0  1
+                    0  0  1  0
+                ]
+            else
+                @test h == [
+                    0  1  0  0
+                    1  0  0  0
+                    0  0  0  0
+                    0  0  0  0
+                ]
+            end
+
+            h = H(f2, [1 3 2 4])
+            if Bool(shared(T))
+                @test h == [
+                    0  1  0  0
+                    1  0  0  0
+                    0  0  0  1
+                    0  0  1  0
+                ]
+            else
+                @test h == [
+                    0  0  0  0
+                    0  0  0  0
+                    0  0  0  1
+                    0  0  1  0
+                ]
+            end
         end
 
-        h = H(f2, [1 3 2 4])
-        if Bool(shared(T))
-            @test h == [
-                0  1  0  0
-                1  0  0  0
-                0  0  0  1
-                0  0  1  0
-            ]
-        else
-            @test h == [
-                0  0  0  0
-                0  0  0  0
-                0  0  0  1
-                0  0  1  0
-            ]
+        @testset "Shared Hessian" begin
+            function dead_end(x)
+                z = x[1] * x[2]
+                return x[3] * x[4]
+            end
+            h = H(dead_end, rand(4))
+            if Bool(shared(T))
+                @test h == [
+                    0  1  0  0
+                    1  0  0  0
+                    0  0  0  1
+                    0  0  1  0
+                ]
+            else
+                @test h == [
+                    0  0  0  0
+                    0  0  0  0
+                    0  0  0  1
+                    0  0  1  0
+                ]
+            end
         end
 
-        # Shared Hessian
-        function dead_end(x)
-            z = x[1] * x[2]
-            return x[3] * x[4]
-        end
-        h = H(dead_end, rand(4))
-        if Bool(shared(T))
-            @test h == [
-                0  1  0  0
-                1  0  0  0
-                0  0  0  1
-                0  0  1  0
-            ]
-        else
-            @test h == [
-                0  0  0  0
-                0  0  0  0
-                0  0  0  1
-                0  0  1  0
-            ]
+        @testset "Miscellaneous" begin
+            @test H(sign, 1) ≈ [0;;]
+            @test H(typemax, 1) ≈ [0;;]
+            @test H(x -> x^(2//3), 1) ≈ [1;;]
+            @test H(x -> (2//3)^x, 1) ≈ [1;;]
+            @test H(x -> x^ℯ, 1) ≈ [1;;]
+            @test H(x -> ℯ^x, 1) ≈ [1;;]
+            @test H(x -> 0, 1) ≈ [0;;]
+
+            # Test special cases on empty tracer
+
+            @test H(x -> zero(x)^(2//3), 1) ≈ [0;;]
+            @test H(x -> (2//3)^zero(x), 1) ≈ [0;;]
+            @test H(x -> zero(x)^ℯ, 1) ≈ [0;;]
+            @test H(x -> ℯ^zero(x), 1) ≈ [0;;]
         end
 
-        # Code coverage
-        @test H(sign, 1) ≈ [0;;]
-        @test H(typemax, 1) ≈ [0;;]
-        @test H(x -> x^(2//3), 1) ≈ [1;;]
-        @test H(x -> (2//3)^x, 1) ≈ [1;;]
-        @test H(x -> x^ℯ, 1) ≈ [1;;]
-        @test H(x -> ℯ^x, 1) ≈ [1;;]
-        @test H(x -> 0, 1) ≈ [0;;]
-
-        # Conversions
-        @testset "Conversion to $T" for T in REAL_TYPES
-            @test H(x -> convert(T, x), 1.0) ≈ [0;;]
-            @test H(x -> convert(T, x^2), 1.0) ≈ [1;;]
-            @test H(x -> convert(T, x)^2, 1.0) ≈ [1;;]
+        @testset "Conversion" begin
+            @testset "to $T" for T in REAL_TYPES
+                @test H(x -> convert(T, x), 1.0) ≈ [0;;]
+                @test H(x -> convert(T, x^2), 1.0) ≈ [1;;]
+                @test H(x -> convert(T, x)^2, 1.0) ≈ [1;;]
+            end
         end
 
-        # Round
-        @test H(round, 1.1) ≈ [0;;]
-        @test H(x -> round(Int, x), 1.1) ≈ [0;;]
-        @test H(x -> round(Bool, x), 1.1) ≈ [0;;]
-        @test H(x -> round(x, RoundNearestTiesAway), 1.1) ≈ [0;;]
-        @test H(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
+        @testset "Round" begin
+            @test H(round, 1.1) ≈ [0;;]
+            @test H(x -> round(Int, x), 1.1) ≈ [0;;]
+            @test H(x -> round(Bool, x), 1.1) ≈ [0;;]
+            @test H(x -> round(x, RoundNearestTiesAway), 1.1) ≈ [0;;]
+            @test H(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
+        end
 
-        # Random
-        @test H(x -> rand(typeof(x)), 1) ≈ [0;;]
-        @test H(x -> rand(GLOBAL_RNG, typeof(x)), 1) ≈ [0;;]
+        @testset "Random" begin
+            @test H(x -> rand(typeof(x)), 1) ≈ [0;;]
+            @test H(x -> rand(GLOBAL_RNG, typeof(x)), 1) ≈ [0;;]
+        end
 
-        # Test special cases on empty tracer
-        @test H(x -> zero(x)^(2//3), 1) ≈ [0;;]
-        @test H(x -> (2//3)^zero(x), 1) ≈ [0;;]
-        @test H(x -> zero(x)^ℯ, 1) ≈ [0;;]
-        @test H(x -> ℯ^zero(x), 1) ≈ [0;;]
+        @testset "NNlib" begin
+            @test H(NNlib.relu, -1) ≈ [0;;]
+            @test H(NNlib.relu, 1) ≈ [0;;]
+            @test H(NNlib.elu, -1) ≈ [1;;]
+            @test H(NNlib.elu, 1) ≈ [0;;]
+            @test H(NNlib.celu, -1) ≈ [1;;]
+            @test H(NNlib.celu, 1) ≈ [0;;]
+            @test H(NNlib.selu, -1) ≈ [1;;]
+            @test H(NNlib.selu, 1) ≈ [0;;]
 
-        # NNlib extension
-        @test H(NNlib.relu, -1) ≈ [0;;]
-        @test H(NNlib.relu, 1) ≈ [0;;]
-        @test H(NNlib.elu, -1) ≈ [1;;]
-        @test H(NNlib.elu, 1) ≈ [0;;]
-        @test H(NNlib.celu, -1) ≈ [1;;]
-        @test H(NNlib.celu, 1) ≈ [0;;]
-        @test H(NNlib.selu, -1) ≈ [1;;]
-        @test H(NNlib.selu, 1) ≈ [0;;]
+            @test H(NNlib.relu6, -1) ≈ [0;;]
+            @test H(NNlib.relu6, 1) ≈ [0;;]
+            @test H(NNlib.relu6, 7) ≈ [0;;]
 
-        @test H(NNlib.relu6, -1) ≈ [0;;]
-        @test H(NNlib.relu6, 1) ≈ [0;;]
-        @test H(NNlib.relu6, 7) ≈ [0;;]
+            @test H(NNlib.trelu, 0.9) ≈ [0;;]
+            @test H(NNlib.trelu, 1.1) ≈ [0;;]
 
-        @test H(NNlib.trelu, 0.9) ≈ [0;;]
-        @test H(NNlib.trelu, 1.1) ≈ [0;;]
+            @test H(NNlib.swish, -5) ≈ [1;;]
+            @test H(NNlib.swish, 0) ≈ [1;;]
+            @test H(NNlib.swish, 5) ≈ [1;;]
 
-        @test H(NNlib.swish, -5) ≈ [1;;]
-        @test H(NNlib.swish, 0) ≈ [1;;]
-        @test H(NNlib.swish, 5) ≈ [1;;]
+            @test H(NNlib.hardswish, -5) ≈ [0;;]
+            @test H(NNlib.hardswish, 0) ≈ [1;;]
+            @test H(NNlib.hardswish, 5) ≈ [0;;]
 
-        @test H(NNlib.hardswish, -5) ≈ [0;;]
-        @test H(NNlib.hardswish, 0) ≈ [1;;]
-        @test H(NNlib.hardswish, 5) ≈ [0;;]
+            @test H(NNlib.hardσ, -4) ≈ [0;;]
+            @test H(NNlib.hardσ, 0) ≈ [0;;]
+            @test H(NNlib.hardσ, 4) ≈ [0;;]
 
-        @test H(NNlib.hardσ, -4) ≈ [0;;]
-        @test H(NNlib.hardσ, 0) ≈ [0;;]
-        @test H(NNlib.hardσ, 4) ≈ [0;;]
+            @test H(NNlib.hardtanh, -2) ≈ [0;;]
+            @test H(NNlib.hardtanh, 0) ≈ [0;;]
+            @test H(NNlib.hardtanh, 2) ≈ [0;;]
 
-        @test H(NNlib.hardtanh, -2) ≈ [0;;]
-        @test H(NNlib.hardtanh, 0) ≈ [0;;]
-        @test H(NNlib.hardtanh, 2) ≈ [0;;]
-
-        @test H(NNlib.softshrink, -1) ≈ [0;;]
-        @test H(NNlib.softshrink, 0) ≈ [0;;]
-        @test H(NNlib.softshrink, 1) ≈ [0;;]
+            @test H(NNlib.softshrink, -1) ≈ [0;;]
+            @test H(NNlib.softshrink, 0) ≈ [0;;]
+            @test H(NNlib.softshrink, 1) ≈ [0;;]
+        end
         yield()
     end
 end
