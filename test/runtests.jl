@@ -5,6 +5,7 @@ Pkg.develop(;
 
 using SparseConnectivityTracer
 
+using Compat: pkgversion
 using Test
 using JuliaFormatter
 using Aqua
