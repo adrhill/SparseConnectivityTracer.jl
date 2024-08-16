@@ -304,9 +304,8 @@ function overload_hessian_1_to_2(M::Symbol, f)
     end
 end
 
-## Special cases
+## Special overloads to avoid ambiguity errors
 
-## Exponent (requires extra types)
 for S in (Integer, Rational, Irrational{:ℯ})
     Base.:^(t::T, ::S) where {T<:HessianTracer} = hessian_tracer_1_to_1(t, false, false)
     Base.:^(::S, t::T) where {T<:HessianTracer} = hessian_tracer_1_to_1(t, false, false)
@@ -321,6 +320,10 @@ for S in (Integer, Rational, Irrational{:ℯ})
         t = hessian_tracer_1_to_1(tracer(d), false, false)
         return Dual(x^y, t)
     end
+end
+
+function Base.isless(dx::D, y::AbstractFloat) where {P,T<:GradientTracer,D<:Dual{P,T}}
+    return isless(primal(dx), y)
 end
 
 ## Rounding

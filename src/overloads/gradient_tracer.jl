@@ -262,9 +262,8 @@ function overload_gradient_1_to_2(M::Symbol, f)
     return Expr(:block, expr_gradienttracer, expr_dual)
 end
 
-## Special cases to avoid ambiguity errors
+## Special overloads to avoid ambiguity errors
 
-## Exponent (requires extra types)
 for S in (Integer, Rational, Irrational{:ℯ})
     Base.:^(t::T, ::S) where {T<:GradientTracer} = t
     Base.:^(::S, t::T) where {T<:GradientTracer} = t
@@ -278,6 +277,10 @@ for S in (Integer, Rational, Irrational{:ℯ})
         t = gradient_tracer_1_to_1(tracer(d), false)
         return Dual(x^y, t)
     end
+end
+
+function Base.isless(dx::D, y::AbstractFloat) where {P,T<:GradientTracer,D<:Dual{P,T}}
+    return isless(primal(dx), y)
 end
 
 ## Rounding
