@@ -25,7 +25,6 @@ include("tracers.jl")
 include("exceptions.jl")
 include("operators.jl")
 
-include("overloads/utils.jl")
 include("overloads/conversion.jl")
 include("overloads/gradient_tracer.jl")
 include("overloads/hessian_tracer.jl")

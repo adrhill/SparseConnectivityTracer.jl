@@ -6,29 +6,17 @@ for overload in (
     :overload_hessian_2_to_1,
     :overload_hessian_1_to_2,
 )
-    @eval function $overload(ops::Union{AbstractVector,Tuple})
-        for op in ops
-            $overload(op)
+    @eval function $overload(M::Symbol, ops::Union{AbstractVector,Tuple})
+        exprs = [$overload(M, op) for op in ops]
+        return quote
+            $(exprs...)
         end
     end
 end
 
-overload_gradient_1_to_1(ops_1_to_1)
-overload_gradient_2_to_1(ops_2_to_1)
-overload_gradient_1_to_2(ops_1_to_2)
-overload_hessian_1_to_1(ops_1_to_1)
-overload_hessian_2_to_1(ops_2_to_1)
-overload_hessian_1_to_2(ops_1_to_2)
-
-# for op in ops_1_to_1
-#     overload_gradient_1_to_1(op)
-#     overload_hessian_1_to_1(op)
-# end
-# for op in ops_2_to_1
-#     overload_gradient_2_to_1(op)
-#     overload_hessian_2_to_1(op)
-# end
-# for op in ops_1_to_2
-#     overload_gradient_1_to_2(op)
-#     overload_hessian_1_to_2(op)
-# end
+eval(overload_gradient_1_to_1(:Base, ops_1_to_1))
+eval(overload_gradient_2_to_1(:Base, ops_2_to_1))
+eval(overload_gradient_1_to_2(:Base, ops_1_to_2))
+eval(overload_hessian_1_to_1(:Base, ops_1_to_1))
+eval(overload_hessian_2_to_1(:Base, ops_2_to_1))
+eval(overload_hessian_1_to_2(:Base, ops_1_to_2))

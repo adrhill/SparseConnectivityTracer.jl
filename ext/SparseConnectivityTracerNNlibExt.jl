@@ -84,7 +84,7 @@ ops_1_to_1 = union(ops_1_to_1_s, ops_1_to_1_f)
 
 ## Overload
 
-SCT.overload_gradient_1_to_1(ops_1_to_1)
-SCT.overload_hessian_1_to_1(ops_1_to_1)
+eval(SCT.overload_gradient_1_to_1(:NNlib, ops_1_to_1))
+eval(SCT.overload_hessian_1_to_1(:NNlib, ops_1_to_1))
 
 end
