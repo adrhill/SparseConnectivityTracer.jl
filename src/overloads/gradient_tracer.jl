@@ -34,23 +34,33 @@ function overload_gradient_1_to_1(M::Symbol, f)
     fname = nameof(f)
     is_der1_zero_g = is_der1_zero_global(f)
 
-    return quote
-        ## GradientTracer
+    expr_gradienttracer = quote
         function $M.$fname(t::$SCT.GradientTracer)
             return $SCT.gradient_tracer_1_to_1(t, $is_der1_zero_g)
         end
+    end
 
-        ## Dual
-        function $M.$fname(d::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
-            x = $SCT.primal(d)
-            p_out = $M.$fname(x)
+    expr_dual = if is_der1_zero_g
+        quote
+            function $M.$fname(d::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+                x = $SCT.primal(d)
+                return $M.$fname(x)
+            end
+        end
+    else
+        quote
+            function $M.$fname(d::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+                x = $SCT.primal(d)
+                p_out = $M.$fname(x)
 
-            t = $SCT.tracer(d)
-            is_der1_zero = $SCT.is_der1_zero_local($M.$fname, x)
-            t_out = $SCT.gradient_tracer_1_to_1(t, is_der1_zero)
-            return $SCT.Dual(p_out, t_out)
+                t = $SCT.tracer(d)
+                is_der1_zero = $SCT.is_der1_zero_local($M.$fname, x)
+                t_out = $SCT.gradient_tracer_1_to_1(t, is_der1_zero)
+                return $SCT.Dual(p_out, t_out)
+            end
         end
     end
+    return Expr(:block, expr_gradienttracer, expr_dual)
 end
 
 ## 2-to-1
@@ -101,65 +111,103 @@ end
 
 function overload_gradient_2_to_1(M::Symbol, f)
     fname = nameof(f)
-    is_der1_arg1_zero = is_der1_arg1_zero_global(f)
-    is_der1_arg2_zero = is_der1_arg2_zero_global(f)
+    is_der1_arg1_zero_g = is_der1_arg1_zero_global(f)
+    is_der1_arg2_zero_g = is_der1_arg2_zero_global(f)
 
-    return quote
-        ## GradientTracer
+    ## GradientTracer
+    expr_gradienttracer = quote
         function $M.$fname(tx::T, ty::T) where {T<:$SCT.GradientTracer}
             return $SCT.gradient_tracer_2_to_1(
-                tx, ty, $is_der1_arg1_zero, $is_der1_arg2_zero
+                tx, ty, $is_der1_arg1_zero_g, $is_der1_arg2_zero_g
             )
         end
 
         function $M.$fname(tx::$SCT.GradientTracer, ::Real)
-            return $SCT.gradient_tracer_1_to_1(tx, $is_der1_arg1_zero)
+            return $SCT.gradient_tracer_1_to_1(tx, $is_der1_arg1_zero_g)
         end
 
         function $M.$fname(::Real, ty::$SCT.GradientTracer)
-            return $SCT.gradient_tracer_1_to_1(ty, $is_der1_arg2_zero)
-        end
-
-        ## Dual
-        function $M.$fname(dx::D, dy::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
-            x = $SCT.primal(dx)
-            y = $SCT.primal(dy)
-            p_out = $M.$fname(x, y)
-
-            tx = $SCT.tracer(dx)
-            ty = $SCT.tracer(dy)
-            is_der1_arg1_zero = $SCT.is_der1_arg1_zero_local($M.$fname, x, y)
-            is_der1_arg2_zero = $SCT.is_der1_arg2_zero_local($M.$fname, x, y)
-            t_out = $SCT.gradient_tracer_2_to_1(
-                tx, ty, is_der1_arg1_zero, is_der1_arg2_zero
-            )
-            return $SCT.Dual(p_out, t_out)
-        end
-
-        function $M.$fname(
-            dx::D, y::Real
-        ) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
-            x = $SCT.primal(dx)
-            p_out = $M.$fname(x, y)
-
-            tx = $SCT.tracer(dx)
-            is_der1_arg1_zero = $SCT.is_der1_arg1_zero_local($M.$fname, x, y)
-            t_out = $SCT.gradient_tracer_1_to_1(tx, is_der1_arg1_zero)
-            return $SCT.Dual(p_out, t_out)
-        end
-
-        function $M.$fname(
-            x::Real, dy::D
-        ) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
-            y = $SCT.primal(dy)
-            p_out = $M.$fname(x, y)
-
-            ty = $SCT.tracer(dy)
-            is_der1_arg2_zero = $SCT.is_der1_arg2_zero_local($M.$fname, x, y)
-            t_out = $SCT.gradient_tracer_1_to_1(ty, is_der1_arg2_zero)
-            return $SCT.Dual(p_out, t_out)
+            return $SCT.gradient_tracer_1_to_1(ty, $is_der1_arg2_zero_g)
         end
     end
+
+    ## Dual
+    expr_dual_dual = if is_der1_arg1_zero_g && is_der1_arg2_zero_g
+        quote
+            function $M.$fname(dx::D, dy::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+                x = $SCT.primal(dx)
+                y = $SCT.primal(dy)
+                return $M.$fname(x, y)
+            end
+        end
+    else
+        quote
+            function $M.$fname(dx::D, dy::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+                x = $SCT.primal(dx)
+                y = $SCT.primal(dy)
+                p_out = $M.$fname(x, y)
+
+                tx = $SCT.tracer(dx)
+                ty = $SCT.tracer(dy)
+                is_der1_arg1_zero = $SCT.is_der1_arg1_zero_local($M.$fname, x, y)
+                is_der1_arg2_zero = $SCT.is_der1_arg2_zero_local($M.$fname, x, y)
+                t_out = $SCT.gradient_tracer_2_to_1(
+                    tx, ty, is_der1_arg1_zero, is_der1_arg2_zero
+                )
+                return $SCT.Dual(p_out, t_out)
+            end
+        end
+    end
+    expr_dual_real = if is_der1_arg1_zero_g
+        quote
+            function $M.$fname(
+                dx::D, y::Real
+            ) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+                x = $SCT.primal(dx)
+                return $M.$fname(x, y)
+            end
+        end
+    else
+        quote
+            function $M.$fname(
+                dx::D, y::Real
+            ) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+                x = $SCT.primal(dx)
+                p_out = $M.$fname(x, y)
+
+                tx = $SCT.tracer(dx)
+                is_der1_arg1_zero = $SCT.is_der1_arg1_zero_local($M.$fname, x, y)
+                t_out = $SCT.gradient_tracer_1_to_1(tx, is_der1_arg1_zero)
+                return $SCT.Dual(p_out, t_out)
+            end
+        end
+    end
+    expr_real_dual = if is_der1_arg2_zero_g
+        quote
+            function $M.$fname(
+                x::Real, dy::D
+            ) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+                y = $SCT.primal(dy)
+                return $M.$fname(x, y)
+            end
+        end
+    else
+        quote
+            function $M.$fname(
+                x::Real, dy::D
+            ) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+                y = $SCT.primal(dy)
+                p_out = $M.$fname(x, y)
+
+                ty = $SCT.tracer(dy)
+                is_der1_arg2_zero = $SCT.is_der1_arg2_zero_local($M.$fname, x, y)
+                t_out = $SCT.gradient_tracer_1_to_1(ty, is_der1_arg2_zero)
+                return $SCT.Dual(p_out, t_out)
+            end
+        end
+    end
+
+    return Expr(:block, expr_gradienttracer, expr_dual_dual, expr_dual_real, expr_real_dual)
 end
 
 ## 1-to-2
@@ -181,31 +229,40 @@ function overload_gradient_1_to_2(M::Symbol, f)
     is_der1_out1_zero_g = is_der1_out1_zero_global(f)
     is_der1_out2_zero_g = is_der1_out2_zero_global(f)
 
-    return quote
-        ## GradientTracer
+    expr_gradienttracer = quote
         function $M.$fname(t::$SCT.GradientTracer)
-            return $SCT.gradient_tracer_1_to_2(
-                t, $is_der1_out1_zero_g, $is_der1_out2_zero_g
-            )
-        end
-
-        ## Dual
-        function $M.$fname(d::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
-            x = $SCT.primal(d)
-            p_out1, p_out2 = $M.$fname(x)
-
-            t = $SCT.tracer(d)
-            is_der1_out2_zero = $SCT.is_der1_out2_zero_local($M.$fname, x)
-            is_der1_out1_zero = $SCT.is_der1_out1_zero_local($M.$fname, x)
-            t_out1, t_out2 = $SCT.gradient_tracer_1_to_2(
-                t, is_der1_out1_zero, is_der1_out2_zero
-            )
-            return ($SCT.Dual(p_out1, t_out1), $SCT.Dual(p_out2, t_out2))  # TODO: this was wrong, add test
+            return $SCT.gradient_tracer_1_to_2(t, $is_der1_out1_zero_g, $is_der1_out2_zero_g)
         end
     end
+
+    expr_dual = if is_der1_out1_zero_g && is_der1_out2_zero_g
+        quote
+            function $M.$fname(d::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+                x = $SCT.primal(d)
+                return $M.$fname(x)
+            end
+        end
+    else
+        quote
+            function $M.$fname(d::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+                x = $SCT.primal(d)
+                p_out1, p_out2 = $M.$fname(x)
+
+                t = $SCT.tracer(d)
+                is_der1_out2_zero = $SCT.is_der1_out2_zero_local($M.$fname, x)
+                is_der1_out1_zero = $SCT.is_der1_out1_zero_local($M.$fname, x)
+                t_out1, t_out2 = $SCT.gradient_tracer_1_to_2(
+                    t, is_der1_out1_zero, is_der1_out2_zero
+                )
+                return ($SCT.Dual(p_out1, t_out1), $SCT.Dual(p_out2, t_out2))  # TODO: this was wrong, add test
+            end
+        end
+    end
+
+    return Expr(:block, expr_gradienttracer, expr_dual)
 end
 
-## Special cases
+## Special cases to avoid ambiguity errors
 
 ## Exponent (requires extra types)
 for S in (Integer, Rational, Irrational{:ℯ})
