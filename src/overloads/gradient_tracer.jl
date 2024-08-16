@@ -1,3 +1,5 @@
+SCT = SparseConnectivityTracer
+
 ## 1-to-1
 
 @noinline function gradient_tracer_1_to_1(
@@ -29,10 +31,8 @@ function gradient_tracer_1_to_1_inner(
 end
 
 function overload_gradient_1_to_1(M::Symbol, f)
-    is_der1_zero_g = is_der1_zero_global(f)
-
-    SCT = SparseConnectivityTracer
     fname = nameof(f)
+    is_der1_zero_g = is_der1_zero_global(f)
 
     return quote
         ## GradientTracer
@@ -100,14 +100,12 @@ function gradient_tracer_2_to_1_inner(
 end
 
 function overload_gradient_2_to_1(M::Symbol, f)
+    fname = nameof(f)
     is_der1_arg1_zero = is_der1_arg1_zero_global(f)
     is_der1_arg2_zero = is_der1_arg2_zero_global(f)
 
-    SCT = SparseConnectivityTracer
-    fname = nameof(f)
-
-    ## GradientTracer
     return quote
+        ## GradientTracer
         function $M.$fname(tx::T, ty::T) where {T<:$SCT.GradientTracer}
             return $SCT.gradient_tracer_2_to_1(
                 tx, ty, $is_der1_arg1_zero, $is_der1_arg2_zero
@@ -179,11 +177,9 @@ end
 end
 
 function overload_gradient_1_to_2(M::Symbol, f)
+    fname = nameof(f)
     is_der1_out1_zero_g = is_der1_out1_zero_global(f)
     is_der1_out2_zero_g = is_der1_out2_zero_global(f)
-
-    SCT = SparseConnectivityTracer
-    fname = nameof(f)
 
     return quote
         ## GradientTracer

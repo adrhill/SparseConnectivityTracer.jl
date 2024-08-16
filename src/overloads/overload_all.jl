@@ -8,9 +8,7 @@ for overload in (
 )
     @eval function $overload(M::Symbol, ops::Union{AbstractVector,Tuple})
         exprs = [$overload(M, op) for op in ops]
-        return quote
-            $(exprs...)
-        end
+        return Expr(:block, exprs...)
     end
 end
 
