@@ -279,7 +279,7 @@ for S in (Integer, Rational, Irrational{:ℯ})
     end
 end
 
-function Base.isless(dx::D, y::AbstractFloat) where {P,T<:GradientTracer,D<:Dual{P,T}}
+function Base.isless(dx::D, y::AbstractFloat) where {P<:Real,T<:GradientTracer,D<:Dual{P,T}}
     return isless(primal(dx), y)
 end
 
