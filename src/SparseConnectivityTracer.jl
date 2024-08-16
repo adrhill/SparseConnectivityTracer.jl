@@ -1,7 +1,6 @@
 module SparseConnectivityTracer
 
 using ADTypes: ADTypes, jacobian_sparsity, hessian_sparsity
-using Compat: Returns
 using SparseArrays: SparseArrays
 using SparseArrays: sparse
 using Random: AbstractRNG, SamplerType
