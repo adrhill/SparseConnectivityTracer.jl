@@ -55,25 +55,28 @@ function hessian_tracer_1_to_1_inner(
     return P(g_out, h_out) # return pattern
 end
 
-function overload_hessian_1_to_1(op)
-    M = parentmodule(op)
+function overload_hessian_1_to_1(f)
+    is_der1_zero_g = is_der1_zero_global(f)
+    is_der2_zero_g = is_der2_zero_global(f)
+
     SCT = SparseConnectivityTracer
+    M = nameofrootmodule(f)
+    fname = nameof(f)
+
     @eval begin
         ## HessianTracer
-        function $M.$op(t::$SCT.HessianTracer)
-            is_der1_zero = $SCT.is_der1_zero_global($M.$op)
-            is_der2_zero = $SCT.is_der2_zero_global($M.$op)
-            return $SCT.hessian_tracer_1_to_1(t, is_der1_zero, is_der2_zero)
+        function $M.$fname(t::$SCT.HessianTracer)
+            return $SCT.hessian_tracer_1_to_1(t, $is_der1_zero_g, $is_der2_zero_g)
         end
 
         ## Dual
-        function $M.$op(d::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
+        function $M.$fname(d::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
             x = $SCT.primal(d)
-            p_out = $M.$op(x)
+            p_out = $M.$fname(x)
 
             t = $SCT.tracer(d)
-            is_der1_zero = $SCT.is_der1_zero_local($M.$op, x)
-            is_der2_zero = $SCT.is_der2_zero_local($M.$op, x)
+            is_der1_zero = $SCT.is_der1_zero_local($M.$fname, x)
+            is_der2_zero = $SCT.is_der2_zero_local($M.$fname, x)
             t_out = $SCT.hessian_tracer_1_to_1(t, is_der1_zero, is_der2_zero)
             return $SCT.Dual(p_out, t_out)
         end
@@ -161,86 +164,87 @@ function hessian_tracer_2_to_1_inner(
     return P(g_out, h_out) # return pattern
 end
 
-function overload_hessian_2_to_1(op)
-    M = parentmodule(op)
+function overload_hessian_2_to_1(f)
+    is_der1_arg1_zero_g = is_der1_arg1_zero_global(f)
+    is_der2_arg1_zero_g = is_der2_arg1_zero_global(f)
+    is_der1_arg2_zero_g = is_der1_arg2_zero_global(f)
+    is_der2_arg2_zero_g = is_der2_arg2_zero_global(f)
+    is_der_cross_zero_g = is_der_cross_zero_global(f)
+
     SCT = SparseConnectivityTracer
-    @eval begin
-        ## HessianTracer
-        function $M.$op(tx::T, ty::T) where {T<:$SCT.HessianTracer}
-            is_der1_arg1_zero = $SCT.is_der1_arg1_zero_global($M.$op)
-            is_der2_arg1_zero = $SCT.is_der2_arg1_zero_global($M.$op)
-            is_der1_arg2_zero = $SCT.is_der1_arg2_zero_global($M.$op)
-            is_der2_arg2_zero = $SCT.is_der2_arg2_zero_global($M.$op)
-            is_der_cross_zero = $SCT.is_der_cross_zero_global($M.$op)
-            return $SCT.hessian_tracer_2_to_1(
-                tx,
-                ty,
-                is_der1_arg1_zero,
-                is_der2_arg1_zero,
-                is_der1_arg2_zero,
-                is_der2_arg2_zero,
-                is_der_cross_zero,
-            )
-        end
+    M = nameofrootmodule(f)
+    fname = nameof(f)
 
-        function $M.$op(tx::$SCT.HessianTracer, y::Real)
-            is_der1_arg1_zero = $SCT.is_der1_arg1_zero_global($M.$op)
-            is_der2_arg1_zero = $SCT.is_der2_arg1_zero_global($M.$op)
-            return $SCT.hessian_tracer_1_to_1(tx, is_der1_arg1_zero, is_der2_arg1_zero)
-        end
+    ## HessianTracer
+    @eval function $M.$fname(tx::T, ty::T) where {T<:$SCT.HessianTracer}
+        return $SCT.hessian_tracer_2_to_1(
+            tx,
+            ty,
+            $is_der1_arg1_zero_g,
+            $is_der2_arg1_zero_g,
+            $is_der1_arg2_zero_g,
+            $is_der2_arg2_zero_g,
+            $is_der_cross_zero_g,
+        )
+    end
 
-        function $M.$op(x::Real, ty::$SCT.HessianTracer)
-            is_der1_arg2_zero = $SCT.is_der1_arg2_zero_global($M.$op)
-            is_der2_arg2_zero = $SCT.is_der2_arg2_zero_global($M.$op)
-            return $SCT.hessian_tracer_1_to_1(ty, is_der1_arg2_zero, is_der2_arg2_zero)
-        end
+    @eval function $M.$fname(tx::$SCT.HessianTracer, y::Real)
+        return $SCT.hessian_tracer_1_to_1(tx, $is_der1_arg1_zero_g, $is_der2_arg1_zero_g)
+    end
 
-        ## Dual
-        function $M.$op(dx::D, dy::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
-            x = $SCT.primal(dx)
-            y = $SCT.primal(dy)
-            p_out = $M.$op(x, y)
+    @eval function $M.$fname(x::Real, ty::$SCT.HessianTracer)
+        return $SCT.hessian_tracer_1_to_1(ty, $is_der1_arg2_zero_g, $is_der2_arg2_zero_g)
+    end
 
-            tx = $SCT.tracer(dx)
-            ty = $SCT.tracer(dy)
-            is_der1_arg1_zero = $SCT.is_der1_arg1_zero_local($M.$op, x, y)
-            is_der2_arg1_zero = $SCT.is_der2_arg1_zero_local($M.$op, x, y)
-            is_der1_arg2_zero = $SCT.is_der1_arg2_zero_local($M.$op, x, y)
-            is_der2_arg2_zero = $SCT.is_der2_arg2_zero_local($M.$op, x, y)
-            is_der_cross_zero = $SCT.is_der_cross_zero_local($M.$op, x, y)
-            t_out = $SCT.hessian_tracer_2_to_1(
-                tx,
-                ty,
-                is_der1_arg1_zero,
-                is_der2_arg1_zero,
-                is_der1_arg2_zero,
-                is_der2_arg2_zero,
-                is_der_cross_zero,
-            )
-            return $SCT.Dual(p_out, t_out)
-        end
+    ## Dual
+    @eval function $M.$fname(dx::D, dy::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
+        x = $SCT.primal(dx)
+        y = $SCT.primal(dy)
+        p_out = $M.$fname(x, y)
 
-        function $M.$op(dx::D, y::Real) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
-            x = $SCT.primal(dx)
-            p_out = $M.$op(x, y)
+        tx = $SCT.tracer(dx)
+        ty = $SCT.tracer(dy)
+        is_der1_arg1_zero = $SCT.is_der1_arg1_zero_local($M.$fname, x, y)
+        is_der2_arg1_zero = $SCT.is_der2_arg1_zero_local($M.$fname, x, y)
+        is_der1_arg2_zero = $SCT.is_der1_arg2_zero_local($M.$fname, x, y)
+        is_der2_arg2_zero = $SCT.is_der2_arg2_zero_local($M.$fname, x, y)
+        is_der_cross_zero = $SCT.is_der_cross_zero_local($M.$fname, x, y)
+        t_out = $SCT.hessian_tracer_2_to_1(
+            tx,
+            ty,
+            is_der1_arg1_zero,
+            is_der2_arg1_zero,
+            is_der1_arg2_zero,
+            is_der2_arg2_zero,
+            is_der_cross_zero,
+        )
+        return $SCT.Dual(p_out, t_out)
+    end
 
-            tx = $SCT.tracer(dx)
-            is_der1_arg1_zero = $SCT.is_der1_arg1_zero_local($M.$op, x, y)
-            is_der2_arg1_zero = $SCT.is_der2_arg1_zero_local($M.$op, x, y)
-            t_out = $SCT.hessian_tracer_1_to_1(tx, is_der1_arg1_zero, is_der2_arg1_zero)
-            return $SCT.Dual(p_out, t_out)
-        end
+    @eval function $M.$fname(
+        dx::D, y::Real
+    ) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
+        x = $SCT.primal(dx)
+        p_out = $M.$fname(x, y)
 
-        function $M.$op(x::Real, dy::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
-            y = $SCT.primal(dy)
-            p_out = $M.$op(x, y)
+        tx = $SCT.tracer(dx)
+        is_der1_arg1_zero = $SCT.is_der1_arg1_zero_local($M.$fname, x, y)
+        is_der2_arg1_zero = $SCT.is_der2_arg1_zero_local($M.$fname, x, y)
+        t_out = $SCT.hessian_tracer_1_to_1(tx, is_der1_arg1_zero, is_der2_arg1_zero)
+        return $SCT.Dual(p_out, t_out)
+    end
 
-            ty = $SCT.tracer(dy)
-            is_der1_arg2_zero = $SCT.is_der1_arg2_zero_local($M.$op, x, y)
-            is_der2_arg2_zero = $SCT.is_der2_arg2_zero_local($M.$op, x, y)
-            t_out = $SCT.hessian_tracer_1_to_1(ty, is_der1_arg2_zero, is_der2_arg2_zero)
-            return $SCT.Dual(p_out, t_out)
-        end
+    @eval function $M.$fname(
+        x::Real, dy::D
+    ) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
+        y = $SCT.primal(dy)
+        p_out = $M.$fname(x, y)
+
+        ty = $SCT.tracer(dy)
+        is_der1_arg2_zero = $SCT.is_der1_arg2_zero_local($M.$fname, x, y)
+        is_der2_arg2_zero = $SCT.is_der2_arg2_zero_local($M.$fname, x, y)
+        t_out = $SCT.hessian_tracer_1_to_1(ty, is_der1_arg2_zero, is_der2_arg2_zero)
+        return $SCT.Dual(p_out, t_out)
     end
 end
 
@@ -262,43 +266,40 @@ end
     end
 end
 
-function overload_hessian_1_to_2(op)
-    M = parentmodule(op)
+function overload_hessian_1_to_2(f)
+    is_der1_out1_zero_g = is_der1_out1_zero_global(f)
+    is_der2_out1_zero_g = is_der2_out1_zero_global(f)
+    is_der1_out2_zero_g = is_der1_out2_zero_global(f)
+    is_der2_out2_zero_g = is_der2_out2_zero_global(f)
+
     SCT = SparseConnectivityTracer
-    @eval begin
-        ## HessianTracer
-        function $M.$op(t::$SCT.HessianTracer)
-            is_der1_out1_zero = $SCT.is_der1_out1_zero_global($M.$op)
-            is_der2_out1_zero = $SCT.is_der2_out1_zero_global($M.$op)
-            is_der1_out2_zero = $SCT.is_der1_out2_zero_global($M.$op)
-            is_der2_out2_zero = $SCT.is_der2_out2_zero_global($M.$op)
-            return $SCT.hessian_tracer_1_to_2(
-                t,
-                is_der1_out1_zero,
-                is_der2_out1_zero,
-                is_der1_out2_zero,
-                is_der2_out2_zero,
-            )
-        end
+    M = nameofrootmodule(f)
+    fname = nameof(f)
 
-        ## Dual
-        function $M.$op(d::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
-            x = $SCT.primal(d)
-            p_out1, p_out2 = $M.$op(x)
+    ## HessianTracer
+    @eval function $M.$fname(t::$SCT.HessianTracer)
+        return $SCT.hessian_tracer_1_to_2(
+            t,
+            $is_der1_out1_zero_g,
+            $is_der2_out1_zero_g,
+            $is_der1_out2_zero_g,
+            $is_der2_out2_zero_g,
+        )
+    end
 
-            is_der1_out1_zero = $SCT.is_der1_out1_zero_local($M.$op, x)
-            is_der2_out1_zero = $SCT.is_der2_out1_zero_local($M.$op, x)
-            is_der1_out2_zero = $SCT.is_der1_out2_zero_local($M.$op, x)
-            is_der2_out2_zero = $SCT.is_der2_out2_zero_local($M.$op, x)
-            t_out1, t_out2 = $SCT.hessian_tracer_1_to_2(
-                d,
-                is_der1_out1_zero,
-                is_der2_out1_zero,
-                is_der1_out2_zero,
-                is_der2_out2_zero,
-            )
-            return ($SCT.Dual(p_out1, t_out1), $SCT.Dual(p_out2, t_out2))
-        end
+    ## Dual
+    @eval function $M.$fname(d::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
+        x = $SCT.primal(d)
+        p_out1, p_out2 = $M.$fname(x)
+
+        is_der1_out1_zero = $SCT.is_der1_out1_zero_local($M.$fname, x)
+        is_der2_out1_zero = $SCT.is_der2_out1_zero_local($M.$fname, x)
+        is_der1_out2_zero = $SCT.is_der1_out2_zero_local($M.$fname, x)
+        is_der2_out2_zero = $SCT.is_der2_out2_zero_local($M.$fname, x)
+        t_out1, t_out2 = $SCT.hessian_tracer_1_to_2(
+            d, is_der1_out1_zero, is_der2_out1_zero, is_der1_out2_zero, is_der2_out2_zero
+        )
+        return ($SCT.Dual(p_out1, t_out1), $SCT.Dual(p_out2, t_out2))
     end
 end
 

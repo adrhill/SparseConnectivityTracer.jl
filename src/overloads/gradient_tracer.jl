@@ -28,26 +28,55 @@ function gradient_tracer_1_to_1_inner(
     end
 end
 
-function overload_gradient_1_to_1(op)
-    M = parentmodule(op)
+function overload_gradient_1_to_1(f)
+    is_der1_zero_g = is_der1_zero_global(f)
+
     SCT = SparseConnectivityTracer
-    @eval begin
-        ## GradientTracer
-        function $M.$op(t::$SCT.GradientTracer)
-            is_der1_zero = $SCT.is_der1_zero_global($M.$op)
-            return $SCT.gradient_tracer_1_to_1(t, is_der1_zero)
-        end
+    M = nameofrootmodule(f)
+    fname = nameof(f)
 
-        ## Dual
-        function $M.$op(d::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
-            x = $SCT.primal(d)
-            p_out = $M.$op(x)
+    ## GradientTracer
+    @eval function $M.$fname(t::$SCT.GradientTracer)
+        return $SCT.gradient_tracer_1_to_1(t, $is_der1_zero_g)
+    end
 
-            t = $SCT.tracer(d)
-            is_der1_zero = $SCT.is_der1_zero_local($op, x)
-            t_out = $SCT.gradient_tracer_1_to_1(t, is_der1_zero)
-            return $SCT.Dual(p_out, t_out)
+    ## Dual
+    @eval function $M.$fname(d::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+        x = $SCT.primal(d)
+        p_out = $M.$fname(x)
+
+        t = $SCT.tracer(d)
+        is_der1_zero = $SCT.is_der1_zero_local($M.$fname, x)
+        t_out = $SCT.gradient_tracer_1_to_1(t, is_der1_zero)
+        return $SCT.Dual(p_out, t_out)
+    end
+end
+
+## Drafty McDraftface
+function foo(f)
+    M = nameofrootmodule(f)
+    fname = nameof(f)
+    is_der1_zero = true
+
+    SCT = LinearAlgebra
+
+    ## GradientTracer
+    return quote
+        function $M.$fname(t::$SCT.Diagonal)
+            return $SCT.gradient_tracer_1_to_1(t, $is_der1_zero)
         end
+    end
+end
+function bar(f)
+    M = nameofrootmodule(f)
+    fname = nameof(f)
+    is_der1_zero = true
+
+    SCT = LinearAlgebra
+
+    ## GradientTracer
+    @eval function $M.$fname(t::$SCT.Diagonal)
+        return $SCT.gradient_tracer_1_to_1(t, $is_der1_zero)
     end
 end
 
@@ -97,62 +126,65 @@ function gradient_tracer_2_to_1_inner(
     end
 end
 
-function overload_gradient_2_to_1(op)
-    M = parentmodule(op)
+function overload_gradient_2_to_1(f)
+    is_der1_arg1_zero = is_der1_arg1_zero_global(f)
+    is_der1_arg2_zero = is_der1_arg2_zero_global(f)
+
     SCT = SparseConnectivityTracer
-    @eval begin
-        ## GradientTracer
-        function $M.$op(tx::T, ty::T) where {T<:$SCT.GradientTracer}
-            is_der1_arg1_zero = $SCT.is_der1_arg1_zero_global($M.$op)
-            is_der1_arg2_zero = $SCT.is_der1_arg2_zero_global($M.$op)
-            return $SCT.gradient_tracer_2_to_1(tx, ty, is_der1_arg1_zero, is_der1_arg2_zero)
-        end
+    M = nameofrootmodule(f)
+    fname = nameof(f)
 
-        function $M.$op(tx::$SCT.GradientTracer, ::Real)
-            is_der1_arg1_zero = $SCT.is_der1_arg1_zero_global($M.$op)
-            return $SCT.gradient_tracer_1_to_1(tx, is_der1_arg1_zero)
-        end
+    ## GradientTracer
+    @eval function $M.$fname(tx::T, ty::T) where {T<:$SCT.GradientTracer}
+        return $SCT.gradient_tracer_2_to_1(tx, ty, $is_der1_arg1_zero, $is_der1_arg2_zero)
+    end
 
-        function $M.$op(::Real, ty::$SCT.GradientTracer)
-            is_der1_arg2_zero = $SCT.is_der1_arg2_zero_global($M.$op)
-            return $SCT.gradient_tracer_1_to_1(ty, is_der1_arg2_zero)
-        end
+    @eval function $M.$fname(tx::$SCT.GradientTracer, ::Real)
+        return $SCT.gradient_tracer_1_to_1(tx, $is_der1_arg1_zero)
+    end
 
-        ## Dual
-        function $M.$op(dx::D, dy::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
-            x = $SCT.primal(dx)
-            y = $SCT.primal(dy)
-            p_out = $M.$op(x, y)
+    @eval function $M.$fname(::Real, ty::$SCT.GradientTracer)
+        return $SCT.gradient_tracer_1_to_1(ty, $is_der1_arg2_zero)
+    end
 
-            tx = $SCT.tracer(dx)
-            ty = $SCT.tracer(dy)
-            is_der1_arg1_zero = $SCT.is_der1_arg1_zero_local($M.$op, x, y)
-            is_der1_arg2_zero = $SCT.is_der1_arg2_zero_local($M.$op, x, y)
-            t_out = $SCT.gradient_tracer_2_to_1(
-                tx, ty, is_der1_arg1_zero, is_der1_arg2_zero
-            )
-            return $SCT.Dual(p_out, t_out)
-        end
+    ## Dual
+    @eval function $M.$fname(
+        dx::D, dy::D
+    ) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+        x = $SCT.primal(dx)
+        y = $SCT.primal(dy)
+        p_out = $M.$fname(x, y)
 
-        function $M.$op(dx::D, y::Real) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
-            x = $SCT.primal(dx)
-            p_out = $M.$op(x, y)
+        tx = $SCT.tracer(dx)
+        ty = $SCT.tracer(dy)
+        is_der1_arg1_zero = $SCT.is_der1_arg1_zero_local($M.$fname, x, y)
+        is_der1_arg2_zero = $SCT.is_der1_arg2_zero_local($M.$fname, x, y)
+        t_out = $SCT.gradient_tracer_2_to_1(tx, ty, is_der1_arg1_zero, is_der1_arg2_zero)
+        return $SCT.Dual(p_out, t_out)
+    end
 
-            tx = $SCT.tracer(dx)
-            is_der1_arg1_zero = $SCT.is_der1_arg1_zero_local($M.$op, x, y)
-            t_out = $SCT.gradient_tracer_1_to_1(tx, is_der1_arg1_zero)
-            return $SCT.Dual(p_out, t_out)
-        end
+    @eval function $M.$fname(
+        dx::D, y::Real
+    ) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+        x = $SCT.primal(dx)
+        p_out = $M.$fname(x, y)
 
-        function $M.$op(x::Real, dy::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
-            y = $SCT.primal(dy)
-            p_out = $M.$op(x, y)
+        tx = $SCT.tracer(dx)
+        is_der1_arg1_zero = $SCT.is_der1_arg1_zero_local($M.$fname, x, y)
+        t_out = $SCT.gradient_tracer_1_to_1(tx, is_der1_arg1_zero)
+        return $SCT.Dual(p_out, t_out)
+    end
 
-            ty = $SCT.tracer(dy)
-            is_der1_arg2_zero = $SCT.is_der1_arg2_zero_local($M.$op, x, y)
-            t_out = $SCT.gradient_tracer_1_to_1(ty, is_der1_arg2_zero)
-            return $SCT.Dual(p_out, t_out)
-        end
+    @eval function $M.$fname(
+        x::Real, dy::D
+    ) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+        y = $SCT.primal(dy)
+        p_out = $M.$fname(x, y)
+
+        ty = $SCT.tracer(dy)
+        is_der1_arg2_zero = $SCT.is_der1_arg2_zero_local($M.$fname, x, y)
+        t_out = $SCT.gradient_tracer_1_to_1(ty, is_der1_arg2_zero)
+        return $SCT.Dual(p_out, t_out)
     end
 end
 
@@ -170,30 +202,31 @@ end
     end
 end
 
-function overload_gradient_1_to_2(op)
-    M = parentmodule(op)
+function overload_gradient_1_to_2(f)
+    is_der1_out1_zero_g = is_der1_out1_zero_global(f)
+    is_der1_out2_zero_g = is_der1_out2_zero_global(f)
+
     SCT = SparseConnectivityTracer
-    @eval begin
-        ## GradientTracer
-        function $M.$op(t::$SCT.GradientTracer)
-            is_der1_out1_zero = $SCT.is_der1_out1_zero_global($M.$op)
-            is_der1_out2_zero = $SCT.is_der1_out2_zero_global($M.$op)
-            return $SCT.gradient_tracer_1_to_2(t, is_der1_out1_zero, is_der1_out2_zero)
-        end
+    M = nameofrootmodule(f)
+    fname = nameof(f)
 
-        ## Dual
-        function $M.$op(d::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
-            x = $SCT.primal(d)
-            p_out1, p_out2 = $M.$op(x)
+    ## GradientTracer
+    @eval function $M.$fname(t::$SCT.GradientTracer)
+        return $SCT.gradient_tracer_1_to_2(t, $is_der1_out1_zero_g, $is_der1_out2_zero_g)
+    end
 
-            t = $SCT.tracer(d)
-            is_der1_out2_zero = $SCT.is_der1_out2_zero_local($M.$op, x)
-            is_der1_out1_zero = $SCT.is_der1_out1_zero_local($M.$op, x)
-            t_out1, t_out2 = $SCT.gradient_tracer_1_to_2(
-                t, is_der1_out1_zero, is_der1_out2_zero
-            )
-            return ($SCT.Dual(p_out1, t_out1), $SCT.Dual(p_out2, t_out2))  # TODO: this was wrong, add test
-        end
+    ## Dual
+    @eval function $M.$fname(d::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+        x = $SCT.primal(d)
+        p_out1, p_out2 = $M.$fname(x)
+
+        t = $SCT.tracer(d)
+        is_der1_out2_zero = $SCT.is_der1_out2_zero_local($M.$fname, x)
+        is_der1_out1_zero = $SCT.is_der1_out1_zero_local($M.$fname, x)
+        t_out1, t_out2 = $SCT.gradient_tracer_1_to_2(
+            t, is_der1_out1_zero, is_der1_out2_zero
+        )
+        return ($SCT.Dual(p_out1, t_out1), $SCT.Dual(p_out2, t_out2))  # TODO: this was wrong, add test
     end
 end
 
