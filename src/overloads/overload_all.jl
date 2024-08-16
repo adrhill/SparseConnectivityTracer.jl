@@ -12,9 +12,15 @@ for overload in (
     end
 end
 
+## Overload operators
 eval(overload_gradient_1_to_1(:Base, ops_1_to_1))
 eval(overload_gradient_2_to_1(:Base, ops_2_to_1))
 eval(overload_gradient_1_to_2(:Base, ops_1_to_2))
 eval(overload_hessian_1_to_1(:Base, ops_1_to_1))
 eval(overload_hessian_2_to_1(:Base, ops_2_to_1))
 eval(overload_hessian_1_to_2(:Base, ops_1_to_2))
+
+## List operators for later testing
+test_operators_1_to_1(::Val{:Base}) = ops_1_to_1
+test_operators_2_to_1(::Val{:Base}) = ops_2_to_1
+test_operators_1_to_2(::Val{:Base}) = ops_1_to_2
