@@ -28,10 +28,9 @@ function test_constant_functions(::Type{D}) where {P,T,D<:Dual{P,T}}
     @testset "$f" for f in (
         zero, one, oneunit, typemin, typemax, eps, floatmin, floatmax, maxintfloat
     )
-        d = f(D)
-        @test isa(d, D)
-        @test isemptytracer(d)
-        @test primal(d) == f(P)
+        out = f(D)
+        @test out isa P
+        @test out == f(P)
     end
 end
 

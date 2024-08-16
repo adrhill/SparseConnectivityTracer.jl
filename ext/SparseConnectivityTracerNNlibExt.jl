@@ -82,14 +82,13 @@ SCT.is_der1_zero_local(::typeof(softshrink), x) = x > -0.5 && x < 0.5
 
 ops_1_to_1 = union(ops_1_to_1_s, ops_1_to_1_f)
 
-## Lists
+## Overload
+eval(SCT.overload_gradient_1_to_1(:NNlib, ops_1_to_1))
+eval(SCT.overload_hessian_1_to_1(:NNlib, ops_1_to_1))
 
-SCT.list_operators_1_to_1(::Val{:NNlib}) = ops_1_to_1
-SCT.list_operators_2_to_1(::Val{:NNlib}) = ()
-SCT.list_operators_1_to_2(::Val{:NNlib}) = ()
-
-## Overloads
-
-eval(SCT.overload_all(:NNlib))
+## List operators for later testing
+SCT.test_operators_1_to_1(::Val{:NNlib}) = ops_1_to_1
+SCT.test_operators_2_to_1(::Val{:NNlib}) = ()
+SCT.test_operators_1_to_2(::Val{:NNlib}) = ()
 
 end

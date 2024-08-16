@@ -1,10 +1,9 @@
-using SparseConnectivityTracer:
-    list_operators_1_to_1,
+using SparseConnectivityTracer: # 1-to-1    
     is_der1_zero_global,
     is_der2_zero_global,
     is_der1_zero_local,
-    is_der2_zero_local,
-    list_operators_2_to_1,
+    is_der2_zero_local
+using SparseConnectivityTracer: # 2-to-1
     is_der1_arg1_zero_global,
     is_der2_arg1_zero_global,
     is_der1_arg2_zero_global,
@@ -14,8 +13,8 @@ using SparseConnectivityTracer:
     is_der2_arg1_zero_local,
     is_der1_arg2_zero_local,
     is_der2_arg2_zero_local,
-    is_der_cross_zero_local,
-    list_operators_1_to_2,
+    is_der_cross_zero_local
+using SparseConnectivityTracer: # 1-to-2
     is_der1_out1_zero_global,
     is_der2_out1_zero_global,
     is_der1_out2_zero_global,
@@ -24,6 +23,10 @@ using SparseConnectivityTracer:
     is_der1_out1_zero_local,
     is_der1_out2_zero_local,
     is_der2_out2_zero_local
+using SparseConnectivityTracer: # testing
+    test_operators_2_to_1,
+    test_operators_1_to_1,
+    test_operators_1_to_2
 using SpecialFunctions: SpecialFunctions
 using NNlib: NNlib
 using Test
@@ -88,7 +91,7 @@ end
 
 @testset verbose = true "1-to-1" begin
     @testset "$m" for m in (Base, SpecialFunctions, NNlib)
-        @testset "$op" for op in list_operators_1_to_1(Val(Symbol(m)))
+        @testset "$op" for op in test_operators_1_to_1(Val(Symbol(m)))
             @test all(
                 correct_classification_1_to_1(op, random_input(op); atol=DEFAULT_ATOL) for
                 _ in 1:DEFAULT_TRIALS
@@ -131,7 +134,7 @@ end
 
 @testset verbose = true "2-to-1" begin
     @testset "$m" for m in (Base, SpecialFunctions, NNlib)
-        @testset "$op" for op in list_operators_2_to_1(Val(Symbol(m)))
+        @testset "$op" for op in test_operators_2_to_1(Val(Symbol(m)))
             @test all(
                 correct_classification_2_to_1(
                     op, random_first_input(op), random_second_input(op); atol=DEFAULT_ATOL
@@ -171,7 +174,7 @@ end
 
 @testset verbose = true "1-to-2" begin
     @testset "$m" for m in (Base, SpecialFunctions, NNlib)
-        @testset "$op" for op in list_operators_1_to_2(Val(Symbol(m)))
+        @testset "$op" for op in test_operators_1_to_2(Val(Symbol(m)))
             @test all(
                 correct_classification_1_to_2(op, random_input(op); atol=DEFAULT_ATOL) for
                 _ in 1:DEFAULT_TRIALS

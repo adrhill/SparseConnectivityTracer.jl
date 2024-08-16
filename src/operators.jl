@@ -374,6 +374,8 @@ end
 ops_2_to_1_zzz = (
     # division
     div, fld, fld1, cld, 
+    # comparisons
+    isequal, isapprox, isless, ==, <, >, <=, >=,
 )
 for op in ops_2_to_1_zzz
     T = typeof(op)
@@ -582,7 +584,3 @@ ops_1_to_2 = union(
     ops_1_to_2_zz,   
 )
 #! format: on
-
-list_operators_1_to_1(::Val{:Base}) = ops_1_to_1
-list_operators_2_to_1(::Val{:Base}) = ops_2_to_1
-list_operators_1_to_2(::Val{:Base}) = ops_1_to_2

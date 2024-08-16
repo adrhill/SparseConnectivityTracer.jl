@@ -1,48 +1,26 @@
-function overload_all(M)
-    exprs_1_to_1 = [
-        quote
-            $(overload_gradient_1_to_1(M, op))
-            $(overload_hessian_1_to_1(M, op))
-        end for op in nameof.(list_operators_1_to_1(Val(M)))
-    ]
-    exprs_1_to_1_dual = [
-        quote
-            $(overload_gradient_1_to_1_dual(M, op))
-            $(overload_hessian_1_to_1_dual(M, op))
-        end for op in nameof.(list_operators_1_to_1(Val(M)))
-    ]
-    exprs_2_to_1 = [
-        quote
-            $(overload_gradient_2_to_1(M, op))
-            $(overload_hessian_2_to_1(M, op))
-        end for op in nameof.(list_operators_2_to_1(Val(M)))
-    ]
-    exprs_2_to_1_dual = [
-        quote
-            $(overload_gradient_2_to_1_dual(M, op))
-            $(overload_hessian_2_to_1_dual(M, op))
-        end for op in nameof.(list_operators_2_to_1(Val(M)))
-    ]
-    exprs_1_to_2 = [
-        quote
-            $(overload_gradient_1_to_2(M, op))
-            $(overload_hessian_1_to_2(M, op))
-        end for op in nameof.(list_operators_1_to_2(Val(M)))
-    ]
-    exprs_1_to_2_dual = [
-        quote
-            $(overload_gradient_1_to_2_dual(M, op))
-            $(overload_hessian_1_to_2_dual(M, op))
-        end for op in nameof.(list_operators_1_to_2(Val(M)))
-    ]
-    return quote
-        $(exprs_1_to_1...)
-        $(exprs_1_to_1_dual...)
-        $(exprs_2_to_1...)
-        $(exprs_2_to_1_dual...)
-        $(exprs_1_to_2...)
-        $(exprs_1_to_2_dual...)
+for overload in (
+    :overload_gradient_1_to_1,
+    :overload_gradient_2_to_1,
+    :overload_gradient_1_to_2,
+    :overload_hessian_1_to_1,
+    :overload_hessian_2_to_1,
+    :overload_hessian_1_to_2,
+)
+    @eval function $overload(M::Symbol, ops::Union{AbstractVector,Tuple})
+        exprs = [$overload(M, op) for op in ops]
+        return Expr(:block, exprs...)
     end
 end
 
-eval(overload_all(:Base))
+## Overload operators
+eval(overload_gradient_1_to_1(:Base, ops_1_to_1))
+eval(overload_gradient_2_to_1(:Base, ops_2_to_1))
+eval(overload_gradient_1_to_2(:Base, ops_1_to_2))
+eval(overload_hessian_1_to_1(:Base, ops_1_to_1))
+eval(overload_hessian_2_to_1(:Base, ops_2_to_1))
+eval(overload_hessian_1_to_2(:Base, ops_1_to_2))
+
+## List operators for later testing
+test_operators_1_to_1(::Val{:Base}) = ops_1_to_1
+test_operators_2_to_1(::Val{:Base}) = ops_2_to_1
+test_operators_1_to_2(::Val{:Base}) = ops_1_to_2

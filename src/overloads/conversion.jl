@@ -1,5 +1,9 @@
 #! format: off
 
+##===============#
+# AbstractTracer #
+#================#
+
 ## Type conversions (non-dual)
 Base.promote_rule(::Type{T}, ::Type{N}) where {T<:AbstractTracer,N<:Real} = T
 Base.promote_rule(::Type{N}, ::Type{T}) where {T<:AbstractTracer,N<:Real} = T
@@ -24,7 +28,10 @@ Base.floatmin(::Type{T})    where {T<:AbstractTracer} = myempty(T)
 Base.floatmax(::Type{T})    where {T<:AbstractTracer} = myempty(T)
 Base.maxintfloat(::Type{T}) where {T<:AbstractTracer} = myempty(T)
 
-## Duals
+##======#
+# Duals #
+#=======#
+
 function Base.promote_rule(::Type{Dual{P1, T}}, ::Type{Dual{P2, T}}) where {P1,P2,T}
     PP = Base.promote_type(P1, P2) # TODO: possible method call error?
     return Dual{PP,T}
@@ -59,15 +66,16 @@ for T in (:Int, :Integer, :Float64, :Float32)
 end
 
 ## Constants
-# These are methods defined on types. Methods on variables are in operators.jl 
-Base.zero(::Type{D})        where {P,T,D<:Dual{P,T}} = D(zero(P),        myempty(T))
-Base.one(::Type{D})         where {P,T,D<:Dual{P,T}} = D(one(P),         myempty(T))
-Base.oneunit(::Type{D})     where {P,T,D<:Dual{P,T}} = D(oneunit(P),     myempty(T))
-Base.typemin(::Type{D})     where {P,T,D<:Dual{P,T}} = D(typemin(P),     myempty(T))
-Base.typemax(::Type{D})     where {P,T,D<:Dual{P,T}} = D(typemax(P),     myempty(T))
-Base.eps(::Type{D})         where {P,T,D<:Dual{P,T}} = D(eps(P),         myempty(T))
-Base.floatmin(::Type{D})    where {P,T,D<:Dual{P,T}} = D(floatmin(P),    myempty(T))
-Base.floatmax(::Type{D})    where {P,T,D<:Dual{P,T}} = D(floatmax(P),    myempty(T))
-Base.maxintfloat(::Type{D}) where {P,T,D<:Dual{P,T}} = D(maxintfloat(P), myempty(T))
+# These are methods defined on types. Methods on variables are in operators.jl
+# TODO: only return primal on methods on variable
+Base.zero(::Type{D})        where {P,T,D<:Dual{P,T}} = zero(P)
+Base.one(::Type{D})         where {P,T,D<:Dual{P,T}} = one(P)
+Base.oneunit(::Type{D})     where {P,T,D<:Dual{P,T}} = oneunit(P)
+Base.typemin(::Type{D})     where {P,T,D<:Dual{P,T}} = typemin(P)
+Base.typemax(::Type{D})     where {P,T,D<:Dual{P,T}} = typemax(P)
+Base.eps(::Type{D})         where {P,T,D<:Dual{P,T}} = eps(P)
+Base.floatmin(::Type{D})    where {P,T,D<:Dual{P,T}} = floatmin(P)
+Base.floatmax(::Type{D})    where {P,T,D<:Dual{P,T}} = floatmax(P)
+Base.maxintfloat(::Type{D}) where {P,T,D<:Dual{P,T}} = maxintfloat(P)
 
 #! format: on
