@@ -16,7 +16,7 @@ Currently, two tracer types are provided:
 When used alone, these tracers compute [**global** sparsity patterns](@ref TracerSparsityDetector).
 Alternatively, these can be used inside of a dual number type [`Dual`](@ref SparseConnectivityTracer.Dual), 
 which keeps track of the primal computation and allows tracing through comparisons and control flow.
-This is how [**local** spasity patterns](@ref TracerLocalSparsityDetector) are computed.
+This is how [**local** sparsity patterns](@ref TracerLocalSparsityDetector) are computed.
 
 !!! tip "Tip: View SparseConnectivityTracer as binary ForwardDiff"
      SparseConnectivityTracer's `Dual{T, GradientTracer}` can be thought of as a binary version of [ForwardDiff](https://github.com/JuliaDiff/ForwardDiff.jl)'s own `Dual` number type.
@@ -31,7 +31,7 @@ the gradient of $f$ is defined as $\left(\nabla f(\mathbf{x})\right)_{i} = \frac
 and the Hessian as $\left(\nabla^2 f(\mathbf{x})\right)_{i,j} = \frac{\partial^2 f}{\partial x_i \partial x_j}$. 
 
 Sparsity patterns correspond to the mask of non-zero values in the gradient and Hessian.
-Instead of saving the values of individual partial derivatives, they can efficiently be represented by the set of indices correponding to non-zero values:
+Instead of saving the values of individual partial derivatives, they can efficiently be represented by the set of indices corresponding to non-zero values:
 
 * Gradient patterns are represented by sets of indices $\left\{i \;\big|\; \left(\nabla f(\mathbf{x})\right)_{i} \neq 1\right\}$
 * Local Hessian patterns are represented by sets of index tuples $\left\{(i, j) \;\Big|\; \left(\nabla^2 f(\mathbf{x})\right)_{i,j} \neq 1\right\}$
@@ -183,5 +183,5 @@ one for the gradient pattern and one for the Hessian pattern.
 These sets are updated based on whether the first- and second-order derivatives of an operator are zero or not.
 
 !!! tip "To be published"
-    Look forward to our upcomping publication of SparseConnectivityTracer, 
+    Look forward to our upcoming publication of SparseConnectivityTracer, 
     where we will go into more detail on the implementation of `HessianTracer`!
