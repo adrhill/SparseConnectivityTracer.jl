@@ -20,7 +20,14 @@ makedocs(;
         edit_link = "main",
         assets    = String[],
     ),
-    pages=["Home" => "index.md", "API Reference" => "api.md"],
+    pages=[
+        "Getting Started" => "index.md",
+        "User Documentation" => ["API Reference" => "user/api.md"],
+        "Developer Documentation" => [
+            "How SCT works" => "dev/how_it_works.md",
+            "Internals Reference" => "dev/api.md",
+        ],
+    ],
     warnonly=[:missing_docs],
 )
 
