@@ -11,7 +11,7 @@ For local sparsity patterns at a specific input point, use [`TracerLocalSparsity
 ```jldoctest
 julia> using SparseConnectivityTracer
 
-julia> ADTypes.jacobian_sparsity(diff, rand(4), TracerSparsityDetector())
+julia> jacobian_sparsity(diff, rand(4), TracerSparsityDetector())
 3×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 6 stored entries:
  1  1  ⋅  ⋅
  ⋅  1  1  ⋅

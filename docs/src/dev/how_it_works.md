@@ -1,9 +1,11 @@
 # How SparseConnectivityTracer works
 
-!!! warning "Internals may change"
+!!! danger "Internals may change"
     The developer documentation might refer to internals which can change without warning in a future release of SparseConnectivityTracer.
     Only functionality that is exported or part of the [user documentation](@ref api) adheres to semantic versioning.
 
+
+## Tracers are scalars
 
 SparseConnectivityTracer (SCT) works by pushing `Real` number types called tracers through generic functions using operator overloading.
 Currently, two tracer types are provided:
@@ -16,9 +18,9 @@ Alternatively, these can be used inside of a dual number type [`Dual`](@ref Spar
 which keeps track of the primal computation and allows tracing through comparisons and control flow.
 This is how [**local** spasity patterns](@ref TracerLocalSparsityDetector) are computed.
 
-!!! tip "Tip: SparseConnectivityTracer as binary ForwardDiff"
+!!! tip "Tip: View SparseConnectivityTracer as binary ForwardDiff"
      SparseConnectivityTracer's `Dual{T, GradientTracer}` can be thought of as a binary version of [ForwardDiff](https://github.com/JuliaDiff/ForwardDiff.jl)'s own `Dual` number type.
-     This is a good mental model for SparseConnectivityTracer if you are already familiar with ForwardDiff and its limitations.
+     This is a good mental model for SparseConnectivityTracer if you are familiar with ForwardDiff and its limitations.
 
 
 ## Index sets
@@ -31,8 +33,15 @@ and the Hessian as $\left(\nabla^2 f(\mathbf{x})\right)_{i,j} = \frac{\partial^2
 Sparsity patterns correspond to the mask of non-zero values in the gradient and Hessian.
 Instead of saving the values of individual partial derivatives, they can efficiently be represented by the set of indices correponding to non-zero values:
 
-* Gradient patterns are represented by sets of indices $\left\{i      \;\big|\; \left(\nabla f(\mathbf{x})\right)_{i}     \neq 1\right\}$
-* Hessian patterns are represented by sets of index tuples  $\left\{(i, j) \;\Big|\; \left(\nabla^2 f(\mathbf{x})\right)_{i,j} \neq 1\right\}$
+* Gradient patterns are represented by sets of indices $\left\{i \;\big|\; \left(\nabla f(\mathbf{x})\right)_{i} \neq 1\right\}$
+* Local Hessian patterns are represented by sets of index tuples $\left\{(i, j) \;\Big|\; \left(\nabla^2 f(\mathbf{x})\right)_{i,j} \neq 1\right\}$
+
+
+!!! warning "Global vs. Local"
+    Global sparsity patterns are the index sets over all $\mathbf{x}\in\mathbb{R}^n$,
+    whereas local patterns are the index sets for a given point $\mathbf{x}$.
+    For a given function $f$, global sparsity patterns are therefore always supersets of local sparsity patterns 
+    and more "conservative" in the sense that they are less sparse. 
 
 ## Motivating example
 
@@ -66,8 +75,8 @@ flowchart LR
 ```
 To obtain a sparsity pattern, each scalar input $x_i$ gets seeded with a corresponding singleton index set $\{i\}$ [^1]. 
 Since addition and multiplication have non-zero derivatives with respect to both of their inputs, 
-the resulting scalar values accumulate and propagate their index sets (annotated on the edged of the graph).
-The sign function has zero derivatives for any input value. It therefore doesn't propagate the index set ${4}$ corresponding to the input $x_4$.
+the resulting values accumulate and propagate their index sets (annotated on the edges of the graph above).
+The sign function has zero derivatives for any input value. It therefore doesn't propagate the index set ${4}$ corresponding to the input $x_4$. Instead, it returns an empty set.
 
 [^1]: since $\frac{\partial x_i}{\partial x_j} \neq 0$ iff $i \neq j$
 
@@ -89,9 +98,10 @@ The resulting **global** gradient sparsity pattern $\left(\nabla f(\mathbf{x})\r
 \end{bmatrix} \quad .
 ```
 
-Note that the **local** sparsity pattern could be more sparse in case $x_3$ and/or $x_2$ are zero.
-Computing such local sparsity patterns requires [`Dual`](@ref SparseConnectivityTracer.Dual) numbers with information about the primal computation. 
-These can be used to evaluate the **local** differentiability of operations like multiplication.
+!!! tip "From Global to Local"
+    Note that the **local** sparsity pattern could be more sparse in case $x_2$ and/or $x_3$ are zero.
+    Computing such local sparsity patterns requires [`Dual`](@ref SparseConnectivityTracer.Dual) numbers with information about the primal computation. 
+    These are used to evaluate the **local** differentiability of operations like multiplication.
 
 ## Toy implementation
 
@@ -140,6 +150,38 @@ x = rand(4)
 jacobian_sparsity(f, x, TracerSparsityDetector())
 ```
 
-! tip "From gradients to Jacobians"
-    
+## Tracing Jacobians
 
+Our toy implementation above doesn't just work on scalar functions, but also on vector valued functions:
+
+```@example toytracer
+g(x) = [x[1], x[2]*x[3], x[1]+x[4]]
+g(xtracer)
+```
+
+By stacking individual `MyGradientTracer`s row-wise, we obtain the sparsity pattern of the Jacobian of $g$
+
+```math
+J_g(\mathbf{x})=
+\begin{pmatrix}
+1 & 0 & 0 & 0 \\
+0 & x_3 & x_2 & 0 \\
+1 & 0 & 0 & 1
+\end{pmatrix} \quad .
+```
+
+We obtain the same result using SCT's `jacobian_sparsity`:
+```@example toytracer
+jacobian_sparsity(g, x, TracerSparsityDetector())
+```
+
+## Tracing Hessians
+
+In the sections above, we outlined how to implement our own [`GradientTracer`](@ref SparseConnectivityTracer.GradientTracer) from scratch.
+[`HessianTracer`](@ref SparseConnectivityTracer.HessianTracer) use the same operator overloading approach but are a bit more involved as they contain two index sets: 
+one for the gradient pattern and one for the Hessian pattern. 
+These sets are updated based on whether the first- and second-order derivatives of an operator are zero or not.
+
+!!! tip "To be published"
+    Look forward to our upcomping publication of SparseConnectivityTracer, 
+    where we will go into more detail on the implementation of `HessianTracer`!
