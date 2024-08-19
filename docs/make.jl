@@ -18,7 +18,7 @@ makedocs(;
     format=Documenter.HTML(;
         canonical = "https://adrhill.github.io/SparseConnectivityTracer.jl",
         edit_link = "main",
-        assets    = String[],
+        assets    = ["assets/favicon.ico"],
     ),
     pages=[
         "Getting Started" => "index.md",
