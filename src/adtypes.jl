@@ -9,7 +9,7 @@ For local sparsity patterns at a specific input point, use [`TracerLocalSparsity
 # Example
 
 ```jldoctest
-julia> using ADTypes, SparseConnectivityTracer
+julia> using SparseConnectivityTracer
 
 julia> ADTypes.jacobian_sparsity(diff, rand(4), TracerSparsityDetector())
 3×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 6 stored entries:
@@ -19,7 +19,7 @@ julia> ADTypes.jacobian_sparsity(diff, rand(4), TracerSparsityDetector())
 ```
 
 ```jldoctest
-julia> using ADTypes, SparseConnectivityTracer
+julia> using SparseConnectivityTracer
 
 julia> f(x) = x[1] + x[2]*x[3] + 1/x[4];
 
@@ -68,7 +68,7 @@ For global sparsity patterns, use [`TracerSparsityDetector`](@ref).
 # Example
 
 ```jldoctest
-julia> using ADTypes, SparseConnectivityTracer
+julia> using SparseConnectivityTracer
 
 julia> f(x) = x[1] > x[2] ? x[1:3] : x[2:4];
 
@@ -86,7 +86,7 @@ julia> jacobian_sparsity(f, [2.0, 1.0, 3.0, 4.0], TracerLocalSparsityDetector())
 ```
 
 ```jldoctest
-julia> using ADTypes, SparseConnectivityTracer
+julia> using SparseConnectivityTracer
 
 julia> f(x) = x[1] + max(x[2], x[3]) * x[3] + 1/x[4];
 
