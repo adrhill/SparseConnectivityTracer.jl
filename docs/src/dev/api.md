@@ -1,7 +1,7 @@
 # [Internals Reference](@id internal-api)
 
 !!! warning "Internals may change"
-    This part of the developer documentation exclusively refers to internals that may change without warning in a future release of SparseConnectivityTracer.
+    This part of the developer documentation **exclusively** refers to internals that may change without warning in a future release of SparseConnectivityTracer.
     Anything written on this page should be treated as if it was undocumented.
     Only functionality that is exported or part of the [user documentation](@ref api) adheres to semantic versioning.
 

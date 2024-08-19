@@ -1,7 +1,8 @@
 # How SparseConnectivityTracer works
 
 !!! warning "Internals may change"
-    The developer documentation might refer to internals that may change without warning in a future release of SparseConnectivityTracer.
+    The developer documentation refers to internals that may change without warning in a future release of SparseConnectivityTracer.
+    Anything written on this page should be treated as if it was undocumented.
     Only functionality that is exported or part of the [user documentation](@ref api) adheres to semantic versioning.
 
 
