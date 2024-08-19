@@ -36,10 +36,9 @@ Base.Bool(::Shared) = true
 Base.Bool(::NotShared) = false
 
 """
-  myempty(T)
-  myempty(tracer)
-  myempty(pattern)
-
+    myempty(T)
+    myempty(tracer::AbstractTracer)
+    myempty(pattern::AbstractPattern)
 
 Constructor for an empty tracer or pattern of type `T` representing a new number (usually an empty pattern).
 """
@@ -53,14 +52,14 @@ Convenience constructor for patterns of type `P` for multiple inputs `xs` and th
 create_patterns
 
 """
-    gradient(pattern)
+    gradient(pattern::AbstractTracer)
     
 Return a representation of non-zero values ``∇f(x)_{i} ≠ 0`` in the gradient.
 """
 gradient
 
 """
-    hessian(pattern)
+    hessian(pattern::HessianTracer)
     
 Return a representation of non-zero values ``∇²f(x)_{ij} ≠ 0`` in the Hessian.
 """
@@ -160,7 +159,7 @@ For use with [`GradientTracer`](@ref).
 * [`myempty`](@ref)
 * [`create_patterns`](@ref)
 * [`gradient`](@ref)
-* [`isshared`](@ref) in case the pattern is shared (mutates). Defaults to false.
+* [`shared`](@ref)
 """
 abstract type AbstractGradientPattern <: AbstractPattern end
 
@@ -208,7 +207,7 @@ For use with [`HessianTracer`](@ref).
 * [`create_patterns`](@ref)
 * [`gradient`](@ref)
 * [`hessian`](@ref)
-* [`shared`](@ref) in case the pattern is shared (mutates). Defaults to `NotShared()`.
+* [`shared`](@ref)
 """
 abstract type AbstractHessianPattern <: AbstractPattern end
 
