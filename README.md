@@ -65,9 +65,6 @@ julia> jacobian_sparsity(layer, x, detector)
 ⎣⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠛⢿⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣷⣄⎦
 ```
 
-The type of index set `S` that is internally used to keep track of connectivity can be specified via `jacobian_sparsity(f, x, S)`, defaulting to `BitSet`. 
-For high-dimensional functions, `Set{Int64}` can be more efficient .
-
 ### Hessian
 
 For scalar functions `y = f(x)`, the sparsity pattern of the Hessian of $f$ can be obtained
@@ -105,7 +102,7 @@ For more detailed examples, take a look at the [documentation](https://adrianhil
 It is not compatible with functions that require information about the primal values of a computation (e.g. `iszero`, `>`, `==`).
 
 To compute a less conservative sparsity pattern at an input point `x`, use `TracerLocalSparsityDetector` instead.
-Note that patterns computed with `TracerLocalSparsityDetector` depend on the input `x`:
+Note that patterns computed with `TracerLocalSparsityDetector` depend on the input `x` and have to be recomputed when `x` changes:
 
 ```julia-repl
 julia> using SparseConnectivityTracer
@@ -132,7 +129,6 @@ julia> hessian_sparsity(f, [1 3 2 4], detector)
 ## ADTypes.jl compatibility
 SparseConnectivityTracer uses [ADTypes.jl](https://github.com/SciML/ADTypes.jl)'s interface for [sparsity detection](https://sciml.github.io/ADTypes.jl/stable/#Sparsity-detector),
 making it compatible with [DifferentiationInterface.jl](https://github.com/gdalle/DifferentiationInterface.jl)'s [sparse automatic differentiation](https://gdalle.github.io/DifferentiationInterface.jl/DifferentiationInterface/stable/tutorial2/) functionality.
-
 In fact, the functions `jacobian_sparsity` and `hessian_sparsity` are re-exported from ADTypes.
 
 ## Related packages
