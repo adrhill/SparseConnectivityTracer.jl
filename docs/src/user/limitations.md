@@ -3,10 +3,56 @@
 ## Sparsity patterns are conservative approximations
 
 Sparsity patterns returned by SparseConnectivityTracer (SCT) can in some cases be overly conservative, meaning that they might contain "too many ones".
-If you observe an overly conservative pattern, [please open a feature request](https://github.com/adrhill/SparseConnectivityTracer.jl/issues) so we know where to add more method overloads.
+If you observe an overly conservative pattern, [please open a feature request](https://github.com/adrhill/SparseConnectivityTracer.jl/issues) so we know where to add more method overloads to increase the sparsity.
 
-!!! warning "No-false-negatives policy"
+!!! warning "SCT's no-false-negatives policy"
     If you ever observe a sparsity pattern that contains too many zeros, we urge you to [open a bug report](https://github.com/adrhill/SparseConnectivityTracer.jl/issues)!
+
+## Function must be composed of generic Julia functions
+
+SCT can't trace through non-Julia code.
+However, if you know the sparsity pattern of an external, non-Julia function,
+you might be able to work around it by adding methods on SCT's tracer types.
+
+## Function types must be generic
+
+When computing the sparsity pattern of a function,
+it must be written generically enough to accept numbers of type `T<:Real` as (or `AbstractArray{<:Real}`) as inputs.
+
+!!! details "Example: Overly restrictive type annotations"
+    Let's see this mistake in action:
+
+    ```@example notgeneric
+    using SparseConnectivityTracer
+    method = TracerSparsityDetector()
+
+    relu_bad(x::AbstractFloat) = max(zero(x), x)
+    outer_function_bad(xs) = sum(relu_bad, xs)
+    nothing # hide
+    ```
+
+    Since tracers and dual numbers are `Real` numbers and not `AbstractFloat`s,
+    `relu_bad` throws a `MethodError`:
+
+    ```@repl notgeneric
+    xs = [1.0, -2.0, 3.0];
+
+    outer_function_bad(xs)
+
+    jacobian_sparsity(outer_function_bad, xs, method)
+    ```
+
+    This is easily fixed by loosening type restrictions or adding an additional methods on `Real`:
+
+    ```@example notgeneric
+    relu_good(x) = max(zero(x), x)
+    outer_function_good(xs) = sum(relu_good, xs)
+    nothing # hide
+    ```
+
+    ```@repl notgeneric
+    jacobian_sparsity(outer_function_good, xs, method)
+    ```
 
 ## Limited control flow
 
@@ -71,56 +117,10 @@ Using an approach based on operator-overloading, this means that global sparsity
     ```
 
     In some cases, we can work around this by using `ifelse`.
-    Since `ifelse` is a method, we can overload it to evaluate "both branches" and take a conservative union of both resulting sparsity patterns:
+    Since `ifelse` is a method, it can evaluate "both branches" and take a conservative union of both resulting sparsity patterns:
 
     ```@repl ctrlflow
     f(x) = ifelse(x[1] > x[2], x[1], x[2])
 
     jacobian_sparsity(f, [1, 2], TracerSparsityDetector())
-    ```
-
-## Function must be composed of generic Julia functions
-
-SCT can't trace through non-Julia code.
-However, if you know the sparsity pattern of an external, non-Julia function,
-you might be able to work around it by adding methods on SCT's tracer types.
-
-## Function types must be generic
-
-When computing the sparsity pattern of a function,
-it must be written generically enough to accept numbers of type `T<:Real` as (or `AbstractArray{<:Real}`) as inputs.
-
-!!! details "Example: Overly restrictive type annotations"
-    Let's see this mistake in action:
-
-    ```@example notgeneric
-    using SparseConnectivityTracer
-    method = TracerSparsityDetector()
-
-    relu_bad(x::AbstractFloat) = max(zero(x), x)
-    outer_function_bad(xs) = sum(relu_bad, xs)
-    nothing # hide
-    ```
-
-    Since tracers and dual numbers are `Real` numbers and not `AbstractFloat`s,
-    `relu_bad` throws a `MethodError`:
-
-    ```@repl notgeneric
-    xs = [1.0, -2.0, 3.0];
-
-    outer_function_bad(xs)
-
-    jacobian_sparsity(outer_function_bad, xs, method)
-    ```
-
-    This is easily fixed by loosening type restrictions or adding an additional methods on `Real`:
-
-    ```@example notgeneric
-    relu_good(x) = max(zero(x), x)
-    outer_function_good(xs) = sum(relu_good, xs)
-    nothing # hide
-    ```
-
-    ```@repl notgeneric
-    jacobian_sparsity(outer_function_good, xs, method)
     ```
