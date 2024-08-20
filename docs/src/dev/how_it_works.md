@@ -1,4 +1,4 @@
-# How SparseConnectivityTracer works
+# [How SparseConnectivityTracer works](@id how-sct-works)
 
 !!! danger "Internals may change"
     The developer documentation might refer to internals which can change without warning in a future release of SparseConnectivityTracer.
