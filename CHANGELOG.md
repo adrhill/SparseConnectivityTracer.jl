@@ -2,8 +2,17 @@
 
 ## Version `v0.6.2`
 
-* ![Feature][badge-feature] More methods for `round` and `rand` ([#162])
-* ![Bugfix][badge-bugfix] Fix Hessian on NNlib activation functions ([#162])
+* ![Feature][badge-feature] Return only primal value when applying non-differentiable methods to `Dual` numbers ([#169])
+* ![Feature][badge-feature] Increase sparsity for Diagonal inputs ([#165])
+* ![Feature][badge-feature] Add more methods on `round`, `rand` ([#162])
+* ![Documentation][badge-docs] This release brings large updates to the documentation:
+  * Document limitations ([#175])
+  * Document global vs. local patterns ([#176])
+  * Add "How it works" developer documentation ([#174])
+  * Add developer documentation on custom overloads ([#177])
+* ![Enhancement][badge-enhancement] Refactor type conversions ([#173], [#168], [#166])
+* ![Enhancement][badge-enhancement] Make comparisons regular operators ([#169])
+* ![Bugfix][badge-bugfix] Fix Hessian on NNlib activation functions `celu`, `elu`, `selu`, `hardswish` ([#162])
 * ![Bugfix][badge-bugfix] Fix `isless` ([#161])
 
 ## Version `v0.6.1`
@@ -39,6 +48,15 @@
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#177]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/177
+[#176]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/176
+[#175]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/175
+[#174]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/174
+[#173]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/173
+[#169]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/169
+[#168]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/168
+[#166]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/166
+[#165]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/165
 [#162]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/162
 [#161]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/161
 [#158]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/158
