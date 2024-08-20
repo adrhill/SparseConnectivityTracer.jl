@@ -97,7 +97,7 @@ julia> hessian_sparsity(g, x, detector)
  ⋅  1  ⋅  ⋅  1
 ```
 
-For more detailled examples, take a look at the [documentation](https://adrianhill.de/SparseConnectivityTracer.jl/dev).
+For more detailed examples, take a look at the [documentation](https://adrianhill.de/SparseConnectivityTracer.jl/dev).
 
 ### Local tracing
 

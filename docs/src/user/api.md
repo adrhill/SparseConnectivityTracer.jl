@@ -4,7 +4,7 @@ CurrentModule = Main
 CollapsedDocStrings = true
 ```
 
-# API Reference
+# [API Reference](@id api)
 ```@index
 ```
 
@@ -21,24 +21,4 @@ TracerSparsityDetector
 To compute **local** sparsity patterns of `f(x)` at a specific input `x`, use
 ```@docs
 TracerLocalSparsityDetector
-```
-
-## Internals
-
-!!! warning
-    Internals may change without warning in a future release of SparseConnectivityTracer.
-
-SparseConnectivityTracer works by pushing `Real` number types called tracers through generic functions.
-Currently, two tracer types are provided:
-
-```@docs
-SparseConnectivityTracer.GradientTracer
-SparseConnectivityTracer.HessianTracer
-```
-
-These can be used alone or inside of the dual number type `Dual`,
-which keeps track of the primal computation and allows tracing through comparisons and control flow:
-
-```@docs
-SparseConnectivityTracer.Dual
 ```

@@ -1,3 +1,17 @@
+"""
+    AbstractTracer
+
+Abstract supertype of tracers.
+
+## Type hierarchy
+```
+AbstractTracer
+├── GradientTracer
+└── HessianTracer
+```
+
+Note that [`Dual`](@ref) is not an `AbstractTracer`.
+"""
 abstract type AbstractTracer{P<:AbstractPattern} <: Real end
 
 #================#

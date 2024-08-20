@@ -1,5 +1,6 @@
 using SparseConnectivityTracer
 using Documenter
+using DocumenterMermaid
 
 # Create index.md from README
 cp(joinpath(@__DIR__, "..", "README.md"), joinpath(@__DIR__, "src", "index.md"); force=true)
@@ -18,9 +19,16 @@ makedocs(;
     format=Documenter.HTML(;
         canonical = "https://adrhill.github.io/SparseConnectivityTracer.jl",
         edit_link = "main",
-        assets    = String[],
+        assets    = ["assets/favicon.ico"],
     ),
-    pages=["Home" => "index.md", "API Reference" => "api.md"],
+    pages=[
+        "Getting Started" => "index.md",
+        "User Documentation" => ["API Reference" => "user/api.md"],
+        "Developer Documentation" => [
+            "How SCT works" => "dev/how_it_works.md",
+            "Internals Reference" => "dev/api.md",
+        ],
+    ],
     warnonly=[:missing_docs],
 )
 
