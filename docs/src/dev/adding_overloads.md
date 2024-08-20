@@ -16,7 +16,7 @@ to improve the performance of your functions or to work around some of SCT's [li
 
 !!! tip "Copy one of our package extensions"
     The easiest way to add overloads is to copy one of our [package extensions](https://github.com/adrhill/SparseConnectivityTracer.jl/tree/main/ext) and to modify it.
-    Please upstream your additions by opening a pull request!
+    Please upstream your additions by opening a pull request! We will help you out to get your feature merged.
 
 ## Operator classification
 
