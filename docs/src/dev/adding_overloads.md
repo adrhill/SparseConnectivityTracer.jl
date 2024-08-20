@@ -37,9 +37,9 @@ Depending on the type of function you're dealing with, you will have to specify 
 
 !!! details "Methods you have to implement for 1-to-1 operators"
 
-    | Function                                   | Meaning                                             |
-    |:-------------------------------------------|:----------------------------------------------------|
-    | `is_der1_zero_global(::typeof{f}) = false` | $\frac{\partial f}{\partial x} \neq 0$ for some $x$ | 
+    | Function                                   | Meaning                                                 |
+    |:-------------------------------------------|:--------------------------------------------------------|
+    | `is_der1_zero_global(::typeof{f}) = false` | $\frac{\partial f}{\partial x} \neq 0$ for some $x$     | 
     | `is_der2_zero_global(::typeof{f}) = false` | $\frac{\partial^2 f}{\partial x^2} \neq 0$ for some $x$ | 
 
     Optionally, to increase the sparsity of [`TracerLocalSparsityDetector`](@ref), you can additionally implement
@@ -171,7 +171,7 @@ eval(SCT.overload_hessian_1_to_1(:NNlib, relu))
 
 The `relu` function is now ready to be called with SCT's tracer types.
 
-!!! details "What is this odd looking eval call doing?"
+!!! details "What is the eval call doing?"
     Let's call `overload_gradient_1_to_1` without wrapping it `eval`:
 
     ```@example overload
