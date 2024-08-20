@@ -10,14 +10,13 @@ If you observe an overly conservative pattern, [please open a feature request](h
 
 ## Limited control flow
 
-[`TracerSparsityDetector`](@ref) does not support any control flow or boolean functions.
-This might seem unintuitive but follows from our policy stated above: SCT guarantees conservative sparsity patterns.
-Using an approach based on operator-overloading, this means that global sparsity detection isn't allowed to hit any branching code. 
+Only [`TracerLocalSparsityDetector`](@ref) supports comparison operators (`<`, `==`, ...), indicator functions (`iszero`, `iseven`, ...) and control flow.
 
-Only [`TracerLocalSparsityDetector`](@ref) supports limited amounts of comparison operators and control flow, i.e.:
-* comparison operators (`<`, `==`, ...)
-* indicator functions (`iszero`, `iseven`, ...)
-* `ifelse` statements
+[`TracerSparsityDetector`](@ref) does not support any boolean functions and control flow (with the exception of `iselse`).
+This might seem unintuitive but follows from our policy stated above: SCT guarantees conservative sparsity patterns.
+Using an approach based on operator-overloading, this means that global sparsity detection isn't allowed to hit any branching code.
+`ifelse` is the only exception, since it allows us to evaluate both branches.
+
 
 !!! warning "Common control flow errors"
     By design, SCT will throw errors instead of returning wrong sparsity patterns. Common error messages include:
@@ -68,6 +67,15 @@ Only [`TracerLocalSparsityDetector`](@ref) supports limited amounts of compariso
     In my our opinion, the right thing to do here is to throw an error:
 
     ```@repl ctrlflow
+    jacobian_sparsity(f, [1, 2], TracerSparsityDetector())
+    ```
+
+    In some cases, we can work around this by using `ifelse`.
+    Since `ifelse` is a method, we can overload it to evaluate "both branches" and take a conservative union of both resulting sparsity patterns:
+
+    ```@repl ctrlflow
+    f(x) = ifelse(x[1] > x[2], x[1], x[2])
+
     jacobian_sparsity(f, [1, 2], TracerSparsityDetector())
     ```
 
