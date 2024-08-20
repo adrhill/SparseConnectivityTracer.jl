@@ -24,11 +24,8 @@ makedocs(;
     pages=[
         "Getting Started" => "index.md",
         "User Documentation" =>
-            ["Limitations" => "user/limitations.md", "API Reference" => "user/api.md"],
-        "Developer Documentation" => [
-            "How SCT works" => "dev/how_it_works.md",
-            "Internals Reference" => "dev/api.md",
-        ],
+            ["user/global_vs_local.md", "user/limitations.md", "user/api.md"],
+        "Developer Documentation" => ["dev/how_it_works.md", "dev/api.md"],
     ],
     warnonly=[:missing_docs],
 )

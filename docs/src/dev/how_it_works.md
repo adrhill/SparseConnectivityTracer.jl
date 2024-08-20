@@ -34,11 +34,12 @@ Sparsity patterns correspond to the mask of non-zero values in the gradient and 
 Instead of saving the values of individual partial derivatives, they can efficiently be represented by the set of indices corresponding to non-zero values:
 
 * Gradient patterns are represented by sets of indices $\left\{i \;\big|\; \left(\nabla f(\mathbf{x})\right)_{i} \neq 1\right\}$
-* Local Hessian patterns are represented by sets of index tuples $\left\{(i, j) \;\Big|\; \left(\nabla^2 f(\mathbf{x})\right)_{i,j} \neq 1\right\}$
+* Hessian patterns are represented by sets of index tuples $\left\{(i, j) \;\Big|\; \left(\nabla^2 f(\mathbf{x})\right)_{i,j} \neq 1\right\}$
 
 
 !!! warning "Global vs. Local"
-    Global sparsity patterns are the index sets over all $\mathbf{x}\in\mathbb{R}^n$,
+    As shown in the page [*"Global vs. Local"*](@ref global-vs-local),
+    global sparsity patterns are the index sets over all $\mathbf{x}\in\mathbb{R}^n$,
     whereas local patterns are the index sets for a given point $\mathbf{x}$.
     For a given function $f$, global sparsity patterns are therefore always supersets of local sparsity patterns 
     and more "conservative" in the sense that they are less sparse. 
