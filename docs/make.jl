@@ -23,7 +23,8 @@ makedocs(;
     ),
     pages=[
         "Getting Started" => "index.md",
-        "User Documentation" => ["API Reference" => "user/api.md"],
+        "User Documentation" =>
+            ["Limitations" => "user/limitations.md", "API Reference" => "user/api.md"],
         "Developer Documentation" => [
             "How SCT works" => "dev/how_it_works.md",
             "Internals Reference" => "dev/api.md",

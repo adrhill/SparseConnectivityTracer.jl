@@ -75,10 +75,10 @@ flowchart LR
 ```
 To obtain a sparsity pattern, each scalar input $x_i$ gets seeded with a corresponding singleton index set $\{i\}$ [^1]. 
 Since addition and multiplication have non-zero derivatives with respect to both of their inputs, 
-the resulting values accumulate and propagate their index sets (annotated on the edges of the graph above).
+their outputs accumulate and propagate the index sets of their inputs (annotated on the edges of the graph above).
 The sign function has zero derivatives for any input value. It therefore doesn't propagate the index set ${4}$ corresponding to the input $x_4$. Instead, it returns an empty set.
 
-[^1]: since $\frac{\partial x_i}{\partial x_j} \neq 0$ iff $i \neq j$
+[^1]: $\frac{\partial x_i}{\partial x_j} \neq 0$ only holds for $i=j$
 
 The resulting **global** gradient sparsity pattern $\left(\nabla f(\mathbf{x})\right)_{i} \neq 1$ for $i$ in $\{1, 2, 3\}$ matches the analytical gradient
 
