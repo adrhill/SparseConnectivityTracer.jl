@@ -1,5 +1,4 @@
 using SparseConnectivityTracer
-using SparseConnectivityTracer: GradientTracer, Dual, MissingPrimalError, trace_input
 using NNlib: NNlib
 using Test
 

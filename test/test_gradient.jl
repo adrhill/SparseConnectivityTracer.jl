@@ -1,5 +1,5 @@
 using SparseConnectivityTracer
-using SparseConnectivityTracer: GradientTracer, Dual, MissingPrimalError, trace_input
+using SparseConnectivityTracer: GradientTracer, Dual, MissingPrimalError
 using Test
 
 using Compat: Returns

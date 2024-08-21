@@ -1,6 +1,5 @@
 
 using SparseConnectivityTracer
-using SparseConnectivityTracer: GradientTracer, Dual, MissingPrimalError, trace_input
 using SpecialFunctions: erf, beta
 using Test
 

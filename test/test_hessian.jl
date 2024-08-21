@@ -1,6 +1,6 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer: Dual, HessianTracer, MissingPrimalError
-using SparseConnectivityTracer: trace_input, create_tracers, pattern, shared
+using SparseConnectivityTracer: create_tracers, pattern, shared
 using Test
 using Random: rand, GLOBAL_RNG
 
