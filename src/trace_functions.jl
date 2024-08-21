@@ -1,7 +1,8 @@
-const DEFAULT_GRADIENT_TRACER = GradientTracer{IndexSetGradientPattern{Int,BitSet}}
-const DEFAULT_HESSIAN_TRACER = HessianTracer{
-    DictHessianPattern{Int,BitSet,Dict{Int,BitSet},NotShared}
-}
+#= This file handles the actual tracing of functions:
+1) creating tracers from inputs
+2) evaluating the function with the created tracers
+3) parsing the resulting tracers into an output matrix
+=#
 
 #==================#
 # Enumerate inputs #

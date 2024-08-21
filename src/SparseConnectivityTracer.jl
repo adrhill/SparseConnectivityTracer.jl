@@ -34,8 +34,8 @@ include("overloads/dual.jl")
 include("overloads/arrays.jl")
 include("overloads/utils.jl")
 
-include("interface.jl")
-include("adtypes.jl")
+include("trace_functions.jl")
+include("adtypes_interface.jl")
 
 export TracerSparsityDetector
 export TracerLocalSparsityDetector
