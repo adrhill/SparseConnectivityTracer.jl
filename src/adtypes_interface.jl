@@ -1,3 +1,10 @@
+#= This file implements the ADTypes interface for `AbstractSparsityDetector`s =#
+
+const DEFAULT_GRADIENT_TRACER = GradientTracer{IndexSetGradientPattern{Int,BitSet}}
+const DEFAULT_HESSIAN_TRACER = HessianTracer{
+    DictHessianPattern{Int,BitSet,Dict{Int,BitSet},NotShared}
+}
+
 """
     TracerSparsityDetector <: ADTypes.AbstractSparsityDetector
 

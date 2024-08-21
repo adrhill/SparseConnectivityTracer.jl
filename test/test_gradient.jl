@@ -1,44 +1,13 @@
 using SparseConnectivityTracer
-using SparseConnectivityTracer: GradientTracer, Dual, MissingPrimalError, trace_input
+using SparseConnectivityTracer: GradientTracer, Dual, MissingPrimalError
 using Test
 
 using Compat: Returns
 using Random: rand, GLOBAL_RNG
 using LinearAlgebra: det, dot, logdet
-using SpecialFunctions: erf, beta
-using NNlib: NNlib
 
 # Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
 include("tracers_definitions.jl")
-
-NNLIB_ACTIVATIONS_S = (
-    NNlib.σ,
-    NNlib.celu,
-    NNlib.elu,
-    NNlib.gelu,
-    NNlib.hardswish,
-    NNlib.lisht,
-    NNlib.logσ,
-    NNlib.logcosh,
-    NNlib.mish,
-    NNlib.selu,
-    NNlib.softplus,
-    NNlib.softsign,
-    NNlib.swish,
-    NNlib.sigmoid_fast,
-    NNlib.tanhshrink,
-    NNlib.tanh_fast,
-)
-NNLIB_ACTIVATIONS_F = (
-    NNlib.hardσ,
-    NNlib.hardtanh,
-    NNlib.leakyrelu,
-    NNlib.relu,
-    NNlib.relu6,
-    NNlib.softshrink,
-    NNlib.trelu,
-)
-NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
 
 REAL_TYPES = (Float64, Int, Bool, UInt8, Float16, Rational{Int})
 
@@ -110,11 +79,6 @@ J(f, x) = jacobian_sparsity(f, x, method)
             @test J(x -> dot(x[1:2], x[4:5]), rand(5)) == [1 1 0 1 1]
         end
 
-        @testset "SpecialFunctions extension" begin
-            @test J(x -> erf(x[1]), rand(2)) == [1 0]
-            @test J(x -> beta(x[1], x[2]), rand(3)) == [1 1 0]
-        end
-
         @testset "MissingPrimalError" begin
             @testset "$f" for f in (
                 iseven,
@@ -130,12 +94,6 @@ J(f, x) = jacobian_sparsity(f, x, method)
                 iszero,
             )
                 @test_throws MissingPrimalError J(f, rand())
-            end
-        end
-
-        @testset "NNlib" begin
-            @testset "$f" for f in NNLIB_ACTIVATIONS
-                @test J(f, 1) ≈ [1;;]
             end
         end
 
@@ -273,44 +231,6 @@ end
             @test J(logdet, [1.0 -1.0; 2.0 2.0]) == [1 1 1 1]  # (#68)
             @test J(x -> log(det(x)), [1.0 -1.0; 2.0 2.0]) == [1 1 1 1]
             @test J(x -> dot(x[1:2], x[4:5]), [0, 1, 0, 1, 0]) == [1 0 0 0 1]
-        end
-
-        @testset "NNlib" begin
-            @test J(NNlib.relu, -1) ≈ [0;;]
-            @test J(NNlib.relu, 1) ≈ [1;;]
-            @test J(NNlib.elu, -1) ≈ [1;;]
-            @test J(NNlib.elu, 1) ≈ [1;;]
-            @test J(NNlib.celu, -1) ≈ [1;;]
-            @test J(NNlib.celu, 1) ≈ [1;;]
-            @test J(NNlib.selu, -1) ≈ [1;;]
-            @test J(NNlib.selu, 1) ≈ [1;;]
-
-            @test J(NNlib.relu6, -1) ≈ [0;;]
-            @test J(NNlib.relu6, 1) ≈ [1;;]
-            @test J(NNlib.relu6, 7) ≈ [0;;]
-
-            @test J(NNlib.trelu, 0.9) ≈ [0;;]
-            @test J(NNlib.trelu, 1.1) ≈ [1;;]
-
-            @test J(NNlib.swish, -5) ≈ [1;;]
-            @test J(NNlib.swish, 0) ≈ [1;;]
-            @test J(NNlib.swish, 5) ≈ [1;;]
-
-            @test J(NNlib.hardswish, -5) ≈ [0;;]
-            @test J(NNlib.hardswish, 0) ≈ [1;;]
-            @test J(NNlib.hardswish, 5) ≈ [1;;]
-
-            @test J(NNlib.hardσ, -4) ≈ [0;;]
-            @test J(NNlib.hardσ, 0) ≈ [1;;]
-            @test J(NNlib.hardσ, 4) ≈ [0;;]
-
-            @test J(NNlib.hardtanh, -2) ≈ [0;;]
-            @test J(NNlib.hardtanh, 0) ≈ [1;;]
-            @test J(NNlib.hardtanh, 2) ≈ [0;;]
-
-            @test J(NNlib.softshrink, -1) ≈ [1;;]
-            @test J(NNlib.softshrink, 0) ≈ [0;;]
-            @test J(NNlib.softshrink, 1) ≈ [1;;]
         end
         yield()
     end
