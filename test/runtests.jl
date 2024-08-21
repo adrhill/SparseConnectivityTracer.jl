@@ -91,6 +91,13 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
             end
         end
     end
+    if GROUP in ("Core", "All")
+        @info "Testing package extensions..."
+        @testset "NNlib" begin
+            @info "...NNlib"
+            include("ext/test_NNlib.jl")
+        end
+    end
 
     if GROUP in ("Core", "All")
         @info "Testing real-world examples..."

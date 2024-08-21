@@ -5,7 +5,6 @@ using Test
 
 using Random: rand, GLOBAL_RNG
 using SpecialFunctions: erf, beta
-using NNlib: NNlib
 
 # Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
 include("tracers_definitions.jl")
@@ -397,44 +396,6 @@ end
         @testset "Random" begin
             @test H(x -> rand(typeof(x)), 1) ≈ [0;;]
             @test H(x -> rand(GLOBAL_RNG, typeof(x)), 1) ≈ [0;;]
-        end
-
-        @testset "NNlib" begin
-            @test H(NNlib.relu, -1) ≈ [0;;]
-            @test H(NNlib.relu, 1) ≈ [0;;]
-            @test H(NNlib.elu, -1) ≈ [1;;]
-            @test H(NNlib.elu, 1) ≈ [0;;]
-            @test H(NNlib.celu, -1) ≈ [1;;]
-            @test H(NNlib.celu, 1) ≈ [0;;]
-            @test H(NNlib.selu, -1) ≈ [1;;]
-            @test H(NNlib.selu, 1) ≈ [0;;]
-
-            @test H(NNlib.relu6, -1) ≈ [0;;]
-            @test H(NNlib.relu6, 1) ≈ [0;;]
-            @test H(NNlib.relu6, 7) ≈ [0;;]
-
-            @test H(NNlib.trelu, 0.9) ≈ [0;;]
-            @test H(NNlib.trelu, 1.1) ≈ [0;;]
-
-            @test H(NNlib.swish, -5) ≈ [1;;]
-            @test H(NNlib.swish, 0) ≈ [1;;]
-            @test H(NNlib.swish, 5) ≈ [1;;]
-
-            @test H(NNlib.hardswish, -5) ≈ [0;;]
-            @test H(NNlib.hardswish, 0) ≈ [1;;]
-            @test H(NNlib.hardswish, 5) ≈ [0;;]
-
-            @test H(NNlib.hardσ, -4) ≈ [0;;]
-            @test H(NNlib.hardσ, 0) ≈ [0;;]
-            @test H(NNlib.hardσ, 4) ≈ [0;;]
-
-            @test H(NNlib.hardtanh, -2) ≈ [0;;]
-            @test H(NNlib.hardtanh, 0) ≈ [0;;]
-            @test H(NNlib.hardtanh, 2) ≈ [0;;]
-
-            @test H(NNlib.softshrink, -1) ≈ [0;;]
-            @test H(NNlib.softshrink, 0) ≈ [0;;]
-            @test H(NNlib.softshrink, 1) ≈ [0;;]
         end
         yield()
     end
