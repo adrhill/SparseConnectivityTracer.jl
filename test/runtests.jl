@@ -97,6 +97,10 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
             @info "...NNlib"
             include("ext/test_NNlib.jl")
         end
+        @testset "SpecialFunctions" begin
+            @info "...SpecialFunctions"
+            include("ext/test_SpecialFunctions.jl")
+        end
     end
 
     if GROUP in ("Core", "All")

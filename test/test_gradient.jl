@@ -5,7 +5,6 @@ using Test
 using Compat: Returns
 using Random: rand, GLOBAL_RNG
 using LinearAlgebra: det, dot, logdet
-using SpecialFunctions: erf, beta
 
 # Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
 include("tracers_definitions.jl")
@@ -78,11 +77,6 @@ J(f, x) = jacobian_sparsity(f, x, method)
 
         @testset "LinearAlgebra" begin
             @test J(x -> dot(x[1:2], x[4:5]), rand(5)) == [1 1 0 1 1]
-        end
-
-        @testset "SpecialFunctions extension" begin
-            @test J(x -> erf(x[1]), rand(2)) == [1 0]
-            @test J(x -> beta(x[1], x[2]), rand(3)) == [1 1 0]
         end
 
         @testset "MissingPrimalError" begin
