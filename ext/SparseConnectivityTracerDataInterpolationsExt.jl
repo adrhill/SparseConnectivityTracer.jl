@@ -3,33 +3,23 @@ import SparseConnectivityTracer as SCT
 
 if isdefined(Base, :get_extension)
     using DataInterpolations
+    using DataInterpolations: _interpolate, _derivative
 else
     using ..DataInterpolations
+    using ..DataInterpolations: _interpolate, _derivative
 end
 
-interpolation_types = []
-for name in names(DataInterpolations)
-    if isdefined(DataInterpolations, name)
-        val = getfield(DataInterpolations, name)
-        if val isa Type && val <: DataInterpolations.AbstractInterpolation
-            push!(interpolation_types, val)
-        end
-    end
+operations = [_interpolate, _derivative]
+
+for operation in operations
+    @eval SCT.is_der1_arg1_zero_global(::typeof($operation)) = true
+    @eval SCT.is_der2_arg1_zero_global(::typeof($operation)) = true
+    @eval SCT.is_der1_arg2_zero_global(::typeof($operation)) = false
+    @eval SCT.is_der2_arg2_zero_global(::typeof($operation)) = false
+    @eval SCT.is_der_cross_zero_global(::typeof($operation)) = true
 end
 
-for interpolation_type in interpolation_types
-    if interpolation_type == ConstantInterpolation
-        @eval SCT.is_der1_zero_global(::Type{$interpolation_type}) = true
-        @eval SCT.is_der2_zero_global(::Type{$interpolation_type}) = true
-    elseif interpolation_type == LinearInterpolation
-        @eval SCT.is_der1_zero_global(::Type{$interpolation_type}) = false
-        @eval SCT.is_der2_zero_global(::Type{$interpolation_type}) = true
-    else
-        @eval SCT.is_der1_zero_global(::Type{$interpolation_type}) = false
-        @eval SCT.is_der2_zero_global(::Type{$interpolation_type}) = false
-    end
-end
-
-SCT.overload_gradient_1_to_1(:DataInterpolations, interpolation_types)
+eval(SCT.overload_gradient_2_to_1(:DataInterpolations, operations))
+eval(SCT.overload_hessian_2_to_1(:DataInterpolations, operations))
 
 end # module SparseConnectivityTracerDataInterpolationsExt

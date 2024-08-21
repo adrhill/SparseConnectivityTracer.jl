@@ -9,15 +9,8 @@ using LinearAlgebra: det, dot, logdet
 # Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
 include("tracers_definitions.jl")
 
-interpolation_types = []
-for name in names(DataInterpolations)
-    if isdefined(DataInterpolations, name)
-        val = getfield(DataInterpolations, name)
-        if val isa Type && val <: DataInterpolations.AbstractInterpolation
-            push!(interpolation_types, val)
-        end
-    end
-end
+# Sample of interpolation types
+interpolation_types = [ConstantInterpolation, LinearInterpolation, QuadraticInterpolation]
 
 REAL_TYPES = (Float64, Int, Bool, UInt8, Float16, Rational{Int})
 
