@@ -66,7 +66,7 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
 
     if GROUP in ("Core", "All")
         @info "Testing operator classification..."
-        @testset "Classification of operators by diff'ability" begin
+        @testset "Operator classification" begin
             include("classification.jl")
         end
     end
@@ -93,10 +93,12 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
     end
     if GROUP in ("Core", "All")
         @info "Testing package extensions..."
-        for ext in (:NNlib, :SpecialFunctions, :DataInterpolations)
-            @testset "$ext" begin
-                @info "...$ext"
-                include("ext/test_$ext.jl")
+        @testset verbose = true "Package extensions" begin
+            for ext in (:NNlib, :SpecialFunctions, :DataInterpolations)
+                @testset "$ext" begin
+                    @info "...$ext"
+                    include("ext/test_$ext.jl")
+                end
             end
         end
     end
