@@ -15,7 +15,7 @@ else
 end
 
 # We assume with the exception of ConstantInterpolation and LinearInterpolation,
-# all interpolations except are twice differentiable
+# all interpolations have a non-zero second derivative at some point in the input domain.
 
 (interp::AbstractInterpolation)(t::GradientTracer) = gradient_tracer_1_to_1(t, false)
 (interp::ConstantInterpolation)(t::GradientTracer) = gradient_tracer_1_to_1(t, true)

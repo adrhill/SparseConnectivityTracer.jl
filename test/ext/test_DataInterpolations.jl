@@ -23,19 +23,19 @@ t = [0.0, 1.0, 3.0]
         method = M()
         J(f, x) = jacobian_sparsity(f, x, method)
 
-        @testset "Non-differentiable" begin
+        @testset "Zero first derivative, zero second derivative" begin
             @testset "$T" for T in interpolations_z
                 interp = T(u, t)
                 @test J(interp, 2.0) ≈ [0;;]
             end
         end
-        @testset "First-order differentiable" begin
+        @testset "Non-zero first derivative, zero second derivative" begin
             @testset "$T" for T in interpolations_f
                 interp = T(u, t)
                 @test J(interp, 2.0) ≈ [1;;]
             end
         end
-        @testset "Second-order differentiable" begin
+        @testset "Non-zero first derivative, non-zero second derivative" begin
             @testset "$T" for T in interpolations_s
                 interp = T(u, t)
                 @test J(interp, 2.0) ≈ [1;;]
@@ -49,19 +49,19 @@ end
         method = M()
         H(f, x) = hessian_sparsity(f, x, method)
 
-        @testset "Non-differentiable" begin
+        @testset "Zero first derivative, zero second derivative" begin
             @testset "$T" for T in interpolations_z
                 interp = T(u, t)
                 @test H(interp, 2.0) ≈ [0;;]
             end
         end
-        @testset "First-order differentiable" begin
+        @testset "Non-zero first derivative, zero second derivative" begin
             @testset "$T" for T in interpolations_f
                 interp = T(u, t)
                 @test H(interp, 2.0) ≈ [0;;]
             end
         end
-        @testset "Second-order differentiable" begin
+        @testset "Non-zero first derivative, non-zero second derivative" begin
             @testset "$T" for T in interpolations_s
                 interp = T(u, t)
                 @test H(interp, 2.0) ≈ [1;;]
