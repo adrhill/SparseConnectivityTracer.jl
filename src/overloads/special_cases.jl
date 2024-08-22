@@ -20,6 +20,8 @@ function Base.rand(
     rng::AbstractRNG, ::SamplerType{D}
 ) where {P,T<:AbstractTracer,D<:Dual{P,T}}
     p = rand(rng, P)
+    # This unfortunately can't just return the primal value.
+    # Random.jl will otherwise throw "TypeError: in typeassert, expected Dual{P,T}, got a value of type P". 
     t = myempty(T)
     return Dual(p, t)
 end
