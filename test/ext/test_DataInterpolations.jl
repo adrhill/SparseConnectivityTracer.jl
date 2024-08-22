@@ -24,19 +24,19 @@ t = [0.0, 1.0, 3.0]
 
     @testset "Non-differentiable" begin
         @testset "$T" for T in interpolations_z
-            interp = construct_interpolator(T, u, t)
+            interp = T(u, t)
             @test J(interp, 2.0) ≈ [0;;]
         end
     end
     @testset "First-order differentiable" begin
         @testset "$T" for T in interpolations_f
-            interp = construct_interpolator(T, u, t)
+            interp = T(u, t)
             @test J(interp, 2.0) ≈ [1;;]
         end
     end
     @testset "Second-order differentiable" begin
         @testset "$T" for T in interpolations_s
-            interp = construct_interpolator(T, u, t)
+            interp = T(u, t)
             @test J(interp, 2.0) ≈ [1;;]
         end
     end

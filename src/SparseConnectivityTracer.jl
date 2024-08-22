@@ -51,7 +51,7 @@ function __init__()
             "../ext/SparseConnectivityTracerNNlibExt.jl"
         )
         @require DataInterpolations = "82cc6244-b520-54b8-b5a6-8a565e85f1d0" include(
-            "..ext/SparseConnectivityTracerDataInterpolationsExt.jl"
+            "../ext/SparseConnectivityTracerDataInterpolationsExt.jl"
         )
     end
 end
