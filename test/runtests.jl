@@ -93,13 +93,11 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
     end
     if GROUP in ("Core", "All")
         @info "Testing package extensions..."
-        @testset "NNlib" begin
-            @info "...NNlib"
-            include("ext/test_NNlib.jl")
-        end
-        @testset "SpecialFunctions" begin
-            @info "...SpecialFunctions"
-            include("ext/test_SpecialFunctions.jl")
+        for ext in (:NNlib, :SpecialFunctions, :DataInterpolations)
+            @testset "$ext" begin
+                @info "...$ext"
+                include("ext/test_$ext.jl")
+            end
         end
     end
 

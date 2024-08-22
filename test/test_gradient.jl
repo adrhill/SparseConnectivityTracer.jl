@@ -9,9 +9,6 @@ using LinearAlgebra: det, dot, logdet
 # Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
 include("tracers_definitions.jl")
 
-# Sample of interpolation types
-interpolation_types = [ConstantInterpolation, LinearInterpolation, QuadraticInterpolation]
-
 REAL_TYPES = (Float64, Int, Bool, UInt8, Float16, Rational{Int})
 
 # These exists to be able to quickly run tests in the REPL.
@@ -97,19 +94,6 @@ J(f, x) = jacobian_sparsity(f, x, method)
                 iszero,
             )
                 @test_throws MissingPrimalError J(f, rand())
-            end
-        end
-
-        @testset "DataInterpolations" begin
-            u = [1.0, 2.0, 5.0]
-            t = [0.0, 1.0, 3.0]
-            @testset "$interpolation_type" for interpolation_type in interpolation_types
-                A = interpolation_type(u, t)
-                if interpolation_type == ConstantInterpolation
-                    @test J(A, 2.0) == [0]
-                else
-                    @test J(A, 2.0) == [1]
-                end
             end
         end
 
