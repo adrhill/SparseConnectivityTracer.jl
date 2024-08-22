@@ -10,9 +10,14 @@ Having read our guide [*"How SparseConnectivityTracer works"*](@ref how-sct-work
 [`Dual`](@ref SparseConnectivityTracer.Dual)
 to improve the performance of your functions or to work around some of SCT's [limitations](@ref limitations).
 
+## Avoid hand-written overloads
+
 !!! warning "Don't overload manually"
-    If you want to overload a `Function` that takes `Real` arguments, we strongly discourage you from manually adding methods on our tracer types.
-    Instead, use the same mechanisms we use ourselves.
+    If you want to overload a `Function` that takes `Real` arguments, 
+    we strongly discourage you from manually adding methods to your function that use our internal tracer types.
+
+    Instead, use the same code generation mechanisms that we use.
+    This page of the documentation shows you how.
 
 !!! tip "Copy one of our package extensions"
     The easiest way to add overloads is to copy one of our [package extensions](https://github.com/adrhill/SparseConnectivityTracer.jl/tree/main/ext) and to modify it.
