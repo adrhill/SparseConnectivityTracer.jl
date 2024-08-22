@@ -11,7 +11,7 @@ Having read our guide [*"How SparseConnectivityTracer works"*](@ref how-sct-work
 to improve the performance of your functions or to work around some of SCT's [limitations](@ref limitations).
 
 !!! warning "Don't overload manually"
-    If you want to overload a simple `Function` that takes `Real` arguments, we strongly discourage you from manually adding methods on our tracer types.
+    If you want to overload a `Function` that takes `Real` arguments, we strongly discourage you from manually adding methods on our tracer types.
     Instead, use the same mechanisms we use ourselves.
 
 !!! tip "Copy one of our package extensions"
