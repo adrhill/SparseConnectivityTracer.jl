@@ -18,62 +18,54 @@ interpolations_s = (
 u = [1.0, 2.0, 5.0]
 t = [0.0, 1.0, 3.0]
 
-@testset "Jacobian Global" begin
-    method = TracerSparsityDetector()
-    J(f, x) = jacobian_sparsity(f, x, method)
+@testset "Jacobian" begin
+    @testset "$M" for M in (TracerSparsityDetector, TracerLocalSparsityDetector)
+        method = M()
+        J(f, x) = jacobian_sparsity(f, x, method)
 
-    @testset "Non-differentiable" begin
-        @testset "$T" for T in interpolations_z
-            interp = T(u, t)
-            @test J(interp, 2.0) ≈ [0;;]
+        @testset "Non-differentiable" begin
+            @testset "$T" for T in interpolations_z
+                interp = T(u, t)
+                @test J(interp, 2.0) ≈ [0;;]
+            end
         end
-    end
-    @testset "First-order differentiable" begin
-        @testset "$T" for T in interpolations_f
-            interp = T(u, t)
-            @test J(interp, 2.0) ≈ [1;;]
+        @testset "First-order differentiable" begin
+            @testset "$T" for T in interpolations_f
+                interp = T(u, t)
+                @test J(interp, 2.0) ≈ [1;;]
+            end
         end
-    end
-    @testset "Second-order differentiable" begin
-        @testset "$T" for T in interpolations_s
-            interp = T(u, t)
-            @test J(interp, 2.0) ≈ [1;;]
+        @testset "Second-order differentiable" begin
+            @testset "$T" for T in interpolations_s
+                interp = T(u, t)
+                @test J(interp, 2.0) ≈ [1;;]
+            end
         end
     end
 end
 
-# TODO: add tests
-# @testset "Jacobian Local" begin
-#     method = TracerLocalSparsityDetector()
-#     J(f, x) = jacobian_sparsity(f, x, method)
-# end
+@testset "Hessian" begin
+    @testset "$M" for M in (TracerSparsityDetector, TracerLocalSparsityDetector)
+        method = M()
+        H(f, x) = hessian_sparsity(f, x, method)
 
-@testset "Global Hessian" begin
-    method = TracerSparsityDetector()
-    H(f, x) = hessian_sparsity(f, x, method)
-
-    @testset "Non-differentiable" begin
-        @testset "$T" for T in interpolations_z
-            interp = T(u, t)
-            @test H(interp, 2.0) ≈ [0;;]
+        @testset "Non-differentiable" begin
+            @testset "$T" for T in interpolations_z
+                interp = T(u, t)
+                @test H(interp, 2.0) ≈ [0;;]
+            end
         end
-    end
-    @testset "First-order differentiable" begin
-        @testset "$T" for T in interpolations_f
-            interp = T(u, t)
-            @test H(interp, 2.0) ≈ [0;;]
+        @testset "First-order differentiable" begin
+            @testset "$T" for T in interpolations_f
+                interp = T(u, t)
+                @test H(interp, 2.0) ≈ [0;;]
+            end
         end
-    end
-    @testset "Second-order differentiable" begin
-        @testset "$T" for T in interpolations_s
-            interp = T(u, t)
-            @test H(interp, 2.0) ≈ [1;;]
+        @testset "Second-order differentiable" begin
+            @testset "$T" for T in interpolations_s
+                interp = T(u, t)
+                @test H(interp, 2.0) ≈ [1;;]
+            end
         end
     end
 end
-
-# TODO: add tests
-# @testset "Local Hessian" begin
-#     method = TracerLocalSparsityDetector()
-#     H(f, x) = hessian_sparsity(f, x, method)
-# end
