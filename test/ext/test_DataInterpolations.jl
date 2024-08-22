@@ -3,7 +3,7 @@ using SparseConnectivityTracer
 using DataInterpolations
 using Test
 
-# Sample of interpolation types
+# Categorize Interpolations by type of differentiability
 interpolations_z = (ConstantInterpolation,)
 interpolations_f = (LinearInterpolation,)
 interpolations_s = (QuadraticInterpolation,)
@@ -48,19 +48,19 @@ end
     @testset "Non-differentiable" begin
         @testset "$TI" for TI in interpolations_z
             interpolant = TI(u, t)
-            @test J(interpolant, 2.0) ≈ [0;;]
+            @test H(interpolant, 2.0) ≈ [0;;]
         end
     end
     @testset "First-order differentiable" begin
         @testset "$TI" for TI in interpolations_f
             interpolant = TI(u, t)
-            @test J(interpolant, 2.0) ≈ [0;;]
+            @test H(interpolant, 2.0) ≈ [0;;]
         end
     end
     @testset "Second-order differentiable" begin
         @testset "$TI" for TI in interpolations_s
             interpolant = TI(u, t)
-            @test J(interpolant, 2.0) ≈ [1;;]
+            @test H(interpolant, 2.0) ≈ [1;;]
         end
     end
 end
