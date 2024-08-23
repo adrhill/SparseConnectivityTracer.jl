@@ -16,10 +16,11 @@ if isdefined(Base, :get_extension)
         QuadraticSpline,
         CubicSpline,
         BSplineInterpolation,
-        BSplineApprox,
-        CubicHermiteSpline,
-        PCHIPInterpolation,
-        QuinticHermiteSpline
+        BSplineApprox
+    # TODO: support when Julia 1.6 is dropped
+    # CubicHermiteSpline,
+    # PCHIPInterpolation,
+    # QuinticHermiteSpline
 else
     using ..SparseConnectivityTracer: GradientTracer, gradient_tracer_1_to_1
     using ..SparseConnectivityTracer: HessianTracer, hessian_tracer_1_to_1
@@ -34,10 +35,11 @@ else
         QuadraticSpline,
         CubicSpline,
         BSplineInterpolation,
-        BSplineApprox,
-        CubicHermiteSpline,
-        PCHIPInterpolation,
-        QuinticHermiteSpline
+        BSplineApprox
+    # TODO: support when Julia 1.6 is dropped
+    # CubicHermiteSpline,
+    # PCHIPInterpolation,
+    # QuinticHermiteSpline
 end
 
 #=======================#
@@ -134,8 +136,9 @@ for I in (
     :CubicSpline,
     :BSplineInterpolation,
     :BSplineApprox,
-    :CubicHermiteSpline,
-    :QuinticHermiteSpline,
+    # TODO: support when Julia 1.6 is dropped
+    # :CubicHermiteSpline,
+    # :QuinticHermiteSpline,
 )
     # 1D Interpolations (uType<:AbstractVector)
     @eval function (interp::$(I){uType})(t::GradientTracer) where {uType<:AbstractVector}

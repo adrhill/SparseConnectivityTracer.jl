@@ -122,7 +122,7 @@ end
         InterpolationTest(1, CubicSpline(u, t)),
         InterpolationTest(1, BSplineInterpolation(u, t, 3, :ArcLen, :Average)),
         InterpolationTest(1, BSplineApprox(u, t, 3, 4, :ArcLen, :Average)),
-        # TODO: comment-in when support for Julia 1.6 is dropped
+        # TODO: support when Julia 1.6 is dropped
         # InterpolationTest(1, PCHIPInterpolation(u, t)), 
         # InterpolationTest(1, CubicHermiteSpline(du, u, t)),
         # InterpolationTest(1, QuinticHermiteSpline(ddu, du, u, t)),
