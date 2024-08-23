@@ -5,17 +5,21 @@ using DataInterpolations
 using DataInterpolations: AbstractInterpolation
 using Test
 
+myprimal(x) = x
+myprimal(d::Dual) = primal(d)
+
 #===========#
 # Test data #
 #===========#
 
-t = [0.0, 1.0, 2.5, 4.0];
-n = length(t)
-
-uv = rand(n); # vector
-um = rand(2, n); # matrix
-
 tquery = 2.0
+t = [0.0, 1.0, 2.5, 4.0, 6.0];
+
+u = sin.(t) # vector
+du = cos.(t)
+ddu = -sin.(t)
+
+um = rand(2, length(t)); # matrix
 
 #==================#
 # Test definitions #
@@ -33,7 +37,7 @@ function InterpolationTest(
 end
 testname(t::InterpolationTest{N}) where {N} = "$N-dim $(typeof(t.interp))"
 
-# scalar interpolations
+# Interpolations with scalar outputs
 function test_interpolation(t::InterpolationTest{1})
     Jref = [Int(!t.is_der1_zero);;]
     Href = [Int(!t.is_der2_zero);;]
@@ -56,7 +60,7 @@ function test_interpolation(t::InterpolationTest{1})
     end
 end
 
-# vector-valued interpolations
+# Interpolations with vector-valued outputs
 function test_interpolation(t::InterpolationTest{N}) where {N} # N ≠ 1
     Jref = t.is_der1_zero ? zeros(N) : ones(N)
     Href = t.is_der2_zero ? zeros(N) : ones(N)
@@ -78,9 +82,6 @@ function test_interpolation(t::InterpolationTest{N}) where {N} # N ≠ 1
         @test H ≈ Href
     end
 end
-
-myprimal(x) = x
-myprimal(d::Dual) = primal(d)
 
 function test_output(t::InterpolationTest)
     @testset "Output sizes and values" begin
@@ -111,15 +112,18 @@ end
 #===========#
 
 interpolation_tests = (
-    InterpolationTest(
-        1, ConstantInterpolation(uv, t); is_der1_zero=true, is_der2_zero=true
-    ),
-    InterpolationTest(1, LinearInterpolation(uv, t); is_der2_zero=true),
-    InterpolationTest(1, QuadraticInterpolation(uv, t)),
-    InterpolationTest(1, LagrangeInterpolation(uv, t)),
-    InterpolationTest(1, AkimaInterpolation(uv, t)),
-    InterpolationTest(1, QuadraticSpline(uv, t)),
-    InterpolationTest(1, CubicSpline(uv, t)),
+    InterpolationTest(1, ConstantInterpolation(u, t); is_der1_zero=true, is_der2_zero=true),
+    InterpolationTest(1, LinearInterpolation(u, t); is_der2_zero=true),
+    InterpolationTest(1, QuadraticInterpolation(u, t)),
+    InterpolationTest(1, LagrangeInterpolation(u, t)),
+    InterpolationTest(1, AkimaInterpolation(u, t)),
+    InterpolationTest(1, QuadraticSpline(u, t)),
+    InterpolationTest(1, CubicSpline(u, t)),
+    InterpolationTest(1, BSplineInterpolation(u, t, 3, :ArcLen, :Average)),
+    InterpolationTest(1, BSplineApprox(u, t, 3, 4, :ArcLen, :Average)),
+    InterpolationTest(1, CubicHermiteSpline(du, u, t)),
+    InterpolationTest(1, PCHIPInterpolation(u, t)),
+    InterpolationTest(1, QuinticHermiteSpline(ddu, du, u, t)),
 )
 
 @testset "Test interpolations" begin
