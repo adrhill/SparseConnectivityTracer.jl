@@ -15,56 +15,47 @@ interpolations_s = (
     CubicSpline,
 )
 
-u = [1.0, 2.0, 5.0]
-t = [0.0, 1.0, 3.0]
+t = [0.0, 1.0, 2.5, 4.0];
+n = length(t)
 
-@testset "Jacobian" begin
-    @testset "$M" for M in (TracerSparsityDetector, TracerLocalSparsityDetector)
-        method = M()
-        J(f, x) = jacobian_sparsity(f, x, method)
+uv = rand(n); # vector
+um = rand(n, 2); # matrix
 
-        @testset "Zero first derivative, zero second derivative" begin
-            @testset "$T" for T in interpolations_z
-                interp = T(u, t)
-                @test J(interp, 2.0) ≈ [0;;]
+@testset "$M" for M in (TracerSparsityDetector, TracerLocalSparsityDetector)
+    method = M()
+    J(f, x) = jacobian_sparsity(f, x, method)
+    H(f, x) = hessian_sparsity(f, x, method)
+
+    @testset "Zero first derivative, zero second derivative" begin
+        @testset "$T" for T in interpolations_z
+            interp_v = T(uv, t)
+            @testset "Jacobian" begin
+                @test J(interp_v, 2.0) ≈ [0;;]
             end
-        end
-        @testset "Non-zero first derivative, zero second derivative" begin
-            @testset "$T" for T in interpolations_f
-                interp = T(u, t)
-                @test J(interp, 2.0) ≈ [1;;]
-            end
-        end
-        @testset "Non-zero first derivative, non-zero second derivative" begin
-            @testset "$T" for T in interpolations_s
-                interp = T(u, t)
-                @test J(interp, 2.0) ≈ [1;;]
+            @testset "Hessian" begin
+                @test H(interp_v, 2.0) ≈ [0;;]
             end
         end
     end
-end
-
-@testset "Hessian" begin
-    @testset "$M" for M in (TracerSparsityDetector, TracerLocalSparsityDetector)
-        method = M()
-        H(f, x) = hessian_sparsity(f, x, method)
-
-        @testset "Zero first derivative, zero second derivative" begin
-            @testset "$T" for T in interpolations_z
-                interp = T(u, t)
-                @test H(interp, 2.0) ≈ [0;;]
+    @testset "Non-zero first derivative, zero second derivative" begin
+        @testset "$T" for T in interpolations_f
+            interp_v = T(uv, t)
+            @testset "Jacobian" begin
+                @test J(interp_v, 2.0) ≈ [1;;]
+            end
+            @testset "Hessian" begin
+                @test H(interp_v, 2.0) ≈ [0;;]
             end
         end
-        @testset "Non-zero first derivative, zero second derivative" begin
-            @testset "$T" for T in interpolations_f
-                interp = T(u, t)
-                @test H(interp, 2.0) ≈ [0;;]
+    end
+    @testset "Non-zero first derivative, non-zero second derivative" begin
+        @testset "$T" for T in interpolations_s
+            interp_v = T(uv, t)
+            @testset "Jacobian" begin
+                @test J(interp_v, 2.0) ≈ [1;;]
             end
-        end
-        @testset "Non-zero first derivative, non-zero second derivative" begin
-            @testset "$T" for T in interpolations_s
-                interp = T(u, t)
-                @test H(interp, 2.0) ≈ [1;;]
+            @testset "Hessian" begin
+                @test H(interp_v, 2.0) ≈ [1;;]
             end
         end
     end
