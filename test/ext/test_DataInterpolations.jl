@@ -122,9 +122,9 @@ end
         InterpolationTest(1, CubicSpline(u, t)),
         InterpolationTest(1, BSplineInterpolation(u, t, 3, :ArcLen, :Average)),
         InterpolationTest(1, BSplineApprox(u, t, 3, 4, :ArcLen, :Average)),
-        InterpolationTest(1, PCHIPInterpolation(u, t)),
         InterpolationTest(1, CubicHermiteSpline(du, u, t)),
         InterpolationTest(1, QuinticHermiteSpline(ddu, du, u, t)),
+        # InterpolationTest(1, PCHIPInterpolation(u, t)), # TODO: comment-in when 1.6 is dropped
     )
         test_interpolation(t)
         test_output(t)
