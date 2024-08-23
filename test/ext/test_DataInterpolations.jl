@@ -31,7 +31,7 @@ function InterpolationTest(
 ) where {I<:AbstractInterpolation}
     return InterpolationTest{N,I}(interp, is_der1_zero, is_der2_zero)
 end
-name(t::InterpolationTest{N}) where {N} = "$N-dim $(typeof(t.interp))"
+testname(t::InterpolationTest{N}) where {N} = "$N-dim $(typeof(t.interp))"
 
 # scalar interpolations
 function test_interpolation(t::InterpolationTest{1})
@@ -123,7 +123,7 @@ interpolation_tests = (
 )
 
 @testset "Test interpolations" begin
-    @testset "$(name(t))" for t in interpolation_tests
+    @testset "$(testname(t))" for t in interpolation_tests
         test_interpolation(t)
         test_output(t)
     end
