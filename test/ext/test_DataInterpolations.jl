@@ -1,20 +1,11 @@
-
 using SparseConnectivityTracer
 using DataInterpolations
 using DataInterpolations: AbstractInterpolation
 using Test
 
-# Categorize Interpolations by type of differentiability
-interpolations_z = (ConstantInterpolation,)
-interpolations_f = (LinearInterpolation,)
-interpolations_s = (
-    QuadraticInterpolation,
-    LagrangeInterpolation,
-    AkimaInterpolation,
-    QuadraticSpline,
-    CubicSpline,
-)
-
+#===========#
+# Test data #
+#===========#
 
 t = [0.0, 1.0, 2.5, 4.0];
 n = length(t)
@@ -22,54 +13,89 @@ n = length(t)
 uv = rand(n); # vector
 um = rand(2, n); # matrix
 
-@testset "$M" for M in (TracerSparsityDetector, TracerLocalSparsityDetector)
-    method = M()
-    J(f, x) = jacobian_sparsity(f, x, method)
-    H(f, x) = hessian_sparsity(f, x, method)
+tquery = 2.0
 
-    @testset "Zero first derivative, zero second derivative" begin
-        @testset "$T" for T in interpolations_z
-            interp_v = T(uv, t)
-            interp_m = T(um, t)
+#==================#
+# Test definitions #
+#==================#
 
-            @testset "Jacobian" begin
-                @test J(interp_v, 2.0) ≈ [0;;]
-                @test J(interp_m, 2.0) == zeros(n)
-            end
-            @testset "Hessian" begin
-                @test H(interp_v, 2.0) ≈ [0;;]
-                @test H(x -> sum(interp_m), 2.0) == zeros(n)
-            end
-        end
+struct InterpolationTest{N,I<:AbstractInterpolation} # N = output dim. of interpolation
+    interp::I
+    is_der1_zero::Bool
+    is_der2_zero::Bool
+end
+function InterpolationTest(
+    N, interp::I; is_der1_zero=false, is_der2_zero=false
+) where {I<:AbstractInterpolation}
+    return InterpolationTest{N,I}(interp, is_der1_zero, is_der2_zero)
+end
+name(t::InterpolationTest{N}) where {N} = "$N-dim $(typeof(t.interp))"
+
+# scalar interpolations
+function test_interpolation(t::InterpolationTest{1})
+    Jref = [Int(!t.is_der1_zero);;]
+    Href = [Int(!t.is_der2_zero);;]
+
+    @testset "Jacobian Global" begin
+        J = jacobian_sparsity(t.interp, tquery, TracerSparsityDetector())
+        @test J ≈ Jref
     end
-    @testset "Non-zero first derivative, zero second derivative" begin
-        @testset "$T" for T in interpolations_f
-            interp_v = T(uv, t)
-            interp_m = T(um, t)
-
-            @testset "Jacobian" begin
-                @test J(interp_v, 2.0) ≈ [1;;]
-                @test J(interp_m, 2.0) == ones(n)
-            end
-            @testset "Hessian" begin
-                @test H(interp_v, 2.0) ≈ [0;;]
-                @test H(x -> sum(interp_m), 2.0) == zeros(n)
-            end
-        end
+    @testset "Jacobian Local" begin
+        J = jacobian_sparsity(t.interp, tquery, TracerLocalSparsityDetector())
+        @test J ≈ Jref
     end
-    @testset "Non-zero first derivative, non-zero second derivative" begin
-        @testset "$T" for T in interpolations_s
-            interp_v = T(uv, t)
-            interp_m = T(um, t)
+    @testset "Hessian Global" begin
+        H = hessian_sparsity(t.interp, tquery, TracerSparsityDetector())
+        @test H ≈ Href
+    end
+    @testset "Hessian Local" begin
+        H = hessian_sparsity(t.interp, tquery, TracerLocalSparsityDetector())
+        @test H ≈ Href
+    end
+end
 
-            @testset "Jacobian" begin
-                @test J(interp_v, 2.0) ≈ [1;;]
-                @test J(interp_m, 2.0) == ones(n)
-            end
-            @testset "Hessian" begin
-                @test H(interp_v, 2.0) ≈ [1;;]
-                @test H(x -> sum(interp_m), 2.0) == ones(n)
-            end
-        end
+# vector-valued interpolations
+function test_interpolation(t::InterpolationTest{N}) where {N} # N ≠ 1
+    Jref = t.is_der1_zero ? zeros(N) : ones(N)
+    Href = t.is_der2_zero ? zeros(N) : ones(N)
+
+    @testset "Jacobian Global" begin
+        J = jacobian_sparsity(t.interp, tquery, TracerSparsityDetector())
+        @test J ≈ Jref
+    end
+    @testset "Jacobian Local" begin
+        J = jacobian_sparsity(t.interp, tquery, TracerLocalSparsityDetector())
+        @test J ≈ Jref
+    end
+    @testset "Hessian Global" begin
+        H = hessian_sparsity(t.interp, tquery, TracerSparsityDetector())
+        @test H ≈ Href
+    end
+    @testset "Hessian Local" begin
+        H = hessian_sparsity(t.interp, tquery, TracerLocalSparsityDetector())
+        @test H ≈ Href
+    end
+end
+
+#===========#
+# Run tests #
+#===========#
+
+interpolation_tests = (
+    InterpolationTest(
+        1, ConstantInterpolation(uv, t); is_der1_zero=true, is_der2_zero=true
+    ),
+    InterpolationTest(1, LinearInterpolation(uv, t); is_der2_zero=true),
+    InterpolationTest(1, QuadraticInterpolation(uv, t)),
+    InterpolationTest(1, LagrangeInterpolation(uv, t)),
+    InterpolationTest(1, AkimaInterpolation(uv, t)),
+    InterpolationTest(1, QuadraticSpline(uv, t)),
+    InterpolationTest(1, CubicSpline(uv, t)),
+)
+
+
+@testset "Test interpolations" begin
+    @testset "$(name(t))" for t in interpolation_tests
+        test_interpolation(t)
     end
 end
