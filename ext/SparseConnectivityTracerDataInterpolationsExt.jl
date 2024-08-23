@@ -1,3 +1,5 @@
+# WARNING: If you are following the "Adding Overloads" guide's advice to copy an existing package extension, 
+# copy another, less complicated one!
 module SparseConnectivityTracerDataInterpolationsExt
 
 if isdefined(Base, :get_extension)
