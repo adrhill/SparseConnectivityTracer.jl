@@ -44,15 +44,15 @@ Depending on the type of function you're dealing with, you will have to specify 
 
     | Function                                   | Meaning                                                 |
     |:-------------------------------------------|:--------------------------------------------------------|
-    | `is_der1_zero_global(::typeof{f}) = false` | $\frac{\partial f}{\partial x} \neq 0$ for some $x$     | 
-    | `is_der2_zero_global(::typeof{f}) = false` | $\frac{\partial^2 f}{\partial x^2} \neq 0$ for some $x$ | 
+    | `is_der1_zero_global(::typeof(f)) = false` | $\frac{\partial f}{\partial x} \neq 0$ for some $x$     | 
+    | `is_der2_zero_global(::typeof(f)) = false` | $\frac{\partial^2 f}{\partial x^2} \neq 0$ for some $x$ | 
 
     Optionally, to increase the sparsity of [`TracerLocalSparsityDetector`](@ref), you can additionally implement
 
     | Function                                     | Meaning                                                  |
     |:---------------------------------------------|:---------------------------------------------------------|
-    | `is_der1_zero_local(::typeof{f}, x) = false` | $\frac{\partial f}{\partial x} \neq 0$ for given $x$     | 
-    | `is_der2_zero_local(::typeof{f}, x) = false` | $\frac{\partial^2 f}{\partial x^2} \neq 0$ for given $x$ | 
+    | `is_der1_zero_local(::typeof(f), x) = false` | $\frac{\partial f}{\partial x} \neq 0$ for given $x$     | 
+    | `is_der2_zero_local(::typeof(f), x) = false` | $\frac{\partial^2 f}{\partial x^2} \neq 0$ for given $x$ | 
 
     These fall back to 
 
@@ -66,21 +66,21 @@ Depending on the type of function you're dealing with, you will have to specify 
 
     | Function                                        | Meaning                                                            |
     |:------------------------------------------------|:-------------------------------------------------------------------|
-    | `is_der1_arg1_zero_global(::typeof{f}) = false` | $\frac{\partial f}{\partial x} \neq 0$ for some $x,y$              | 
-    | `is_der2_arg1_zero_global(::typeof{f}) = false` | $\frac{\partial^2 f}{\partial x^2} \neq 0$ for some $x,y$          | 
-    | `is_der1_arg2_zero_global(::typeof{f}) = false` | $\frac{\partial f}{\partial y} \neq 0$ for some $x,y$              | 
-    | `is_der2_arg2_zero_global(::typeof{f}) = false` | $\frac{\partial^2 f}{\partial y^2} \neq 0$ for some $x,y$          | 
-    | `is_der_cross_zero_global(::typeof{f}) = false` | $\frac{\partial^2 f}{\partial x \partial y} \neq 0$ for some $x,y$ | 
+    | `is_der1_arg1_zero_global(::typeof(f)) = false` | $\frac{\partial f}{\partial x} \neq 0$ for some $x,y$              | 
+    | `is_der2_arg1_zero_global(::typeof(f)) = false` | $\frac{\partial^2 f}{\partial x^2} \neq 0$ for some $x,y$          | 
+    | `is_der1_arg2_zero_global(::typeof(f)) = false` | $\frac{\partial f}{\partial y} \neq 0$ for some $x,y$              | 
+    | `is_der2_arg2_zero_global(::typeof(f)) = false` | $\frac{\partial^2 f}{\partial y^2} \neq 0$ for some $x,y$          | 
+    | `is_der_cross_zero_global(::typeof(f)) = false` | $\frac{\partial^2 f}{\partial x \partial y} \neq 0$ for some $x,y$ | 
 
     Optionally, to increase the sparsity of [`TracerLocalSparsityDetector`](@ref), you can additionally implement
 
     | Function                                             | Meaning                                                             |
     |:-----------------------------------------------------|:--------------------------------------------------------------------|
-    | `is_der1_arg1_zero_local(::typeof{f}, x, y) = false` | $\frac{\partial f}{\partial x} \neq 0$ for given $x,y$              | 
-    | `is_der2_arg1_zero_local(::typeof{f}, x, y) = false` | $\frac{\partial^2 f}{\partial x^2} \neq 0$ for given $x,y$          | 
-    | `is_der1_arg2_zero_local(::typeof{f}, x, y) = false` | $\frac{\partial f}{\partial x} \neq 0$ for given $x,y$              | 
-    | `is_der2_arg2_zero_local(::typeof{f}, x, y) = false` | $\frac{\partial^2 f}{\partial x^2} \neq 0$ for given $x,y$          | 
-    | `is_der_cross_zero_local(::typeof{f}, x, y) = false` | $\frac{\partial^2 f}{\partial x \partial y} \neq 0$ for given $x,y$ | 
+    | `is_der1_arg1_zero_local(::typeof(f), x, y) = false` | $\frac{\partial f}{\partial x} \neq 0$ for given $x,y$              | 
+    | `is_der2_arg1_zero_local(::typeof(f), x, y) = false` | $\frac{\partial^2 f}{\partial x^2} \neq 0$ for given $x,y$          | 
+    | `is_der1_arg2_zero_local(::typeof(f), x, y) = false` | $\frac{\partial f}{\partial x} \neq 0$ for given $x,y$              | 
+    | `is_der2_arg2_zero_local(::typeof(f), x, y) = false` | $\frac{\partial^2 f}{\partial x^2} \neq 0$ for given $x,y$          | 
+    | `is_der_cross_zero_local(::typeof(f), x, y) = false` | $\frac{\partial^2 f}{\partial x \partial y} \neq 0$ for given $x,y$ | 
 
 
     These fall back to 
@@ -97,19 +97,19 @@ Depending on the type of function you're dealing with, you will have to specify 
 
     | Function                                       | Meaning                                                   |
     |:-----------------------------------------------|:----------------------------------------------------------|
-    | `is_der1_out1_zero_local(::typeof{f}) = false` | $\frac{\partial f_1}{\partial x} \neq 0$ for some $x$     | 
-    | `is_der2_out1_zero_local(::typeof{f}) = false` | $\frac{\partial^2 f_1}{\partial x^2} \neq 0$ for some $x$ | 
-    | `is_der1_out2_zero_local(::typeof{f}) = false` | $\frac{\partial f_2}{\partial x} \neq 0$ for some $x$     | 
-    | `is_der2_out2_zero_local(::typeof{f}) = false` | $\frac{\partial^2 f_2}{\partial x^2} \neq 0$ for some $x$ | 
+    | `is_der1_out1_zero_local(::typeof(f)) = false` | $\frac{\partial f_1}{\partial x} \neq 0$ for some $x$     | 
+    | `is_der2_out1_zero_local(::typeof(f)) = false` | $\frac{\partial^2 f_1}{\partial x^2} \neq 0$ for some $x$ | 
+    | `is_der1_out2_zero_local(::typeof(f)) = false` | $\frac{\partial f_2}{\partial x} \neq 0$ for some $x$     | 
+    | `is_der2_out2_zero_local(::typeof(f)) = false` | $\frac{\partial^2 f_2}{\partial x^2} \neq 0$ for some $x$ | 
 
     Optionally, to increase the sparsity of [`TracerLocalSparsityDetector`](@ref), you can additionally implement
 
     | Function                                          | Meaning                                                    |
     |:--------------------------------------------------|:-----------------------------------------------------------|
-    | `is_der1_out1_zero_local(::typeof{f}, x) = false` | $\frac{\partial f_1}{\partial x} \neq 0$ for given $x$     | 
-    | `is_der2_out1_zero_local(::typeof{f}, x) = false` | $\frac{\partial^2 f_1}{\partial x^2} \neq 0$ for given $x$ | 
-    | `is_der1_out2_zero_local(::typeof{f}, x) = false` | $\frac{\partial f_2}{\partial x} \neq 0$ for given $x$     | 
-    | `is_der2_out2_zero_local(::typeof{f}, x) = false` | $\frac{\partial^2 f_2}{\partial x^2} \neq 0$ for given $x$ | 
+    | `is_der1_out1_zero_local(::typeof(f), x) = false` | $\frac{\partial f_1}{\partial x} \neq 0$ for given $x$     | 
+    | `is_der2_out1_zero_local(::typeof(f), x) = false` | $\frac{\partial^2 f_1}{\partial x^2} \neq 0$ for given $x$ | 
+    | `is_der1_out2_zero_local(::typeof(f), x) = false` | $\frac{\partial f_2}{\partial x} \neq 0$ for given $x$     | 
+    | `is_der2_out2_zero_local(::typeof(f), x) = false` | $\frac{\partial^2 f_2}{\partial x^2} \neq 0$ for given $x$ | 
 
     These fall back to 
 
