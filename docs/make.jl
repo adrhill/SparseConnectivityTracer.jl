@@ -1,4 +1,5 @@
 using SparseConnectivityTracer
+using ADTypes
 using Documenter
 using DocumenterMermaid
 
@@ -13,7 +14,7 @@ DocMeta.setdocmeta!(
 )
 
 makedocs(;
-    modules=[SparseConnectivityTracer],
+    modules=[SparseConnectivityTracer, ADTypes],
     authors="Adrian Hill <gh@adrianhill.de>",
     sitename="SparseConnectivityTracer.jl",
     format=Documenter.HTML(;

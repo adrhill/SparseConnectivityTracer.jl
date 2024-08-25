@@ -58,7 +58,7 @@ it must be written generically enough to accept numbers of type `T<:Real` as (or
 
 Only [`TracerLocalSparsityDetector`](@ref) supports comparison operators (`<`, `==`, ...), indicator functions (`iszero`, `iseven`, ...) and control flow.
 
-[`TracerSparsityDetector`](@ref) does not support any boolean functions and control flow (with the exception of `iselse`).
+[`TracerSparsityDetector`](@ref) does not support any boolean functions and control flow (with the exception of `ifelse`).
 This might seem unintuitive but follows from our policy stated above: SCT guarantees conservative sparsity patterns.
 Using an approach based on operator-overloading, this means that global sparsity detection isn't allowed to hit any branching code.
 `ifelse` is the only exception, since it allows us to evaluate both branches.
