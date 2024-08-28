@@ -12,8 +12,11 @@ myprimal(d::Dual) = primal(d)
 # Test data #
 #===========#
 
-tquery = 2.0
 t = [0.0, 1.0, 2.5, 4.0, 6.0];
+t_scalar = 2.0
+t_vector = [2.0, 2.5, 3.0]
+t_range = 2:5
+test_inputs = (t_scalar, t_vector, t_range)
 
 u = sin.(t) # vector
 du = cos.(t)
@@ -35,72 +38,80 @@ function InterpolationTest(
 end
 testname(t::InterpolationTest{N}) where {N} = "$N-dim $(typeof(t.interp))"
 
-# Interpolations with scalar outputs
-function test_interpolation(t::InterpolationTest{1})
-    Jref = [Int(!t.is_der1_zero);;]
-    Href = [Int(!t.is_der2_zero);;]
-
-    @testset "Jacobian Global" begin
-        J = jacobian_sparsity(t.interp, tquery, TracerSparsityDetector())
+function test_jacobian(t::InterpolationTest)
+    @testset "Jacobian" begin
+        @testset "input type: $(typeof(input))" for input in test_inputs
+            test_jacobian(t, input)
+        end
+    end
+end
+function test_jacobian(t::InterpolationTest{N_OUT}, input) where {N_OUT}
+    N_IN = length(input)
+    Jref = t.is_der1_zero ? zeros(N_OUT, N_IN) : ones(N_OUT, N_IN)
+    @testset "Global Jacobian sparsity" begin
+        J = jacobian_sparsity(t.interp, input, TracerSparsityDetector())
         @test J ≈ Jref
     end
-    @testset "Jacobian Local" begin
-        J = jacobian_sparsity(t.interp, tquery, TracerLocalSparsityDetector())
+    @testset "Local Jacobian sparsity" begin
+        J = jacobian_sparsity(t.interp, input, TracerLocalSparsityDetector())
         @test J ≈ Jref
-    end
-    @testset "Hessian Global" begin
-        H = hessian_sparsity(t.interp, tquery, TracerSparsityDetector())
-        @test H ≈ Href
-    end
-    @testset "Hessian Local" begin
-        H = hessian_sparsity(t.interp, tquery, TracerLocalSparsityDetector())
-        @test H ≈ Href
     end
 end
 
-# Interpolations with vector-valued outputs
-function test_interpolation(t::InterpolationTest{N}) where {N} # N ≠ 1
-    Jref = t.is_der1_zero ? zeros(N) : ones(N)
-    Href = [Int(!t.is_der2_zero);;]
-
-    @testset "Jacobian Global" begin
-        J = jacobian_sparsity(t.interp, tquery, TracerSparsityDetector())
-        @test J ≈ Jref
+function test_hessian(t::InterpolationTest)
+    @testset "Hessian" begin
+        @testset "input type: $(typeof(input))" for input in test_inputs
+            test_hessian(t, input)
+        end
     end
-    @testset "Jacobian Local" begin
-        J = jacobian_sparsity(t.interp, tquery, TracerLocalSparsityDetector())
-        @test J ≈ Jref
-    end
-    @testset "Hessian Global" begin
-        H = hessian_sparsity(x -> sum(t.interp(x)), tquery, TracerSparsityDetector())
+end
+function test_hessian(t::InterpolationTest{1}, input)
+    N_IN = length(input)
+    Href = t.is_der2_zero ? zeros(N_IN, N_IN) : ones(N_IN, N_IN)
+    @testset "Global Hessian sparsity" begin
+        H = hessian_sparsity(t.interp, input, TracerSparsityDetector())
         @test H ≈ Href
     end
-    @testset "Hessian Local" begin
-        H = hessian_sparsity(x -> sum(t.interp(x)), tquery, TracerLocalSparsityDetector())
+    @testset "Local Hessian sparsity" begin
+        H = hessian_sparsity(t.interp, input, TracerLocalSparsityDetector())
+        @test H ≈ Href
+    end
+end
+function test_hessian(t::InterpolationTest{N_OUT}, input) where {N_OUT} #  N_OUT ≠ 1
+    N_IN = length(input)
+    Href = t.is_der2_zero ? zeros(N_IN, N_IN) : ones(N_IN, N_IN)
+    @testset "Global Hessian sparsity" begin
+        H = hessian_sparsity(x -> sum(t.interp(x)), input, TracerSparsityDetector())
+        @test H ≈ Href
+    end
+    @testset "Local Hessian sparsity" begin
+        H = hessian_sparsity(x -> sum(t.interp(x)), input, TracerLocalSparsityDetector())
         @test H ≈ Href
     end
 end
 
 function test_output(t::InterpolationTest)
     @testset "Output sizes and values" begin
-        out_ref = t.interp(tquery)
-        s_ref = size(out_ref)
+        @testset "input type: $(typeof(input))" for input in test_inputs
+            out_ref = t.interp(input)
+            s_ref = size(out_ref)
 
-        @testset "$T" for T in (DEFAULT_GRADIENT_TRACER, DEFAULT_HESSIAN_TRACER)
-            t_tracer = trace_input(T, tquery)
-            out_tracer = t.interp(t_tracer)
-            s_tracer = size(out_tracer)
-            @test s_tracer == s_ref
-        end
-        @testset "$T" for T in (
-            Dual{typeof(tquery),DEFAULT_GRADIENT_TRACER},
-            Dual{typeof(tquery),DEFAULT_HESSIAN_TRACER},
-        )
-            t_dual = trace_input(T, tquery)
-            out_dual = t.interp(t_dual)
-            s_dual = size(out_dual)
-            @test s_dual == s_ref
-            @test myprimal.(out_dual) ≈ out_ref
+            @testset "$T" for T in (DEFAULT_GRADIENT_TRACER, DEFAULT_HESSIAN_TRACER)
+                t_tracer = trace_input(T, input)
+                out_tracer = t.interp(t_tracer)
+                s_tracer = size(out_tracer)
+                @test s_tracer == s_ref
+            end
+            @testset "$T" for T in (
+                Dual{typeof(input),DEFAULT_GRADIENT_TRACER},
+                Dual{typeof(input),DEFAULT_HESSIAN_TRACER},
+            )
+                t_dual = trace_input(T, input)
+                out_dual = t.interp(t_dual)
+                s_dual = size(out_dual)
+                @test s_dual == s_ref
+                @test myprimal.(out_dual) ≈ out_ref
+            end
         end
     end
 end
@@ -127,7 +138,8 @@ end
         # InterpolationTest(1, CubicHermiteSpline(du, u, t)),
         # InterpolationTest(1, QuinticHermiteSpline(ddu, du, u, t)),
     )
-        test_interpolation(t)
+        test_jacobian(t)
+        test_hessian(t)
         test_output(t)
         yield()
     end
@@ -144,7 +156,7 @@ for N in (2, 5)
             InterpolationTest(N, LinearInterpolation(um, t); is_der2_zero=true),
             InterpolationTest(N, QuadraticInterpolation(um, t)),
             InterpolationTest(N, LagrangeInterpolation(um, t)),
-            ## The following interpolations appear to not be supported as of DataInterpolations v6.2.0:
+            ## The following interpolations appear to not be supported on N dimensions as of DataInterpolations v6.2.0:
             # InterpolationTest(N, AkimaInterpolation(um, t)),
             # InterpolationTest(N, BSplineApprox(um, t, 3, 4, :ArcLen, :Average)),
             # InterpolationTest(N, QuadraticSpline(um, t)),
@@ -152,8 +164,8 @@ for N in (2, 5)
             # InterpolationTest(N, BSplineInterpolation(um, t, 3, :ArcLen, :Average)),
             # InterpolationTest(N, PCHIPInterpolation(um, t)),
         )
-            test_interpolation(t)
-            test_output(t)
+            test_jacobian(t)
+            test_hessian(t)
             yield()
         end
     end
