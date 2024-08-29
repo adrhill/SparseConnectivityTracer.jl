@@ -3,11 +3,12 @@
 module SparseConnectivityTracerDataInterpolationsExt
 
 if isdefined(Base, :get_extension)
+    using SparseConnectivityTracer: AbstractTracer, Dual, primal, tracer
     using SparseConnectivityTracer: GradientTracer, gradient_tracer_1_to_1
     using SparseConnectivityTracer: HessianTracer, hessian_tracer_1_to_1
-    using SparseConnectivityTracer: Dual, primal, tracer
     using SparseConnectivityTracer: Fill # from FillArrays.jl
     import DataInterpolations:
+        AbstractInterpolation,
         LinearInterpolation,
         QuadraticInterpolation,
         LagrangeInterpolation,
@@ -22,11 +23,12 @@ if isdefined(Base, :get_extension)
     # PCHIPInterpolation,
     # QuinticHermiteSpline
 else
+    using ..SparseConnectivityTracer: AbstractTracer, Dual, primal, tracer
     using ..SparseConnectivityTracer: GradientTracer, gradient_tracer_1_to_1
     using ..SparseConnectivityTracer: HessianTracer, hessian_tracer_1_to_1
-    using ..SparseConnectivityTracer: Dual, primal, tracer
     using ..SparseConnectivityTracer: Fill # from FillArrays.jl
     import ..DataInterpolations:
+        AbstractInterpolation,
         LinearInterpolation,
         QuadraticInterpolation,
         LagrangeInterpolation,
@@ -68,11 +70,6 @@ for I in (
     @eval function (interp::$(I){uType})(t::HessianTracer) where {uType<:AbstractVector}
         return hessian_tracer_1_to_1(t, false, false)
     end
-    @eval function (interp::$(I){uType})(d::Dual) where {uType<:AbstractVector}
-        p = interp(primal(d))
-        t = interp(tracer(d))
-        return Dual(p, t)
-    end
 
     # ND Interpolations (uType<:AbstractMatrix)
     @eval function (interp::$(I){uType})(t::GradientTracer) where {uType<:AbstractMatrix}
@@ -85,6 +82,23 @@ for I in (
         nstates = size(interp.u, 1)
         return Fill(t, nstates)
     end
+end
+
+# Some Interpolations require custom overloads on `Dual` due to mutation of caches.
+for I in (
+    :LagrangeInterpolation,
+    :BSplineInterpolation,
+    :BSplineApprox,
+    # TODO: support when Julia 1.6 is dropped
+    # :CubicHermiteSpline,
+    # :QuinticHermiteSpline,
+)
+    @eval function (interp::$(I){uType})(d::Dual) where {uType<:AbstractVector}
+        p = interp(primal(d))
+        t = interp(tracer(d))
+        return Dual(p, t)
+    end
+
     @eval function (interp::$(I){uType})(d::Dual) where {uType<:AbstractMatrix}
         p = interp(primal(d))
         t = interp(tracer(d))
@@ -107,9 +121,6 @@ function (interp::ConstantInterpolation{uType})(
 ) where {uType<:AbstractVector}
     return hessian_tracer_1_to_1(t, true, true)
 end
-function (interp::ConstantInterpolation{uType})(d::Dual) where {uType<:AbstractVector}
-    return interp(primal(d))
-end
 
 # ND Interpolations (uType<:AbstractMatrix)
 function (interp::ConstantInterpolation{uType})(
@@ -125,9 +136,6 @@ function (interp::ConstantInterpolation{uType})(
     t = hessian_tracer_1_to_1(t, true, true)
     nstates = size(interp.u, 1)
     return Fill(t, nstates)
-end
-function (interp::ConstantInterpolation{uType})(d::Dual) where {uType<:AbstractMatrix}
-    return interp(primal(d))
 end
 
 #=====================#
@@ -145,11 +153,6 @@ function (interp::LinearInterpolation{uType})(
 ) where {uType<:AbstractVector}
     return hessian_tracer_1_to_1(t, false, true)
 end
-function (interp::LinearInterpolation{uType})(d::Dual) where {uType<:AbstractVector}
-    p = interp(primal(d))
-    t = interp(tracer(d))
-    return Dual(p, t)
-end
 
 # ND Interpolations (uType<:AbstractMatrix)
 function (interp::LinearInterpolation{uType})(
@@ -165,11 +168,6 @@ function (interp::LinearInterpolation{uType})(
     t = hessian_tracer_1_to_1(t, false, true)
     nstates = size(interp.u, 1)
     return Fill(t, nstates)
-end
-function (interp::LinearInterpolation{uType})(d::Dual) where {uType<:AbstractMatrix}
-    p = interp(primal(d))
-    t = interp(tracer(d))
-    return Dual.(p, t)
 end
 
 end # module SparseConnectivityTracerDataInterpolationsExt
