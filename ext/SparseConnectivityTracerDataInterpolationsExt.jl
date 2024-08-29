@@ -42,6 +42,8 @@ else
     # QuinticHermiteSpline
 end
 
+# TODO: throw errors on constructors
+
 #========================#
 # General interpolations #
 #========================#
@@ -61,8 +63,6 @@ for I in (
     # :CubicHermiteSpline,
     # :QuinticHermiteSpline,
 )
-    ## Scalar inputs
-
     # 1D Interpolations (uType<:AbstractVector)
     @eval function (interp::$(I){uType})(t::GradientTracer) where {uType<:AbstractVector}
         return gradient_tracer_1_to_1(t, false)
@@ -92,19 +92,11 @@ for I in (
         t = interp(tracer(d))
         return Dual.(p, t)
     end
-
-    ## Vector inputs
-
-    # TODO: 1D Interpolations (uType<:AbstractVector)
-
-    # TODO: ND Interpolations (uType<:AbstractMatrix)
 end
 
 #=======================#
 # ConstantInterpolation #
 #=======================#
-
-## Scalar Inputs
 
 # 1D Interpolations (uType<:AbstractVector)
 function (interp::ConstantInterpolation{uType})(
@@ -139,12 +131,6 @@ end
 function (interp::ConstantInterpolation{uType})(d::Dual) where {uType<:AbstractMatrix}
     return interp(primal(d))
 end
-
-## Vector inputs
-
-# TODO: 1D Interpolations (uType<:AbstractVector)
-
-# TODO: ND Interpolations (uType<:AbstractMatrix)
 
 #=====================#
 # LinearInterpolation #
