@@ -42,8 +42,6 @@ else
     # QuinticHermiteSpline
 end
 
-# TODO: throw errors on constructors
-
 #========================#
 # General interpolations #
 #========================#
@@ -173,11 +171,5 @@ function (interp::LinearInterpolation{uType})(d::Dual) where {uType<:AbstractMat
     t = interp(tracer(d))
     return Dual.(p, t)
 end
-
-## Vector inputs
-
-# TODO: 1D Interpolations (uType<:AbstractVector)
-
-# TODO: ND Interpolations (uType<:AbstractMatrix)
 
 end # module SparseConnectivityTracerDataInterpolationsExt
