@@ -40,6 +40,10 @@ function InterpolationTest(
 end
 testname(t::InterpolationTest{N}) where {N} = "$N-dim $(typeof(t.interp))"
 
+#================#
+# Jacobian Tests #
+#================#
+
 function test_jacobian(t::InterpolationTest)
     @testset "Jacobian" begin
         for input in test_inputs
@@ -67,7 +71,7 @@ function test_jacobian(t::InterpolationTest{1}, input::AbstractVector)
     N = 1
     N_IN = length(input)
     N_OUT = N * N_IN
-    Jref = t.is_der1_zero ? zeros(N_IN, N_IN) : I
+    Jref = t.is_der1_zero ? zeros(N_IN, N_IN) : I(N_IN)
 
     @testset "input type $(typeof(input)): $N_IN inputs, $N states, $N_OUT outputs" begin
         @testset "Global Jacobian sparsity" begin
@@ -85,13 +89,13 @@ end
 function test_jacobian(t::InterpolationTest{N}, input::AbstractVector) where {N}
     N_IN = length(input)
     N_OUT = N * N_IN
-    
+
     # Construct reference Jacobian
     Jref = zeros(Bool, N_OUT, N_IN)
     if !t.is_der1_zero
         for (i, col) in enumerate(eachcol(Jref)) # iterate over outputs
             i0 = 1 + N * (i - 1)
-            irange = i0:(i0 + N -1)
+            irange = i0:(i0 + N - 1)
             col[irange] .= true
         end
     end
@@ -110,35 +114,87 @@ function test_jacobian(t::InterpolationTest{N}, input::AbstractVector) where {N}
     end
 end
 
+#===============#
+# Hessian Tests #
+#===============#
+
 function test_hessian(t::InterpolationTest)
     @testset "Hessian" begin
-        @testset "input type: $(typeof(input))" for input in test_inputs
+        for input in test_inputs
             test_hessian(t, input)
         end
     end
 end
-function test_hessian(t::InterpolationTest{1}, input)
+function test_hessian(t::InterpolationTest{1}, input::Real)
+    N = 1
     N_IN = length(input)
+    N_OUT = N * N_IN
     Href = t.is_der2_zero ? zeros(N_IN, N_IN) : ones(N_IN, N_IN)
-    @testset "Global Hessian sparsity" begin
-        H = hessian_sparsity(t.interp, input, TracerSparsityDetector())
-        @test H ≈ Href
-    end
-    @testset "Local Hessian sparsity" begin
-        H = hessian_sparsity(t.interp, input, TracerLocalSparsityDetector())
-        @test H ≈ Href
+
+    @testset "input type $(typeof(input)): $N_IN inputs, $N states, $N_OUT outputs" begin
+        @testset "Global Hessian sparsity" begin
+            H = hessian_sparsity(t.interp, input, TracerSparsityDetector())
+            @test H ≈ Href
+        end
+        @testset "Local Hessian sparsity" begin
+            H = hessian_sparsity(t.interp, input, TracerLocalSparsityDetector())
+            @test H ≈ Href
+        end
     end
 end
-function test_hessian(t::InterpolationTest{N_OUT}, input) where {N_OUT} #  N_OUT ≠ 1
+function test_hessian(t::InterpolationTest{N}, input::Real) where {N} #  N ≠ 1
     N_IN = length(input)
+    N_OUT = N * N_IN
     Href = t.is_der2_zero ? zeros(N_IN, N_IN) : ones(N_IN, N_IN)
-    @testset "Global Hessian sparsity" begin
-        H = hessian_sparsity(x -> sum(t.interp(x)), input, TracerSparsityDetector())
-        @test H ≈ Href
+
+    @testset "input type $(typeof(input)): $N_IN inputs, $N states, $N_OUT outputs" begin
+        @testset "Global Hessian sparsity" begin
+            H = hessian_sparsity(x -> sum(t.interp(x)), input, TracerSparsityDetector())
+            @test H ≈ Href
+        end
+        @testset "Local Hessian sparsity" begin
+            H = hessian_sparsity(
+                x -> sum(t.interp(x)), input, TracerLocalSparsityDetector()
+            )
+            @test H ≈ Href
+        end
     end
-    @testset "Local Hessian sparsity" begin
-        H = hessian_sparsity(x -> sum(t.interp(x)), input, TracerLocalSparsityDetector())
-        @test H ≈ Href
+end
+function test_hessian(t::InterpolationTest{1}, input::AbstractVector)
+    N = 1
+    N_IN = length(input)
+    N_OUT = N * N_IN
+    Href = t.is_der2_zero ? zeros(N_IN, N_IN) : I(N_IN)
+
+    @testset "input type $(typeof(input)): $N_IN inputs, $N states, $N_OUT outputs" begin
+        @testset "Global Hessian sparsity" begin
+            H = hessian_sparsity(x -> sum(t.interp(x)), input, TracerSparsityDetector())
+            @test H ≈ Href
+        end
+        @testset "Local Hessian sparsity" begin
+            H = hessian_sparsity(
+                x -> sum(t.interp(x)), input, TracerLocalSparsityDetector()
+            )
+            @test H ≈ Href
+        end
+    end
+end
+function test_hessian(t::InterpolationTest{N}, input::AbstractVector) where {N} #  N ≠ 1
+    N_IN = length(input)
+    N_OUT = N * N_IN
+    Href = t.is_der2_zero ? zeros(N_IN, N_IN) : I(N_IN)
+
+    @testset "input type $(typeof(input)): $N_IN inputs, $N states, $N_OUT outputs" begin
+        @testset "Global Hessian sparsity" begin
+            H = hessian_sparsity(x -> sum(t.interp(x)), input, TracerSparsityDetector())
+            @test H ≈ Href
+        end
+        @testset "Local Hessian sparsity" begin
+            H = hessian_sparsity(
+                x -> sum(t.interp(x)), input, TracerLocalSparsityDetector()
+            )
+            @test H ≈ Href
+        end
     end
 end
 
@@ -155,8 +211,8 @@ function test_output(t::InterpolationTest)
                 @test s_tracer == s_ref
             end
             @testset "$T" for T in (
-                Dual{typeof(input),DEFAULT_GRADIENT_TRACER},
-                Dual{typeof(input),DEFAULT_HESSIAN_TRACER},
+                Dual{eltype(input),DEFAULT_GRADIENT_TRACER},
+                Dual{eltype(input),DEFAULT_HESSIAN_TRACER},
             )
                 t_dual = trace_input(T, input)
                 out_dual = t.interp(t_dual)
@@ -198,7 +254,7 @@ end
 end
 
 for N in (2, 5)
-    um = rand(N, length(t)) # matrix
+    local um = rand(N, length(t)) # matrix
 
     @testset "$(N)D Interpolations" begin
         @testset "$(testname(t))" for t in (
@@ -218,6 +274,7 @@ for N in (2, 5)
         )
             test_jacobian(t)
             test_hessian(t)
+            test_output(t)
             yield()
         end
     end
