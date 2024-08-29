@@ -3,6 +3,8 @@ using SparseConnectivityTracer: DEFAULT_GRADIENT_TRACER, DEFAULT_HESSIAN_TRACER
 using SparseConnectivityTracer: trace_input, Dual, primal
 using DataInterpolations
 using DataInterpolations: AbstractInterpolation
+
+using LinearAlgebra: I
 using Test
 
 myprimal(x) = x
@@ -40,21 +42,71 @@ testname(t::InterpolationTest{N}) where {N} = "$N-dim $(typeof(t.interp))"
 
 function test_jacobian(t::InterpolationTest)
     @testset "Jacobian" begin
-        @testset "input type: $(typeof(input))" for input in test_inputs
+        for input in test_inputs
             test_jacobian(t, input)
         end
     end
 end
-function test_jacobian(t::InterpolationTest{N_OUT}, input) where {N_OUT}
+function test_jacobian(t::InterpolationTest{N}, input::Real) where {N}
     N_IN = length(input)
-    Jref = t.is_der1_zero ? zeros(N_OUT, N_IN) : ones(N_OUT, N_IN)
-    @testset "Global Jacobian sparsity" begin
-        J = jacobian_sparsity(t.interp, input, TracerSparsityDetector())
-        @test J ≈ Jref
+    N_OUT = N * N_IN
+    Jref = t.is_der1_zero ? zeros(N, N_IN) : ones(N, N_IN)
+
+    @testset "input type $(typeof(input)): $N_IN inputs, $N states, $N_OUT outputs" begin
+        @testset "Global Jacobian sparsity" begin
+            J = jacobian_sparsity(t.interp, input, TracerSparsityDetector())
+            @test J ≈ Jref
+        end
+        @testset "Local Jacobian sparsity" begin
+            J = jacobian_sparsity(t.interp, input, TracerLocalSparsityDetector())
+            @test J ≈ Jref
+        end
     end
-    @testset "Local Jacobian sparsity" begin
-        J = jacobian_sparsity(t.interp, input, TracerLocalSparsityDetector())
-        @test J ≈ Jref
+end
+function test_jacobian(t::InterpolationTest{1}, input::AbstractVector)
+    N = 1
+    N_IN = length(input)
+    N_OUT = N * N_IN
+    Jref = t.is_der1_zero ? zeros(N_IN, N_IN) : I
+
+    @testset "input type $(typeof(input)): $N_IN inputs, $N states, $N_OUT outputs" begin
+        @testset "Global Jacobian sparsity" begin
+            J = jacobian_sparsity(x -> vec(t.interp(x)), input, TracerSparsityDetector())
+            @test J ≈ Jref
+        end
+        @testset "Local Jacobian sparsity" begin
+            J = jacobian_sparsity(
+                x -> vec(t.interp(x)), input, TracerLocalSparsityDetector()
+            )
+            @test J ≈ Jref
+        end
+    end
+end
+function test_jacobian(t::InterpolationTest{N}, input::AbstractVector) where {N}
+    N_IN = length(input)
+    N_OUT = N * N_IN
+    
+    # Construct reference Jacobian
+    Jref = zeros(Bool, N_OUT, N_IN)
+    if !t.is_der1_zero
+        for (i, col) in enumerate(eachcol(Jref)) # iterate over outputs
+            i0 = 1 + N * (i - 1)
+            irange = i0:(i0 + N -1)
+            col[irange] .= true
+        end
+    end
+
+    @testset "input type $(typeof(input)): $N_IN inputs, $N states, $N_OUT outputs" begin
+        @testset "Global Jacobian sparsity" begin
+            J = jacobian_sparsity(x -> vec(t.interp(x)), input, TracerSparsityDetector())
+            @test J ≈ Jref
+        end
+        @testset "Local Jacobian sparsity" begin
+            J = jacobian_sparsity(
+                x -> vec(t.interp(x)), input, TracerLocalSparsityDetector()
+            )
+            @test J ≈ Jref
+        end
     end
 end
 
