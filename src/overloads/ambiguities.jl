@@ -32,4 +32,7 @@ for TT in (GradientTracer, HessianTracer)
     function Base.isless(dx::D, y::AbstractFloat) where {P<:Real,T<:TT,D<:Dual{P,T}}
         return isless(primal(dx), y)
     end
+    function Base.isless(x::AbstractFloat, dy::D) where {P<:Real,T<:TT,D<:Dual{P,T}}
+        return isless(x, primal(dy))
+    end
 end
