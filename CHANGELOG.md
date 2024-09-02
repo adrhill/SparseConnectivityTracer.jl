@@ -1,5 +1,16 @@
 # SparseConnectivityTracer.jl
 
+## Version `v0.6.3`
+
+* ![Feature][badge-feature] Add DataInterpolations.jl package extension ([#178])
+* ![Feature][badge-feature] Add LogExpFunctions.jl package extension ([#184])
+* ![Feature][badge-feature] Add NaNMath.jl package extension ([#187])
+* ![Feature][badge-feature] Support two-argument `atan` and `log` ([#185])
+* ![Documentation][badge-docs] Document limitations of operator overloading utils ([#180])
+* ![Documentation][badge-docs] Reexport ADTypes interface ([#182])
+* ![Documentation][badge-docs] Update developer documentation URLs ([#186])
+* ![Maintenance][badge-maintenance] Reorganize code and update code generation utilities ([#179], [#183])
+
 ## Version `v0.6.2`
 
 * ![Feature][badge-feature] Return only primal value when applying non-differentiable methods to `Dual` numbers ([#169])
@@ -48,6 +59,15 @@
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#187]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/187
+[#186]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/186
+[#185]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/185
+[#184]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/184
+[#183]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/183
+[#182]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/182
+[#180]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/180
+[#179]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/179
+[#178]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/178
 [#177]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/177
 [#176]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/176
 [#175]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/175
