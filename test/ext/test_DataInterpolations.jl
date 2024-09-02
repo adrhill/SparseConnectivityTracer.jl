@@ -279,3 +279,428 @@ for N in (2, 5)
         end
     end
 end
+
+@testset "Interpolant contains tracers" begin
+    mlocal = TracerLocalSparsityDetector()
+    mglobal = TracerSparsityDetector()
+
+    @testset "ConstantInterpolation" begin
+        @testset "u dependent (c1_u)" begin
+            function c1_u(x)
+                u = x[1:3]
+                t = [0.0, 1.0, 2.0]
+                interp = ConstantInterpolation(u, t)
+                return interp(1.5)
+            end
+
+            x = [1.0, 2.0, 3.0, 4.0]
+            @testset "Local" begin
+                @test jacobian_sparsity(c1_u, x, mlocal) == [1 1 1 0]
+                @test hessian_sparsity(c1_u, x, mlocal) == zeros(Bool, 4, 4)
+            end
+            @testset "Global" begin
+                @test jacobian_sparsity(c1_u, x, mglobal) == [1 1 1 0]
+                @test hessian_sparsity(c1_u, x, mglobal) == zeros(Bool, 4, 4)
+            end
+        end
+
+        @testset "t dependent (c1_t)" begin
+            function c1_t(x)
+                u = [1.0, 2.0, 3.0]
+                t = x[1:3]
+                interp = ConstantInterpolation(u, t)
+                return interp(1.5)
+            end
+
+            x = [0.0, 1.0, 2.0, 3.0]
+            @testset "Local" begin
+                @test jacobian_sparsity(c1_t, x, mlocal) == [0 0 0 0]
+                @test hessian_sparsity(c1_t, x, mlocal) == zeros(Bool, 4, 4)
+            end
+            @testset "Global" begin
+                @test jacobian_sparsity(c1_t, x, mglobal) == [0 0 0 0]
+                @test hessian_sparsity(c1_t, x, mglobal) == zeros(Bool, 4, 4)
+            end
+        end
+
+        @testset "u and t dependent (c1_ut)" begin
+            function c1_ut(x)
+                u = x[1:3]
+                t = x[4:6]
+                interp = ConstantInterpolation(u, t)
+                return interp(1.5)
+            end
+
+            x = [1.0, 2.0, 3.0, 0.0, 1.0, 2.0, 3.0]
+            @testset "Local" begin
+                @test jacobian_sparsity(c1_ut, x, mlocal) == [1 1 1 0 0 0 0]
+                @test hessian_sparsity(c1_ut, x, mlocal) == zeros(Bool, 7, 7)
+            end
+            @testset "Global" begin
+                @test jacobian_sparsity(c1_ut, x, mglobal) == [1 1 1 0 0 0 0]
+                @test hessian_sparsity(c1_ut, x, mglobal) == zeros(Bool, 7, 7)
+            end
+        end
+
+        @testset "u and x dependent (c1_ux)" begin
+            function c1_ux(x)
+                u = x[1:3]
+                t = [0.0, 1.0, 2.0]
+                interp = ConstantInterpolation(u, t)
+                return interp(x[4])
+            end
+
+            x = [1.0, 2.0, 3.0, 1.5]
+            @testset "Local" begin
+                @test jacobian_sparsity(c1_ux, x, mlocal) == [1 1 1 0]
+                @test hessian_sparsity(c1_ux, x, mlocal) == zeros(Bool, 4, 4)
+            end
+            @testset "Global" begin
+                @test jacobian_sparsity(c1_ux, x, mglobal) == [1 1 1 1]
+                @test hessian_sparsity(c1_ux, x, mglobal) == zeros(Bool, 4, 4)
+            end
+        end
+
+        @testset "t and x dependent (c1_tx)" begin
+            function c1_tx(x)
+                u = [1.0, 2.0, 3.0]
+                t = x[1:3]
+                interp = ConstantInterpolation(u, t)
+                return interp(x[4])
+            end
+
+            x = [0.0, 1.0, 2.0, 1.5]
+            @testset "Local" begin
+                @test jacobian_sparsity(c1_tx, x, mlocal) == [0 0 0 0]
+                @test hessian_sparsity(c1_tx, x, mlocal) == zeros(Bool, 4, 4)
+            end
+            @testset "Global" begin
+                @test jacobian_sparsity(c1_tx, x, mglobal) == [1 1 1 1]
+                @test hessian_sparsity(c1_tx, x, mglobal) == zeros(Bool, 4, 4)
+            end
+        end
+
+        @testset "u, t, and x dependent (c1_utx)" begin
+            function c1_utx(x)
+                u = x[1:3]
+                t = x[4:6]
+                interp = ConstantInterpolation(u, t)
+                return interp(x[7])
+            end
+
+            x = [1.0, 2.0, 3.0, 0.0, 1.0, 2.0, 1.5]
+            @testset "Local" begin
+                @test jacobian_sparsity(c1_utx, x, mlocal) == [1 1 1 0 0 0 0]
+                @test hessian_sparsity(c1_utx, x, mlocal) == zeros(Bool, 7, 7)
+            end
+            @testset "Global" begin
+                @test jacobian_sparsity(c1_utx, x, mglobal) == [1 1 1 1 1 1 1]
+                @test hessian_sparsity(c1_utx, x, mglobal) == zeros(Bool, 7, 7)
+            end
+        end
+    end
+
+    @testset "LinearInterpolation" begin
+        @testset "u dependent (l1_u)" begin
+            function l1_u(x)
+                u = x[1:3]
+                t = [0.0, 1.0, 2.0]
+                interp = LinearInterpolation(u, t)
+                return interp(1.5)
+            end
+
+            x = [1.0, 2.0, 3.0, 4.0]
+            @testset "Local" begin
+                @test jacobian_sparsity(l1_u, x, mlocal) == [0 1 1 0]
+                @test hessian_sparsity(l1_u, x, mlocal) == zeros(Bool, 4, 4)
+            end
+            @testset "Global" begin
+                @test jacobian_sparsity(l1_u, x, mglobal) == [1 1 1 0]
+                @test hessian_sparsity(l1_u, x, mglobal) == zeros(Bool, 4, 4)
+            end
+        end
+
+        @testset "t dependent (l1_t)" begin
+            function l1_t(x)
+                u = [1.0, 2.0, 3.0]
+                t = x[1:3]
+                interp = LinearInterpolation(u, t)
+                return interp(1.5)
+            end
+
+            x = [0.0, 1.0, 2.0, 3.0]
+            @testset "Local" begin
+                @test jacobian_sparsity(l1_t, x, mlocal) == [1 1 0 0]
+                @test hessian_sparsity(l1_t, x, mlocal) == zeros(Bool, 4, 4)
+            end
+            @testset "Global" begin
+                @test jacobian_sparsity(l1_t, x, mglobal) == [1 1 1 0]
+                @test hessian_sparsity(l1_t, x, mglobal) == zeros(Bool, 4, 4)
+            end
+        end
+
+        @testset "u and t dependent (l1_ut)" begin
+            function l1_ut(x)
+                u = x[1:3]
+                t = x[4:6]
+                interp = LinearInterpolation(u, t)
+                return interp(1.5)
+            end
+
+            x = [1.0, 2.0, 3.0, 0.0, 1.0, 2.0, 3.0]
+            @testset "Local" begin
+                @test jacobian_sparsity(l1_ut, x, mlocal) == [0 1 1 1 1 0 0]
+                @test hessian_sparsity(l1_ut, x, mlocal) == zeros(Bool, 7, 7)
+            end
+            @testset "Global" begin
+                @test jacobian_sparsity(l1_ut, x, mglobal) == [1 1 1 1 1 1 0]
+                @test hessian_sparsity(l1_ut, x, mglobal) == zeros(Bool, 7, 7)
+            end
+        end
+
+        @testset "u and x dependent (l1_ux)" begin
+            function l1_ux(x)
+                u = x[1:3]
+                t = [0.0, 1.0, 2.0]
+                interp = LinearInterpolation(u, t)
+                return interp(x[4])
+            end
+
+            x = [1.0, 2.0, 3.0, 1.5]
+            @testset "Local" begin
+                @test jacobian_sparsity(l1_ux, x, mlocal) == [0 1 1 1]
+                @test hessian_sparsity(l1_ux, x, mlocal) == zeros(Bool, 4, 4)
+            end
+            @testset "Global" begin
+                @test jacobian_sparsity(l1_ux, x, mglobal) == [1 1 1 1]
+                @test hessian_sparsity(l1_ux, x, mglobal) == zeros(Bool, 4, 4)
+            end
+        end
+
+        @testset "t and x dependent (l1_tx)" begin
+            function l1_tx(x)
+                u = [1.0, 2.0, 3.0]
+                t = x[1:3]
+                interp = LinearInterpolation(u, t)
+                return interp(x[4])
+            end
+
+            x = [0.0, 1.0, 2.0, 1.5]
+            @testset "Local" begin
+                @test jacobian_sparsity(l1_tx, x, mlocal) == [1 1 0 1]
+                @test hessian_sparsity(l1_tx, x, mlocal) == zeros(Bool, 4, 4)
+            end
+            @testset "Global" begin
+                @test jacobian_sparsity(l1_tx, x, mglobal) == [1 1 1 1]
+                @test hessian_sparsity(l1_tx, x, mglobal) == zeros(Bool, 4, 4)
+            end
+        end
+
+        @testset "u, t, and x dependent (l1_utx)" begin
+            function l1_utx(x)
+                u = x[1:3]
+                t = x[4:6]
+                interp = LinearInterpolation(u, t)
+                return interp(x[7])
+            end
+
+            x = [1.0, 2.0, 3.0, 0.0, 1.0, 2.0, 1.5]
+            @testset "Local" begin
+                @test jacobian_sparsity(l1_utx, x, mlocal) == [0 1 1 1 1 0 1]
+                @test hessian_sparsity(l1_utx, x, mlocal) == zeros(Bool, 7, 7)
+            end
+            @testset "Global" begin
+                @test jacobian_sparsity(l1_utx, x, mglobal) == [1 1 1 1 1 1 1]
+                @test hessian_sparsity(l1_utx, x, mglobal) == zeros(Bool, 7, 7)
+            end
+        end
+    end
+
+    @testset "QuadraticInterpolation" begin
+        @testset "u dependent (q1_u)" begin
+            function q1_u(x)
+                u = x[1:3]
+                t = [0.0, 1.0, 2.0]
+                interp = QuadraticInterpolation(u, t)
+                return interp(1.5)
+            end
+
+            x = [1.0, 2.0, 3.0, 4.0]
+            @testset "Local" begin
+                @test jacobian_sparsity(q1_u, x, mlocal) == [1 1 1 0]
+                @test hessian_sparsity(q1_u, x, mlocal) == [
+                    1 1 1 0
+                    1 1 1 0
+                    1 1 1 0
+                    0 0 0 0
+                ]
+            end
+            @testset "Global" begin
+                @test jacobian_sparsity(q1_u, x, mglobal) == [1 1 1 0]
+                @test hessian_sparsity(q1_u, x, mglobal) == [
+                    1 1 1 0
+                    1 1 1 0
+                    1 1 1 0
+                    0 0 0 0
+                ]
+            end
+        end
+
+        @testset "t dependent (q1_t)" begin
+            function q1_t(x)
+                u = [1.0, 2.0, 3.0]
+                t = x[1:3]
+                interp = QuadraticInterpolation(u, t)
+                return interp(1.5)
+            end
+
+            x = [0.0, 1.0, 2.0, 3.0]
+            @testset "Local" begin
+                @test jacobian_sparsity(q1_t, x, mlocal) == [1 1 1 0]
+                @test hessian_sparsity(q1_t, x, mlocal) == [
+                    1 1 1 0
+                    1 1 1 0
+                    1 1 1 0
+                    0 0 0 0
+                ]
+            end
+            @testset "Global" begin
+                @test jacobian_sparsity(q1_t, x, mglobal) == [1 1 1 0]
+                @test hessian_sparsity(q1_t, x, mglobal) == [
+                    1 1 1 0
+                    1 1 1 0
+                    1 1 1 0
+                    0 0 0 0
+                ]
+            end
+        end
+
+        @testset "u and t dependent (q1_ut)" begin
+            function q1_ut(x)
+                u = x[1:3]
+                t = x[4:6]
+                interp = QuadraticInterpolation(u, t)
+                return interp(1.5)
+            end
+
+            x = [1.0, 2.0, 3.0, 0.0, 1.0, 2.0, 3.0]
+            @testset "Local" begin
+                @test jacobian_sparsity(q1_ut, x, mlocal) == [1 1 1 1 1 1 0]
+                @test hessian_sparsity(q1_ut, x, mlocal) == [
+                    1 1 1 1 1 1 0
+                    1 1 1 1 1 1 0
+                    1 1 1 1 1 1 0
+                    1 1 1 1 1 1 0
+                    1 1 1 1 1 1 0
+                    1 1 1 1 1 1 0
+                    0 0 0 0 0 0 0
+                ]
+            end
+            @testset "Global" begin
+                @test jacobian_sparsity(q1_ut, x, mglobal) == [1 1 1 1 1 1 0]
+                @test hessian_sparsity(q1_ut, x, mglobal) == [
+                    1 1 1 1 1 1 0
+                    1 1 1 1 1 1 0
+                    1 1 1 1 1 1 0
+                    1 1 1 1 1 1 0
+                    1 1 1 1 1 1 0
+                    1 1 1 1 1 1 0
+                    0 0 0 0 0 0 0
+                ]
+            end
+        end
+
+        @testset "u and x dependent (q1_ux)" begin
+            function q1_ux(x)
+                u = x[1:3]
+                t = [0.0, 1.0, 2.0]
+                interp = QuadraticInterpolation(u, t)
+                return interp(x[4])
+            end
+
+            x = [1.0, 2.0, 3.0, 1.5]
+            @testset "Local" begin
+                @test jacobian_sparsity(q1_ux, x, mlocal) == [1 1 1 1]
+                @test hessian_sparsity(q1_ux, x, mlocal) == [
+                    1 1 1 1
+                    1 1 1 1
+                    1 1 1 1
+                    1 1 1 0
+                ]
+            end
+            @testset "Global" begin
+                @test jacobian_sparsity(q1_ux, x, mglobal) == [1 1 1 1]
+                @test hessian_sparsity(q1_ux, x, mglobal) == [
+                    1 1 1 1
+                    1 1 1 1
+                    1 1 1 1
+                    1 1 1 0
+                ]
+            end
+        end
+
+        @testset "t and x dependent (q1_tx)" begin
+            function q1_tx(x)
+                u = [1.0, 2.0, 3.0]
+                t = x[1:3]
+                interp = QuadraticInterpolation(u, t)
+                return interp(x[4])
+            end
+
+            x = [0.0, 1.0, 2.0, 1.5]
+            @testset "Local" begin
+                @test jacobian_sparsity(q1_tx, x, mlocal) == [1 1 1 1]
+                @test hessian_sparsity(q1_tx, x, mlocal) == [
+                    1 1 1 1
+                    1 1 1 1
+                    1 1 1 1
+                    1 1 1 0
+                ]
+            end
+            @testset "Global" begin
+                @test jacobian_sparsity(q1_tx, x, mglobal) == [1 1 1 1]
+                @test hessian_sparsity(q1_tx, x, mglobal) == [
+                    1 1 1 1
+                    1 1 1 1
+                    1 1 1 1
+                    1 1 1 0
+                ]
+            end
+        end
+
+        @testset "u, t, and x dependent (q1_utx)" begin
+            function q1_utx(x)
+                u = x[1:3]
+                t = x[4:6]
+                interp = QuadraticInterpolation(u, t)
+                return interp(x[7])
+            end
+
+            x = [1.0, 2.0, 3.0, 0.0, 1.0, 2.0, 1.5]
+            @testset "Local" begin
+                @test jacobian_sparsity(q1_utx, x, mlocal) == [1 1 1 1 1 1 1]
+                @test hessian_sparsity(q1_utx, x, mlocal) == [
+                    1 1 1 1 1 1 1
+                    1 1 1 1 1 1 1
+                    1 1 1 1 1 1 1
+                    1 1 1 1 1 1 1
+                    1 1 1 1 1 1 1
+                    1 1 1 1 1 1 1
+                    1 1 1 1 1 1 0
+                ]
+            end
+            @testset "Global" begin
+                @test jacobian_sparsity(q1_utx, x, mglobal) == [1 1 1 1 1 1 1]
+                @test hessian_sparsity(q1_utx, x, mglobal) == [
+                    1 1 1 1 1 1 1
+                    1 1 1 1 1 1 1
+                    1 1 1 1 1 1 1
+                    1 1 1 1 1 1 1
+                    1 1 1 1 1 1 1
+                    1 1 1 1 1 1 1
+                    1 1 1 1 1 1 0
+                ]
+            end
+        end
+    end
+end
