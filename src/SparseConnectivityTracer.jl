@@ -53,6 +53,9 @@ function __init__()
         @require LogExpFunctions = "2ab3a3ac-af41-5b50-aa03-7779005ae688" include(
             "../ext/SparseConnectivityTracerLogExpFunctionsExt.jl"
         )
+        @require NaNMath = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3" include(
+            "../ext/SparseConnectivityTracerNaNMathExt.jl"
+        )
         # NOTE: SparseConnectivityTracerDataInterpolationsExt is not loaded on Julia <1.10
     end
 end
