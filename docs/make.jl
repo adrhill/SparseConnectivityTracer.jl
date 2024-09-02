@@ -26,8 +26,11 @@ makedocs(;
         "Getting Started" => "index.md",
         "User Documentation" =>
             ["user/global_vs_local.md", "user/limitations.md", "user/api.md"],
-        "Developer Documentation" =>
-            ["dev/how_it_works.md", "dev/adding_overloads.md", "dev/api.md"],
+        "Developer Documentation" => [
+            "internals/how_it_works.md",
+            "internals/adding_overloads.md",
+            "internals/api.md",
+        ],
     ],
     warnonly=[:missing_docs],
 )
