@@ -18,9 +18,9 @@ SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 DataInterpolations = "82cc6244-b520-54b8-b5a6-8a565e85f1d0"
 
 [extensions]
+SparseConnectivityTracerDataInterpolationsExt = "DataInterpolations"
 SparseConnectivityTracerNNlibExt = "NNlib"
 SparseConnectivityTracerSpecialFunctionsExt = "SpecialFunctions"
-SparseConnectivityTracerDataInterpolationsExt = "DataInterpolations"
 
 [extras]
 DataInterpolations = "82cc6244-b520-54b8-b5a6-8a565e85f1d0"
@@ -29,7 +29,7 @@ SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 
 [compat]
 ADTypes = "1"
-DataInterpolations = "6"
+DataInterpolations = "6.2"
 DocStringExtensions = "0.9"
 FillArrays = "1"
 LinearAlgebra = "<0.0.1, 1"

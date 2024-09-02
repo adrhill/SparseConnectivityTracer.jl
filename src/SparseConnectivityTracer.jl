@@ -50,9 +50,7 @@ function __init__()
         @require NNlib = "872c559c-99b0-510c-b3b7-b6c96a88d5cd" include(
             "../ext/SparseConnectivityTracerNNlibExt.jl"
         )
-        @require DataInterpolations = "82cc6244-b520-54b8-b5a6-8a565e85f1d0" include(
-            "../ext/SparseConnectivityTracerDataInterpolationsExt.jl"
-        )
+        # NOTE: SparseConnectivityTracerDataInterpolationsExt is not loaded on Julia <1.10
     end
 end
 

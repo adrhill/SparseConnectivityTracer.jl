@@ -17,11 +17,10 @@ if isdefined(Base, :get_extension)
         QuadraticSpline,
         CubicSpline,
         BSplineInterpolation,
-        BSplineApprox
-    # TODO: support when Julia 1.6 is dropped
-    # CubicHermiteSpline,
-    # PCHIPInterpolation,
-    # QuinticHermiteSpline
+        BSplineApprox,
+        CubicHermiteSpline,
+        PCHIPInterpolation,
+        QuinticHermiteSpline
 else
     using ..SparseConnectivityTracer: AbstractTracer, Dual, primal, tracer
     using ..SparseConnectivityTracer: GradientTracer, gradient_tracer_1_to_1
@@ -37,11 +36,10 @@ else
         QuadraticSpline,
         CubicSpline,
         BSplineInterpolation,
-        BSplineApprox
-    # TODO: support when Julia 1.6 is dropped
-    # CubicHermiteSpline,
-    # PCHIPInterpolation,
-    # QuinticHermiteSpline
+        BSplineApprox,
+        CubicHermiteSpline,
+        PCHIPInterpolation,
+        QuinticHermiteSpline
 end
 
 #========================#
@@ -59,9 +57,8 @@ for I in (
     :CubicSpline,
     :BSplineInterpolation,
     :BSplineApprox,
-    # TODO: support when Julia 1.6 is dropped
-    # :CubicHermiteSpline,
-    # :QuinticHermiteSpline,
+    :CubicHermiteSpline,
+    :QuinticHermiteSpline,
 )
     # 1D Interpolations (uType<:AbstractVector)
     @eval function (interp::$(I){uType})(t::GradientTracer) where {uType<:AbstractVector}
@@ -89,9 +86,8 @@ for I in (
     :LagrangeInterpolation,
     :BSplineInterpolation,
     :BSplineApprox,
-    # TODO: support when Julia 1.6 is dropped
-    # :CubicHermiteSpline,
-    # :QuinticHermiteSpline,
+    :CubicHermiteSpline,
+    :QuinticHermiteSpline,
 )
     @eval function (interp::$(I){uType})(d::Dual) where {uType<:AbstractVector}
         p = interp(primal(d))

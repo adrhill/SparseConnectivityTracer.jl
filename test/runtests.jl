@@ -94,10 +94,19 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
     if GROUP in ("Core", "All")
         @info "Testing package extensions..."
         @testset verbose = true "Package extensions" begin
-            for ext in (:NNlib, :SpecialFunctions, :DataInterpolations)
+            for ext in (:NNlib, :SpecialFunctions)
                 @testset "$ext" begin
                     @info "...$ext"
                     include("ext/test_$ext.jl")
+                end
+            end
+            # Some extensions are only loaded in newer Julia releases
+            if VERSION >= v"1.10"
+                for ext in (:DataInterpolations,)
+                    @testset "$ext" begin
+                        @info "...$ext"
+                        include("ext/test_$ext.jl")
+                    end
                 end
             end
         end
