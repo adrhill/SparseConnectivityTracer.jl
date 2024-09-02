@@ -8,7 +8,7 @@ else
     using ..LogExpFunctions
 end
 
-# 1-to-1 functions
+## 1-to-1 functions
 
 ops_1_to_1 = (
     xlogx,
@@ -22,8 +22,6 @@ ops_1_to_1 = (
     log1mexp,
     log2mexp,
     logexpm1,
-    softplus,
-    invsoftplus,
     log1pmx,
     logmxp1,
     cloglog,
@@ -32,6 +30,8 @@ ops_1_to_1 = (
     logitexp,
     log1mlogistic,
     logit1mexp,
+    # softplus, # alias for log1pexp
+    # invsoftplus, # alias for logexpm1
 )
 
 for op in ops_1_to_1
@@ -40,7 +40,7 @@ for op in ops_1_to_1
     @eval SCT.is_der2_zero_global(::$T) = false
 end
 
-# 2-to-1 functions
+## 2-to-1 functions
 
 ops_2_to_1 = (xlogy, xlog1py, xexpy, logaddexp, logsubexp)
 
@@ -53,13 +53,13 @@ for op in ops_2_to_1
     @eval SCT.is_der_cross_zero_global(::$T) = false
 end
 
-# Generate overloads
+## Generate overloads
 eval(SCT.generate_code_1_to_1(:LogExpFunctions, ops_1_to_1))
 eval(SCT.generate_code_2_to_1(:LogExpFunctions, ops_2_to_1))
 
-# List operators for later testing
+## List operators for later testing
 SCT.test_operators_1_to_1(::Val{:LogExpFunctions}) = ops_1_to_1
 SCT.test_operators_2_to_1(::Val{:LogExpFunctions}) = ops_2_to_1
 SCT.test_operators_1_to_2(::Val{:LogExpFunctions}) = ()
 
-end
+end # module

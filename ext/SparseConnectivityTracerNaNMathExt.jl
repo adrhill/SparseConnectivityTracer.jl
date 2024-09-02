@@ -91,4 +91,4 @@ SCT.test_operators_1_to_1(::Val{:NaNMath}) = ops_1_to_1
 SCT.test_operators_2_to_1(::Val{:NaNMath}) = ops_2_to_1
 SCT.test_operators_1_to_2(::Val{:NaNMath}) = ()
 
-end
+end # module
