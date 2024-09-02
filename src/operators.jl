@@ -138,7 +138,7 @@ is_der_cross_zero_local(f::F, x, y) where {F} = is_der_cross_zero_global(f)
 # ∂²f/∂y²  != 0
 # ∂²f/∂x∂y != 0
 ops_2_to_1_ssc = (
-    ^, hypot
+    ^, hypot, atan, log
 )
 for op in ops_2_to_1_ssc
     T = typeof(op)
