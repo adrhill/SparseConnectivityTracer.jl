@@ -30,7 +30,7 @@ function gradient_tracer_1_to_1_inner(
     end
 end
 
-function overload_gradient_1_to_1(M::Symbol, f)
+function generate_code_gradient_1_to_1(M::Symbol, f)
     fname = nameof(f)
     is_der1_zero_g = is_der1_zero_global(f)
 
@@ -109,7 +109,7 @@ function gradient_tracer_2_to_1_inner(
     end
 end
 
-function overload_gradient_2_to_1(M::Symbol, f)
+function generate_code_gradient_2_to_1(M::Symbol, f)
     fname = nameof(f)
     is_der1_arg1_zero_g = is_der1_arg1_zero_global(f)
     is_der1_arg2_zero_g = is_der1_arg2_zero_global(f)
@@ -224,7 +224,7 @@ end
     end
 end
 
-function overload_gradient_1_to_2(M::Symbol, f)
+function generate_code_gradient_1_to_2(M::Symbol, f)
     fname = nameof(f)
     is_der1_out1_zero_g = is_der1_out1_zero_global(f)
     is_der1_out2_zero_g = is_der1_out2_zero_global(f)

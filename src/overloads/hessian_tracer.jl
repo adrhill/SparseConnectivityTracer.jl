@@ -57,7 +57,7 @@ function hessian_tracer_1_to_1_inner(
     return P(g_out, h_out) # return pattern
 end
 
-function overload_hessian_1_to_1(M::Symbol, f)
+function generate_code_hessian_1_to_1(M::Symbol, f)
     fname = nameof(f)
     is_der1_zero_g = is_der1_zero_global(f)
     is_der2_zero_g = is_der2_zero_global(f)
@@ -175,7 +175,7 @@ function hessian_tracer_2_to_1_inner(
     return P(g_out, h_out) # return pattern
 end
 
-function overload_hessian_2_to_1(M::Symbol, f)
+function generate_code_hessian_2_to_1(M::Symbol, f)
     fname = nameof(f)
     is_der1_arg1_zero_g = is_der1_arg1_zero_global(f)
     is_der2_arg1_zero_g = is_der2_arg1_zero_global(f)
@@ -315,7 +315,7 @@ end
     end
 end
 
-function overload_hessian_1_to_2(M::Symbol, f)
+function generate_code_hessian_1_to_2(M::Symbol, f)
     fname = nameof(f)
     is_der1_out1_zero_g = is_der1_out1_zero_global(f)
     is_der2_out1_zero_g = is_der2_out1_zero_global(f)

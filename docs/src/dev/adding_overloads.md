@@ -126,14 +126,14 @@ After implementing the required classification methods for a function, the funct
 SCT provides six functions that generate code via meta-programming:
 
 * 1-to-1
-    * `eval(SCT.overload_gradient_1_to_1(module_symbol, f))`
-    * `eval(SCT.overload_hessian_1_to_1(module_symbol, f))`
+    * `eval(SCT.generate_code_gradient_1_to_1(module_symbol, f))`
+    * `eval(SCT.generate_code_hessian_1_to_1(module_symbol, f))`
 * 2-to-1
-    * `eval(SCT.overload_gradient_1_to_2(module_symbol, f))`
-    * `eval(SCT.overload_hessian_1_to_2(module_symbol, f))`
+    * `eval(SCT.generate_code_gradient_1_to_2(module_symbol, f))`
+    * `eval(SCT.generate_code_hessian_1_to_2(module_symbol, f))`
 * 1-to-2
-    * `eval(SCT.overload_gradient_2_to_1(module_symbol, f))`
-    * `eval(SCT.overload_hessian_2_to_1(module_symbol, f))`
+    * `eval(SCT.generate_code_gradient_2_to_1(module_symbol, f))`
+    * `eval(SCT.generate_code_hessian_2_to_1(module_symbol, f))`
 
 You are required to call the two functions that match your type of operator.
 
@@ -170,17 +170,17 @@ The `relu` function has not been overloaded on our tracer types yet.
 Let's call the code generation utilities from the [*"Overloading"*](@ref code-gen) section for this purpose:
 
 ```@example overload
-eval(SCT.overload_gradient_1_to_1(:NNlib, relu))
-eval(SCT.overload_hessian_1_to_1(:NNlib, relu))
+eval(SCT.generate_code_gradient_1_to_1(:NNlib, relu))
+eval(SCT.generate_code_hessian_1_to_1(:NNlib, relu))
 ```
 
 The `relu` function is now ready to be called with SCT's tracer types.
 
 !!! details "What is the eval call doing?"
-    Let's call `overload_gradient_1_to_1` without wrapping it `eval`:
+    Let's call `generate_code_gradient_1_to_1` without wrapping it `eval`:
 
     ```@example overload
-    SCT.overload_gradient_1_to_1(:NNlib, relu)
+    SCT.generate_code_gradient_1_to_1(:NNlib, relu)
     ```
 
     As you can see, this returns a `quote`, a type of expression containing our generated Julia code.
