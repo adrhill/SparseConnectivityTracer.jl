@@ -111,10 +111,8 @@ end
 ops_2_to_1 = ops_2_to_1_ssc
 
 ## Overloads
-eval(SCT.generate_code_gradient_1_to_1(:SpecialFunctions, ops_1_to_1))
-eval(SCT.generate_code_gradient_2_to_1(:SpecialFunctions, ops_2_to_1))
-eval(SCT.generate_code_hessian_1_to_1(:SpecialFunctions, ops_1_to_1))
-eval(SCT.generate_code_hessian_2_to_1(:SpecialFunctions, ops_2_to_1))
+eval(SCT.generate_code_1_to_1(:SpecialFunctions, ops_1_to_1))
+eval(SCT.generate_code_2_to_1(:SpecialFunctions, ops_2_to_1))
 
 ## List operators for later testing
 SCT.test_operators_1_to_1(::Val{:SpecialFunctions}) = ops_1_to_1
