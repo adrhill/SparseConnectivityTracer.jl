@@ -4,13 +4,20 @@ Pkg.develop(;
 )
 
 using SparseConnectivityTracer
-
 using Compat: pkgversion
 using Test
-using JuliaFormatter
-using Aqua
-using JET
-using Documenter
+
+using JuliaFormatter: JuliaFormatter
+using Aqua: Aqua
+using JET: JET
+using ExplicitImports: ExplicitImports
+using Documenter: Documenter, DocMeta
+
+# Load package extensions so they get tested by ExplicitImports.jl
+using DataInterpolations: DataInterpolations
+using NaNMath: NaNMath
+using NNlib: NNlib
+using SpecialFunctions: SpecialFunctions
 
 DocMeta.setdocmeta!(
     SparseConnectivityTracer,
@@ -45,6 +52,50 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
                 @testset "JET tests" begin
                     @info "...with JET.jl"
                     JET.test_package(SparseConnectivityTracer; target_defined_modules=true)
+                end
+                @testset "ExplicitImports tests" begin
+                    @info "...with ExplicitImports.jl"
+                    @testset "Improper implicit imports" begin
+                        @test ExplicitImports.check_no_implicit_imports(
+                            SparseConnectivityTracer
+                        ) === nothing
+                    end
+                    @testset "Improper explicit imports" begin
+                        @test ExplicitImports.check_no_stale_explicit_imports(
+                            SparseConnectivityTracer;
+                            ignore=(
+                                :AbstractTracer,
+                                :AkimaInterpolation,
+                                :BSplineApprox,
+                                :BSplineInterpolation,
+                                :CubicHermiteSpline,
+                                :CubicSpline,
+                                :LagrangeInterpolation,
+                                :QuadraticInterpolation,
+                                :QuadraticSpline,
+                                :QuinticHermiteSpline,
+                            ),
+                        ) === nothing
+                        @test ExplicitImports.check_all_explicit_imports_via_owners(
+                            SparseConnectivityTracer
+                        ) === nothing
+                        # TODO: test in the future when `public` is more common
+                        # @test ExplicitImports.check_all_explicit_imports_are_public(
+                        #     SparseConnectivityTracer
+                        # ) === nothing
+                    end
+                    @testset "Improper qualified accesses" begin
+                        @test ExplicitImports.check_all_qualified_accesses_via_owners(
+                            SparseConnectivityTracer
+                        ) === nothing
+                        @test ExplicitImports.check_no_self_qualified_accesses(
+                            SparseConnectivityTracer
+                        ) === nothing
+                        # TODO: test in the future when `public` is more common
+                        # @test ExplicitImports.check_all_qualified_accesses_are_public(
+                        #     SparseConnectivityTracer
+                        # ) === nothing
+                    end
                 end
             end
             @testset "Doctests" begin
