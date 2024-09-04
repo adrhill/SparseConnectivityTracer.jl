@@ -223,7 +223,7 @@ for op in ops_2_to_1_fsc
 end
 
 # gradient of x/y: [1/y -x/y²]
-SparseConnectivityTracer.is_der1_arg2_zero_local(::typeof(/), x, y) = iszero(x)
+is_der1_arg2_zero_local(::typeof(/), x, y) = iszero(x)
 
 # ops_2_to_1_fsz: 
 # ∂f/∂x    != 0

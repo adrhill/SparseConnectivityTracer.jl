@@ -4,13 +4,9 @@ Pkg.develop(;
 )
 
 using SparseConnectivityTracer
-
 using Compat: pkgversion
+using Documenter: Documenter, DocMeta
 using Test
-using JuliaFormatter
-using Aqua
-using JET
-using Documenter
 
 DocMeta.setdocmeta!(
     SparseConnectivityTracer,
@@ -23,36 +19,18 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
 
 @testset verbose = true "SparseConnectivityTracer.jl" begin
     if GROUP in ("Core", "All")
-        @testset verbose = true "Formalities" begin
-            @info "Testing formalities..."
-            if VERSION >= v"1.10"
-                @testset "Code formatting" begin
-                    @info "...with JuliaFormatter.jl"
-                    @test JuliaFormatter.format(
-                        SparseConnectivityTracer; verbose=false, overwrite=false
-                    )
-                end
-                @testset "Aqua tests" begin
-                    @info "...with Aqua.jl"
-                    Aqua.test_all(
-                        SparseConnectivityTracer;
-                        ambiguities=false,
-                        deps_compat=(check_extras=false,),
-                        stale_deps=(ignore=[:Requires],),
-                        persistent_tasks=false,
-                    )
-                end
-                @testset "JET tests" begin
-                    @info "...with JET.jl"
-                    JET.test_package(SparseConnectivityTracer; target_defined_modules=true)
-                end
-            end
-            @testset "Doctests" begin
-                Documenter.doctest(SparseConnectivityTracer)
+        if VERSION >= v"1.10"
+            @testset verbose = true "Linting" begin
+                @info "Testing linting..."
+                include("linting.jl")
             end
         end
     end
-
+    if GROUP in ("Core", "All")
+        @testset "Doctests" begin
+            Documenter.doctest(SparseConnectivityTracer)
+        end
+    end
     if GROUP in ("Core", "All")
         @testset verbose = true "Set types" begin
             @testset "Correctness" begin
