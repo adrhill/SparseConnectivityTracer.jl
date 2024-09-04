@@ -111,12 +111,12 @@ function LinearAlgebra.eigen(
 end
 
 ## Inverse
-function LinearAlgebra.inv(A::StridedMatrix{T}) where {T<:AbstractTracer}
+function Base.inv(A::StridedMatrix{T}) where {T<:AbstractTracer}
     LinearAlgebra.checksquare(A)
     t = second_order_or(A)
     return Fill(t, size(A)...)
 end
-function LinearAlgebra.inv(D::Diagonal{T}) where {T<:AbstractTracer}
+function Base.inv(D::Diagonal{T}) where {T<:AbstractTracer}
     ts_in = D.diag
     ts_out = similar(ts_in)
     for i in 1:length(ts_out)
@@ -132,7 +132,7 @@ function LinearAlgebra.pinv(
     t = second_order_or(A)
     return Fill(t, m, n)
 end
-LinearAlgebra.pinv(D::Diagonal{T}) where {T<:AbstractTracer} = LinearAlgebra.inv(D)
+LinearAlgebra.pinv(D::Diagonal{T}) where {T<:AbstractTracer} = inv(D)
 
 ## Division
 function LinearAlgebra.:\(
@@ -143,7 +143,7 @@ function LinearAlgebra.:\(
 end
 
 ## Exponential
-function LinearAlgebra.exp(A::AbstractMatrix{T}) where {T<:AbstractTracer}
+function Base.exp(A::AbstractMatrix{T}) where {T<:AbstractTracer}
     LinearAlgebra.checksquare(A)
     n = size(A, 1)
     t = second_order_or(A)

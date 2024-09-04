@@ -9,7 +9,7 @@ using LinearAlgebra: LinearAlgebra, Symmetric
 using LinearAlgebra: Diagonal, diag, diagind
 using FillArrays: Fill
 
-using DocStringExtensions
+using DocStringExtensions: DocStringExtensions, TYPEDEF, TYPEDFIELDS
 
 if !isdefined(Base, :get_extension)
     using Requires

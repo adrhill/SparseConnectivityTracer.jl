@@ -6,9 +6,8 @@ if isdefined(Base, :get_extension)
     using SparseConnectivityTracer: AbstractTracer, Dual, primal, tracer
     using SparseConnectivityTracer: GradientTracer, gradient_tracer_1_to_1
     using SparseConnectivityTracer: HessianTracer, hessian_tracer_1_to_1
-    using SparseConnectivityTracer: Fill # from FillArrays.jl
+    using FillArrays: Fill # from FillArrays.jl
     import DataInterpolations:
-        AbstractInterpolation,
         LinearInterpolation,
         QuadraticInterpolation,
         LagrangeInterpolation,
@@ -19,15 +18,14 @@ if isdefined(Base, :get_extension)
         BSplineInterpolation,
         BSplineApprox,
         CubicHermiteSpline,
-        PCHIPInterpolation,
+        # PCHIPInterpolation,
         QuinticHermiteSpline
 else
     using ..SparseConnectivityTracer: AbstractTracer, Dual, primal, tracer
     using ..SparseConnectivityTracer: GradientTracer, gradient_tracer_1_to_1
     using ..SparseConnectivityTracer: HessianTracer, hessian_tracer_1_to_1
-    using ..SparseConnectivityTracer: Fill # from FillArrays.jl
+    using ..FillArrays: Fill # from FillArrays.jl
     import ..DataInterpolations:
-        AbstractInterpolation,
         LinearInterpolation,
         QuadraticInterpolation,
         LagrangeInterpolation,
@@ -38,7 +36,7 @@ else
         BSplineInterpolation,
         BSplineApprox,
         CubicHermiteSpline,
-        PCHIPInterpolation,
+        # PCHIPInterpolation,
         QuinticHermiteSpline
 end
 
