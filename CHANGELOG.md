@@ -1,5 +1,11 @@
 # SparseConnectivityTracer.jl
 
+## Version `v0.6.4`
+
+* ![Enhancement][badge-enhancement] Shorter printing of default detectors ([#190])
+* ![Documentation][badge-docs] Consistently refer to `TracerSparsityDetector` as `detector` ([#191])
+* ![Maintenance][badge-maintenance] Make imports explicit, test with ExplicitImports.jl ([#188])
+
 ## Version `v0.6.3`
 
 * ![Feature][badge-feature] Add DataInterpolations.jl package extension ([#178])
@@ -59,7 +65,9 @@
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
-[#187]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/187
+[#191]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/191
+[#190]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/190
+[#188]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/188
 [#186]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/186
 [#185]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/185
 [#184]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/184
