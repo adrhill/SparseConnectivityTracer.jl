@@ -27,9 +27,7 @@ julia> jacobian_sparsity(diff, rand(4), detector)
  1  1  ⋅  ⋅
  ⋅  1  1  ⋅
  ⋅  ⋅  1  1
-```
 
-```jldoctest
 julia> f(x) = x[1] + x[2]*x[3] + 1/x[4];
 
 julia> hessian_sparsity(f, rand(4), detector)
