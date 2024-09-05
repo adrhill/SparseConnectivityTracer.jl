@@ -45,17 +45,6 @@ isemptytracer(t::GradientTracer) = t.isempty
 pattern(t::GradientTracer) = t.pattern
 gradient(t::GradientTracer) = gradient(pattern(t))
 
-function Base.show(io::IO, t::GradientTracer)
-    print(io, typeof(t))
-    if isemptytracer(t)
-        print(io, "()")
-    else
-        printsorted(io, gradient(t))
-    end
-    println(io)
-    return nothing
-end
-
 #===============#
 # HessianTracer #
 #===============#
@@ -87,20 +76,6 @@ isemptytracer(t::HessianTracer) = t.isempty
 pattern(t::HessianTracer) = t.pattern
 gradient(t::HessianTracer) = gradient(pattern(t))
 hessian(t::HessianTracer) = hessian(pattern(t))
-
-function Base.show(io::IO, t::HessianTracer)
-    print(io, typeof(t))
-    if isemptytracer(t)
-        print(io, "()")
-    else
-        print(io, "(\n", "  Gradient:")
-        printlnsorted(io, gradient(t))
-        print(io, "  Hessian: ")
-        printlnsorted(io, hessian(t))
-        println(io, ")")
-    end
-    return nothing
-end
 
 #================================#
 # Dual numbers for local tracing #
@@ -178,12 +153,3 @@ name(::Type{T}) where {T<:HessianTracer}  = "HessianTracer"
 name(::Type{D}) where {P,T,D<:Dual{P,T}}  = "Dual-$(name(T))"
 name(::T) where {T<:AbstractTracer}       = name(T)
 name(::D) where {D<:Dual}                 = name(D)
-
-# Utilities for printing sets
-printsorted(io::IO, x) = Base.show_delim_array(io, sort(x), "(", ',', ')', true)
-printsorted(io::IO, s::AbstractSet) = printsorted(io, collect(s))
-function printlnsorted(io::IO, x)
-    printsorted(io, x)
-    println(io)
-    return nothing
-end

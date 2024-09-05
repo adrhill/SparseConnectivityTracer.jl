@@ -176,8 +176,6 @@ struct IndexSetGradientPattern{I<:Integer,S<:AbstractSet{I}} <: AbstractGradient
     gradient::S
 end
 
-Base.show(io::IO, p::IndexSetGradientPattern) = Base.show(io, gradient(p))
-
 function myempty(::Type{IndexSetGradientPattern{I,S}}) where {I,S}
     return IndexSetGradientPattern{I,S}(myempty(S))
 end
