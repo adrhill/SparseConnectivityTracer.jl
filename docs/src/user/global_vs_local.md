@@ -24,14 +24,14 @@ These are computed by [`TracerLocalSparsityDetector`](@ref):
 
 ```@repl localvsglobal
 using SparseConnectivityTracer
-method = TracerLocalSparsityDetector();
+detector = TracerLocalSparsityDetector();
 
 f(x) = x[1]*x[2];
 
-jacobian_sparsity(f, [1, 1], method)
-jacobian_sparsity(f, [0, 1], method)
-jacobian_sparsity(f, [1, 0], method)
-jacobian_sparsity(f, [0, 0], method)
+jacobian_sparsity(f, [1, 1], detector)
+jacobian_sparsity(f, [0, 1], detector)
+jacobian_sparsity(f, [1, 0], detector)
+jacobian_sparsity(f, [0, 0], detector)
 ```
 
 In contrast to this, [`TracerSparsityDetector`](@ref) computes a conservative union over all sparsity patterns in $\mathbf{x} \in \mathbb{R}^2$.
@@ -39,13 +39,13 @@ The resulting **global** pattern therefore does not depend on the input.
 All of the following function calls are equivalent:
 
 ```@repl localvsglobal
-method = TracerSparsityDetector();
+detector = TracerSparsityDetector()
 
-jacobian_sparsity(f, [1, 1], method)
-jacobian_sparsity(f, [0, 1], method)
-jacobian_sparsity(f, [1, 0], method)
-jacobian_sparsity(f, [0, 0], method)
-jacobian_sparsity(f, rand(2), method)
+jacobian_sparsity(f, [1, 1], detector)
+jacobian_sparsity(f, [0, 1], detector)
+jacobian_sparsity(f, [1, 0], detector)
+jacobian_sparsity(f, [0, 0], detector)
+jacobian_sparsity(f, rand(2), detector)
 ```
 
 !!! tip "Global vs. Local"

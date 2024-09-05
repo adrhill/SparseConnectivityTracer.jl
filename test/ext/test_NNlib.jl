@@ -32,8 +32,8 @@ NNLIB_ACTIVATIONS_F = (
 NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
 
 @testset "Jacobian Global" begin
-    method = TracerSparsityDetector()
-    J(f, x) = jacobian_sparsity(f, x, method)
+    detector = TracerSparsityDetector()
+    J(f, x) = jacobian_sparsity(f, x, detector)
 
     @testset "$f" for f in NNLIB_ACTIVATIONS
         @test J(f, 1) ≈ [1;;]
@@ -41,8 +41,8 @@ NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
 end
 
 @testset "Jacobian Local" begin
-    method = TracerLocalSparsityDetector()
-    J(f, x) = jacobian_sparsity(f, x, method)
+    detector = TracerLocalSparsityDetector()
+    J(f, x) = jacobian_sparsity(f, x, detector)
 
     @test J(NNlib.relu, -1) ≈ [0;;]
     @test J(NNlib.relu, 1) ≈ [1;;]
@@ -82,8 +82,8 @@ end
 end
 
 @testset "Global Hessian" begin
-    method = TracerSparsityDetector()
-    H(f, x) = hessian_sparsity(f, x, method)
+    detector = TracerSparsityDetector()
+    H(f, x) = hessian_sparsity(f, x, detector)
 
     @testset "First-order differentiable" begin
         @testset "$f" for f in NNLIB_ACTIVATIONS_F
@@ -98,8 +98,8 @@ end
 end
 
 @testset "Local Hessian" begin
-    method = TracerLocalSparsityDetector()
-    H(f, x) = hessian_sparsity(f, x, method)
+    detector = TracerLocalSparsityDetector()
+    H(f, x) = hessian_sparsity(f, x, detector)
 
     @test H(NNlib.relu, -1) ≈ [0;;]
     @test H(NNlib.relu, 1) ≈ [0;;]

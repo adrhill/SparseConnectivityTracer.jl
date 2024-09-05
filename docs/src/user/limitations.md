@@ -24,7 +24,7 @@ it must be written generically enough to accept numbers of type `T<:Real` as (or
 
     ```@example notgeneric
     using SparseConnectivityTracer
-    method = TracerSparsityDetector()
+    detector = TracerSparsityDetector()
 
     relu_bad(x::AbstractFloat) = max(zero(x), x)
     outer_function_bad(xs) = sum(relu_bad, xs)
@@ -39,7 +39,7 @@ it must be written generically enough to accept numbers of type `T<:Real` as (or
 
     outer_function_bad(xs)
 
-    jacobian_sparsity(outer_function_bad, xs, method)
+    jacobian_sparsity(outer_function_bad, xs, detector)
     ```
 
     This is easily fixed by loosening type restrictions or adding an additional methods on `Real`:
@@ -51,7 +51,7 @@ it must be written generically enough to accept numbers of type `T<:Real` as (or
     ```
 
     ```@repl notgeneric
-    jacobian_sparsity(outer_function_good, xs, method)
+    jacobian_sparsity(outer_function_good, xs, detector)
     ```
 
 ## Limited control flow
