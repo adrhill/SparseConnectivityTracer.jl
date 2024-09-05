@@ -45,13 +45,13 @@ pow3(A) = A^3
 # Testing utilities #
 #===================#
 
-method = TracerSparsityDetector()
+detector = TracerSparsityDetector()
 
 allone(A) = all(isone, A)
 allzero(A) = all(iszero, A)
 
 # Short-hand for Jacobian pattern of `x -> sum(f(A))`
-Jsum(f, A) = jacobian_sparsity(SumOutputs(f), A, method)
+Jsum(f, A) = jacobian_sparsity(SumOutputs(f), A, detector)
 # Test whether all entries in Jacobian are zero
 testJ0(f, A) = @testset "Jacobian" begin
     @test allzero(Jsum(f, A))
@@ -75,7 +75,7 @@ function testJ1(f, A::Diagonal)
 end
 
 # Short-hand for Hessian pattern of `x -> sum(f(A))`
-Hsum(f, A) = hessian_sparsity(SumOutputs(f), A, method)
+Hsum(f, A) = hessian_sparsity(SumOutputs(f), A, detector)
 # Test whether all entries in Hessian are zero
 testH0(f, A) = @testset "Hessian" begin
     @test allzero(Hsum(f, A))

@@ -9,10 +9,10 @@ Test cases taken from the article:
 > https://www.tandfonline.com/doi/full/10.1080/10556788.2018.1480625
 =#
 
-function hessbench(method)
+function hessbench(detector)
     suite = BenchmarkGroup()
-    suite["ArrowHead"] = hessbench_arrowhead(method)
-    suite["RandomSparsity"] = hessbench_randomsparsity(method)
+    suite["ArrowHead"] = hessbench_arrowhead(detector)
+    suite["RandomSparsity"] = hessbench_randomsparsity(detector)
     return suite
 end
 
@@ -32,7 +32,7 @@ function (ah::ArrowHead)(x::AbstractVector)
     end
 end
 
-function hessbench_arrowhead(method)
+function hessbench_arrowhead(detector)
     suite = BenchmarkGroup()
     # Commented-out cases (N, K) are included in the JuMP paper linked above,
     # but excluded from to accelerate the benchmark suite.
@@ -48,7 +48,7 @@ function hessbench_arrowhead(method)
     ]
         x = rand(N)
         f = ArrowHead(K)
-        suite["N=$N, K=$K"] = @benchmarkable hessian_sparsity($f, $x, $method)
+        suite["N=$N, K=$K"] = @benchmarkable hessian_sparsity($f, $x, $detector)
     end
     return suite
 end
@@ -70,7 +70,7 @@ function (rs::RandomSparsity)(x::AbstractVector)
     end
 end
 
-function hessbench_randomsparsity(method)
+function hessbench_randomsparsity(detector)
     suite = BenchmarkGroup()
     # Commented-out cases (N, K) are included in the JuMP paper linked above,
     # but excluded from to accelerate the benchmark suite.
@@ -86,7 +86,7 @@ function hessbench_randomsparsity(method)
     ]
         x = rand(N)
         f = RandomSparsity(N, K)
-        suite["N=$N, K=$K"] = @benchmarkable hessian_sparsity($f, $x, $method)
+        suite["N=$N, K=$K"] = @benchmarkable hessian_sparsity($f, $x, $detector)
     end
     return suite
 end

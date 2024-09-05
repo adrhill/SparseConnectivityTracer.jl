@@ -28,8 +28,8 @@ lef_1_to_1 = union(lef_1_to_1_pos_input, lef_1_to_1_neg_input)
 lef_2_to_1 = (xlogy, xlog1py, xexpy, logaddexp, logsubexp)
 
 @testset "Jacobian Global" begin
-    method = TracerSparsityDetector()
-    J(f, x) = jacobian_sparsity(f, x, method)
+    detector = TracerSparsityDetector()
+    J(f, x) = jacobian_sparsity(f, x, detector)
 
     @testset "1-to-1 functions" begin
         @testset "$f" for f in lef_1_to_1
@@ -44,8 +44,8 @@ lef_2_to_1 = (xlogy, xlog1py, xexpy, logaddexp, logsubexp)
 end
 
 @testset "Jacobian Local" begin
-    method = TracerLocalSparsityDetector()
-    J(f, x) = jacobian_sparsity(f, x, method)
+    detector = TracerLocalSparsityDetector()
+    J(f, x) = jacobian_sparsity(f, x, detector)
 
     @testset "1-to-1 functions" begin
         @testset "$f" for f in lef_1_to_1_pos_input
@@ -63,8 +63,8 @@ end
 end
 
 @testset "Hessian Global" begin
-    method = TracerSparsityDetector()
-    H(f, x) = hessian_sparsity(f, x, method)
+    detector = TracerSparsityDetector()
+    H(f, x) = hessian_sparsity(f, x, detector)
 
     @testset "1-to-1 functions" begin
         @testset "$f" for f in lef_1_to_1
@@ -79,8 +79,8 @@ end
 end
 
 @testset "Hessian Local" begin
-    method = TracerLocalSparsityDetector()
-    H(f, x) = hessian_sparsity(f, x, method)
+    detector = TracerLocalSparsityDetector()
+    H(f, x) = hessian_sparsity(f, x, detector)
 
     @testset "1-to-1 functions" begin
         @testset "$f" for f in lef_1_to_1_pos_input

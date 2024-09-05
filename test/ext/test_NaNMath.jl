@@ -22,8 +22,8 @@ nan_1_to_1 = (
 )
 
 @testset "Jacobian Global" begin
-    method = TracerSparsityDetector()
-    J(f, x) = jacobian_sparsity(f, x, method)
+    detector = TracerSparsityDetector()
+    J(f, x) = jacobian_sparsity(f, x, detector)
 
     @testset "1-to-1 functions" begin
         @testset "$f" for f in nan_1_to_1
@@ -38,8 +38,8 @@ nan_1_to_1 = (
 end
 
 @testset "Jacobian Local" begin
-    method = TracerLocalSparsityDetector()
-    J(f, x) = jacobian_sparsity(f, x, method)
+    detector = TracerLocalSparsityDetector()
+    J(f, x) = jacobian_sparsity(f, x, detector)
 
     @testset "2-to-1 functions" begin
         @test J(x -> NaNMath.max(x[1], x[2]), [1.0, 2.0, 0.0]) == [0 1 0]
@@ -50,8 +50,8 @@ end
 end
 
 @testset "Hessian Global" begin
-    method = TracerSparsityDetector()
-    H(f, x) = hessian_sparsity(f, x, method)
+    detector = TracerSparsityDetector()
+    H(f, x) = hessian_sparsity(f, x, detector)
 
     @testset "1-to-1 functions" begin
         @testset "$f" for f in nan_1_to_1
@@ -66,8 +66,8 @@ end
 end
 
 @testset "Hessian Local" begin
-    method = TracerLocalSparsityDetector()
-    H(f, x) = hessian_sparsity(f, x, method)
+    detector = TracerLocalSparsityDetector()
+    H(f, x) = hessian_sparsity(f, x, detector)
 
     @testset "2-to-1 functions" begin
         @test H(x -> NaNMath.max(x[1], x[2]), [1.0, 2.0, 0.0]) == zeros(Bool, 3, 3)

@@ -13,14 +13,14 @@ REAL_TYPES = (Float64, Int, Bool, UInt8, Float16, Rational{Int})
 
 # These exists to be able to quickly run tests in the REPL.
 # NOTE: J gets overwritten inside the testsets.
-method = TracerSparsityDetector()
-J(f, x) = jacobian_sparsity(f, x, method)
+detector = TracerSparsityDetector()
+J(f, x) = jacobian_sparsity(f, x, detector)
 
 @testset "Jacobian Global" begin
     @testset "$P" for P in GRADIENT_PATTERNS
         T = GradientTracer{P}
-        method = TracerSparsityDetector(; gradient_tracer_type=T)
-        J(f, x) = jacobian_sparsity(f, x, method)
+        detector = TracerSparsityDetector(; gradient_tracer_type=T)
+        J(f, x) = jacobian_sparsity(f, x, detector)
 
         @testset "Trivial examples" begin
             f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])]
@@ -126,8 +126,8 @@ end
 @testset "Jacobian Local" begin
     @testset "$P" for P in GRADIENT_PATTERNS
         T = GradientTracer{P}
-        method = TracerLocalSparsityDetector(; gradient_tracer_type=T)
-        J(f, x) = jacobian_sparsity(f, x, method)
+        detector = TracerLocalSparsityDetector(; gradient_tracer_type=T)
+        J(f, x) = jacobian_sparsity(f, x, detector)
 
         @testset "Trivial examples" begin
 

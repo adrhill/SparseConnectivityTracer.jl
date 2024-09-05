@@ -10,8 +10,8 @@ REAL_TYPES = (Float64, Int, Bool, UInt8, Float16, Rational{Int})
 
 # These exists to be able to quickly run tests in the REPL.
 # NOTE: H gets overwritten inside the testsets.
-method = TracerSparsityDetector()
-H(f, x) = hessian_sparsity(f, x, method)
+detector = TracerSparsityDetector()
+H(f, x) = hessian_sparsity(f, x, detector)
 
 P = first(HESSIAN_PATTERNS)
 T = HessianTracer{P}
@@ -20,8 +20,8 @@ D = Dual{Int,T}
 @testset "Global Hessian" begin
     @testset "$P" for P in HESSIAN_PATTERNS
         T = HessianTracer{P}
-        method = TracerSparsityDetector(; hessian_tracer_type=T)
-        H(f, x) = hessian_sparsity(f, x, method)
+        detector = TracerSparsityDetector(; hessian_tracer_type=T)
+        H(f, x) = hessian_sparsity(f, x, detector)
 
         @testset "Trivial examples" begin
             @test H(identity, rand()) ≈ [0;;]
@@ -266,8 +266,8 @@ end
 @testset "Local Hessian" begin
     @testset "$P" for P in HESSIAN_PATTERNS
         T = HessianTracer{P}
-        method = TracerLocalSparsityDetector(; hessian_tracer_type=T)
-        H(f, x) = hessian_sparsity(f, x, method)
+        detector = TracerLocalSparsityDetector(; hessian_tracer_type=T)
+        H(f, x) = hessian_sparsity(f, x, detector)
 
         @testset "Trivial examples" begin
             f1(x) = x[1] + x[2] * x[3] + 1 / x[4] + x[2] * max(x[1], x[5])
