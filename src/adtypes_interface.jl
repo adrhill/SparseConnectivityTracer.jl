@@ -1,9 +1,10 @@
 #= This file implements the ADTypes interface for `AbstractSparsityDetector`s =#
 
-const DEFAULT_GRADIENT_TRACER = GradientTracer{IndexSetGradientPattern{Int,BitSet}}
-const DEFAULT_HESSIAN_TRACER = HessianTracer{
-    DictHessianPattern{Int,BitSet,Dict{Int,BitSet},NotShared}
-}
+const DEFAULT_GRADIENT_PATTERN = IndexSetGradientPattern{Int,BitSet}
+const DEFAULT_GRADIENT_TRACER = GradientTracer{DEFAULT_GRADIENT_PATTERN}
+
+const DEFAULT_HESSIAN_PATTERN = DictHessianPattern{Int,BitSet,Dict{Int,BitSet},NotShared}
+const DEFAULT_HESSIAN_TRACER = HessianTracer{DEFAULT_HESSIAN_PATTERN}
 
 """
     TracerSparsityDetector <: ADTypes.AbstractSparsityDetector
@@ -18,17 +19,18 @@ For local sparsity patterns at a specific input point, use [`TracerLocalSparsity
 ```jldoctest
 julia> using SparseConnectivityTracer
 
-julia> jacobian_sparsity(diff, rand(4), TracerSparsityDetector())
+julia> detector = TracerSparsityDetector()
+TracerSparsityDetector()
+
+julia> jacobian_sparsity(diff, rand(4), detector)
 3×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 6 stored entries:
  1  1  ⋅  ⋅
  ⋅  1  1  ⋅
  ⋅  ⋅  1  1
-```
 
-```jldoctest
 julia> f(x) = x[1] + x[2]*x[3] + 1/x[4];
 
-julia> hessian_sparsity(f, rand(4), TracerSparsityDetector())
+julia> hessian_sparsity(f, rand(4), detector)
 4×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 3 stored entries:
  ⋅  ⋅  ⋅  ⋅
  ⋅  ⋅  1  ⋅
@@ -77,23 +79,24 @@ Local sparsity patterns are less convervative than global patterns and need to b
 ```jldoctest
 julia> using SparseConnectivityTracer
 
-julia> method = TracerLocalSparsityDetector();
+julia> detector = TracerLocalSparsityDetector()
+TracerLocalSparsityDetector()
 
 julia> f(x) = x[1] * x[2]; # J_f = [x[2], x[1]]
 
-julia> jacobian_sparsity(f, [1, 0], method)
+julia> jacobian_sparsity(f, [1, 0], detector)
 1×2 SparseArrays.SparseMatrixCSC{Bool, Int64} with 1 stored entry:
  ⋅  1
 
-julia> jacobian_sparsity(f, [0, 1], method)
+julia> jacobian_sparsity(f, [0, 1], detector)
 1×2 SparseArrays.SparseMatrixCSC{Bool, Int64} with 1 stored entry:
  1  ⋅
 
-julia> jacobian_sparsity(f, [0, 0], method)
+julia> jacobian_sparsity(f, [0, 0], detector)
 1×2 SparseArrays.SparseMatrixCSC{Bool, Int64} with 0 stored entries:
  ⋅  ⋅
 
-julia> jacobian_sparsity(f, [1, 1], method)
+julia> jacobian_sparsity(f, [1, 1], detector)
 1×2 SparseArrays.SparseMatrixCSC{Bool, Int64} with 2 stored entries:
  1  1
 ```
@@ -154,4 +157,16 @@ end
 
 function ADTypes.hessian_sparsity(f, x, ::TracerLocalSparsityDetector{TG,TH}) where {TG,TH}
     return _local_hessian_sparsity(f, x, TH)
+end
+
+## Pretty printing
+for detector in (:TracerSparsityDetector, :TracerLocalSparsityDetector)
+    @eval function Base.show(io::IO, d::$detector{TG,TH}) where {TG,TH}
+        if TG == DEFAULT_GRADIENT_TRACER && TH == DEFAULT_HESSIAN_TRACER
+            println(io, $detector, "()")
+        else
+            println(io, $detector, "{", TG, ",", TH, "}()")
+        end
+        return nothing
+    end
 end
