@@ -1,9 +1,10 @@
 #= This file implements the ADTypes interface for `AbstractSparsityDetector`s =#
 
-const DEFAULT_GRADIENT_TRACER = GradientTracer{IndexSetGradientPattern{Int,BitSet}}
-const DEFAULT_HESSIAN_TRACER = HessianTracer{
-    DictHessianPattern{Int,BitSet,Dict{Int,BitSet},NotShared}
-}
+const DEFAULT_GRADIENT_PATTERN = IndexSetGradientPattern{Int,BitSet}
+const DEFAULT_GRADIENT_TRACER = GradientTracer{DEFAULT_GRADIENT_PATTERN}
+
+const DEFAULT_HESSIAN_PATTERN = DictHessianPattern{Int,BitSet,Dict{Int,BitSet},NotShared}
+const DEFAULT_HESSIAN_TRACER = HessianTracer{DEFAULT_HESSIAN_PATTERN}
 
 """
     TracerSparsityDetector <: ADTypes.AbstractSparsityDetector
@@ -154,4 +155,18 @@ end
 
 function ADTypes.hessian_sparsity(f, x, ::TracerLocalSparsityDetector{TG,TH}) where {TG,TH}
     return _local_hessian_sparsity(f, x, TH)
+end
+
+## Pretty printing
+for detector in (:TracerSparsityDetector, :TracerLocalSparsityDetector)
+    @eval function Base.show(
+        io::IO, d::$detector{TG,TH}; indent=0
+    ) where {PG,TG<:GradientTracer{PG},PH,TH<:HessianTracer{PH}}
+        if PG == DEFAULT_GRADIENT_PATTERN && PH == DEFAULT_HESSIAN_PATTERN
+            println(io, $detector, "()")
+        else
+            println(io, $detector, "{", TG, ",", TH, "}()")
+        end
+        return nothing
+    end
 end
