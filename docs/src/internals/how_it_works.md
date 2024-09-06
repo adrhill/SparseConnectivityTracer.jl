@@ -33,8 +33,8 @@ and the Hessian as $\left(\nabla^2 f(\mathbf{x})\right)_{i,j} = \frac{\partial^2
 Sparsity patterns correspond to the mask of non-zero values in the gradient and Hessian.
 Instead of saving the values of individual partial derivatives, they can efficiently be represented by the set of indices corresponding to non-zero values:
 
-* Gradient patterns are represented by sets of indices $\left\{i \;\big|\; \left(\nabla f(\mathbf{x})\right)_{i} \neq 1\right\}$
-* Hessian patterns are represented by sets of index tuples $\left\{(i, j) \;\Big|\; \left(\nabla^2 f(\mathbf{x})\right)_{i,j} \neq 1\right\}$
+* Gradient patterns are represented by sets of indices $\left\{i \;\big|\; \frac{\partial f}{\partial x_i} \neq 0\right\}$
+* Hessian patterns are represented by sets of index tuples $\left\{(i, j) \;\Big|\; \frac{\partial^2 f}{\partial x_i \partial x_j} \neq 0\right\}$
 
 
 !!! warning "Global vs. Local"
@@ -81,7 +81,7 @@ The sign function has zero derivatives for any input value. It therefore doesn't
 
 [^1]: $\frac{\partial x_i}{\partial x_j} \neq 0$ only holds for $i=j$
 
-The resulting **global** gradient sparsity pattern $\left(\nabla f(\mathbf{x})\right)_{i} \neq 1$ for $i$ in $\{1, 2, 3\}$ matches the analytical gradient
+The resulting **global** gradient sparsity pattern $\left(\nabla f(\mathbf{x})\right)_{i} \neq 0$ for $i$ in $\{1, 2, 3\}$ matches the analytical gradient
 
 ```math 
 \nabla f(\mathbf{x}) = \begin{bmatrix}
