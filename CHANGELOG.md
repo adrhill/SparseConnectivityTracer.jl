@@ -1,5 +1,10 @@
 # SparseConnectivityTracer.jl
 
+## Version `v0.6.5`
+
+* ![Bugfix][badge-bugfix] Fix LogExpFunctions.jl compat entry ([#195])
+* ![Documentation][badge-docs] Fix "How it works" documentation ([#193])
+
 ## Version `v0.6.4`
 
 * ![Enhancement][badge-enhancement] Shorter printing of default detectors ([#190])
@@ -65,6 +70,8 @@
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#195]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/195
+[#193]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/193
 [#191]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/191
 [#190]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/190
 [#188]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/188
