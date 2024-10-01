@@ -7,6 +7,7 @@ using JET: JET
 using ExplicitImports: ExplicitImports
 
 # Load package extensions so they get tested by ExplicitImports.jl
+using ForwardDiff: ForwardDiff
 using DataInterpolations: DataInterpolations
 using NaNMath: NaNMath
 using NNlib: NNlib
