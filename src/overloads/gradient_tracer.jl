@@ -30,7 +30,7 @@ function gradient_tracer_1_to_1_inner(
     end
 end
 
-function generate_code_gradient_1_to_1(M::Symbol, f)
+function generate_code_gradient_1_to_1(M::Symbol, f::Function)
     fname = nameof(f)
     is_der1_zero_g = is_der1_zero_global(f)
 
@@ -109,33 +109,19 @@ function gradient_tracer_2_to_1_inner(
     end
 end
 
-function generate_code_gradient_2_to_1(
-    M::Symbol,    # Symbol indicating Module of f, usually `:Base`
-    f::Function,  # function to overload
-    Z::Type=Real, # external non-tracer-type to overload on 
-)
+function generate_code_gradient_2_to_1(M::Symbol, f::Function)
     fname = nameof(f)
     is_der1_arg1_zero_g = is_der1_arg1_zero_global(f)
     is_der1_arg2_zero_g = is_der1_arg2_zero_global(f)
 
-    ## GradientTracer
-    expr_gradienttracer = quote
+    expr_tracer_tracer = quote
         function $M.$fname(tx::T, ty::T) where {T<:$SCT.GradientTracer}
             return $SCT.gradient_tracer_2_to_1(
                 tx, ty, $is_der1_arg1_zero_g, $is_der1_arg2_zero_g
             )
         end
-
-        function $M.$fname(tx::$SCT.GradientTracer, ::$Z)
-            return $SCT.gradient_tracer_1_to_1(tx, $is_der1_arg1_zero_g)
-        end
-
-        function $M.$fname(::$Z, ty::$SCT.GradientTracer)
-            return $SCT.gradient_tracer_1_to_1(ty, $is_der1_arg2_zero_g)
-        end
     end
 
-    ## Dual
     expr_dual_dual = if is_der1_arg1_zero_g && is_der1_arg2_zero_g
         quote
             function $M.$fname(dx::D, dy::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
@@ -162,7 +148,32 @@ function generate_code_gradient_2_to_1(
             end
         end
     end
-    expr_dual_nondual = if is_der1_arg1_zero_g
+
+    exprs_typed = generate_code_gradient_2_to_1_typed(M, f, Real)
+    return Expr(:block, expr_tracer_tracer, expr_dual_dual, exprs_typed)
+end
+
+function generate_code_gradient_2_to_1_typed(
+    M::Symbol,   # Symbol indicating Module of f, usually `:Base`
+    f::Function, # function to overload
+    Z::Type,     # external non-tracer-type to overload on 
+)
+    fname = nameof(f)
+    is_der1_arg1_zero_g = is_der1_arg1_zero_global(f)
+    is_der1_arg2_zero_g = is_der1_arg2_zero_global(f)
+
+    expr_tracer_type = quote
+        function $M.$fname(tx::$SCT.GradientTracer, ::$Z)
+            return $SCT.gradient_tracer_1_to_1(tx, $is_der1_arg1_zero_g)
+        end
+    end
+    expr_type_tracer = quote
+        function $M.$fname(::$Z, ty::$SCT.GradientTracer)
+            return $SCT.gradient_tracer_1_to_1(ty, $is_der1_arg2_zero_g)
+        end
+    end
+
+    expr_dual_type = if is_der1_arg1_zero_g
         quote
             function $M.$fname(dx::D, y::$Z) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
                 x = $SCT.primal(dx)
@@ -182,7 +193,7 @@ function generate_code_gradient_2_to_1(
             end
         end
     end
-    expr_nondual_dual = if is_der1_arg2_zero_g
+    expr_type_dual = if is_der1_arg2_zero_g
         quote
             function $M.$fname(x::$Z, dy::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
                 y = $SCT.primal(dy)
@@ -202,10 +213,7 @@ function generate_code_gradient_2_to_1(
             end
         end
     end
-
-    return Expr(
-        :block, expr_gradienttracer, expr_dual_dual, expr_dual_nondual, expr_nondual_dual
-    )
+    return Expr(:block, expr_tracer_type, expr_type_tracer, expr_dual_type, expr_type_dual)
 end
 
 ## 1-to-2
@@ -222,7 +230,7 @@ end
     end
 end
 
-function generate_code_gradient_1_to_2(M::Symbol, f)
+function generate_code_gradient_1_to_2(M::Symbol, f::Function)
     fname = nameof(f)
     is_der1_out1_zero_g = is_der1_out1_zero_global(f)
     is_der1_out2_zero_g = is_der1_out2_zero_global(f)

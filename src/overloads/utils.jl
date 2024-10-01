@@ -28,21 +28,13 @@ for d in dims
 end
 
 # Overloads of 2-argument functions on arbitrary types
-function generate_code_2_to_1(M::Symbol, f::Function, Z::Type)
-    expr_g = generate_code_gradient_2_to_1(M, f, Z)
-    expr_h = generate_code_hessian_2_to_1(M, f, Z)
+function generate_code_2_to_1_typed(M::Symbol, f::Function, Z::Type)
+    expr_g = generate_code_gradient_2_to_1_typed(M, f, Z)
+    expr_h = generate_code_hessian_2_to_1_typed(M, f, Z)
     return Expr(:block, expr_g, expr_h)
 end
-function generate_code_2_to_1(M::Symbol, ops::Union{AbstractVector,Tuple}, Z::Type)
-    exprs = [generate_code_2_to_1(M, op, Z) for op in ops]
-    return Expr(:block, exprs...)
-end
-function generate_code_gradient_2_to_1(M::Symbol, ops::Union{AbstractVector,Tuple}, Z::Type)
-    exprs = [generate_code_gradient_2_to_1(M, op, Z) for op in ops]
-    return Expr(:block, exprs...)
-end
-function generate_code_hessian_2_to_1(M::Symbol, ops::Union{AbstractVector,Tuple}, Z::Type)
-    exprs = [generate_code_hessian_2_to_1(M, op, Z) for op in ops]
+function generate_code_2_to_1_typed(M::Symbol, ops::Union{AbstractVector,Tuple}, Z::Type)
+    exprs = [generate_code_2_to_1_typed(M, op, Z) for op in ops]
     return Expr(:block, exprs...)
 end
 
