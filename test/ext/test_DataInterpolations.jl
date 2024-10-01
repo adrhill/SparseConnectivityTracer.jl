@@ -260,7 +260,7 @@ for N in (2, 5)
             InterpolationTest(
                 N, ConstantInterpolation(um, t); is_der1_zero=true, is_der2_zero=true
             ),
-            InterpolationTest(N, LinearInterpolation(um, t); is_der2_zero=true),
+            # InterpolationTest(N, LinearInterpolation(um, t); is_der2_zero=true), # TODO: include once https://github.com/SciML/DataInterpolations.jl/pull/335 is settled
             InterpolationTest(N, QuadraticInterpolation(um, t)),
             InterpolationTest(N, LagrangeInterpolation(um, t)),
             ## The following interpolations appear to not be supported on N dimensions as of DataInterpolations v6.2.0:
