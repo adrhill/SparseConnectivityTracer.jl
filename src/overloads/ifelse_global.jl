@@ -9,17 +9,19 @@
     end
 
     ## output union on scalar outputs
-    function output_union(tx::T, ty::T) where {T<:AbstractTracer}
+    function output_union(tx::T, ty::T) where {T<:GradientTracer}
         return T(output_union(pattern(tx), pattern(ty))) # return tracer
     end
     function output_union(px::P, py::P) where {P<:IndexSetGradientPattern}
         return P(union(gradient(px), gradient(py))) # return pattern
     end
 
-    function output_union(px::P, py::P) where {P<:AbstractHessianPattern}
-        return output_union(px, py, shared(P))
+    function output_union(tx::T, ty::T) where {T<:HessianTracer}
+        return T(output_union(pattern(tx), pattern(ty))) # return tracer
     end
-
+    function output_union(px::P, py::P) where {P<:AbstractHessianPattern}
+        return output_union(px, py, shared(P)) # return pattern
+    end
     function output_union(px::P, py::P, ::Shared) where {P<:AbstractHessianPattern}
         g_out = union(gradient(px), gradient(py))
         hx, hy = hessian(px), hessian(py)

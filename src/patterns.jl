@@ -180,7 +180,7 @@ function myempty(::Type{IndexSetGradientPattern{I,S}}) where {I,S}
     return IndexSetGradientPattern{I,S}(myempty(S))
 end
 function create_patterns(::Type{P}, xs, is) where {I,S,P<:IndexSetGradientPattern{I,S}}
-    sets = seed.(S, is)
+    sets = seed.(Ref(S), is)
     return P.(sets)
 end
 
@@ -274,7 +274,7 @@ function myempty(::Type{DictHessianPattern{I,S,D,SB}}) where {I,S,D,SB}
     return DictHessianPattern{I,S,D,SB}(myempty(S), myempty(D))
 end
 function create_patterns(::Type{P}, xs, is) where {I,S,D,SB,P<:DictHessianPattern{I,S,D,SB}}
-    gradients = seed.(S, is)
+    gradients = seed.(Ref(S), is)
     hessian = myempty(D)
     # Even if `NotShared`, sharing a single reference to `hessian` is allowed upon initialization, 
     # since mutation is prohibited when `isshared` is false.
