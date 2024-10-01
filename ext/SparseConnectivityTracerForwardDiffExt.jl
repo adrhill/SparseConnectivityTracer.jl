@@ -9,6 +9,6 @@ else
 end
 
 # Overload 2-to-1 functions on ForwardDiff.Dual
-eval(SCT.generate_code_2_to_1(:Base, SCT.ops_2_to_1, ForwardDiff.Dual))
+eval(SCT.generate_code_2_to_1_typed(:Base, SCT.ops_2_to_1, ForwardDiff.Dual))
 
 end # module
