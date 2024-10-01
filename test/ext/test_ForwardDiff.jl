@@ -1,9 +1,9 @@
-using SparseConnectivityTracer, ForwardDiff
-using ForwardDiff: Dual, Partials, Tag
+using SparseConnectivityTracer
+using ForwardDiff: ForwardDiff
 
 using Test
 
-d = Dual{Tag{*,Float64}}(1.2, 3.4)
+d = ForwardDiff.Dual{ForwardDiff.Tag{*,Float64}}(1.2, 3.4)
 @testset "$D" for D in (TracerSparsityDetector, TracerLocalSparsityDetector)
     detector = D()
     # Testing on multiplication ensures that methods from Base have been overloaded,
