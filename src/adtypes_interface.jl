@@ -163,9 +163,9 @@ end
 for detector in (:TracerSparsityDetector, :TracerLocalSparsityDetector)
     @eval function Base.show(io::IO, d::$detector{TG,TH}) where {TG,TH}
         if TG == DEFAULT_GRADIENT_TRACER && TH == DEFAULT_HESSIAN_TRACER
-            println(io, $detector, "()")
+            print(io, $detector, "()")
         else
-            println(io, $detector, "{", TG, ",", TH, "}()")
+            print(io, $detector, "{", TG, ",", TH, "}()")
         end
         return nothing
     end
