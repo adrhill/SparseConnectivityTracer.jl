@@ -175,7 +175,11 @@ function hessian_tracer_2_to_1_inner(
     return P(g_out, h_out) # return pattern
 end
 
-function generate_code_hessian_2_to_1(M::Symbol, f)
+function generate_code_hessian_2_to_1(
+    M::Symbol,    # Symbol indicating Module of f, usually `:Base`
+    f::Function,  # function to overload
+    Z::Type=Real, # external non-tracer-type to overload on 
+)
     fname = nameof(f)
     is_der1_arg1_zero_g = is_der1_arg1_zero_global(f)
     is_der2_arg1_zero_g = is_der2_arg1_zero_global(f)
@@ -197,11 +201,11 @@ function generate_code_hessian_2_to_1(M::Symbol, f)
             )
         end
 
-        function $M.$fname(tx::$SCT.HessianTracer, y::Real)
+        function $M.$fname(tx::$SCT.HessianTracer, y::$Z)
             return $SCT.hessian_tracer_1_to_1(tx, $is_der1_arg1_zero_g, $is_der2_arg1_zero_g)
         end
 
-        function $M.$fname(x::Real, ty::$SCT.HessianTracer)
+        function $M.$fname(x::$Z, ty::$SCT.HessianTracer)
             return $SCT.hessian_tracer_1_to_1(ty, $is_der1_arg2_zero_g, $is_der2_arg2_zero_g)
         end
     end
@@ -251,16 +255,16 @@ function generate_code_hessian_2_to_1(M::Symbol, f)
                 end
             end
         end
-    expr_dual_real = if is_der1_arg1_zero_g && is_der2_arg1_zero_g
+    expr_dual_nondual = if is_der1_arg1_zero_g && is_der2_arg1_zero_g
         quote
-            function $M.$fname(dx::D, y::Real) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
+            function $M.$fname(dx::D, y::$Z) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
                 x = $SCT.primal(dx)
                 return $M.$fname(x, y)
             end
         end
     else
         quote
-            function $M.$fname(dx::D, y::Real) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
+            function $M.$fname(dx::D, y::$Z) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
                 x = $SCT.primal(dx)
                 p_out = $M.$fname(x, y)
 
@@ -272,16 +276,16 @@ function generate_code_hessian_2_to_1(M::Symbol, f)
             end
         end
     end
-    expr_real_dual = if is_der1_arg2_zero_g && is_der2_arg2_zero_g
+    expr_nondual_dual = if is_der1_arg2_zero_g && is_der2_arg2_zero_g
         quote
-            function $M.$fname(x::Real, dy::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
+            function $M.$fname(x::$Z, dy::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
                 y = $SCT.primal(dy)
                 return $M.$fname(x, y)
             end
         end
     else
         quote
-            function $M.$fname(x::Real, dy::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
+            function $M.$fname(x::$Z, dy::D) where {P,T<:$SCT.HessianTracer,D<:$SCT.Dual{P,T}}
                 y = $SCT.primal(dy)
                 p_out = $M.$fname(x, y)
 
@@ -294,7 +298,9 @@ function generate_code_hessian_2_to_1(M::Symbol, f)
         end
     end
 
-    return Expr(:block, expr_hessiantracer, expr_dual_dual, expr_dual_real, expr_real_dual)
+    return Expr(
+        :block, expr_hessiantracer, expr_dual_dual, expr_dual_nondual, expr_nondual_dual
+    )
 end
 
 ## 1-to-2

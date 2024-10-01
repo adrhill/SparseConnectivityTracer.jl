@@ -18,6 +18,3 @@ for fn in (
         throw(MissingPrimalError($fn, t))
     end
 end
-
-# In some cases, more specialized methods are needed
-Base.isless(dx::D, y::AbstractFloat) where {D<:Dual} = isless(primal(dx), y)
