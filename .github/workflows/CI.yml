@@ -30,7 +30,7 @@ jobs:
           - Core
           - Benchmarks
           - NLPModels
-        exclude: # TODO: remove once 1.11 is the new LTS
+        exclude: # TODO: remove once LTS is not 1.6
           - version: 'lts'
             group: NLPModels
           - version: 'lts'
