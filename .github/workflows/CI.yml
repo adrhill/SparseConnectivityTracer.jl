@@ -23,16 +23,17 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.6'
+          - 'lts'
           - '1'
+          - 'pre'
         group:
           - Core
           - Benchmarks
           - NLPModels
-        exclude:
-          - version: '1.6'
+        exclude: # TODO: remove once 1.11 is the new LTS
+          - version: 'lts'
             group: NLPModels
-          - version: '1.6'
+          - version: 'lts'
             group: Benchmarks
     steps:
       - uses: actions/checkout@v4
