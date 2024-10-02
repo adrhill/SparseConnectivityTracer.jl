@@ -44,9 +44,6 @@ export jacobian_sparsity, hessian_sparsity
 
 function __init__()
     @static if !isdefined(Base, :get_extension)
-        @require ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210" include(
-            "../ext/SparseConnectivityTracerForwardDiffExt.jl"
-        )
         @require LogExpFunctions = "2ab3a3ac-af41-5b50-aa03-7779005ae688" include(
             "../ext/SparseConnectivityTracerLogExpFunctionsExt.jl"
         )
@@ -59,7 +56,7 @@ function __init__()
         @require SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b" include(
             "../ext/SparseConnectivityTracerSpecialFunctionsExt.jl"
         )
-        # NOTE: SparseConnectivityTracerDataInterpolationsExt is not loaded on Julia <1.10
+        # NOTE: DataInterpolations extension is not loaded on Julia <1.10
     end
 end
 

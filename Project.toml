@@ -14,7 +14,6 @@ SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [weakdeps]
 DataInterpolations = "82cc6244-b520-54b8-b5a6-8a565e85f1d0"
-ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 LogExpFunctions = "2ab3a3ac-af41-5b50-aa03-7779005ae688"
 NNlib = "872c559c-99b0-510c-b3b7-b6c96a88d5cd"
 NaNMath = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3"
@@ -22,7 +21,6 @@ SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 
 [extensions]
 SparseConnectivityTracerDataInterpolationsExt = "DataInterpolations"
-SparseConnectivityTracerForwardDiffExt = "ForwardDiff"
 SparseConnectivityTracerLogExpFunctionsExt = "LogExpFunctions"
 SparseConnectivityTracerNNlibExt = "NNlib"
 SparseConnectivityTracerNaNMathExt = "NaNMath"
@@ -33,7 +31,6 @@ ADTypes = "1"
 DataInterpolations = "6.2"
 DocStringExtensions = "0.9"
 FillArrays = "1"
-ForwardDiff = "0.10"
 LinearAlgebra = "<0.0.1, 1"
 LogExpFunctions = "0.3.28"
 NNlib = "0.8, 0.9"
@@ -46,7 +43,6 @@ julia = "1.6"
 
 [extras]
 DataInterpolations = "82cc6244-b520-54b8-b5a6-8a565e85f1d0"
-ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 LogExpFunctions = "2ab3a3ac-af41-5b50-aa03-7779005ae688"
 NNlib = "872c559c-99b0-510c-b3b7-b6c96a88d5cd"
 NaNMath = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3"
