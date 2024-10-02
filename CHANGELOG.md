@@ -1,5 +1,11 @@
 # SparseConnectivityTracer.jl
 
+## Version `v0.6.6`
+
+* ![Bugfix][badge-bugfix] Fix detector display by replacing `println` with `print` ([#201])
+* ![Enhancement][badge-enhancement] Improve code generation for 2-to-1 overloads on arbitrary types ([#197], [#202])
+* ![Maintenance][badge-maintenance] Update package tests and CI workflow ([#198], [#199])
+
 ## Version `v0.6.5`
 
 * ![Bugfix][badge-bugfix] Fix LogExpFunctions.jl compat entry ([#195])
@@ -70,6 +76,11 @@
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#202]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/202
+[#201]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/201
+[#199]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/199
+[#198]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/198
+[#197]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/197
 [#195]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/195
 [#193]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/193
 [#191]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/191
