@@ -11,10 +11,6 @@ using FillArrays: Fill
 
 using DocStringExtensions: DocStringExtensions, TYPEDEF, TYPEDFIELDS
 
-if !isdefined(Base, :get_extension)
-    using Requires
-end
-
 include("settypes/duplicatevector.jl")
 include("settypes/recursiveset.jl")
 include("settypes/sortedvector.jl")
@@ -41,23 +37,5 @@ export TracerSparsityDetector
 export TracerLocalSparsityDetector
 # Reexport ADTypes interface
 export jacobian_sparsity, hessian_sparsity
-
-function __init__()
-    @static if !isdefined(Base, :get_extension)
-        @require LogExpFunctions = "2ab3a3ac-af41-5b50-aa03-7779005ae688" include(
-            "../ext/SparseConnectivityTracerLogExpFunctionsExt.jl"
-        )
-        @require NaNMath = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3" include(
-            "../ext/SparseConnectivityTracerNaNMathExt.jl"
-        )
-        @require NNlib = "872c559c-99b0-510c-b3b7-b6c96a88d5cd" include(
-            "../ext/SparseConnectivityTracerNNlibExt.jl"
-        )
-        @require SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b" include(
-            "../ext/SparseConnectivityTracerSpecialFunctionsExt.jl"
-        )
-        # NOTE: DataInterpolations extension is not loaded on Julia <1.10
-    end
-end
 
 end # module

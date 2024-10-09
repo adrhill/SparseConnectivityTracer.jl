@@ -1,62 +1,32 @@
 module SparseConnectivityTracerLogExpFunctionsExt
 
-if isdefined(Base, :get_extension)
-    import SparseConnectivityTracer as SCT
-    using LogExpFunctions:
-        LogExpFunctions,
-        cexpexp,
-        cloglog,
-        log1mexp,
-        log1mlogistic,
-        log1pexp,
-        log1pmx,
-        log1psq,
-        log2mexp,
-        logabssinh,
-        logaddexp,
-        logcosh,
-        logexpm1,
-        logistic,
-        logit,
-        logit1mexp,
-        logitexp,
-        loglogistic,
-        logmxp1,
-        logsubexp,
-        xexpx,
-        xexpy,
-        xlog1py,
-        xlogx,
-        xlogy
-else
-    import ..SparseConnectivityTracer as SCT
-    using ..LogExpFunctions:
-        LogExpFunctions,
-        cexpexp,
-        cloglog,
-        log1mexp,
-        log1mlogistic,
-        log1pexp,
-        log1pmx,
-        log1psq,
-        log2mexp,
-        logabssinh,
-        logaddexp,
-        logcosh,
-        logexpm1,
-        logistic,
-        logit,
-        logit1mexp,
-        logitexp,
-        loglogistic,
-        logmxp1,
-        logsubexp,
-        xexpx,
-        xexpy,
-        xlog1py,
-        xlogx,
-        xlogy
-end
+import SparseConnectivityTracer as SCT
+using LogExpFunctions:
+    LogExpFunctions,
+    cexpexp,
+    cloglog,
+    log1mexp,
+    log1mlogistic,
+    log1pexp,
+    log1pmx,
+    log1psq,
+    log2mexp,
+    logabssinh,
+    logaddexp,
+    logcosh,
+    logexpm1,
+    logistic,
+    logit,
+    logit1mexp,
+    logitexp,
+    loglogistic,
+    logmxp1,
+    logsubexp,
+    xexpx,
+    xexpy,
+    xlog1py,
+    xlogx,
+    xlogy
 
 ## 1-to-1 functions
 

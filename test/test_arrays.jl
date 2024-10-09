@@ -311,14 +311,11 @@ end
             testJ1(SpdiagmifyInput(exp), v)
             testH1(SpdiagmifyInput(exp), v)
 
-            if VERSION >= v"1.10"
-                # issue with custom _mapreducezeros in SparseArrays on Julia 1.6
-                testJ0(SpdiagmifyInput(pow0), v)
-                testH0(SpdiagmifyInput(pow0), v)
+            testJ0(SpdiagmifyInput(pow0), v)
+            testH0(SpdiagmifyInput(pow0), v)
 
-                testJ1(SpdiagmifyInput(pow3), v)
-                testH1(SpdiagmifyInput(pow3), v)
-            end
+            testJ1(SpdiagmifyInput(pow3), v)
+            testH1(SpdiagmifyInput(pow3), v)
         end
     end
 
@@ -327,11 +324,9 @@ end
         testJ1(pinv, A)
         testH1(pinv, A)
     end
-    if VERSION >= v"1.9"
-        @testset "`SparseMatrixCSC` (3×4)" begin
-            testJ1(SparsifyInput(pinv), rand(3, 4))
-            testH1(SparsifyInput(pinv), rand(3, 4))
-        end
+    @testset "`SparseMatrixCSC` (3×4)" begin
+        testJ1(SparsifyInput(pinv), rand(3, 4))
+        testH1(SparsifyInput(pinv), rand(3, 4))
     end
 end
 
