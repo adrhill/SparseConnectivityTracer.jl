@@ -4,7 +4,6 @@ Pkg.develop(;
 )
 
 using SparseConnectivityTracer
-using Compat: pkgversion
 using Documenter: Documenter, DocMeta
 using Test
 
