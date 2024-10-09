@@ -1,5 +1,9 @@
 # SparseConnectivityTracer.jl
 
+## Version `v0.6.7`
+
+* ![Enhancement][badge-enhancement] Drop compatibility with Julia <1.10 to improve tracer performance ([#204], [#205])
+
 ## Version `v0.6.6`
 
 * ![Bugfix][badge-bugfix] Fix detector display by replacing `println` with `print` ([#201])
@@ -76,6 +80,8 @@
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#205]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/205
+[#204]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/204
 [#202]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/202
 [#201]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/201
 [#199]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/199
