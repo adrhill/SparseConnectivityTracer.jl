@@ -188,60 +188,58 @@ arrayname(A) = "$(typeof(A)) $(size(A))"
         testH0(logabsdet_last, A)
     end
 
-    if VERSION >= v"1.9"
-        @testset "`SparseMatrixCSC` (3×3)" begin
-            A = rand(3, 3)
-            v = rand(3)
+    @testset "`SparseMatrixCSC` (3×3)" begin
+        A = rand(3, 3)
+        v = rand(3)
 
-            # TODO: this is a temporary solution until sparse matrix inputs are supported (#28)
-            @testset "det" begin
-                testJ1(SparsifyInput(det), A)
-                testH1(SparsifyInput(det), A)
-                testJ1(SpdiagmifyInput(det), v)
-                testH1(SpdiagmifyInput(det), v)
-            end
-            @testset "logdet" begin
-                testJ1(SparsifyInput(logdet), A)
-                testH1(SparsifyInput(logdet), A)
-                testJ1(SpdiagmifyInput(logdet), v)
-                testH1(SpdiagmifyInput(logdet), v)
-            end
-            @testset "norm" begin
-                testJ1(SparsifyInput(norm), A)
-                testH1(SparsifyInput(norm), A)
-                testJ1(SpdiagmifyInput(norm), v)
-                testH1(SpdiagmifyInput(norm), v)
-            end
-            @testset "eigmax" begin
-                testJ1(SparsifyInput(eigmax), A)
-                testH1(SparsifyInput(eigmax), A)
-                testJ1(SpdiagmifyInput(eigmax), v)
-                testH1(SpdiagmifyInput(eigmax), v)
-            end
-            @testset "eigmin" begin
-                testJ1(SparsifyInput(eigmin), A)
-                testH1(SparsifyInput(eigmin), A)
-                testJ1(SpdiagmifyInput(eigmin), v)
-                testH1(SpdiagmifyInput(eigmin), v)
-            end
-            @testset "opnorm(x, 1)" begin
-                testJ1(SparsifyInput(opnorm1), A)
-                testH0(SparsifyInput(opnorm1), A)
-                testJ1(SpdiagmifyInput(opnorm1), v)
-                testH0(SpdiagmifyInput(opnorm1), v)
-            end
-            @testset "first(logabsdet(x))" begin
-                testJ1(SparsifyInput(logabsdet_first), A)
-                testH1(SparsifyInput(logabsdet_first), A)
-                testJ1(SpdiagmifyInput(logabsdet_first), v)
-                testH1(SpdiagmifyInput(logabsdet_first), v)
-            end
-            @testset "last(logabsdet(x))" begin
-                testJ0(SparsifyInput(logabsdet_last), A)
-                testH0(SparsifyInput(logabsdet_last), A)
-                testJ0(SpdiagmifyInput(logabsdet_last), v)
-                testH0(SpdiagmifyInput(logabsdet_last), v)
-            end
+        # TODO: this is a temporary solution until sparse matrix inputs are supported (#28)
+        @testset "det" begin
+            testJ1(SparsifyInput(det), A)
+            testH1(SparsifyInput(det), A)
+            testJ1(SpdiagmifyInput(det), v)
+            testH1(SpdiagmifyInput(det), v)
+        end
+        @testset "logdet" begin
+            testJ1(SparsifyInput(logdet), A)
+            testH1(SparsifyInput(logdet), A)
+            testJ1(SpdiagmifyInput(logdet), v)
+            testH1(SpdiagmifyInput(logdet), v)
+        end
+        @testset "norm" begin
+            testJ1(SparsifyInput(norm), A)
+            testH1(SparsifyInput(norm), A)
+            testJ1(SpdiagmifyInput(norm), v)
+            testH1(SpdiagmifyInput(norm), v)
+        end
+        @testset "eigmax" begin
+            testJ1(SparsifyInput(eigmax), A)
+            testH1(SparsifyInput(eigmax), A)
+            testJ1(SpdiagmifyInput(eigmax), v)
+            testH1(SpdiagmifyInput(eigmax), v)
+        end
+        @testset "eigmin" begin
+            testJ1(SparsifyInput(eigmin), A)
+            testH1(SparsifyInput(eigmin), A)
+            testJ1(SpdiagmifyInput(eigmin), v)
+            testH1(SpdiagmifyInput(eigmin), v)
+        end
+        @testset "opnorm(x, 1)" begin
+            testJ1(SparsifyInput(opnorm1), A)
+            testH0(SparsifyInput(opnorm1), A)
+            testJ1(SpdiagmifyInput(opnorm1), v)
+            testH0(SpdiagmifyInput(opnorm1), v)
+        end
+        @testset "first(logabsdet(x))" begin
+            testJ1(SparsifyInput(logabsdet_first), A)
+            testH1(SparsifyInput(logabsdet_first), A)
+            testJ1(SpdiagmifyInput(logabsdet_first), v)
+            testH1(SpdiagmifyInput(logabsdet_first), v)
+        end
+        @testset "last(logabsdet(x))" begin
+            testJ0(SparsifyInput(logabsdet_last), A)
+            testH0(SparsifyInput(logabsdet_last), A)
+            testJ0(SpdiagmifyInput(logabsdet_last), v)
+            testH0(SpdiagmifyInput(logabsdet_last), v)
         end
     end
 end
@@ -292,31 +290,29 @@ end
         testH1(pow3, A)
     end
 
-    if VERSION >= v"1.9"
-        A = rand(3, 3)
-        v = rand(3)
+    A = rand(3, 3)
+    v = rand(3)
 
-        @testset "`SparseMatrixCSC` (3×3)" begin
-            # TODO: this is a temporary solution until sparse matrix inputs are supported (#28)
+    @testset "`SparseMatrixCSC` (3×3)" begin
+        # TODO: this is a temporary solution until sparse matrix inputs are supported (#28)
 
-            testJ1(SparsifyInput(exp), A)
-            testH1(SparsifyInput(exp), A)
+        testJ1(SparsifyInput(exp), A)
+        testH1(SparsifyInput(exp), A)
 
-            testJ0(SparsifyInput(pow0), A)
-            testH0(SparsifyInput(pow0), A)
+        testJ0(SparsifyInput(pow0), A)
+        testH0(SparsifyInput(pow0), A)
 
-            testJ1(SparsifyInput(pow3), A)
-            testH1(SparsifyInput(pow3), A)
+        testJ1(SparsifyInput(pow3), A)
+        testH1(SparsifyInput(pow3), A)
 
-            testJ1(SpdiagmifyInput(exp), v)
-            testH1(SpdiagmifyInput(exp), v)
+        testJ1(SpdiagmifyInput(exp), v)
+        testH1(SpdiagmifyInput(exp), v)
 
-            testJ0(SpdiagmifyInput(pow0), v)
-            testH0(SpdiagmifyInput(pow0), v)
+        testJ0(SpdiagmifyInput(pow0), v)
+        testH0(SpdiagmifyInput(pow0), v)
 
-            testJ1(SpdiagmifyInput(pow3), v)
-            testH1(SpdiagmifyInput(pow3), v)
-        end
+        testJ1(SpdiagmifyInput(pow3), v)
+        testH1(SpdiagmifyInput(pow3), v)
     end
 
     # Functions that work on all matrices
@@ -361,15 +357,13 @@ end
     @test all(t -> SCT.gradient(t) == s_out, vectors)
 end
 
-if VERSION >= v"1.9"
-    @testset "SparseMatrixCSC construction" begin
-        t1 = TG(P(S(1)))
-        t2 = TG(P(S(2)))
-        t3 = TG(P(S(3)))
-        SA = sparse([t1 t2; t3 0])
-        @test length(SA.nzval) == 3
+@testset "SparseMatrixCSC construction" begin
+    t1 = TG(P(S(1)))
+    t2 = TG(P(S(2)))
+    t3 = TG(P(S(3)))
+    SA = sparse([t1 t2; t3 0])
+    @test length(SA.nzval) == 3
 
-        res = opnorm(SA, 1)
-        @test SCT.gradient(res) == S([1, 2, 3])
-    end
+    res = opnorm(SA, 1)
+    @test SCT.gradient(res) == S([1, 2, 3])
 end

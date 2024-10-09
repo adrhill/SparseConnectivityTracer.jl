@@ -9,6 +9,7 @@ GRADIENT_PATTERNS = (
     IndexSetGradientPattern{Int,Set{Int}},
     IndexSetGradientPattern{Int,DuplicateVector{Int}},
     IndexSetGradientPattern{Int,SortedVector{Int}},
+    IndexSetGradientPattern{Int,RecursiveSet{Int}},
 )
 
 HESSIAN_PATTERNS_SHARED = (

@@ -10,14 +10,7 @@ function gradient_tracer_1_to_1(t::T, is_der1_zero::Bool) where {T<:GradientTrac
     end
 end
 
-function gradient_tracer_1_to_1_inner(
-    p::P, is_der1_zero::Bool
-) where {P<:IndexSetGradientPattern}
-    return P(gradient_tracer_1_to_1_inner(gradient(p), is_der1_zero)) # return pattern
-end
-
 # This is only required because it is called by HessianTracer with IndexSetHessianPattern
-# Otherwise, we would just have the method on IndexSetGradientPattern above.
 function gradient_tracer_1_to_1_inner(
     s::S, is_der1_zero::Bool
 ) where {S<:AbstractSet{<:Integer}}

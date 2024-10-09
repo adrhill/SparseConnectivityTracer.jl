@@ -39,7 +39,6 @@ end
 
 GradientTracer{P}(::Real) where {P} = myempty(GradientTracer{P})
 GradientTracer{P}(t::GradientTracer{P}) where {P} = t
-GradientTracer(t::GradientTracer) = t
 
 isemptytracer(t::GradientTracer) = t.isempty
 pattern(t::GradientTracer) = t.pattern
@@ -70,7 +69,6 @@ end
 
 HessianTracer{P}(::Real) where {P} = myempty(HessianTracer{P})
 HessianTracer{P}(t::HessianTracer{P}) where {P} = t
-HessianTracer(t::HessianTracer) = t
 
 isemptytracer(t::HessianTracer) = t.isempty
 pattern(t::HessianTracer) = t.pattern
@@ -122,8 +120,6 @@ end
 
 shared(::Type{T}) where {P,T<:HessianTracer{P}} = shared(P)
 
-myempty(::T) where {T<:AbstractTracer} = myempty(T)
-
 myempty(::Type{GradientTracer{P}}) where {P} = GradientTracer{P}(myempty(P), true)
 myempty(::Type{HessianTracer{P}}) where {P}  = HessianTracer{P}(myempty(P), true)
 
@@ -146,10 +142,3 @@ function create_tracers(
     tracers = create_tracers(T, xs, indices)
     return D.(xs, tracers)
 end
-
-# Pretty-printing of Dual tracers
-name(::Type{T}) where {T<:GradientTracer} = "GradientTracer"
-name(::Type{T}) where {T<:HessianTracer}  = "HessianTracer"
-name(::Type{D}) where {P,T,D<:Dual{P,T}}  = "Dual-$(name(T))"
-name(::T) where {T<:AbstractTracer}       = name(T)
-name(::D) where {D<:Dual}                 = name(D)

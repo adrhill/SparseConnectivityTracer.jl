@@ -97,12 +97,10 @@ J(f, x) = jacobian_sparsity(f, x, detector)
         end
 
         @testset "ifelse and comparisons" begin
-            if VERSION >= v"1.8"
-                @test J(x -> ifelse(x[2] < x[3], x[1] + x[2], x[3] * x[4]), [1 2 3 4]) ==
-                    [1 1 1 1]
-                @test J(x -> ifelse(x[2] < x[3], x[1] + x[2], 1.0), [1 2 3 4]) == [1 1 0 0]
-                @test J(x -> ifelse(x[2] < x[3], 1.0, x[3] * x[4]), [1 2 3 4]) == [0 0 1 1]
-            end
+            @test J(x -> ifelse(x[2] < x[3], x[1] + x[2], x[3] * x[4]), [1 2 3 4]) ==
+                [1 1 1 1]
+            @test J(x -> ifelse(x[2] < x[3], x[1] + x[2], 1.0), [1 2 3 4]) == [1 1 0 0]
+            @test J(x -> ifelse(x[2] < x[3], 1.0, x[3] * x[4]), [1 2 3 4]) == [0 0 1 1]
 
             function f_ampgo07(x)
                 return (x[1] <= 0) * convert(eltype(x), Inf) +
