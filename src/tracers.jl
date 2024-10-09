@@ -146,10 +146,3 @@ function create_tracers(
     tracers = create_tracers(T, xs, indices)
     return D.(xs, tracers)
 end
-
-# Pretty-printing of Dual tracers
-name(::Type{T}) where {T<:GradientTracer} = "GradientTracer"
-name(::Type{T}) where {T<:HessianTracer}  = "HessianTracer"
-name(::Type{D}) where {P,T,D<:Dual{P,T}}  = "Dual-$(name(T))"
-name(::T) where {T<:AbstractTracer}       = name(T)
-name(::D) where {D<:Dual}                 = name(D)

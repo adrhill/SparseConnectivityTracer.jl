@@ -1,11 +1,16 @@
 # Test construction and conversions of internal tracer types
 using SparseConnectivityTracer: AbstractTracer, GradientTracer, HessianTracer, Dual
-using SparseConnectivityTracer: primal, tracer, isemptytracer, myempty, name
+using SparseConnectivityTracer: primal, tracer, isemptytracer, myempty, tracer_name
 using SparseConnectivityTracer: IndexSetGradientPattern
 using Test
 
 # Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
 include("tracers_definitions.jl")
+
+# Pretty-printing of Dual tracers
+tracer_name(::Type{T}) where {T<:GradientTracer} = "GradientTracer"
+tracer_name(::Type{T}) where {T<:HessianTracer}  = "HessianTracer"
+tracer_name(::Type{D}) where {P,T,D<:Dual{P,T}}  = "Dual-$(tracer_name(T))"
 
 function test_nested_duals(::Type{T}) where {T<:AbstractTracer}
     # Putting Duals into Duals is prohibited
@@ -65,13 +70,13 @@ end
 
 function test_type_casting(::Type{D}) where {P,T,D<:Dual{P,T}}
     d_in = Dual(one(P), myempty(T))
-    @testset "$(name(D)) to $(name(D))" begin
+    @testset "$(tracer_name(D)) to $(tracer_name(D))" begin
         d_out = D(d_in)
         @test primal(d_out) == primal(d_in)
         @test tracer(d_out) isa T
         @test isemptytracer(d_out)
     end
-    @testset "$P2 to $(name(D))" for P2 in (Int, Float32, Irrational)
+    @testset "$P2 to $(tracer_name(D))" for P2 in (Int, Float32, Irrational)
         p_in = one(P2)
         d_out = D(p_in)
         @test primal(d_out) == P(p_in)
