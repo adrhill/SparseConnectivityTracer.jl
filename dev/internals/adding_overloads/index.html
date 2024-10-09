@@ -16,28 +16,28 @@ SCT.is_der2_zero_global(::typeof(relu)) = true
 SCT.is_der1_zero_local(::typeof(relu), x) = x &lt; 0</code></pre><div class="admonition is-warning"><header class="admonition-header">import SparseConnectivityTracer</header><div class="admonition-body"><p>Note that we imported SCT to extend its operator classification methods on <code>typeof(relu)</code>.</p></div></div><h3 id="Step-2:-Overloading"><a class="docs-heading-anchor" href="#Step-2:-Overloading">Step 2: Overloading</a><a id="Step-2:-Overloading-1"></a><a class="docs-heading-anchor-permalink" href="#Step-2:-Overloading" title="Permalink"></a></h3><p>The <code>relu</code> function has not been overloaded on our tracer types yet. Let&#39;s call the code generation utilities from the <a href="#code-gen"><em>&quot;Overloading&quot;</em></a> section for this purpose:</p><pre><code class="language-julia hljs">eval(SCT.generate_code_1_to_1(:NNlib, relu))</code></pre><p>The <code>relu</code> function is now ready to be called with SCT&#39;s tracer types.</p><details class="admonition is-details"><summary class="admonition-header">What is the eval call doing?</summary><div class="admonition-body"><p>Let&#39;s call <code>generate_code_1_to_1</code> without wrapping it <code>eval</code>:</p><pre><code class="language-julia hljs">SCT.generate_code_1_to_1(:NNlib, relu)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">quote
     begin
         begin
-            <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:38 =#</span>
+            <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:36 =#</span>
             function NNlib.relu(t::(SparseConnectivityTracer).GradientTracer)
-                <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:38 =#</span>
-                <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:39 =#</span>
-                return (SparseConnectivityTracer).gradient_tracer_1_to_1(t, false)
+                <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:36 =#</span>
+                <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:37 =#</span>
+                return <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:37 =#</span> @noinline((SparseConnectivityTracer).gradient_tracer_1_to_1(t, false))
             end
         end
         begin
-            <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:52 =#</span>
+            <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:50 =#</span>
             function NNlib.relu(d::D) where {P, T &lt;: (SparseConnectivityTracer).GradientTracer, D &lt;: (SparseConnectivityTracer).Dual{P, T}}
-                <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:52 =#</span>
-                <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:53 =#</span>
+                <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:50 =#</span>
+                <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:51 =#</span>
                 x = (SparseConnectivityTracer).primal(d)
-                <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:54 =#</span>
+                <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:52 =#</span>
                 p_out = NNlib.relu(x)
-                <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:56 =#</span>
+                <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:54 =#</span>
                 t = (SparseConnectivityTracer).tracer(d)
-                <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:57 =#</span>
+                <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:55 =#</span>
                 is_der1_zero = (SparseConnectivityTracer).is_der1_zero_local(NNlib.relu, x)
-                <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:58 =#</span>
-                t_out = (SparseConnectivityTracer).gradient_tracer_1_to_1(t, is_der1_zero)
-                <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:59 =#</span>
+                <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:56 =#</span>
+                t_out = <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:56 =#</span> @noinline((SparseConnectivityTracer).gradient_tracer_1_to_1(t, is_der1_zero))
+                <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/gradient_tracer.jl:57 =#</span>
                 return (SparseConnectivityTracer).Dual(p_out, t_out)
             end
         end
@@ -48,7 +48,7 @@ SCT.is_der1_zero_local(::typeof(relu), x) = x &lt; 0</code></pre><div class="adm
             function NNlib.relu(t::(SparseConnectivityTracer).HessianTracer)
                 <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/hessian_tracer.jl:67 =#</span>
                 <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/hessian_tracer.jl:68 =#</span>
-                return (SparseConnectivityTracer).hessian_tracer_1_to_1(t, false, true)
+                return <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/hessian_tracer.jl:68 =#</span> @noinline((SparseConnectivityTracer).hessian_tracer_1_to_1(t, false, true))
             end
         end
         begin
@@ -66,7 +66,7 @@ SCT.is_der1_zero_local(::typeof(relu), x) = x &lt; 0</code></pre><div class="adm
                 <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/hessian_tracer.jl:87 =#</span>
                 is_der2_zero = (SparseConnectivityTracer).is_der2_zero_local(NNlib.relu, x)
                 <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/hessian_tracer.jl:88 =#</span>
-                t_out = (SparseConnectivityTracer).hessian_tracer_1_to_1(t, is_der1_zero, is_der2_zero)
+                t_out = <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/hessian_tracer.jl:88 =#</span> @noinline((SparseConnectivityTracer).hessian_tracer_1_to_1(t, is_der1_zero, is_der2_zero))
                 <span class="sgr90">#= /home/runner/work/SparseConnectivityTracer.jl/SparseConnectivityTracer.jl/src/overloads/hessian_tracer.jl:89 =#</span>
                 return (SparseConnectivityTracer).Dual(p_out, t_out)
             end
@@ -77,4 +77,4 @@ mermaid.initialize({
     startOnLoad: true,
     theme: "neutral"
 });
-</script></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../how_it_works/">« How SparseConnectivityTracer works</a><a class="docs-footer-nextpage" href="../api/">Internals Reference »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.7.0 on <span class="colophon-date" title="Wednesday 9 October 2024 15:10">Wednesday 9 October 2024</span>. Using Julia version 1.11.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+</script></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../how_it_works/">« How SparseConnectivityTracer works</a><a class="docs-footer-nextpage" href="../api/">Internals Reference »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.7.0 on <span class="colophon-date" title="Wednesday 9 October 2024 16:05">Wednesday 9 October 2024</span>. Using Julia version 1.11.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
