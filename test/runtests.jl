@@ -18,11 +18,9 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
 
 @testset verbose = true "SparseConnectivityTracer.jl" begin
     if GROUP in ("Core", "All")
-        if VERSION >= v"1.10"
-            @testset verbose = true "Linting" begin
-                @info "Testing linting..."
-                include("linting.jl")
-            end
+        @testset verbose = true "Linting" begin
+            @info "Testing linting..."
+            include("linting.jl")
         end
     end
     if GROUP in ("Core", "All")
@@ -78,12 +76,10 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
                 end
             end
             # Some extensions are only loaded in newer Julia releases
-            if VERSION >= v"1.10"
-                for ext in (:DataInterpolations,)
-                    @testset "$ext" begin
-                        @info "...$ext"
-                        include("ext/test_$ext.jl")
-                    end
+            for ext in (:DataInterpolations,)
+                @testset "$ext" begin
+                    @info "...$ext"
+                    include("ext/test_$ext.jl")
                 end
             end
         end

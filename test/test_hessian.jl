@@ -224,28 +224,26 @@ D = Dual{Int,T}
         end
 
         @testset "ifelse and comparisons" begin
-            if VERSION >= v"1.8"
-                @test H(x -> ifelse(x[1], x[1]^x[2], x[3] * x[4]), rand(4)) == [
-                    1  1  0  0
-                    1  1  0  0
-                    0  0  0  1
-                    0  0  1  0
-                ]
+            @test H(x -> ifelse(x[1], x[1]^x[2], x[3] * x[4]), rand(4)) == [
+                1  1  0  0
+                1  1  0  0
+                0  0  0  1
+                0  0  1  0
+            ]
 
-                @test H(x -> ifelse(x[1], x[1]^x[2], 1.0), rand(4)) == [
-                    1  1  0  0
-                    1  1  0  0
-                    0  0  0  0
-                    0  0  0  0
-                ]
+            @test H(x -> ifelse(x[1], x[1]^x[2], 1.0), rand(4)) == [
+                1  1  0  0
+                1  1  0  0
+                0  0  0  0
+                0  0  0  0
+            ]
 
-                @test H(x -> ifelse(x[1], 1.0, x[3] * x[4]), rand(4)) == [
-                    0  0  0  0
-                    0  0  0  0
-                    0  0  0  1
-                    0  0  1  0
-                ]
-            end
+            @test H(x -> ifelse(x[1], 1.0, x[3] * x[4]), rand(4)) == [
+                0  0  0  0
+                0  0  0  0
+                0  0  0  1
+                0  0  1  0
+            ]
 
             function f_ampgo07(x)
                 return (x[1] <= 0) * convert(eltype(x), Inf) +
