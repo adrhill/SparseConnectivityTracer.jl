@@ -2,61 +2,32 @@
 # Parametric activation functions with two or more arguments are ignored.
 module SparseConnectivityTracerNNlibExt
 
-if isdefined(Base, :get_extension)
-    import SparseConnectivityTracer as SCT
-    using NNlib:
-        NNlib,
-        celu,
-        elu,
-        gelu,
-        hardswish,
-        hardtanh,
-        hardσ,
-        leakyrelu,
-        lisht,
-        logcosh,
-        logσ,
-        mish,
-        relu,
-        relu6,
-        selu,
-        sigmoid_fast,
-        softplus,
-        softshrink,
-        softsign,
-        swish,
-        tanh_fast,
-        tanhshrink,
-        trelu,
-        σ
-else
-    import ..SparseConnectivityTracer as SCT
-    using ..NNlib:
-        NNlib,
-        celu,
-        elu,
-        gelu,
-        hardswish,
-        hardtanh,
-        hardσ,
-        leakyrelu,
-        lisht,
-        logcosh,
-        logσ,
-        mish,
-        relu,
-        relu6,
-        selu,
-        sigmoid_fast,
-        softplus,
-        softshrink,
-        softsign,
-        swish,
-        tanh_fast,
-        tanhshrink,
-        trelu,
-        σ
-end
+import SparseConnectivityTracer as SCT
+using NNlib:
+    NNlib,
+    celu,
+    elu,
+    gelu,
+    hardswish,
+    hardtanh,
+    hardσ,
+    leakyrelu,
+    lisht,
+    logcosh,
+    logσ,
+    mish,
+    relu,
+    relu6,
+    selu,
+    sigmoid_fast,
+    softplus,
+    softshrink,
+    softsign,
+    swish,
+    tanh_fast,
+    tanhshrink,
+    trelu,
+    σ
 
 ## 1-to-1
 

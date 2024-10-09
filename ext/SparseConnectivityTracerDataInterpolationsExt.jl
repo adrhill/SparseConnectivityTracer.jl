@@ -2,43 +2,23 @@
 # copy another, less complicated one!
 module SparseConnectivityTracerDataInterpolationsExt
 
-if isdefined(Base, :get_extension)
-    using SparseConnectivityTracer: AbstractTracer, Dual, primal, tracer
-    using SparseConnectivityTracer: GradientTracer, gradient_tracer_1_to_1
-    using SparseConnectivityTracer: HessianTracer, hessian_tracer_1_to_1
-    using FillArrays: Fill # from FillArrays.jl
-    import DataInterpolations:
-        LinearInterpolation,
-        QuadraticInterpolation,
-        LagrangeInterpolation,
-        AkimaInterpolation,
-        ConstantInterpolation,
-        QuadraticSpline,
-        CubicSpline,
-        BSplineInterpolation,
-        BSplineApprox,
-        CubicHermiteSpline,
-        # PCHIPInterpolation,
-        QuinticHermiteSpline
-else
-    using ..SparseConnectivityTracer: AbstractTracer, Dual, primal, tracer
-    using ..SparseConnectivityTracer: GradientTracer, gradient_tracer_1_to_1
-    using ..SparseConnectivityTracer: HessianTracer, hessian_tracer_1_to_1
-    using ..FillArrays: Fill # from FillArrays.jl
-    import ..DataInterpolations:
-        LinearInterpolation,
-        QuadraticInterpolation,
-        LagrangeInterpolation,
-        AkimaInterpolation,
-        ConstantInterpolation,
-        QuadraticSpline,
-        CubicSpline,
-        BSplineInterpolation,
-        BSplineApprox,
-        CubicHermiteSpline,
-        # PCHIPInterpolation,
-        QuinticHermiteSpline
-end
+using SparseConnectivityTracer: AbstractTracer, Dual, primal, tracer
+using SparseConnectivityTracer: GradientTracer, gradient_tracer_1_to_1
+using SparseConnectivityTracer: HessianTracer, hessian_tracer_1_to_1
+using FillArrays: Fill # from FillArrays.jl
+import DataInterpolations:
+    LinearInterpolation,
+    QuadraticInterpolation,
+    LagrangeInterpolation,
+    AkimaInterpolation,
+    ConstantInterpolation,
+    QuadraticSpline,
+    CubicSpline,
+    BSplineInterpolation,
+    BSplineApprox,
+    CubicHermiteSpline,
+    # PCHIPInterpolation,
+    QuinticHermiteSpline
 
 #========================#
 # General interpolations #

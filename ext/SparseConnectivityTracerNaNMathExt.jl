@@ -1,12 +1,7 @@
 module SparseConnectivityTracerNaNMathExt
 
-if isdefined(Base, :get_extension)
-    import SparseConnectivityTracer as SCT
-    using NaNMath: NaNMath
-else
-    import ..SparseConnectivityTracer as SCT
-    using ..NaNMath: NaNMath
-end
+import SparseConnectivityTracer as SCT
+using NaNMath: NaNMath
 
 ## 1-to-1
 

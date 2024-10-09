@@ -23,7 +23,6 @@ end
         SparseConnectivityTracer;
         ambiguities=false,
         deps_compat=(check_extras=false,),
-        stale_deps=(ignore=[:Requires],),
         persistent_tasks=false,
     )
 end
