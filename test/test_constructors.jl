@@ -1,6 +1,6 @@
 # Test construction and conversions of internal tracer types
 using SparseConnectivityTracer: AbstractTracer, GradientTracer, HessianTracer, Dual
-using SparseConnectivityTracer: primal, tracer, isemptytracer, myempty, tracer_name
+using SparseConnectivityTracer: primal, tracer, isemptytracer, myempty
 using SparseConnectivityTracer: IndexSetGradientPattern
 using Test
 
