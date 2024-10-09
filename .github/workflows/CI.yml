@@ -30,11 +30,6 @@ jobs:
           - Core
           - Benchmarks
           - NLPModels
-        exclude: # TODO: remove once LTS is not 1.6
-          - version: 'lts'
-            group: NLPModels
-          - version: 'lts'
-            group: Benchmarks
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
