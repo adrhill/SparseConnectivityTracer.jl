@@ -39,7 +39,6 @@ end
 
 GradientTracer{P}(::Real) where {P} = myempty(GradientTracer{P})
 GradientTracer{P}(t::GradientTracer{P}) where {P} = t
-GradientTracer(t::GradientTracer) = t
 
 isemptytracer(t::GradientTracer) = t.isempty
 pattern(t::GradientTracer) = t.pattern
@@ -70,7 +69,6 @@ end
 
 HessianTracer{P}(::Real) where {P} = myempty(HessianTracer{P})
 HessianTracer{P}(t::HessianTracer{P}) where {P} = t
-HessianTracer(t::HessianTracer) = t
 
 isemptytracer(t::HessianTracer) = t.isempty
 pattern(t::HessianTracer) = t.pattern
@@ -103,11 +101,7 @@ end
 
 primal(d::Dual) = d.primal
 tracer(d::Dual) = d.tracer
-
-gradient(d::Dual{P,T}) where {P,T<:GradientTracer} = gradient(tracer(d))
-gradient(d::Dual{P,T}) where {P,T<:HessianTracer}  = gradient(tracer(d))
-hessian(d::Dual{P,T}) where {P,T<:HessianTracer}   = hessian(tracer(d))
-isemptytracer(d::Dual)                             = isemptytracer(tracer(d))
+isemptytracer(d::Dual) = isemptytracer(tracer(d))
 
 Dual{P,T}(d::Dual{P,T}) where {P<:Real,T<:AbstractTracer} = d
 Dual(primal::P, tracer::T) where {P,T} = Dual{P,T}(primal, tracer)
@@ -121,8 +115,6 @@ end
 #===========#
 
 shared(::Type{T}) where {P,T<:HessianTracer{P}} = shared(P)
-
-myempty(::T) where {T<:AbstractTracer} = myempty(T)
 
 myempty(::Type{GradientTracer{P}}) where {P} = GradientTracer{P}(myempty(P), true)
 myempty(::Type{HessianTracer{P}}) where {P}  = HessianTracer{P}(myempty(P), true)
