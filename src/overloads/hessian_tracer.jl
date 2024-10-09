@@ -5,7 +5,7 @@ SCT = SparseConnectivityTracer
 # 𝟙[∇γ]  = 𝟙[∂φ]⋅𝟙[∇α]
 # 𝟙[∇²γ] = 𝟙[∂φ]⋅𝟙[∇²α] ∨ 𝟙[∂²φ]⋅(𝟙[∇α] ∨ 𝟙[∇α]ᵀ)
 
-@noinline function hessian_tracer_1_to_1(
+function hessian_tracer_1_to_1(
     t::T, is_der1_zero::Bool, is_der2_zero::Bool
 ) where {P<:AbstractHessianPattern,T<:HessianTracer{P}}
     if isemptytracer(t) # TODO: add test
@@ -65,7 +65,7 @@ function generate_code_hessian_1_to_1(M::Symbol, f::Function)
     expr_hessiantracer = quote
         ## HessianTracer
         function $M.$fname(t::$SCT.HessianTracer)
-            return $SCT.hessian_tracer_1_to_1(t, $is_der1_zero_g, $is_der2_zero_g)
+            return @noinline $SCT.hessian_tracer_1_to_1(t, $is_der1_zero_g, $is_der2_zero_g)
         end
     end
 
@@ -85,7 +85,7 @@ function generate_code_hessian_1_to_1(M::Symbol, f::Function)
                 t = $SCT.tracer(d)
                 is_der1_zero = $SCT.is_der1_zero_local($M.$fname, x)
                 is_der2_zero = $SCT.is_der2_zero_local($M.$fname, x)
-                t_out = $SCT.hessian_tracer_1_to_1(t, is_der1_zero, is_der2_zero)
+                t_out = @noinline $SCT.hessian_tracer_1_to_1(t, is_der1_zero, is_der2_zero)
                 return $SCT.Dual(p_out, t_out)
             end
         end
@@ -96,7 +96,7 @@ end
 
 ## 2-to-1
 
-@noinline function hessian_tracer_2_to_1(
+function hessian_tracer_2_to_1(
     tx::T,
     ty::T,
     is_der1_arg1_zero::Bool,
@@ -189,7 +189,7 @@ function generate_code_hessian_2_to_1(
 
     expr_tracer_tracer = quote
         function $M.$fname(tx::T, ty::T) where {T<:$SCT.HessianTracer}
-            return $SCT.hessian_tracer_2_to_1(
+            return @noinline $SCT.hessian_tracer_2_to_1(
                 tx,
                 ty,
                 $is_der1_arg1_zero_g,
@@ -232,7 +232,7 @@ function generate_code_hessian_2_to_1(
                     is_der1_arg2_zero = $SCT.is_der1_arg2_zero_local($M.$fname, x, y)
                     is_der2_arg2_zero = $SCT.is_der2_arg2_zero_local($M.$fname, x, y)
                     is_der_cross_zero = $SCT.is_der_cross_zero_local($M.$fname, x, y)
-                    t_out = $SCT.hessian_tracer_2_to_1(
+                    t_out = @noinline $SCT.hessian_tracer_2_to_1(
                         tx,
                         ty,
                         is_der1_arg1_zero,
@@ -263,12 +263,16 @@ function generate_code_hessian_2_to_1_typed(
 
     expr_tracer_type = quote
         function $M.$fname(tx::$SCT.HessianTracer, y::$Z)
-            return $SCT.hessian_tracer_1_to_1(tx, $is_der1_arg1_zero_g, $is_der2_arg1_zero_g)
+            return @noinline $SCT.hessian_tracer_1_to_1(
+                tx, $is_der1_arg1_zero_g, $is_der2_arg1_zero_g
+            )
         end
     end
     expr_type_tracer = quote
         function $M.$fname(x::$Z, ty::$SCT.HessianTracer)
-            return $SCT.hessian_tracer_1_to_1(ty, $is_der1_arg2_zero_g, $is_der2_arg2_zero_g)
+            return @noinline $SCT.hessian_tracer_1_to_1(
+                ty, $is_der1_arg2_zero_g, $is_der2_arg2_zero_g
+            )
         end
     end
 
@@ -288,7 +292,9 @@ function generate_code_hessian_2_to_1_typed(
                 tx = $SCT.tracer(dx)
                 is_der1_arg1_zero = $SCT.is_der1_arg1_zero_local($M.$fname, x, y)
                 is_der2_arg1_zero = $SCT.is_der2_arg1_zero_local($M.$fname, x, y)
-                t_out = $SCT.hessian_tracer_1_to_1(tx, is_der1_arg1_zero, is_der2_arg1_zero)
+                t_out = @noinline $SCT.hessian_tracer_1_to_1(
+                    tx, is_der1_arg1_zero, is_der2_arg1_zero
+                )
                 return $SCT.Dual(p_out, t_out)
             end
         end
@@ -309,7 +315,9 @@ function generate_code_hessian_2_to_1_typed(
                 ty = $SCT.tracer(dy)
                 is_der1_arg2_zero = $SCT.is_der1_arg2_zero_local($M.$fname, x, y)
                 is_der2_arg2_zero = $SCT.is_der2_arg2_zero_local($M.$fname, x, y)
-                t_out = $SCT.hessian_tracer_1_to_1(ty, is_der1_arg2_zero, is_der2_arg2_zero)
+                t_out = @noinline $SCT.hessian_tracer_1_to_1(
+                    ty, is_der1_arg2_zero, is_der2_arg2_zero
+                )
                 return $SCT.Dual(p_out, t_out)
             end
         end
@@ -319,7 +327,7 @@ end
 
 ## 1-to-2
 
-@noinline function hessian_tracer_1_to_2(
+function hessian_tracer_1_to_2(
     t::T,
     is_der1_out1_zero::Bool,
     is_der2_out1_zero::Bool,
@@ -344,7 +352,7 @@ function generate_code_hessian_1_to_2(M::Symbol, f::Function)
 
     expr_hessiantracer = quote
         function $M.$fname(t::$SCT.HessianTracer)
-            return $SCT.hessian_tracer_1_to_2(
+            return @noinline $SCT.hessian_tracer_1_to_2(
                 t,
                 $is_der1_out1_zero_g,
                 $is_der2_out1_zero_g,
@@ -375,7 +383,7 @@ function generate_code_hessian_1_to_2(M::Symbol, f::Function)
                     is_der2_out1_zero = $SCT.is_der2_out1_zero_local($M.$fname, x)
                     is_der1_out2_zero = $SCT.is_der1_out2_zero_local($M.$fname, x)
                     is_der2_out2_zero = $SCT.is_der2_out2_zero_local($M.$fname, x)
-                    t_out1, t_out2 = $SCT.hessian_tracer_1_to_2(
+                    t_out1, t_out2 = @noinline $SCT.hessian_tracer_1_to_2(
                         d,
                         is_der1_out1_zero,
                         is_der2_out1_zero,

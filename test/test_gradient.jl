@@ -2,7 +2,6 @@ using SparseConnectivityTracer
 using SparseConnectivityTracer: GradientTracer, Dual, MissingPrimalError
 using Test
 
-using Compat: Returns
 using Random: rand, GLOBAL_RNG
 using LinearAlgebra: det, dot, logdet
 

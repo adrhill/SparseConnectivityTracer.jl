@@ -2,9 +2,7 @@ SCT = SparseConnectivityTracer
 
 ## 1-to-1
 
-@noinline function gradient_tracer_1_to_1(
-    t::T, is_der1_zero::Bool
-) where {T<:GradientTracer}
+function gradient_tracer_1_to_1(t::T, is_der1_zero::Bool) where {T<:GradientTracer}
     if is_der1_zero && !isemptytracer(t)
         return myempty(T)
     else
@@ -36,7 +34,7 @@ function generate_code_gradient_1_to_1(M::Symbol, f::Function)
 
     expr_gradienttracer = quote
         function $M.$fname(t::$SCT.GradientTracer)
-            return $SCT.gradient_tracer_1_to_1(t, $is_der1_zero_g)
+            return @noinline $SCT.gradient_tracer_1_to_1(t, $is_der1_zero_g)
         end
     end
 
@@ -55,7 +53,7 @@ function generate_code_gradient_1_to_1(M::Symbol, f::Function)
 
                 t = $SCT.tracer(d)
                 is_der1_zero = $SCT.is_der1_zero_local($M.$fname, x)
-                t_out = $SCT.gradient_tracer_1_to_1(t, is_der1_zero)
+                t_out = @noinline $SCT.gradient_tracer_1_to_1(t, is_der1_zero)
                 return $SCT.Dual(p_out, t_out)
             end
         end
@@ -65,7 +63,7 @@ end
 
 ## 2-to-1
 
-@noinline function gradient_tracer_2_to_1(
+function gradient_tracer_2_to_1(
     tx::T, ty::T, is_der1_arg1_zero::Bool, is_der1_arg2_zero::Bool
 ) where {T<:GradientTracer}
     # TODO: add tests for isempty
@@ -116,7 +114,7 @@ function generate_code_gradient_2_to_1(M::Symbol, f::Function)
 
     expr_tracer_tracer = quote
         function $M.$fname(tx::T, ty::T) where {T<:$SCT.GradientTracer}
-            return $SCT.gradient_tracer_2_to_1(
+            return @noinline $SCT.gradient_tracer_2_to_1(
                 tx, ty, $is_der1_arg1_zero_g, $is_der1_arg2_zero_g
             )
         end
@@ -141,7 +139,7 @@ function generate_code_gradient_2_to_1(M::Symbol, f::Function)
                 ty = $SCT.tracer(dy)
                 is_der1_arg1_zero = $SCT.is_der1_arg1_zero_local($M.$fname, x, y)
                 is_der1_arg2_zero = $SCT.is_der1_arg2_zero_local($M.$fname, x, y)
-                t_out = $SCT.gradient_tracer_2_to_1(
+                t_out = @noinline $SCT.gradient_tracer_2_to_1(
                     tx, ty, is_der1_arg1_zero, is_der1_arg2_zero
                 )
                 return $SCT.Dual(p_out, t_out)
@@ -164,12 +162,12 @@ function generate_code_gradient_2_to_1_typed(
 
     expr_tracer_type = quote
         function $M.$fname(tx::$SCT.GradientTracer, ::$Z)
-            return $SCT.gradient_tracer_1_to_1(tx, $is_der1_arg1_zero_g)
+            return @noinline $SCT.gradient_tracer_1_to_1(tx, $is_der1_arg1_zero_g)
         end
     end
     expr_type_tracer = quote
         function $M.$fname(::$Z, ty::$SCT.GradientTracer)
-            return $SCT.gradient_tracer_1_to_1(ty, $is_der1_arg2_zero_g)
+            return @noinline $SCT.gradient_tracer_1_to_1(ty, $is_der1_arg2_zero_g)
         end
     end
 
@@ -188,7 +186,7 @@ function generate_code_gradient_2_to_1_typed(
 
                 tx = $SCT.tracer(dx)
                 is_der1_arg1_zero = $SCT.is_der1_arg1_zero_local($M.$fname, x, y)
-                t_out = $SCT.gradient_tracer_1_to_1(tx, is_der1_arg1_zero)
+                t_out = @noinline $SCT.gradient_tracer_1_to_1(tx, is_der1_arg1_zero)
                 return $SCT.Dual(p_out, t_out)
             end
         end
@@ -208,7 +206,7 @@ function generate_code_gradient_2_to_1_typed(
 
                 ty = $SCT.tracer(dy)
                 is_der1_arg2_zero = $SCT.is_der1_arg2_zero_local($M.$fname, x, y)
-                t_out = $SCT.gradient_tracer_1_to_1(ty, is_der1_arg2_zero)
+                t_out = @noinline $SCT.gradient_tracer_1_to_1(ty, is_der1_arg2_zero)
                 return $SCT.Dual(p_out, t_out)
             end
         end
@@ -218,7 +216,7 @@ end
 
 ## 1-to-2
 
-@noinline function gradient_tracer_1_to_2(
+function gradient_tracer_1_to_2(
     t::T, is_der1_out1_zero::Bool, is_der1_out2_zero::Bool
 ) where {T<:GradientTracer}
     if isemptytracer(t) # TODO: add test
@@ -237,7 +235,9 @@ function generate_code_gradient_1_to_2(M::Symbol, f::Function)
 
     expr_gradienttracer = quote
         function $M.$fname(t::$SCT.GradientTracer)
-            return $SCT.gradient_tracer_1_to_2(t, $is_der1_out1_zero_g, $is_der1_out2_zero_g)
+            return @noinline $SCT.gradient_tracer_1_to_2(
+                t, $is_der1_out1_zero_g, $is_der1_out2_zero_g
+            )
         end
     end
 
@@ -257,7 +257,7 @@ function generate_code_gradient_1_to_2(M::Symbol, f::Function)
                 t = $SCT.tracer(d)
                 is_der1_out2_zero = $SCT.is_der1_out2_zero_local($M.$fname, x)
                 is_der1_out1_zero = $SCT.is_der1_out1_zero_local($M.$fname, x)
-                t_out1, t_out2 = $SCT.gradient_tracer_1_to_2(
+                t_out1, t_out2 = @noinline $SCT.gradient_tracer_1_to_2(
                     t, is_der1_out1_zero, is_der1_out2_zero
                 )
                 return ($SCT.Dual(p_out1, t_out1), $SCT.Dual(p_out2, t_out2))  # TODO: this was wrong, add test
