@@ -2,7 +2,6 @@ using ADTypes
 using ADTypes: AbstractSparsityDetector
 using ReferenceTests
 using SparseConnectivityTracer
-using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using SparseConnectivityTracerBenchmarks.ODE: Brusselator!
 using Test
 

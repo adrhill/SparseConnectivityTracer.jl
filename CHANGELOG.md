@@ -3,6 +3,7 @@
 ## Version `v0.6.8`
 
 * ![Feature][badge-feature] Support `clamp` and `clamp!` ([#208])
+* ![Maintenance][badge-maintenance] Remove internal set type `DuplicateVector` ([#209])
 
 ## Version `v0.6.7`
 
@@ -84,6 +85,7 @@
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#209]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/209
 [#208]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/208
 [#205]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/205
 [#204]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/204

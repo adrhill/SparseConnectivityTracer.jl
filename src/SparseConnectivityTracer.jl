@@ -11,7 +11,6 @@ using FillArrays: Fill
 
 using DocStringExtensions: DocStringExtensions, TYPEDEF, TYPEDFIELDS
 
-include("settypes/duplicatevector.jl")
 include("settypes/recursiveset.jl")
 include("settypes/sortedvector.jl")
 
