@@ -330,6 +330,41 @@ S = BitSet
 P = IndexSetGradientPattern{Int,S}
 TG = GradientTracer{P}
 
+@testset "clamp!" begin
+    t1 = TG(P(S(1)))
+    t2 = TG(P(S(2)))
+    t3 = TG(P(S(3)))
+    t4 = TG(P(S(4)))
+    A = [t1 t2; t3 t4]
+
+    t_lo = TG(P(S(5)))
+    t_hi = TG(P(S(6)))
+
+    out = clamp!(A, 0.0, 1.0)
+    @test SCT.gradient(out[1, 1]) == S(1)
+    @test SCT.gradient(out[1, 2]) == S(2)
+    @test SCT.gradient(out[2, 1]) == S(3)
+    @test SCT.gradient(out[2, 2]) == S(4)
+
+    out = clamp!(A, t_lo, 1.0)
+    @test SCT.gradient(out[1, 1]) == S([1, 5])
+    @test SCT.gradient(out[1, 2]) == S([2, 5])
+    @test SCT.gradient(out[2, 1]) == S([3, 5])
+    @test SCT.gradient(out[2, 2]) == S([4, 5])
+
+    out = clamp!(A, 0.0, t_hi)
+    @test SCT.gradient(out[1, 1]) == S([1, 6])
+    @test SCT.gradient(out[1, 2]) == S([2, 6])
+    @test SCT.gradient(out[2, 1]) == S([3, 6])
+    @test SCT.gradient(out[2, 2]) == S([4, 6])
+
+    out = clamp!(A, t_lo, t_hi)
+    @test SCT.gradient(out[1, 1]) == S([1, 5, 6])
+    @test SCT.gradient(out[1, 2]) == S([2, 5, 6])
+    @test SCT.gradient(out[2, 1]) == S([3, 5, 6])
+    @test SCT.gradient(out[2, 2]) == S([4, 5, 6])
+end
+
 @testset "Matrix division" begin
     t1 = TG(P(S([1, 3, 4])))
     t2 = TG(P(S([2, 4])))
