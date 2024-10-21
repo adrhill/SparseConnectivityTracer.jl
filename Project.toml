@@ -27,7 +27,7 @@ SparseConnectivityTracerSpecialFunctionsExt = "SpecialFunctions"
 
 [compat]
 ADTypes = "1"
-DataInterpolations = "6.4.2"
+DataInterpolations = "6.5"
 DocStringExtensions = "0.9"
 FillArrays = "1"
 LinearAlgebra = "<0.0.1, 1"
