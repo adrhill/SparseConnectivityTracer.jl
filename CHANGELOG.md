@@ -1,5 +1,9 @@
 # SparseConnectivityTracer.jl
 
+## Version `v0.6.8`
+
+* ![Feature][badge-feature] Support `clamp` and `clamp!` ([#208])
+
 ## Version `v0.6.7`
 
 * ![Enhancement][badge-enhancement] Drop compatibility with Julia <1.10 to improve tracer performance ([#204], [#205])
@@ -80,6 +84,7 @@
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#208]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/208
 [#205]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/205
 [#204]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/204
 [#202]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/202
