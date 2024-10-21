@@ -6,6 +6,7 @@ using SparseConnectivityTracer: AbstractTracer, Dual, primal, tracer
 using SparseConnectivityTracer: GradientTracer, gradient_tracer_1_to_1
 using SparseConnectivityTracer: HessianTracer, hessian_tracer_1_to_1
 using FillArrays: Fill # from FillArrays.jl
+import DataInterpolations: AbstractInterpolation
 import DataInterpolations:
     LinearInterpolation,
     QuadraticInterpolation,
@@ -20,42 +21,71 @@ import DataInterpolations:
     # PCHIPInterpolation,
     QuinticHermiteSpline
 
-#========================#
-# General interpolations #
-#========================#
+#===========#
+# Utilities #
+#===========#
+
+function _sct_interpolate(
+    ::AbstractInterpolation{T,N},
+    uType::Type{V},
+    t::GradientTracer,
+    is_der_1_zero,
+    is_der_2_zero,
+) where {T,N,V<:AbstractVector}
+    return gradient_tracer_1_to_1(t, is_der_1_zero)
+end
+function _sct_interpolate(
+    ::AbstractInterpolation{T,N},
+    uType::Type{V},
+    t::HessianTracer,
+    is_der_1_zero,
+    is_der_2_zero,
+) where {T,N,V<:AbstractVector}
+    return hessian_tracer_1_to_1(t, is_der_1_zero, is_der_2_zero)
+end
+function _sct_interpolate(
+    ::AbstractInterpolation{T,N},
+    uType::Type{M},
+    t::GradientTracer,
+    is_der_1_zero,
+    is_der_2_zero,
+) where {T,N,M<:AbstractMatrix}
+    t = gradient_tracer_1_to_1(t, is_der_1_zero)
+    return Fill(t, N)
+end
+function _sct_interpolate(
+    ::AbstractInterpolation{T,N},
+    uType::Type{M},
+    t::HessianTracer,
+    is_der_1_zero,
+    is_der_2_zero,
+) where {T,N,M<:AbstractMatrix}
+    t = hessian_tracer_1_to_1(t, is_der_1_zero, is_der_2_zero)
+    return Fill(t, N)
+end
+
+#===========#
+# Overloads #
+#===========#
 
 # We assume that with the exception of ConstantInterpolation and LinearInterpolation,
 # all interpolations have a non-zero second derivative at some point in the input domain.
 
-for I in (
-    :QuadraticInterpolation,
-    :LagrangeInterpolation,
-    :AkimaInterpolation,
-    :QuadraticSpline,
-    :CubicSpline,
-    :BSplineInterpolation,
-    :BSplineApprox,
-    :CubicHermiteSpline,
-    :QuinticHermiteSpline,
+for (I, is_der1_zero, is_der2_zero) in (
+    (:ConstantInterpolation, true, true),
+    (:LinearInterpolation, false, true),
+    (:QuadraticInterpolation, false, false),
+    (:LagrangeInterpolation, false, false),
+    (:AkimaInterpolation, false, false),
+    (:QuadraticSpline, false, false),
+    (:CubicSpline, false, false),
+    (:BSplineInterpolation, false, false),
+    (:BSplineApprox, false, false),
+    (:CubicHermiteSpline, false, false),
+    (:QuinticHermiteSpline, false, false),
 )
-    # 1D Interpolations (uType<:AbstractVector)
-    @eval function (interp::$(I){uType})(t::GradientTracer) where {uType<:AbstractVector}
-        return gradient_tracer_1_to_1(t, false)
-    end
-    @eval function (interp::$(I){uType})(t::HessianTracer) where {uType<:AbstractVector}
-        return hessian_tracer_1_to_1(t, false, false)
-    end
-
-    # ND Interpolations (uType<:AbstractMatrix)
-    @eval function (interp::$(I){uType})(t::GradientTracer) where {uType<:AbstractMatrix}
-        t = gradient_tracer_1_to_1(t, false)
-        nstates = size(interp.u, 1)
-        return Fill(t, nstates)
-    end
-    @eval function (interp::$(I){uType})(t::HessianTracer) where {uType<:AbstractMatrix}
-        t = hessian_tracer_1_to_1(t, false, false)
-        nstates = size(interp.u, 1)
-        return Fill(t, nstates)
+    @eval function (interp::$(I){uType})(t::AbstractTracer) where {uType}
+        return _sct_interpolate(interp, uType, t, $is_der1_zero, $is_der2_zero)
     end
 end
 
@@ -78,70 +108,6 @@ for I in (
         t = interp(tracer(d))
         return Dual.(p, t)
     end
-end
-
-#=======================#
-# ConstantInterpolation #
-#=======================#
-
-# 1D Interpolations (uType<:AbstractVector)
-function (interp::ConstantInterpolation{uType})(
-    t::GradientTracer
-) where {uType<:AbstractVector}
-    return gradient_tracer_1_to_1(t, true)
-end
-function (interp::ConstantInterpolation{uType})(
-    t::HessianTracer
-) where {uType<:AbstractVector}
-    return hessian_tracer_1_to_1(t, true, true)
-end
-
-# ND Interpolations (uType<:AbstractMatrix)
-function (interp::ConstantInterpolation{uType})(
-    t::GradientTracer
-) where {uType<:AbstractMatrix}
-    t = gradient_tracer_1_to_1(t, true)
-    nstates = size(interp.u, 1)
-    return Fill(t, nstates)
-end
-function (interp::ConstantInterpolation{uType})(
-    t::HessianTracer
-) where {uType<:AbstractMatrix}
-    t = hessian_tracer_1_to_1(t, true, true)
-    nstates = size(interp.u, 1)
-    return Fill(t, nstates)
-end
-
-#=====================#
-# LinearInterpolation #
-#=====================#
-
-# 1D Interpolations (uType<:AbstractVector)
-function (interp::LinearInterpolation{uType})(
-    t::GradientTracer
-) where {uType<:AbstractVector}
-    return gradient_tracer_1_to_1(t, false)
-end
-function (interp::LinearInterpolation{uType})(
-    t::HessianTracer
-) where {uType<:AbstractVector}
-    return hessian_tracer_1_to_1(t, false, true)
-end
-
-# ND Interpolations (uType<:AbstractMatrix)
-function (interp::LinearInterpolation{uType})(
-    t::GradientTracer
-) where {uType<:AbstractMatrix}
-    t = gradient_tracer_1_to_1(t, false)
-    nstates = size(interp.u, 1)
-    return Fill(t, nstates)
-end
-function (interp::LinearInterpolation{uType})(
-    t::HessianTracer
-) where {uType<:AbstractMatrix}
-    t = hessian_tracer_1_to_1(t, false, true)
-    nstates = size(interp.u, 1)
-    return Fill(t, nstates)
 end
 
 end # module SparseConnectivityTracerDataInterpolationsExt
