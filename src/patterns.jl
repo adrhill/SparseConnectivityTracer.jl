@@ -117,7 +117,7 @@ function union_product!(
 end
 
 # Some custom set types don't support `push!`
-for S in (:DuplicateVector, :SortedVector, :RecursiveSet)
+for S in (:SortedVector, :RecursiveSet)
     @eval function union_product!(
         hessian::$S{Tuple{I,I}}, gradient_x::$S{I}, gradient_y::$S{I}
     ) where {I<:Integer}

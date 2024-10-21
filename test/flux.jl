@@ -3,7 +3,6 @@ using ADTypes: AbstractSparsityDetector
 using Flux: Conv, relu
 using ReferenceTests
 using SparseConnectivityTracer
-using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
 # Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS

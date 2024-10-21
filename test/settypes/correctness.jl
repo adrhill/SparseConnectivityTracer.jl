@@ -1,10 +1,8 @@
 using SparseConnectivityTracer
-using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector, product
+using SparseConnectivityTracer: RecursiveSet, SortedVector, product
 using Test
 
-@testset "$S" for S in (
-    BitSet, Set{Int}, DuplicateVector{Int}, RecursiveSet{Int}, SortedVector{Int}
-)
+@testset "$S" for S in (BitSet, Set{Int}, RecursiveSet{Int}, SortedVector{Int})
     x = S.(1:10)
     y = (x[1] ∪ x[3]) ∪ (x[3] ∪ ((x[5] ∪ x[7]) ∪ x[1]))
 
