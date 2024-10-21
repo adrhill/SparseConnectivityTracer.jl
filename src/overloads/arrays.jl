@@ -124,7 +124,16 @@ function Base.literal_pow(::typeof(^), D::Diagonal{T}, ::Val{0}) where {T<:Abstr
 end
 
 ## clamp!
-Base.clamp!(A::AbstractArray{<:AbstractTracer}, lo, hi) = A
+Base.clamp!(A::AbstractArray{T}, lo, hi) where {T<:AbstractTracer} = A
+function Base.clamp!(A::AbstractArray{T}, lo::T, hi) where {T<:AbstractTracer}
+    return first_order_or.(A, lo)
+end
+function Base.clamp!(A::AbstractArray{T}, lo, hi::T) where {T<:AbstractTracer}
+    return first_order_or.(A, hi)
+end
+function Base.clamp!(A::AbstractArray{T}, lo::T, hi::T) where {T<:AbstractTracer}
+    return first_order_or.(A, first_order_or(lo, hi))
+end
 
 #==========================#
 # LinearAlgebra.jl on Dual #
