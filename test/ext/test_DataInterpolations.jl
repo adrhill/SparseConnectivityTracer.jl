@@ -258,7 +258,7 @@ for N in (2, 5)
     @testset "$(N)D Interpolations" begin
         @testset "$(testname(t))" for t in (
             InterpolationTest(
-                N, ConstantInterpolation(um, t); is_der1_zero=true, is_der2_zero=true
+                ConstantInterpolation(um, t); is_der1_zero=true, is_der2_zero=true
             ),
             InterpolationTest(LinearInterpolation(um, t); is_der2_zero=true),
             InterpolationTest(QuadraticInterpolation(um, t)),
