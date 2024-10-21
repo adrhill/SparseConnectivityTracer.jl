@@ -34,9 +34,9 @@ struct InterpolationTest{N,I<:AbstractInterpolation} # N = output dim. of interp
     is_der2_zero::Bool
 end
 function InterpolationTest(
-    N, interp::I; is_der1_zero=false, is_der2_zero=false
-) where {I<:AbstractInterpolation}
-    return InterpolationTest{N,I}(interp, is_der1_zero, is_der2_zero)
+    interp::I; is_der1_zero=false, is_der2_zero=false
+) where {T,N,I<:AbstractInterpolation{T,N}}
+    return InterpolationTest{only(N),I}(interp, is_der1_zero, is_der2_zero)
 end
 testname(t::InterpolationTest{N}) where {N} = "$N-dim $(typeof(t.interp))"
 
@@ -231,19 +231,19 @@ end
 @testset "1D Interpolations" begin
     @testset "$(testname(t))" for t in (
         InterpolationTest(
-            1, ConstantInterpolation(u, t); is_der1_zero=true, is_der2_zero=true
+            ConstantInterpolation(u, t); is_der1_zero=true, is_der2_zero=true
         ),
-        InterpolationTest(1, LinearInterpolation(u, t); is_der2_zero=true),
-        InterpolationTest(1, QuadraticInterpolation(u, t)),
-        InterpolationTest(1, LagrangeInterpolation(u, t)),
-        InterpolationTest(1, AkimaInterpolation(u, t)),
-        InterpolationTest(1, QuadraticSpline(u, t)),
-        InterpolationTest(1, CubicSpline(u, t)),
-        InterpolationTest(1, BSplineInterpolation(u, t, 3, :ArcLen, :Average)),
-        InterpolationTest(1, BSplineApprox(u, t, 3, 4, :ArcLen, :Average)),
-        InterpolationTest(1, PCHIPInterpolation(u, t)),
-        InterpolationTest(1, CubicHermiteSpline(du, u, t)),
-        InterpolationTest(1, QuinticHermiteSpline(ddu, du, u, t)),
+        InterpolationTest(LinearInterpolation(u, t); is_der2_zero=true),
+        InterpolationTest(QuadraticInterpolation(u, t)),
+        InterpolationTest(LagrangeInterpolation(u, t)),
+        InterpolationTest(AkimaInterpolation(u, t)),
+        InterpolationTest(QuadraticSpline(u, t)),
+        InterpolationTest(CubicSpline(u, t)),
+        InterpolationTest(BSplineInterpolation(u, t, 3, :ArcLen, :Average)),
+        InterpolationTest(BSplineApprox(u, t, 3, 4, :ArcLen, :Average)),
+        InterpolationTest(PCHIPInterpolation(u, t)),
+        InterpolationTest(CubicHermiteSpline(du, u, t)),
+        InterpolationTest(QuinticHermiteSpline(ddu, du, u, t)),
     )
         test_jacobian(t)
         test_hessian(t)
@@ -260,16 +260,16 @@ for N in (2, 5)
             InterpolationTest(
                 N, ConstantInterpolation(um, t); is_der1_zero=true, is_der2_zero=true
             ),
-            InterpolationTest(N, LinearInterpolation(um, t); is_der2_zero=true),
-            InterpolationTest(N, QuadraticInterpolation(um, t)),
-            InterpolationTest(N, LagrangeInterpolation(um, t)),
+            InterpolationTest(LinearInterpolation(um, t); is_der2_zero=true),
+            InterpolationTest(QuadraticInterpolation(um, t)),
+            InterpolationTest(LagrangeInterpolation(um, t)),
             ## The following interpolations appear to not be supported on N dimensions as of DataInterpolations v6.2.0:
-            # InterpolationTest(N, AkimaInterpolation(um, t)),
-            # InterpolationTest(N, BSplineApprox(um, t, 3, 4, :ArcLen, :Average)),
-            # InterpolationTest(N, QuadraticSpline(um, t)),
-            # InterpolationTest(N, CubicSpline(um, t)),
-            # InterpolationTest(N, BSplineInterpolation(um, t, 3, :ArcLen, :Average)),
-            # InterpolationTest(N, PCHIPInterpolation(um, t)),
+            # InterpolationTest(AkimaInterpolation(um, t)),
+            # InterpolationTest(BSplineApprox(um, t, 3, 4, :ArcLen, :Average)),
+            # InterpolationTest(QuadraticSpline(um, t)),
+            # InterpolationTest(CubicSpline(um, t)),
+            # InterpolationTest(BSplineInterpolation(um, t, 3, :ArcLen, :Average)),
+            # InterpolationTest(PCHIPInterpolation(um, t)),
         )
             test_jacobian(t)
             test_hessian(t)
