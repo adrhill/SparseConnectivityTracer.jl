@@ -69,6 +69,13 @@ J(f, x) = jacobian_sparsity(f, x, detector)
             @test J(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
         end
 
+        @testset "Three-argument operators" begin
+            @test J(x -> clamp(x, 0.0, 1.0), rand()) == [1;;]
+            @test J(x -> clamp(x[1], x[2], 1.0), rand(2)) == [1 1]
+            @test J(x -> clamp(x[1], 0.0, x[2]), rand(2)) == [1 1]
+            @test J(x -> clamp(x[1], x[2], x[3]), rand(3)) == [1 1 1]
+        end
+
         @testset "Random" begin
             @test J(x -> rand(typeof(x)), 1) ≈ [0;;]
             @test J(x -> rand(GLOBAL_RNG, typeof(x)), 1) ≈ [0;;]
@@ -217,6 +224,18 @@ end
             @test J(x -> round(Bool, x), 1.1) ≈ [0;;]
             @test J(x -> round(x, RoundNearestTiesAway), 1.1) ≈ [0;;]
             @test J(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
+        end
+
+        @testset "Three-argument operators" begin
+            @test J(x -> clamp(x, 0.0, 1.0), 0.5) == [1;;]
+            @test J(x -> clamp(x, 0.0, 1.0), -0.5) == [0;;]
+            @test J(x -> clamp(x[1], x[2], 1.0), [0.5, 0.0]) == [1 0]
+            @test J(x -> clamp(x[1], x[2], 1.0), [0.5, 0.6]) == [0 1]
+            @test J(x -> clamp(x[1], 0.0, x[2]), [0.5, 1.0]) == [1 0]
+            @test J(x -> clamp(x[1], 0.0, x[2]), [0.5, 0.4]) == [0 1]
+            @test J(x -> clamp(x[1], x[2], x[3]), [0.5, 0.0, 1.0]) == [1 0 0]
+            @test J(x -> clamp(x[1], x[2], x[3]), [0.5, 0.6, 1.0]) == [0 1 0]
+            @test J(x -> clamp(x[1], x[2], x[3]), [0.5, 0.0, 0.4]) == [0 0 1]
         end
 
         @testset "Random" begin

@@ -69,6 +69,16 @@ D = Dual{Int,T}
             @test H(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
         end
 
+        @testset "Three-argument operators" begin
+            @test H(x -> clamp(x, 0.1, 0.9), rand()) == [0;;]
+            @test H(x -> clamp(x[1], x[2], 0.9), rand(2)) == [0 0; 0 0]
+            @test H(x -> clamp(x[1], 0.1, x[2]), rand(2)) == [0 0; 0 0]
+            @test H(x -> clamp(x[1], x[2], x[3]), rand(3)) == [0 0 0; 0 0 0; 0 0 0]
+            @test H(x -> x[1] * clamp(x[1], x[2], x[3]), rand(3)) == [1 1 1; 1 0 0; 1 0 0]
+            @test H(x -> x[2] * clamp(x[1], x[2], x[3]), rand(3)) == [0 1 0; 1 1 1; 0 1 0]
+            @test H(x -> x[3] * clamp(x[1], x[2], x[3]), rand(3)) == [0 0 1; 0 0 1; 1 1 1]
+        end
+
         @testset "Random" begin
             @test H(x -> rand(typeof(x)), 1) ≈ [0;;]
             @test H(x -> rand(GLOBAL_RNG, typeof(x)), 1) ≈ [0;;]
@@ -375,6 +385,21 @@ end
             @test H(x -> round(Bool, x), 1.1) ≈ [0;;]
             @test H(x -> round(x, RoundNearestTiesAway), 1.1) ≈ [0;;]
             @test H(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
+        end
+
+        @testset "Three-argument operators" begin
+            @test H(x -> x * clamp(x, 0.0, 1.0), 0.5) == [1;;]
+            @test H(x -> x * clamp(x, 0.0, 1.0), -0.5) == [0;;]
+            @test H(x -> sum(x) * clamp(x[1], x[2], 1.0), [0.5, 0.0]) == [1 1; 1 0]
+            @test H(x -> sum(x) * clamp(x[1], x[2], 1.0), [0.5, 0.6]) == [0 1; 1 1]
+            @test H(x -> sum(x) * clamp(x[1], 0.0, x[2]), [0.5, 1.0]) == [1 1; 1 0]
+            @test H(x -> sum(x) * clamp(x[1], 0.0, x[2]), [0.5, 0.4]) == [0 1; 1 1]
+            @test H(x -> sum(x) * clamp(x[1], x[2], x[3]), [0.5, 0.0, 1.0]) ==
+                [1 1 1; 1 0 0; 1 0 0]
+            @test H(x -> sum(x) * clamp(x[1], x[2], x[3]), [0.5, 0.6, 1.0]) ==
+                [0 1 0; 1 1 1; 0 1 0]
+            @test H(x -> sum(x) * clamp(x[1], x[2], x[3]), [0.5, 0.0, 0.4]) ==
+                [0 0 1; 0 0 1; 1 1 1]
         end
 
         @testset "Random" begin
