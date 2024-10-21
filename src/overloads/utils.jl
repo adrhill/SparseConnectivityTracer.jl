@@ -1,3 +1,56 @@
+#===============#
+# Tracer unions #
+#===============#
+
+"""
+    first_order_or(tracers)
+
+Compute the most conservative elementwise OR of tracer sparsity patterns,
+excluding second-order interactions of `HessianTracer`.
+
+This is functionally equivalent to:
+```julia
+reduce(+, tracers)
+```
+"""
+function first_order_or(ts::AbstractArray{T}) where {T<:AbstractTracer}
+    # TODO: improve performance
+    return reduce(first_order_or, ts; init=myempty(T))
+end
+function first_order_or(a::T, b::T) where {T<:GradientTracer}
+    return gradient_tracer_2_to_1(a, b, false, false)
+end
+function first_order_or(a::T, b::T) where {T<:HessianTracer}
+    return hessian_tracer_2_to_1(a, b, false, true, false, true, true)
+end
+
+"""
+    second_order_or(tracers)
+
+Compute the most conservative elementwise OR of tracer sparsity patterns,
+including second-order interactions to update the `hessian` field of `HessianTracer`.
+
+This is functionally equivalent to:
+```julia
+reduce(^, tracers)
+```
+"""
+function second_order_or(ts::AbstractArray{T}) where {T<:AbstractTracer}
+    # TODO: improve performance
+    return reduce(second_order_or, ts; init=myempty(T))
+end
+
+function second_order_or(a::T, b::T) where {T<:GradientTracer}
+    return gradient_tracer_2_to_1(a, b, false, false)
+end
+function second_order_or(a::T, b::T) where {T<:HessianTracer}
+    return hessian_tracer_2_to_1(a, b, false, false, false, false, false)
+end
+
+#=================#
+# Code generation #
+#=================#
+
 dims = (Symbol("1_to_1"), Symbol("2_to_1"), Symbol("1_to_2"))
 
 # Generate both Gradient and Hessian code with one call to `generate_code_X_to_Y`

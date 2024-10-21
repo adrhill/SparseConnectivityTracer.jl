@@ -1,48 +1,3 @@
-"""
-    second_order_or(tracers)
-
-Compute the most conservative elementwise OR of tracer sparsity patterns,
-including second-order interactions to update the `hessian` field of `HessianTracer`.
-
-This is functionally equivalent to:
-```julia
-reduce(^, tracers)
-```
-"""
-function second_order_or(ts::AbstractArray{T}) where {T<:AbstractTracer}
-    # TODO: improve performance
-    return reduce(second_order_or, ts; init=myempty(T))
-end
-
-function second_order_or(a::T, b::T) where {T<:GradientTracer}
-    return gradient_tracer_2_to_1(a, b, false, false)
-end
-function second_order_or(a::T, b::T) where {T<:HessianTracer}
-    return hessian_tracer_2_to_1(a, b, false, false, false, false, false)
-end
-
-"""
-    first_order_or(tracers)
-
-Compute the most conservative elementwise OR of tracer sparsity patterns,
-excluding second-order interactions of `HessianTracer`.
-
-This is functionally equivalent to:
-```julia
-reduce(+, tracers)
-```
-"""
-function first_order_or(ts::AbstractArray{T}) where {T<:AbstractTracer}
-    # TODO: improve performance
-    return reduce(first_order_or, ts; init=myempty(T))
-end
-function first_order_or(a::T, b::T) where {T<:GradientTracer}
-    return gradient_tracer_2_to_1(a, b, false, false)
-end
-function first_order_or(a::T, b::T) where {T<:HessianTracer}
-    return hessian_tracer_2_to_1(a, b, false, true, false, true, true)
-end
-
 #===========#
 # Utilities #
 #===========#
@@ -167,6 +122,9 @@ function Base.literal_pow(::typeof(^), D::Diagonal{T}, ::Val{0}) where {T<:Abstr
     ts .= myempty(T)
     return Diagonal(ts)
 end
+
+## clamp!
+Base.clamp!(A::AbstractArray{<:AbstractTracer}, lo, hi) = A
 
 #==========================#
 # LinearAlgebra.jl on Dual #
