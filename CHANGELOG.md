@@ -1,5 +1,10 @@
 # SparseConnectivityTracer.jl
 
+## Version `v0.6.9`
+
+* ![Enhancement][badge-enhancement] Change internal default set type to `Set{Int}` instead of `BitSet`. 
+  This should substantially improve performance and allocations on sparse problems with many inputs (500+), at the cost of a minor performance regression on small problems.    
+
 ## Version `v0.6.8`
 
 * ![Feature][badge-feature] Support `clamp` and `clamp!` ([#208])
