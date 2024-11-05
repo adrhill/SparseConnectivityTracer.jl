@@ -1,5 +1,11 @@
 # SparseConnectivityTracer.jl
 
+## Version `v0.6.9`
+
+* ![Enhancement][badge-enhancement] Change internal default set type to `Set{Int}` instead of `BitSet` ([#211])
+  * This should substantially improve performance and allocations on sparse problems with many inputs (500+), at the cost of a minor performance regression on small problems.    
+* ![Enhancement][badge-enhancement] Simplify DataInterpolations.jl extension ([#210])
+
 ## Version `v0.6.8`
 
 * ![Feature][badge-feature] Support `clamp` and `clamp!` ([#208])
@@ -85,6 +91,8 @@
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#211]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/211
+[#210]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/210
 [#209]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/209
 [#208]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/208
 [#205]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/205
