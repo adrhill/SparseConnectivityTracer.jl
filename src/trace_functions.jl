@@ -59,10 +59,6 @@ end
 to_array(x::Real) = [x]
 to_array(x::AbstractArray) = x
 
-# Utilities
-_tracer_or_number(x::Real) = x
-_tracer_or_number(d::Dual) = tracer(d)
-
 #==========#
 # Jacobian #
 #==========#

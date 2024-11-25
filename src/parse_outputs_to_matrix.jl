@@ -1,11 +1,14 @@
 #= Parse tracers from function evaluation in `src/trace_functions.jl` into an output matrix. =#
 
+_tracer_or_number(x::Real) = x
+_tracer_or_number(d::Dual) = tracer(d)
+
 #==========#
 # Jacobian #
 #==========#
 
 function jacobian_tracers_to_matrix(
-    xt::AbstractArray{T}, yt::AbstractArray{<:Real}
+    xt::AbstractArray{T}, yt::AbstractArray
 ) where {T<:GradientTracer}
     n, m = length(xt), length(yt)
     I = Int[] # row indices
@@ -24,7 +27,7 @@ function jacobian_tracers_to_matrix(
 end
 
 function jacobian_tracers_to_matrix(
-    xt::AbstractArray{D}, yt::AbstractArray{<:Real}
+    xt::AbstractArray{D}, yt::AbstractArray
 ) where {P,T<:GradientTracer,D<:Dual{P,T}}
     return jacobian_tracers_to_matrix(tracer.(xt), _tracer_or_number.(yt))
 end
