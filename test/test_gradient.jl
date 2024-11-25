@@ -123,6 +123,36 @@ J(f, x) = jacobian_sparsity(f, x, detector)
                 x -> x[1] > x[2] ? x[3] : x[4], [1.0, 2.0, 3.0, 4.0]
             ) == [0 0 1 1;]
         end
+
+        @testset "Output of type Vector{Any}" begin
+            function f(x::AbstractVector)
+                n = length(x)
+                ret = [] # return type will be Vector{Any}
+                for i in 1:(n - 1)
+                    append!(
+                        ret,
+                        abs2(x[i + 1]) - abs2(x[i]) + abs2(x[n - i]) - abs2(x[n - i + 1]),
+                    )
+                end
+                return ret
+            end
+            x = [
+                0.263914
+                0.605532
+                1.281598
+                1.413663
+                0.178133
+                -1.705427
+            ]
+            @test J(f, x) == [
+                1  1  0  0  1  1
+                0  1  1  1  1  0
+                0  0  1  1  0  0
+                0  1  1  1  1  0
+                1  1  0  0  1  1
+            ]
+        end
+
         yield()
     end
 end
@@ -248,6 +278,35 @@ end
             @test J(x -> log(det(x)), [1.0 -1.0; 2.0 2.0]) == [1 1 1 1]
             @test J(x -> dot(x[1:2], x[4:5]), [0, 1, 0, 1, 0]) == [1 0 0 0 1]
         end
+        @testset "Output of type Vector{Any}" begin
+            function f(x::AbstractVector)
+                n = length(x)
+                ret = [] # return type will be Vector{Any}
+                for i in 1:(n - 1)
+                    append!(
+                        ret,
+                        abs2(x[i + 1]) - abs2(x[i]) + abs2(x[n - i]) - abs2(x[n - i + 1]),
+                    )
+                end
+                return ret
+            end
+            x = [
+                0.263914
+                0.605532
+                1.281598
+                1.413663
+                0.178133
+                -1.705427
+            ]
+            @test J(f, x) == [
+                1  1  0  0  1  1
+                0  1  1  1  1  0
+                0  0  1  1  0  0
+                0  1  1  1  1  0
+                1  1  0  0  1  1
+            ]
+        end
+
         yield()
     end
 end
