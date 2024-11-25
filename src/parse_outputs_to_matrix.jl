@@ -4,7 +4,7 @@
 # Jacobian #
 #==========#
 
-function jacobian_pattern_to_mat(
+function jacobian_tracers_to_matrix(
     xt::AbstractArray{T}, yt::AbstractArray{<:Real}
 ) where {T<:GradientTracer}
     n, m = length(xt), length(yt)
@@ -23,17 +23,17 @@ function jacobian_pattern_to_mat(
     return sparse(I, J, V, m, n)
 end
 
-function jacobian_pattern_to_mat(
+function jacobian_tracers_to_matrix(
     xt::AbstractArray{D}, yt::AbstractArray{<:Real}
 ) where {P,T<:GradientTracer,D<:Dual{P,T}}
-    return jacobian_pattern_to_mat(tracer.(xt), _tracer_or_number.(yt))
+    return jacobian_tracers_to_matrix(tracer.(xt), _tracer_or_number.(yt))
 end
 
 #=========#
 # Hessian #
 #=========#
 
-function hessian_pattern_to_mat(xt::AbstractArray{T}, yt::T) where {T<:HessianTracer}
+function hessian_tracers_to_matrix(xt::AbstractArray{T}, yt::T) where {T<:HessianTracer}
     n = length(xt)
     I = Int[] # row indices
     J = Int[] # column indices
@@ -54,18 +54,20 @@ function hessian_pattern_to_mat(xt::AbstractArray{T}, yt::T) where {T<:HessianTr
     return h
 end
 
-function hessian_pattern_to_mat(
+function hessian_tracers_to_matrix(
     xt::AbstractArray{D1}, yt::D2
 ) where {P1,P2,T<:HessianTracer,D1<:Dual{P1,T},D2<:Dual{P2,T}}
-    return hessian_pattern_to_mat(tracer.(xt), tracer(yt))
+    return hessian_tracers_to_matrix(tracer.(xt), tracer(yt))
 end
 
-function hessian_pattern_to_mat(xt::AbstractArray{T}, yt::Number) where {T<:HessianTracer}
-    return hessian_pattern_to_mat(xt, myempty(T))
+function hessian_tracers_to_matrix(
+    xt::AbstractArray{T}, yt::Number
+) where {T<:HessianTracer}
+    return hessian_tracers_to_matrix(xt, myempty(T))
 end
 
-function hessian_pattern_to_mat(
+function hessian_tracers_to_matrix(
     xt::AbstractArray{D1}, yt::Number
 ) where {P1,T<:HessianTracer,D1<:Dual{P1,T}}
-    return hessian_pattern_to_mat(tracer.(xt), myempty(T))
+    return hessian_tracers_to_matrix(tracer.(xt), myempty(T))
 end

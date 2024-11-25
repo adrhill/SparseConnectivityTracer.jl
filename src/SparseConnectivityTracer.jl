@@ -31,7 +31,7 @@ include("overloads/arrays.jl")
 include("overloads/ambiguities.jl")
 
 include("trace_functions.jl")
-include("parse_outputs_to_mat.jl")
+include("parse_outputs_to_matrix.jl")
 include("adtypes_interface.jl")
 
 export TracerSparsityDetector

@@ -2,7 +2,7 @@
 1) creating tracers from inputs
 2) evaluating the function with the created tracers
 
-The resulting output is parsed in `src/parse_outputs_to_mat.jl`.
+The resulting output is parsed in `src/parse_outputs_to_matrix.jl`.
 =#
 
 #==================#
@@ -72,7 +72,7 @@ function _jacobian_sparsity(
     f, x, ::Type{T}=DEFAULT_GRADIENT_TRACER
 ) where {T<:GradientTracer}
     xt, yt = trace_function(T, f, x)
-    return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
+    return jacobian_tracers_to_matrix(to_array(xt), to_array(yt))
 end
 
 # Compute the sparsity pattern of the Jacobian of `f!(y, x)`.
@@ -80,7 +80,7 @@ function _jacobian_sparsity(
     f!, y, x, ::Type{T}=DEFAULT_GRADIENT_TRACER
 ) where {T<:GradientTracer}
     xt, yt = trace_function(T, f!, y, x)
-    return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
+    return jacobian_tracers_to_matrix(to_array(xt), to_array(yt))
 end
 
 # Compute the local sparsity pattern of the Jacobian of `y = f(x)` at `x`.
@@ -89,7 +89,7 @@ function _local_jacobian_sparsity(
 ) where {T<:GradientTracer}
     D = Dual{eltype(x),T}
     xt, yt = trace_function(D, f, x)
-    return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
+    return jacobian_tracers_to_matrix(to_array(xt), to_array(yt))
 end
 
 # Compute the local sparsity pattern of the Jacobian of `f!(y, x)` at `x`.
@@ -98,7 +98,7 @@ function _local_jacobian_sparsity(
 ) where {T<:GradientTracer}
     D = Dual{eltype(x),T}
     xt, yt = trace_function(D, f!, y, x)
-    return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
+    return jacobian_tracers_to_matrix(to_array(xt), to_array(yt))
 end
 
 #=========#
@@ -108,7 +108,7 @@ end
 # Compute the sparsity pattern of the Hessian of a scalar function `y = f(x)`.
 function _hessian_sparsity(f, x, ::Type{T}=DEFAULT_HESSIAN_TRACER) where {T<:HessianTracer}
     xt, yt = trace_function(T, f, x)
-    return hessian_pattern_to_mat(to_array(xt), yt)
+    return hessian_tracers_to_matrix(to_array(xt), yt)
 end
 
 # Compute the local sparsity pattern of the Hessian of a scalar function `y = f(x)` at `x`.
@@ -117,5 +117,5 @@ function _local_hessian_sparsity(
 ) where {T<:HessianTracer}
     D = Dual{eltype(x),T}
     xt, yt = trace_function(D, f, x)
-    return hessian_pattern_to_mat(to_array(xt), yt)
+    return hessian_tracers_to_matrix(to_array(xt), yt)
 end
