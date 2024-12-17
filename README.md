@@ -129,7 +129,7 @@ julia> hessian_sparsity(f, [1 3 2 4], detector)
 
 ## ADTypes.jl compatibility
 SparseConnectivityTracer uses [ADTypes.jl](https://github.com/SciML/ADTypes.jl)'s interface for [sparsity detection](https://sciml.github.io/ADTypes.jl/stable/#Sparsity-detector),
-making it compatible with [DifferentiationInterface.jl](https://github.com/gdalle/DifferentiationInterface.jl)'s [sparse automatic differentiation](https://gdalle.github.io/DifferentiationInterface.jl/DifferentiationInterface/stable/tutorial2/) functionality.
+making it compatible with [DifferentiationInterface.jl](https://github.com/gdalle/DifferentiationInterface.jl)'s [sparse automatic differentiation](https://juliadiff.org/DifferentiationInterface.jl/DifferentiationInterface/stable/tutorials/advanced/#Sparsity) functionality.
 In fact, the functions `jacobian_sparsity` and `hessian_sparsity` are re-exported from ADTypes.
 
 ## Related packages
