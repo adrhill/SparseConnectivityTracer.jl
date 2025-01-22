@@ -52,6 +52,7 @@ end
 function trace_function(::Type{T}, f!, y, x) where {T<:Union{AbstractTracer,Dual}}
     xt = trace_input(T, x)
     yt = similar(y, T)
+    fill!(yt, T(0))
     f!(yt, xt)
     return xt, yt
 end

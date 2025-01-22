@@ -310,3 +310,16 @@ end
         yield()
     end
 end
+
+@testset "Sparsity for Jacobian of in-place function" begin
+    x = rand(100)
+    y = similar(x)
+
+    function f!(y, x)
+        for i in 1:(length(x) - 1)
+            y[i] = x[i + 1] - x[i]
+        end
+    end
+    @test_nowarn jacobian_sparsity(f!, y, x, TracerLocalSparsityDetector())
+    @test_nowarn jacobian_sparsity(f!, y, x, TracerSparsityDetector())
+end
