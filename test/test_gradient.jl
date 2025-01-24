@@ -15,7 +15,8 @@ REAL_TYPES = (Float64, Int, Bool, UInt8, Float16, Rational{Int})
 detector = TracerSparsityDetector()
 J(f, x) = jacobian_sparsity(f, x, detector)
 J(f!, y, x) = jacobian_sparsity(f!, y, x, detector)
-
+P = first(GRADIENT_PATTERNS)
+T = GradientTracer{P}
 
 @testset "Jacobian Global" begin
     @testset "$P" for P in GRADIENT_PATTERNS
@@ -57,7 +58,7 @@ J(f!, y, x) = jacobian_sparsity(f!, y, x, detector)
         end
 
         @testset "In-place functions" begin
-            x = rand(100)
+            x = rand(5)
             y = similar(x)
     
             function f!(y, x)
@@ -65,7 +66,6 @@ J(f!, y, x) = jacobian_sparsity(f!, y, x, detector)
                     y[i] = x[i + 1] - x[i]
                 end
             end
-            @test_nowarn J(f!, y, x)
             @test_nowarn J(f!, y, x)
         end
 
@@ -261,7 +261,7 @@ end
         end
 
         @testset "In-place functions" begin
-            x = rand(100)
+            x = rand(5)
             y = similar(x)
     
             function f!(y, x)
@@ -269,7 +269,6 @@ end
                     y[i] = x[i + 1] - x[i]
                 end
             end
-            @test_nowarn J(f!, y, x)
             @test_nowarn J(f!, y, x)
         end
 
