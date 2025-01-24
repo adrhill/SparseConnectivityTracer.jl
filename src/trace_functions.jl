@@ -51,7 +51,8 @@ end
 
 function trace_function(::Type{T}, f!, y, x) where {T<:AbstractTracer}
     xt = trace_input(T, x)
-    yt = fill(myempty(T), size(y))
+    yt = similar(y, T)
+    fill!(yt, myempty(T))
     f!(yt, xt)
     return xt, yt
 end
