@@ -14,12 +14,15 @@ REAL_TYPES = (Float64, Int, Bool, UInt8, Float16, Rational{Int})
 # NOTE: J gets overwritten inside the testsets.
 detector = TracerSparsityDetector()
 J(f, x) = jacobian_sparsity(f, x, detector)
+J(f!, y, x) = jacobian_sparsity(f!, y, x, detector)
+
 
 @testset "Jacobian Global" begin
     @testset "$P" for P in GRADIENT_PATTERNS
         T = GradientTracer{P}
         detector = TracerSparsityDetector(; gradient_tracer_type=T)
         J(f, x) = jacobian_sparsity(f, x, detector)
+        J(f!, y, x) = jacobian_sparsity(f!, y, x, detector)
 
         @testset "Trivial examples" begin
             f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])]
@@ -51,6 +54,19 @@ J(f, x) = jacobian_sparsity(f, x, detector)
             @test J(x -> (2//3)^zero(x), 1) ≈ [0;;]
             @test J(x -> zero(x)^ℯ, 1) ≈ [0;;]
             @test J(x -> ℯ^zero(x), 1) ≈ [0;;]
+        end
+
+        @testset "In-place functions" begin
+            x = rand(100)
+            y = similar(x)
+    
+            function f!(y, x)
+                for i in 1:(length(x) - 1)
+                    y[i] = x[i + 1] - x[i]
+                end
+            end
+            @test_nowarn J(f!, y, x)
+            @test_nowarn J(f!, y, x)
         end
 
         # Conversions
@@ -162,6 +178,8 @@ end
         T = GradientTracer{P}
         detector = TracerLocalSparsityDetector(; gradient_tracer_type=T)
         J(f, x) = jacobian_sparsity(f, x, detector)
+        J(f!, y, x) = jacobian_sparsity(f!, y, x, detector)
+
 
         @testset "Trivial examples" begin
 
@@ -242,6 +260,19 @@ end
             @test J(x -> 0, 1) ≈ [0;;]
         end
 
+        @testset "In-place functions" begin
+            x = rand(100)
+            y = similar(x)
+    
+            function f!(y, x)
+                for i in 1:(length(x) - 1)
+                    y[i] = x[i + 1] - x[i]
+                end
+            end
+            @test_nowarn J(f!, y, x)
+            @test_nowarn J(f!, y, x)
+        end
+
         # Conversions
         @testset "Conversion" begin
             @testset "Conversion to $T" for T in REAL_TYPES
@@ -311,15 +342,4 @@ end
     end
 end
 
-@testset "Sparsity for Jacobian of in-place function" begin
-    x = rand(100)
-    y = similar(x)
 
-    function f!(y, x)
-        for i in 1:(length(x) - 1)
-            y[i] = x[i + 1] - x[i]
-        end
-    end
-    @test_nowarn jacobian_sparsity(f!, y, x, TracerLocalSparsityDetector())
-    @test_nowarn jacobian_sparsity(f!, y, x, TracerSparsityDetector())
-end
