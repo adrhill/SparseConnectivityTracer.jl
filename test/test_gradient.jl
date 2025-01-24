@@ -60,7 +60,7 @@ T = GradientTracer{P}
         @testset "In-place functions" begin
             x = rand(5)
             y = similar(x)
-    
+
             function f!(y, x)
                 for i in 1:(length(x) - 1)
                     y[i] = x[i + 1] - x[i]
@@ -180,7 +180,6 @@ end
         J(f, x) = jacobian_sparsity(f, x, detector)
         J(f!, y, x) = jacobian_sparsity(f!, y, x, detector)
 
-
         @testset "Trivial examples" begin
 
             # Multiplication
@@ -263,7 +262,7 @@ end
         @testset "In-place functions" begin
             x = rand(5)
             y = similar(x)
-    
+
             function f!(y, x)
                 for i in 1:(length(x) - 1)
                     y[i] = x[i + 1] - x[i]
@@ -340,5 +339,3 @@ end
         yield()
     end
 end
-
-

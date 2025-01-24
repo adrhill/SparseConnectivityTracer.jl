@@ -49,9 +49,17 @@ function trace_function(::Type{T}, f, x) where {T<:Union{AbstractTracer,Dual}}
     return xt, yt
 end
 
-function trace_function(::Type{T}, f!, y, x) where {T<:Union{AbstractTracer,Dual}}
+function trace_function(::Type{T}, f!, y, x) where {T<:AbstractTracer}
     xt = trace_input(T, x)
     yt = fill(myempty(T), size(y))
+    f!(yt, xt)
+    return xt, yt
+end
+
+function trace_function(::Type{D}, f!, y, x) where {P,T<:AbstractTracer,D<:Dual{P,T}}
+    t = myempty(T)
+    xt = trace_input(D, x)
+    yt = Dual.(y, t)
     f!(yt, xt)
     return xt, yt
 end
