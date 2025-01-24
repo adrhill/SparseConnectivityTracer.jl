@@ -1,5 +1,8 @@
 # SparseConnectivityTracer.jl
 
+## Version `v0.6.10`
+* ![Bugfix][badge-bugfix] Fix `jacobian_sparsity` output initialization for  inplace functions ([#223])
+
 ## Version `v0.6.9`
 * ![Bugfix][badge-bugfix] Relax type annotations in Jacobian output parsing ([#217])
 * ![Enhancement][badge-enhancement] Simplify DataInterpolations.jl extension ([#210])
@@ -89,6 +92,7 @@
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#223]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/223
 [#217]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/217
 [#210]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/210
 [#209]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/209
