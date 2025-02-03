@@ -1,9 +1,12 @@
 # [How SparseConnectivityTracer works](@id how-sct-works)
 
+!!! tip "Read the paper"
+    Please read our preprint describing SparseConnectivityTracer:
+    [*Sparser, Better, Faster, Stronger: Efficient Automatic Differentiation for Sparse Jacobians and Hessians*](https://arxiv.org/abs/2501.17737).
+
 !!! danger "Internals may change"
     The developer documentation might refer to internals which can change without warning in a future release of SparseConnectivityTracer.
     Only functionality that is exported or part of the [user documentation](@ref api) adheres to semantic versioning.
-
 
 ## Tracers are scalars
 
@@ -22,7 +25,6 @@ This is how [**local** sparsity patterns](@ref TracerLocalSparsityDetector) are 
      SparseConnectivityTracer's `Dual{T, GradientTracer}` can be thought of as a binary version of [ForwardDiff](https://github.com/JuliaDiff/ForwardDiff.jl)'s own `Dual` number type.
      This is a good mental model for SparseConnectivityTracer if you are familiar with ForwardDiff and its limitations.
 
-
 ## Index sets
 
 Let's take a look at a scalar function $f: \mathbb{R}^n \rightarrow \mathbb{R}$.
@@ -36,7 +38,6 @@ Instead of saving the values of individual partial derivatives, they can efficie
 * Gradient patterns are represented by sets of indices $\left\{i \;\big|\; \frac{\partial f}{\partial x_i} \neq 0\right\}$
 * Hessian patterns are represented by sets of index tuples $\left\{(i, j) \;\Big|\; \frac{\partial^2 f}{\partial x_i \partial x_j} \neq 0\right\}$
 
-
 !!! warning "Global vs. Local"
     As shown in the page [*"Global vs. Local"*](@ref global-vs-local),
     global sparsity patterns are the index sets over all $\mathbf{x}\in\mathbb{R}^n$,
@@ -48,7 +49,6 @@ Instead of saving the values of individual partial derivatives, they can efficie
 
 Let's take a look at the computational graph of the equation $f(\mathbf{x}) = x_1 + x_2x_3 + \text{sgn}(x_4)$,
 where $\text{sgn}$ is the [sign function](https://en.wikipedia.org/wiki/Sign_function):
-
 
 ```mermaid
 flowchart LR
