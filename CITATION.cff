@@ -12,7 +12,7 @@ version: 0.1.0
 date-released: 2024-04-22
 url: "https://github.com/adrhill/SparseConnectivityTracer.jl"
 preferred-citation:
-  type: article
+  type: unpublished
   authors:
   - family-names: "Hill"
     given-names: "Adrian"
@@ -23,5 +23,4 @@ preferred-citation:
   doi: "10.48550/arXiv.2501.17737"
   title: "Sparser, Better, Faster, Stronger: Efficient Automatic Differentiation for Sparse Jacobians and Hessians"
   year: 2025
-  journal: "arXiv preprint"
   url: "https://arxiv.org/abs/2501.17737"
