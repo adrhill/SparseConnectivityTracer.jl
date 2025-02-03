@@ -12,7 +12,7 @@ version: 0.1.0
 date-released: 2024-04-22
 url: "https://github.com/adrhill/SparseConnectivityTracer.jl"
 preferred-citation:
-  type: unpublished
+  type: generic
   authors:
   - family-names: "Hill"
     given-names: "Adrian"
