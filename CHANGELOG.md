@@ -2,7 +2,7 @@
 
 ## Version `v0.6.11`
 * ![Documentation][badge-docs] SCT has a new preprint! 🎉 
-  Check it out on the arXiv: [*Sparser, Better, Faster, Stronger: Efficient Automatic Differentiation for Sparse Jacobians and Hessians*](https://arxiv.org/abs/2501.17737) 
+  Check it out on the arXiv: [*Sparser, Better, Faster, Stronger: Efficient Automatic Differentiation for Sparse Jacobians and Hessians*](https://arxiv.org/abs/2501.17737) ([#225])
 * ![Feature][badge-feature] Add overloads for 3-argument `dot` ([#226])
 
 ## Version `v0.6.10`
@@ -98,6 +98,7 @@
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
 [#226]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/226
+[#225]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/225
 [#223]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/223
 [#217]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/217
 [#210]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/210
