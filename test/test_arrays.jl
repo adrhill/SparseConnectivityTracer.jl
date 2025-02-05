@@ -399,6 +399,44 @@ end
     b = A \ x
     @test all(t -> sameidx(t, s_out), b)
 end
+
+@testset "Dot" begin
+    t1 = idx2tracer([1, 3, 4])
+    t2 = idx2tracer([2, 4])
+    t3 = idx2tracer([5, 6])
+    t4 = idx2tracer([7, 8])
+
+    tx = [t1, t2]
+    ty = [t3, t4]
+    tA = [idx2tracer(9) idx2tracer(10); idx2tracer(11) idx2tracer(12)]
+
+    @testset "scalar-scalar" begin
+        @test sameidx(dot(t1, t2), 1:4)
+        @test sameidx(dot(t1, t3), [1, 3, 4, 5, 6])
+        @test sameidx(dot(t1, 1.0), [1, 3, 4])
+        @test sameidx(dot(1.0, t2), [2, 4])
+    end
+    @testset "vector-vector" begin
+        @test sameidx(dot(tx, ty), 1:8)
+        @test sameidx(dot(tx, rand(2)), 1:4)
+        @test sameidx(dot(rand(2), ty), 5:8)
+        @test_throws DimensionMismatch dot(tx, rand(3))
+        @test_throws DimensionMismatch dot(rand(3), ty)
+
+        txe = TG[]
+        tye = TG[]
+        out = dot(txe, tye)
+        @test isemptytracer(out)
+    end
+    @testset "vector-Matrix-vector" begin
+        @test sameidx(dot(tx, rand(2, 2), rand(2)), 1:4)
+        @test sameidx(dot(tx, tA, rand(2)), vcat(1:4, 9:12))
+        @test sameidx(dot(tx, rand(2, 2), ty), 1:8)
+        @test sameidx(dot(tx, tA, ty), 1:12)
+        @test sameidx(dot(rand(2), tA, rand(2)), 9:12)
+        @test sameidx(dot(rand(2), tA, ty), 5:12)
+        @test sameidx(dot(rand(2), rand(2, 2), ty), 5:8)
+    end
 end
 
 @testset "Eigenvalues" begin
