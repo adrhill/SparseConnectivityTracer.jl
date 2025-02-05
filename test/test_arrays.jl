@@ -1,7 +1,6 @@
 import SparseConnectivityTracer as SCT
 using SparseConnectivityTracer
-using SparseConnectivityTracer:
-    GradientTracer, IndexSetGradientPattern, gradient, isemptytracer
+using SparseConnectivityTracer: GradientTracer, IndexSetGradientPattern, isemptytracer
 using Test
 
 using LinearAlgebra: Symmetric, Diagonal, diagind
@@ -31,8 +30,10 @@ function sameidx(s1::AbstractSet, s2::AbstractSet)
     end
 end
 
-sameidx(t1::T, t2::T) where {T<:GradientTracer} = sameidx(gradient(t1), gradient(t2))
-sameidx(t::GradientTracer, s::AbstractSet) = sameidx(gradient(t), s)
+function sameidx(t1::T, t2::T) where {T<:GradientTracer}
+    return sameidx(SCT.gradient(t1), SCT.gradient(t2))
+end
+sameidx(t::GradientTracer, s::AbstractSet) = sameidx(SCT.gradient(t), s)
 sameidx(t::GradientTracer, i) = sameidx(t, idx2set(i))
 
 #=========================#
