@@ -90,31 +90,17 @@ end
 LinearAlgebra.pinv(D::Diagonal{T}) where {T<:AbstractTracer} = inv(D)
 
 ## Dot product – adapted from https://github.com/JuliaLang/LinearAlgebra.jl/blob/924dda4d5d26d745fc8993b7ffdfaa80ee0e0c0e/src/generic.jl#L895-L1029
-dot(x::T, y::T) where {T<:AbstractTracer} = x * y # no conjugate required on tracers.
+LinearAlgebra.dot(x::T, y::T) where {T<:AbstractTracer} = x * y # no conjugate required on tracers.
 
-function dot(x::AbstractArray{T}, y::AbstractArray{T}) where {T<:AbstractTracer}
-    lx = length(x)
-    if lx != length(y)
-        throw(
-            DimensionMismatch(
-                lazy"first array has length $(lx) which does not match the length of the second, $(length(y)).",
-            ),
-        )
+# In the future, we will likely have to add more methods.
+for (Tx, TA, Ty) in Iterators.product(
+    (AbstractVector, AbstractVector{<:AbstractTracer}),
+    (AbstractMatrix, AbstractMatrix{<:AbstractTracer}),
+    (AbstractVector, AbstractVector{<:AbstractTracer}),
+)
+    if (Tx, TA, Ty) != (AbstractVector, AbstractMatrix, AbstractVector) # avoid type piracy
+        @eval LinearAlgebra.dot(x::$Tx, A::$TA, y::$Ty) = LinearAlgebra.dot(x, A * y)
     end
-    if lx == 0
-        return myempty(T)
-    end
-    s = myempty(T)
-    for (Ix, Iy) in zip(eachindex(x), eachindex(y))
-        @inbounds s += dot(x[Ix], y[Iy])
-    end
-    return s
-end
-
-function dot(
-    x::AbstractVector{T}, A::AbstractMatrix, y::AbstractVector{T}
-) where {T<:AbstractTracer}
-    return dot(x, A * y)
 end
 
 ## Division
