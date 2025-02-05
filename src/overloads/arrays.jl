@@ -89,6 +89,20 @@ function LinearAlgebra.pinv(
 end
 LinearAlgebra.pinv(D::Diagonal{T}) where {T<:AbstractTracer} = inv(D)
 
+## Dot product – adapted from https://github.com/JuliaLang/LinearAlgebra.jl/blob/924dda4d5d26d745fc8993b7ffdfaa80ee0e0c0e/src/generic.jl#L895-L1029
+LinearAlgebra.dot(x::T, y::T) where {T<:AbstractTracer} = x * y # no conjugate required on tracers.
+
+# In the future, we will likely have to add more methods.
+for (Tx, TA, Ty) in Iterators.product(
+    (AbstractVector, AbstractVector{<:AbstractTracer}),
+    (AbstractMatrix, AbstractMatrix{<:AbstractTracer}),
+    (AbstractVector, AbstractVector{<:AbstractTracer}),
+)
+    if (Tx, TA, Ty) != (AbstractVector, AbstractMatrix, AbstractVector) # avoid type piracy
+        @eval LinearAlgebra.dot(x::$Tx, A::$TA, y::$Ty) = LinearAlgebra.dot(x, A * y)
+    end
+end
+
 ## Division
 function LinearAlgebra.:\(
     A::AbstractMatrix{T}, B::AbstractVecOrMat

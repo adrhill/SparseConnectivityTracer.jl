@@ -1,13 +1,40 @@
 import SparseConnectivityTracer as SCT
 using SparseConnectivityTracer
-using SparseConnectivityTracer: GradientTracer, IndexSetGradientPattern
+using SparseConnectivityTracer: GradientTracer, IndexSetGradientPattern, isemptytracer
 using Test
 
 using LinearAlgebra: Symmetric, Diagonal, diagind
 using LinearAlgebra: det, logdet, logabsdet, norm, opnorm
 using LinearAlgebra: eigen, eigmax, eigmin
-using LinearAlgebra: inv, pinv
+using LinearAlgebra: inv, pinv, dot
 using SparseArrays: sparse, spdiagm
+
+S = BitSet
+P = IndexSetGradientPattern{Int,S}
+TG = GradientTracer{P}
+
+# Utilities for quick testing
+idx2set(is) = S(is)
+idx2set(r::AbstractRange) = idx2set(collect(r))
+idx2tracer(is) = TG(P(idx2set(is)))
+
+function sameidx(s1::AbstractSet, s2::AbstractSet)
+    same = s1 == s2
+    if same
+        return true
+    else
+        println("Index sets don't match:")
+        println(s1)
+        println(s2)
+        return false
+    end
+end
+
+function sameidx(t1::T, t2::T) where {T<:GradientTracer}
+    return sameidx(SCT.gradient(t1), SCT.gradient(t2))
+end
+sameidx(t::GradientTracer, s::AbstractSet) = sameidx(SCT.gradient(t), s)
+sameidx(t::GradientTracer, i) = sameidx(t, idx2set(i))
 
 #=========================#
 # Weird function wrappers #
@@ -326,79 +353,114 @@ end
     end
 end
 
-S = BitSet
-P = IndexSetGradientPattern{Int,S}
-TG = GradientTracer{P}
-
 @testset "clamp!" begin
-    t1 = TG(P(S(1)))
-    t2 = TG(P(S(2)))
-    t3 = TG(P(S(3)))
-    t4 = TG(P(S(4)))
+    t1 = idx2tracer(1)
+    t2 = idx2tracer(2)
+    t3 = idx2tracer(3)
+    t4 = idx2tracer(4)
     A = [t1 t2; t3 t4]
 
-    t_lo = TG(P(S(5)))
-    t_hi = TG(P(S(6)))
+    t_lo = idx2tracer(5)
+    t_hi = idx2tracer(6)
 
     out = clamp!(A, 0.0, 1.0)
-    @test SCT.gradient(out[1, 1]) == S(1)
-    @test SCT.gradient(out[1, 2]) == S(2)
-    @test SCT.gradient(out[2, 1]) == S(3)
-    @test SCT.gradient(out[2, 2]) == S(4)
+    @test sameidx(out[1, 1], 1)
+    @test sameidx(out[1, 2], 2)
+    @test sameidx(out[2, 1], 3)
+    @test sameidx(out[2, 2], 4)
 
     out = clamp!(A, t_lo, 1.0)
-    @test SCT.gradient(out[1, 1]) == S([1, 5])
-    @test SCT.gradient(out[1, 2]) == S([2, 5])
-    @test SCT.gradient(out[2, 1]) == S([3, 5])
-    @test SCT.gradient(out[2, 2]) == S([4, 5])
+    @test sameidx(out[1, 1], [1, 5])
+    @test sameidx(out[1, 2], [2, 5])
+    @test sameidx(out[2, 1], [3, 5])
+    @test sameidx(out[2, 2], [4, 5])
 
     out = clamp!(A, 0.0, t_hi)
-    @test SCT.gradient(out[1, 1]) == S([1, 6])
-    @test SCT.gradient(out[1, 2]) == S([2, 6])
-    @test SCT.gradient(out[2, 1]) == S([3, 6])
-    @test SCT.gradient(out[2, 2]) == S([4, 6])
+    @test sameidx(out[1, 1], [1, 6])
+    @test sameidx(out[1, 2], [2, 6])
+    @test sameidx(out[2, 1], [3, 6])
+    @test sameidx(out[2, 2], [4, 6])
 
     out = clamp!(A, t_lo, t_hi)
-    @test SCT.gradient(out[1, 1]) == S([1, 5, 6])
-    @test SCT.gradient(out[1, 2]) == S([2, 5, 6])
-    @test SCT.gradient(out[2, 1]) == S([3, 5, 6])
-    @test SCT.gradient(out[2, 2]) == S([4, 5, 6])
+    @test sameidx(out[1, 1], [1, 5, 6])
+    @test sameidx(out[1, 2], [2, 5, 6])
+    @test sameidx(out[2, 1], [3, 5, 6])
+    @test sameidx(out[2, 2], [4, 5, 6])
 end
 
 @testset "Matrix division" begin
-    t1 = TG(P(S([1, 3, 4])))
-    t2 = TG(P(S([2, 4])))
-    t3 = TG(P(S([8, 9])))
-    t4 = TG(P(S([8, 9])))
+    t1 = idx2tracer([1, 3, 4])
+    t2 = idx2tracer([2, 4])
+    t3 = idx2tracer([8, 9])
+    t4 = idx2tracer([8, 9])
     A = [t1 t2; t3 t4]
-    s_out = S([1, 2, 3, 4, 8, 9])
+    s_out = idx2set([1, 2, 3, 4, 8, 9])
 
     x = rand(2)
     b = A \ x
-    @test all(t -> SCT.gradient(t) == s_out, b)
+    @test all(t -> sameidx(t, s_out), b)
+end
+
+@testset "Dot" begin
+    t1 = idx2tracer([1, 3, 4])
+    t2 = idx2tracer([2, 4])
+    t3 = idx2tracer([5, 6])
+    t4 = idx2tracer([7, 8])
+
+    tx = [t1, t2]
+    ty = [t3, t4]
+    tA = [idx2tracer(9) idx2tracer(10); idx2tracer(11) idx2tracer(12)]
+
+    @testset "scalar-scalar" begin
+        @test sameidx(dot(t1, t2), 1:4)
+        @test sameidx(dot(t1, t3), [1, 3, 4, 5, 6])
+        @test sameidx(dot(t1, 1.0), [1, 3, 4])
+        @test sameidx(dot(1.0, t2), [2, 4])
+    end
+    @testset "vector-vector" begin
+        @test sameidx(dot(tx, ty), 1:8)
+        @test sameidx(dot(tx, rand(2)), 1:4)
+        @test sameidx(dot(rand(2), ty), 5:8)
+        @test_throws DimensionMismatch dot(tx, rand(3))
+        @test_throws DimensionMismatch dot(rand(3), ty)
+
+        txe = TG[]
+        tye = TG[]
+        out = dot(txe, tye)
+        @test isemptytracer(out)
+    end
+    @testset "vector-Matrix-vector" begin
+        @test sameidx(dot(tx, rand(2, 2), rand(2)), 1:4)
+        @test sameidx(dot(tx, tA, rand(2)), vcat(1:4, 9:12))
+        @test sameidx(dot(tx, rand(2, 2), ty), 1:8)
+        @test sameidx(dot(tx, tA, ty), 1:12)
+        @test sameidx(dot(rand(2), tA, rand(2)), 9:12)
+        @test sameidx(dot(rand(2), tA, ty), 5:12)
+        @test sameidx(dot(rand(2), rand(2, 2), ty), 5:8)
+    end
 end
 
 @testset "Eigenvalues" begin
-    t1 = TG(P(S([1, 3, 4])))
-    t2 = TG(P(S([2, 4])))
-    t3 = TG(P(S([8, 9])))
-    t4 = TG(P(S([8, 9])))
+    t1 = idx2tracer([1, 3, 4])
+    t2 = idx2tracer([2, 4])
+    t3 = idx2tracer([8, 9])
+    t4 = idx2tracer([8, 9])
     A = [t1 t2; t3 t4]
-    s_out = S([1, 2, 3, 4, 8, 9])
+    s_out = idx2set([1, 2, 3, 4, 8, 9])
     values, vectors = eigen(A)
     @test size(values) == (2,)
     @test size(vectors) == (2, 2)
-    @test all(t -> SCT.gradient(t) == s_out, values)
-    @test all(t -> SCT.gradient(t) == s_out, vectors)
+    @test all(t -> sameidx(t, s_out), values)
+    @test all(t -> sameidx(t, s_out), vectors)
 end
 
 @testset "SparseMatrixCSC construction" begin
-    t1 = TG(P(S(1)))
-    t2 = TG(P(S(2)))
-    t3 = TG(P(S(3)))
+    t1 = idx2tracer(1)
+    t2 = idx2tracer(2)
+    t3 = idx2tracer(3)
     SA = sparse([t1 t2; t3 0])
     @test length(SA.nzval) == 3
 
     res = opnorm(SA, 1)
-    @test SCT.gradient(res) == S([1, 2, 3])
+    @test sameidx(res, [1, 2, 3])
 end
