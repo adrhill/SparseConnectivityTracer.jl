@@ -412,6 +412,11 @@ end
     ty = [t3, t4]
     tA = [idx2tracer(9) idx2tracer(10); idx2tracer(11) idx2tracer(12)]
 
+    # SubArray variants of tx and ty
+    B = [t1 t2; t3 t4]
+    subx = view(B, 1, :)
+    suby = view(B, 2, :)
+
     rx = rand(2)
     ry = rand(2)
     rA = rand(2, 2)
@@ -429,6 +434,15 @@ end
         @test sameidx(dot(tx, ty), 1:8)
         @test sameidx(dot(tx, ry), 1:4)
         @test sameidx(dot(rx, ty), 5:8)
+
+        @testset "SubArrays" begin
+            @test subx isa SubArray
+            @test suby isa SubArray
+            @test sameidx(dot(subx, suby), 1:8)
+            @test sameidx(dot(subx, ry), 1:4)
+            @test sameidx(dot(rx, suby), 5:8)
+        end
+
         @testset "SparseArrays" begin
             @test sameidx(dot(tx, sy), [2, 4])
             @test sameidx(dot(sx, ty), 5:6)
@@ -446,9 +460,21 @@ end
         @test sameidx(dot(tx, tA, ry), vcat(1:4, 9:12))
         @test sameidx(dot(tx, rA, ty), 1:8)
         @test sameidx(dot(tx, tA, ty), 1:12)
-        @test sameidx(dot(rx, tA, ry), 9:12)
         @test sameidx(dot(rx, tA, ty), 5:12)
         @test sameidx(dot(rx, rA, ty), 5:8)
+        @test sameidx(dot(rx, tA, ry), 9:12)
+
+        @testset "SubArrays" begin
+            @test subx isa SubArray
+            @test suby isa SubArray
+            @test sameidx(dot(subx, rA, ry), 1:4)
+            @test sameidx(dot(subx, tA, ry), vcat(1:4, 9:12))
+            @test sameidx(dot(subx, rA, suby), 1:8)
+            @test sameidx(dot(subx, tA, suby), 1:12)
+            @test sameidx(dot(rx, tA, suby), 5:12)
+            @test sameidx(dot(rx, rA, suby), 5:8)
+            @test sameidx(dot(rx, tA, ry), 9:12)
+        end
 
         @testset "SparseArrays" begin
             # Some tests are broken since there is no specialized support for SparseArrays.
