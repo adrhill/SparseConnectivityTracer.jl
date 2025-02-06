@@ -1,5 +1,8 @@
 # SparseConnectivityTracer.jl
 
+## Version `v0.6.12`
+* ![Bugfix][badge-bugfix] Fix for method ambiguities resulting from the 3-argument `dot` methods introduced in `v0.6.11` ([#228])
+
 ## Version `v0.6.11`
 * ![Documentation][badge-docs] SCT has a new preprint! 🎉 
   Check it out on the arXiv: [*Sparser, Better, Faster, Stronger: Efficient Automatic Differentiation for Sparse Jacobians and Hessians*](https://arxiv.org/abs/2501.17737) ([#225])
@@ -97,6 +100,7 @@
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#228]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/228
 [#226]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/226
 [#225]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/225
 [#223]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/223
