@@ -104,11 +104,11 @@ for (Tx, TA, Ty) in Iterators.filter(
     nopiracy, # only keep tuples of types we own 
     Iterators.product(
         # Types for x
-        (Vector, Vector{<:AbstractTracer}, SubArray, SubArray{<:AbstractTracer}),
+        (Vector, Vector{<:AbstractTracer}, SubArray, SubArray{<:AbstractTracer,1}),
         # Types for A
         (Matrix, Matrix{<:AbstractTracer}),
         # Types for y
-        (Vector, Vector{<:AbstractTracer}, SubArray, SubArray{<:AbstractTracer}),
+        (Vector, Vector{<:AbstractTracer}, SubArray, SubArray{<:AbstractTracer,1}),
     ),
 )
     @eval LinearAlgebra.dot(x::$Tx, A::$TA, y::$Ty) = LinearAlgebra.dot(x, A * y)
