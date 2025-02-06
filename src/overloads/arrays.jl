@@ -8,6 +8,13 @@ function split_dual_array(A::AbstractArray{D}) where {D<:Dual}
     return primals, tracers
 end
 
+sct_owns_type(::Type) = false
+sct_owns_type(::Type{T}) where {T<:AbstractTracer} = true
+sct_owns_type(::Type{A}) where {A<:AbstractArray{<:AbstractTracer}} = true
+sct_owns_type(::Type{A}) where {T,A<:AbstractArray{T}} = sct_owns_type(T)
+
+nopiracy(types) = any(sct_owns_type, types)
+
 #==================#
 # LinearAlgebra.jl #
 #==================#
@@ -93,14 +100,18 @@ LinearAlgebra.pinv(D::Diagonal{T}) where {T<:AbstractTracer} = inv(D)
 LinearAlgebra.dot(x::T, y::T) where {T<:AbstractTracer} = x * y # no conjugate required on tracers.
 
 # In the future, we will likely have to add more methods.
-for (Tx, TA, Ty) in Iterators.product(
-    (AbstractVector, AbstractVector{<:AbstractTracer}),
-    (AbstractMatrix, AbstractMatrix{<:AbstractTracer}),
-    (AbstractVector, AbstractVector{<:AbstractTracer}),
+for (Tx, TA, Ty) in Iterators.filter(
+    nopiracy, # only keep tuples of types we own 
+    Iterators.product(
+        # Types for x
+        (Vector, Vector{<:AbstractTracer}, SubArray, SubArray{<:AbstractTracer}),
+        # Types for A
+        (Matrix, Matrix{<:AbstractTracer}),
+        # Types for y
+        (Vector, Vector{<:AbstractTracer}, SubArray, SubArray{<:AbstractTracer}),
+    ),
 )
-    if (Tx, TA, Ty) != (AbstractVector, AbstractMatrix, AbstractVector) # avoid type piracy
-        @eval LinearAlgebra.dot(x::$Tx, A::$TA, y::$Ty) = LinearAlgebra.dot(x, A * y)
-    end
+    @eval LinearAlgebra.dot(x::$Tx, A::$TA, y::$Ty) = LinearAlgebra.dot(x, A * y)
 end
 
 ## Division
