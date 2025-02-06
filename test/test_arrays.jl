@@ -1,6 +1,7 @@
 import SparseConnectivityTracer as SCT
 using SparseConnectivityTracer
-using SparseConnectivityTracer: GradientTracer, IndexSetGradientPattern, isemptytracer
+using SparseConnectivityTracer:
+    GradientTracer, IndexSetGradientPattern, isemptytracer, MissingPrimalError
 using Test
 
 using LinearAlgebra: Symmetric, Diagonal, diagind
@@ -24,8 +25,8 @@ function sameidx(s1::AbstractSet, s2::AbstractSet)
         return true
     else
         println("Index sets don't match:")
-        println(s1)
-        println(s2)
+        println("Detected:  ", s1)
+        println("Reference: ", s2)
         return false
     end
 end
@@ -411,6 +412,13 @@ end
     ty = [t3, t4]
     tA = [idx2tracer(9) idx2tracer(10); idx2tracer(11) idx2tracer(12)]
 
+    rx = rand(2)
+    ry = rand(2)
+    rA = rand(2, 2)
+    sx = sparse([1; 0])
+    sy = sparse([0; 1])
+    sA = sparse([1 0; 0 2])
+
     @testset "scalar-scalar" begin
         @test sameidx(dot(t1, t2), 1:4)
         @test sameidx(dot(t1, t3), [1, 3, 4, 5, 6])
@@ -419,8 +427,12 @@ end
     end
     @testset "vector-vector" begin
         @test sameidx(dot(tx, ty), 1:8)
-        @test sameidx(dot(tx, rand(2)), 1:4)
-        @test sameidx(dot(rand(2), ty), 5:8)
+        @test sameidx(dot(tx, ry), 1:4)
+        @test sameidx(dot(rx, ty), 5:8)
+        @testset "SparseArrays" begin
+            @test sameidx(dot(tx, sy), [2, 4])
+            @test sameidx(dot(sx, ty), 5:6)
+        end
         @test_throws DimensionMismatch dot(tx, rand(3))
         @test_throws DimensionMismatch dot(rand(3), ty)
 
@@ -430,13 +442,31 @@ end
         @test isemptytracer(out)
     end
     @testset "vector-Matrix-vector" begin
-        @test sameidx(dot(tx, rand(2, 2), rand(2)), 1:4)
-        @test sameidx(dot(tx, tA, rand(2)), vcat(1:4, 9:12))
-        @test sameidx(dot(tx, rand(2, 2), ty), 1:8)
+        @test sameidx(dot(tx, rA, ry), 1:4)
+        @test sameidx(dot(tx, tA, ry), vcat(1:4, 9:12))
+        @test sameidx(dot(tx, rA, ty), 1:8)
         @test sameidx(dot(tx, tA, ty), 1:12)
-        @test sameidx(dot(rand(2), tA, rand(2)), 9:12)
-        @test sameidx(dot(rand(2), tA, ty), 5:12)
-        @test sameidx(dot(rand(2), rand(2, 2), ty), 5:8)
+        @test sameidx(dot(rx, tA, ry), 9:12)
+        @test sameidx(dot(rx, tA, ty), 5:12)
+        @test sameidx(dot(rx, rA, ty), 5:8)
+
+        @testset "SparseArrays" begin
+            # Some tests are broken since there is no specialized support for SparseArrays.
+            # The purpose of these tests is to catch ambiguity errors.
+            @test sameidx(dot(tx, sA, ry), 1:4)
+            @test sameidx(dot(tx, rA, sy), 1:4)
+            @test_broken sameidx(dot(tx, sA, sy), [2, 4])  # overly conservative
+            @test sameidx(dot(tx, tA, sy), [1, 2, 3, 4, 10, 12])
+            @test sameidx(dot(tx, sA, ty), 1:8)
+            @test sameidx(dot(tx, tA, ty), 1:12)
+            @test_broken sameidx(dot(sx, tA, ry), [9, 10]) # overly conservative
+            @test sameidx(dot(rx, tA, sy), [10, 12])
+            @test_broken sameidx(dot(sx, tA, sy), 10) # overly conservative
+            @test_throws MissingPrimalError sameidx(dot(sx, tA, ty), 5:10)
+            @test_throws MissingPrimalError sameidx(dot(sx, rA, ty), 5:8)
+            @test sameidx(dot(rx, sA, ty), 5:8)
+            @test_broken sameidx(dot(sx, sA, ty), [5, 6]) # overly conservative
+        end
     end
 end
 
