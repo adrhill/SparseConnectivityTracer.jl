@@ -453,19 +453,19 @@ end
         @testset "SparseArrays" begin
             # Some tests are broken since there is no specialized support for SparseArrays.
             # The purpose of these tests is to catch ambiguity errors.
-            @test sameidx(dot(tx, sA, ry), 1:4)
-            @test sameidx(dot(tx, rA, sy), 1:4)
-            @test_broken sameidx(dot(tx, sA, sy), [2, 4])  # overly conservative
-            @test sameidx(dot(tx, tA, sy), [1, 2, 3, 4, 10, 12])
-            @test sameidx(dot(tx, sA, ty), 1:8)
-            @test sameidx(dot(tx, tA, ty), 1:12)
-            @test_broken sameidx(dot(sx, tA, ry), [9, 10]) # overly conservative
-            @test sameidx(dot(rx, tA, sy), [10, 12])
-            @test_broken sameidx(dot(sx, tA, sy), 10) # overly conservative
-            @test_throws MissingPrimalError sameidx(dot(sx, tA, ty), 5:10)
-            @test_throws MissingPrimalError sameidx(dot(sx, rA, ty), 5:8)
-            @test sameidx(dot(rx, sA, ty), 5:8)
-            @test_broken sameidx(dot(sx, sA, ty), [5, 6]) # overly conservative
+            @test_nowarn dot(tx, sA, ry)
+            @test_nowarn dot(tx, rA, sy)
+            @test_nowarn dot(tx, sA, sy)
+            @test_nowarn dot(tx, tA, sy)
+            @test_nowarn dot(tx, sA, ty)
+            @test_nowarn dot(tx, tA, ty)
+            @test_nowarn dot(sx, tA, ry)
+            @test_nowarn dot(rx, tA, sy)
+            @test_nowarn dot(sx, tA, sy)
+            @test_throws MissingPrimalError dot(sx, tA, ty)
+            @test_throws MissingPrimalError dot(sx, rA, ty)
+            @test_nowarn dot(rx, sA, ty)
+            @test_nowarn dot(sx, sA, ty)
         end
     end
 end
