@@ -59,7 +59,6 @@ end
 # Constant functions on types #
 #=============================#
 
-# Methods on variables are in operators.jl 
 for f in
     (:zero, :one, :oneunit, :typemin, :typemax, :eps, :floatmin, :floatmax, :maxintfloat)
     @eval Base.$f(::Type{T}) where {T<:AbstractTracer} = myempty(T)
