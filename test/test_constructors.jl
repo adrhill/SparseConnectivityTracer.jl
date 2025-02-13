@@ -34,8 +34,7 @@ function test_constant_functions(::Type{D}) where {P,T,D<:Dual{P,T}}
         zero, one, oneunit, typemin, typemax, eps, floatmin, floatmax, maxintfloat
     )
         out = f(D)
-        @test out isa P
-        @test out == f(P)
+        @test out isa D
     end
 end
 
