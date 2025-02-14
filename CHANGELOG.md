@@ -1,5 +1,8 @@
 # SparseConnectivityTracer.jl
 
+## Version `v0.6.13`
+* ![Bugfix][badge-bugfix] Return `Dual` on `zero` and friends ([#231])
+
 ## Version `v0.6.12`
 * ![Bugfix][badge-bugfix] Fix for method ambiguities resulting from the 3-argument `dot` methods introduced in `v0.6.11` ([#228])
 
@@ -100,6 +103,7 @@
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#231]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/231
 [#228]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/228
 [#226]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/226
 [#225]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/225
