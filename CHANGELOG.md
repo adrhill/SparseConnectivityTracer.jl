@@ -1,7 +1,7 @@
 # SparseConnectivityTracer.jl
 
 ## Version `v0.6.14`
-* ![Feature][badge-feature] Add stable API for allocation of buffers via `jacobian_buffer` and `hessian_buffer`
+* ![Feature][badge-feature] Add stable API for allocation of buffers via `jacobian_buffer` and `hessian_buffer` ([#232])
 
 ## Version `v0.6.13`
 * ![Bugfix][badge-bugfix] Return `Dual` on `zero` and friends ([#231])
@@ -106,6 +106,7 @@
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#232]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/232
 [#231]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/231
 [#228]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/228
 [#226]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/226
