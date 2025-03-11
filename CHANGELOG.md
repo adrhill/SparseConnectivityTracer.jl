@@ -1,5 +1,8 @@
 # SparseConnectivityTracer.jl
 
+## Version `v0.6.14`
+* ![Feature][badge-feature] Add stable API for allocation of buffers via `jacobian_buffer` and `hessian_buffer`
+
 ## Version `v0.6.13`
 * ![Bugfix][badge-bugfix] Return `Dual` on `zero` and friends ([#231])
 
