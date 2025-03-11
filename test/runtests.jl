@@ -58,6 +58,9 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
             @testset "HessianTracer" begin
                 include("test_hessian.jl")
             end
+            @testset "Buffer allocation" begin
+                include("test_buffers.jl")
+            end
             @testset "Array overloads" begin
                 include("test_arrays.jl")
             end
