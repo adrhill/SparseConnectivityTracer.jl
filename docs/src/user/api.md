@@ -24,3 +24,10 @@ To compute **local** sparsity patterns of `f(x)` at a specific input `x`, use
 TracerLocalSparsityDetector
 ```
 
+## Memory allocation
+
+For developers requiring the allocation of output buffers that support our tracers, we additionally provide
+```@docs
+jacobian_buffer
+hessian_buffer
+```
