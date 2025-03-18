@@ -39,6 +39,7 @@ export TracerLocalSparsityDetector
 # Reexport ADTypes interface
 export jacobian_sparsity, hessian_sparsity
 
+export jacobian_tracer_type, hessian_tracer_type
 export jacobian_buffer, hessian_buffer
 
 end # module

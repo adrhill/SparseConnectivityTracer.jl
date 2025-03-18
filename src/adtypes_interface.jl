@@ -172,18 +172,35 @@ for detector in (:TracerSparsityDetector, :TracerLocalSparsityDetector)
 end
 
 ## Stable API to allow packages like DI to allocate caches of tracers
+
+"""
+    jacobian_tracer_type(x, detector)
+
+Return the tracer type used for Jacobian sparsity detection.
+"""
+jacobian_tracer_type(x, ::TracerSparsityDetector{TG}) where {TG} = TG
+jacobian_tracer_type(x, ::TracerLocalSparsityDetector{TG}) where {TG} = Dual{eltype(x),TG}
+
+"""
+    hessian_tracer_type(x, detector)
+
+Return the tracer type used for Hessian sparsity detection.
+"""
+hessian_tracer_type(x, ::TracerSparsityDetector{TG,TH}) where {TG,TH} = TH
+function hessian_tracer_type(x, ::TracerLocalSparsityDetector{TG,TH}) where {TG,TH}
+    return Dual{eltype(x),TH}
+end
+
 """
     jacobian_buffer(x, detector)
 
 Allocate a buffer similiar to `x` with the required tracer type for Jacobian sparsity detection.
 Thin wrapper around `similar` that doesn't expose internal types.
 """
-jacobian_buffer(x, ::TracerSparsityDetector{TG}) where {TG} = similar(x, TG)
-
-function jacobian_buffer(x, ::TracerLocalSparsityDetector{TG}) where {TG}
-    P = eltype(x)
-    D = Dual{P,TG}
-    return similar(x, D)
+function jacobian_buffer(
+    x, detector::Union{TracerSparsityDetector,TracerLocalSparsityDetector}
+)
+    return similar(x, jacobian_tracer_type(x, detector))
 end
 
 """
@@ -192,10 +209,8 @@ end
 Allocate a buffer similiar to `x` with the required tracer type for Hessian sparsity detection.
 Thin wrapper around `similar` that doesn't expose internal types.
 """
-hessian_buffer(x, ::TracerSparsityDetector{TG,TH}) where {TG,TH} = similar(x, TH)
-
-function hessian_buffer(x, ::TracerLocalSparsityDetector{TG,TH}) where {TG,TH}
-    P = eltype(x)
-    D = Dual{P,TH}
-    return similar(x, D)
+function hessian_buffer(
+    x, detector::Union{TracerSparsityDetector,TracerLocalSparsityDetector}
+)
+    return similar(x, hessian_tracer_type(x, detector))
 end
