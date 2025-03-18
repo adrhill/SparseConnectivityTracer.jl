@@ -109,6 +109,7 @@
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#233]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/233
 [#232]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/232
 [#231]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/231
 [#228]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/228

@@ -178,16 +178,24 @@ end
 
 Return the tracer type used for Jacobian sparsity detection.
 """
-jacobian_tracer_type(x, ::TracerSparsityDetector{TG}) where {TG} = TG
-jacobian_tracer_type(x, ::TracerLocalSparsityDetector{TG}) where {TG} = Dual{eltype(x),TG}
+jacobian_tracer_type(x::AbstractArray{<:Real}, ::TracerSparsityDetector{TG}) where {TG} = TG
+function jacobian_tracer_type(
+    x::AbstractArray{<:Real}, ::TracerLocalSparsityDetector{TG}
+) where {TG}
+    return Dual{eltype(x),TG}
+end
 
 """
     hessian_tracer_type(x, detector)
 
 Return the tracer type used for Hessian sparsity detection.
 """
-hessian_tracer_type(x, ::TracerSparsityDetector{TG,TH}) where {TG,TH} = TH
-function hessian_tracer_type(x, ::TracerLocalSparsityDetector{TG,TH}) where {TG,TH}
+hessian_tracer_type(
+    x::AbstractArray{<:Real}, ::TracerSparsityDetector{TG,TH}
+) where {TG,TH} = TH
+function hessian_tracer_type(
+    x::AbstractArray{<:Real}, ::TracerLocalSparsityDetector{TG,TH}
+) where {TG,TH}
     return Dual{eltype(x),TH}
 end
 
