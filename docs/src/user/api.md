@@ -28,8 +28,8 @@ TracerLocalSparsityDetector
 
 For developers requiring the allocation of output buffers that support our tracers, we additionally provide
 ```@docs
-jacobian_tracer_type
-hessian_tracer_type
+jacobian_eltype
+hessian_eltype
 jacobian_buffer
 hessian_buffer
 ```

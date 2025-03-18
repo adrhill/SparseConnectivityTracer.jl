@@ -1,7 +1,7 @@
 # SparseConnectivityTracer.jl
 
 ## Version `v0.6.15`
-* ![Feature][badge-feature] Add stable API for tracer type via `jacobian_tracer_type` and `hessian_tracer_type` ([#233])
+* ![Feature][badge-feature] Add stable API for tracer type via `jacobian_eltype` and `hessian_eltype` ([#233])
 
 ## Version `v0.6.14`
 * ![Feature][badge-feature] Add stable API for allocation of buffers via `jacobian_buffer` and `hessian_buffer` ([#232])
