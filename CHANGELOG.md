@@ -1,5 +1,8 @@
 # SparseConnectivityTracer.jl
 
+## Version `v0.6.15`
+* ![Feature][badge-feature] Add stable API for tracer type via `jacobian_eltype` and `hessian_eltype` ([#233])
+
 ## Version `v0.6.14`
 * ![Feature][badge-feature] Add stable API for allocation of buffers via `jacobian_buffer` and `hessian_buffer` ([#232])
 
@@ -106,6 +109,7 @@
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#233]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/233
 [#232]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/232
 [#231]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/231
 [#228]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/228
