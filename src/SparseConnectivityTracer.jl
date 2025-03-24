@@ -34,6 +34,9 @@ include("trace_functions.jl")
 include("parse_outputs_to_matrix.jl")
 include("adtypes_interface.jl")
 
+# stub for DataInterpolationsExt
+function get_output_dim end
+
 export TracerSparsityDetector
 export TracerLocalSparsityDetector
 # Reexport ADTypes interface
