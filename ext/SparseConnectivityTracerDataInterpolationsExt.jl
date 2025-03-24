@@ -2,7 +2,8 @@
 # copy another, less complicated one!
 module SparseConnectivityTracerDataInterpolationsExt
 
-using SparseConnectivityTracer: AbstractTracer, Dual, primal, tracer
+import SparseConnectivityTracer as SCT
+using SparseConnectivityTracer: AbstractTracer, Dual, primal, tracer, get_output_dim
 using SparseConnectivityTracer: GradientTracer, gradient_tracer_1_to_1
 using SparseConnectivityTracer: HessianTracer, hessian_tracer_1_to_1
 using FillArrays: Fill # from FillArrays.jl
@@ -25,42 +26,61 @@ import DataInterpolations:
 # Utilities #
 #===========#
 
+# Get output dimension for parameterizing AbstractInterpolations
+# This function was removed together with the output type parameter
+# in DataInterpolations v8: https://github.com/SciML/DataInterpolations.jl/pull/396
+# TODO use DataInterpolations.output_dim instead, which always returns an integer
+# which is 0 for scalar output.
+function SCT.get_output_dim(u::AbstractVector{<:Number})
+    return (1,)
+end
+
+function SCT.get_output_dim(u::AbstractVector)
+    return (length(first(u)),)
+end
+
+function SCT.get_output_dim(u::AbstractArray)
+    return size(u)[1:(end - 1)]
+end
+
 function _sct_interpolate(
-    ::AbstractInterpolation{T,N},
+    ::AbstractInterpolation{T},
     uType::Type{V},
     t::GradientTracer,
     is_der_1_zero,
     is_der_2_zero,
-) where {T,N,V<:AbstractVector}
+) where {T,V<:AbstractVector}
     return gradient_tracer_1_to_1(t, is_der_1_zero)
 end
 function _sct_interpolate(
-    ::AbstractInterpolation{T,N},
+    ::AbstractInterpolation{T},
     uType::Type{V},
     t::HessianTracer,
     is_der_1_zero,
     is_der_2_zero,
-) where {T,N,V<:AbstractVector}
+) where {T,V<:AbstractVector}
     return hessian_tracer_1_to_1(t, is_der_1_zero, is_der_2_zero)
 end
 function _sct_interpolate(
-    ::AbstractInterpolation{T,N},
+    interp::AbstractInterpolation{T},
     uType::Type{M},
     t::GradientTracer,
     is_der_1_zero,
     is_der_2_zero,
-) where {T,N,M<:AbstractMatrix}
+) where {T,M<:AbstractMatrix}
     t = gradient_tracer_1_to_1(t, is_der_1_zero)
+    N = get_output_dim(interp.u)
     return Fill(t, N)
 end
 function _sct_interpolate(
-    ::AbstractInterpolation{T,N},
+    interp::AbstractInterpolation{T},
     uType::Type{M},
     t::HessianTracer,
     is_der_1_zero,
     is_der_2_zero,
-) where {T,N,M<:AbstractMatrix}
+) where {T,M<:AbstractMatrix}
     t = hessian_tracer_1_to_1(t, is_der_1_zero, is_der_2_zero)
+    N = get_output_dim(interp.u)
     return Fill(t, N)
 end
 

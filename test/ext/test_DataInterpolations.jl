@@ -1,6 +1,6 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer: DEFAULT_GRADIENT_TRACER, DEFAULT_HESSIAN_TRACER
-using SparseConnectivityTracer: trace_input, Dual, primal
+using SparseConnectivityTracer: trace_input, Dual, primal, get_output_dim
 using DataInterpolations
 using DataInterpolations: AbstractInterpolation
 
@@ -35,7 +35,8 @@ struct InterpolationTest{N,I<:AbstractInterpolation} # N = output dim. of interp
 end
 function InterpolationTest(
     interp::I; is_der1_zero=false, is_der2_zero=false
-) where {T,N,I<:AbstractInterpolation{T,N}}
+) where {T,I<:AbstractInterpolation{T}}
+    N = get_output_dim(interp.u)
     return InterpolationTest{only(N),I}(interp, is_der1_zero, is_der2_zero)
 end
 testname(t::InterpolationTest{N}) where {N} = "$N-dim $(typeof(t.interp))"
