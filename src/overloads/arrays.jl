@@ -189,18 +189,18 @@ function LinearAlgebra.logabsdet(A::AbstractMatrix{D}) where {D<:Dual}
 end
 function LinearAlgebra.:\(A::AbstractMatrix{D}, B::AbstractVector) where {D<:Dual}
     primals, tracers = split_dual_array(A)
-    p = primals\B
-    t = tracers\B
+    p = primals \ B
+    t = tracers \ B
     return D.(p, t)
 end
 function LinearAlgebra.:\(A::AbstractMatrix, B::AbstractVector{D}) where {D<:Dual}
-    return D.(A)\B
+    return D.(A) \ B
 end
 function LinearAlgebra.:\(A::AbstractMatrix{D}, B::AbstractVector{D}) where {D<:Dual}
     A_primals, A_tracers = split_dual_array(A)
     B_primals, B_tracers = split_dual_array(B)
-    p = A_primals\B_primals
-    t = A_tracers\B_tracers
+    p = A_primals \ B_primals
+    t = A_tracers \ B_tracers
     return D.(p, t)
 end
 
