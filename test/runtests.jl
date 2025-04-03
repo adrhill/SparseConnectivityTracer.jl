@@ -99,6 +99,9 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
                     include("flux.jl")
                 end
             end
+            @testset "RecursiveArrayTools.jl" begin
+                include("recursive_array_tools.jl")
+            end
         end
     end
 

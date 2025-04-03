@@ -16,6 +16,7 @@ DataInterpolations = "82cc6244-b520-54b8-b5a6-8a565e85f1d0"
 LogExpFunctions = "2ab3a3ac-af41-5b50-aa03-7779005ae688"
 NNlib = "872c559c-99b0-510c-b3b7-b6c96a88d5cd"
 NaNMath = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3"
+RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 
 [extensions]
@@ -24,6 +25,7 @@ SparseConnectivityTracerLogExpFunctionsExt = "LogExpFunctions"
 SparseConnectivityTracerNNlibExt = "NNlib"
 SparseConnectivityTracerNaNMathExt = "NaNMath"
 SparseConnectivityTracerSpecialFunctionsExt = "SpecialFunctions"
+SparseConnectivityTracerRecursiveArrayToolsExt = "RecursiveArrayTools"
 
 [compat]
 ADTypes = "1"
@@ -35,6 +37,7 @@ LogExpFunctions = "0.3.28"
 NNlib = "0.8, 0.9"
 NaNMath = "1"
 Random = "<0.0.1, 1"
+RecursiveArrayTools = "3.31.2"
 SparseArrays = "<0.0.1, 1"
 SpecialFunctions = "2.4"
 julia = "1.10"
