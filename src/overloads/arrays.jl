@@ -1,48 +1,3 @@
-"""
-    second_order_or(tracers)
-
-Compute the most conservative elementwise OR of tracer sparsity patterns,
-including second-order interactions to update the `hessian` field of `HessianTracer`.
-
-This is functionally equivalent to:
-```julia
-reduce(^, tracers)
-```
-"""
-function second_order_or(ts::AbstractArray{T}) where {T<:AbstractTracer}
-    # TODO: improve performance
-    return reduce(second_order_or, ts; init=myempty(T))
-end
-
-function second_order_or(a::T, b::T) where {T<:GradientTracer}
-    return gradient_tracer_2_to_1(a, b, false, false)
-end
-function second_order_or(a::T, b::T) where {T<:HessianTracer}
-    return hessian_tracer_2_to_1(a, b, false, false, false, false, false)
-end
-
-"""
-    first_order_or(tracers)
-
-Compute the most conservative elementwise OR of tracer sparsity patterns,
-excluding second-order interactions of `HessianTracer`.
-
-This is functionally equivalent to:
-```julia
-reduce(+, tracers)
-```
-"""
-function first_order_or(ts::AbstractArray{T}) where {T<:AbstractTracer}
-    # TODO: improve performance
-    return reduce(first_order_or, ts; init=myempty(T))
-end
-function first_order_or(a::T, b::T) where {T<:GradientTracer}
-    return gradient_tracer_2_to_1(a, b, false, false)
-end
-function first_order_or(a::T, b::T) where {T<:HessianTracer}
-    return hessian_tracer_2_to_1(a, b, false, true, false, true, true)
-end
-
 #===========#
 # Utilities #
 #===========#
@@ -52,6 +7,13 @@ function split_dual_array(A::AbstractArray{D}) where {D<:Dual}
     tracers = getproperty.(A, :tracer)
     return primals, tracers
 end
+
+sct_owns_type(::Type) = false
+sct_owns_type(::Type{T}) where {T<:AbstractTracer} = true
+sct_owns_type(::Type{A}) where {A<:AbstractArray{<:AbstractTracer}} = true
+sct_owns_type(::Type{A}) where {T,A<:AbstractArray{T}} = sct_owns_type(T)
+
+nopiracy(types) = any(sct_owns_type, types)
 
 #==================#
 # LinearAlgebra.jl #
@@ -111,12 +73,12 @@ function LinearAlgebra.eigen(
 end
 
 ## Inverse
-function LinearAlgebra.inv(A::StridedMatrix{T}) where {T<:AbstractTracer}
+function Base.inv(A::StridedMatrix{T}) where {T<:AbstractTracer}
     LinearAlgebra.checksquare(A)
     t = second_order_or(A)
     return Fill(t, size(A)...)
 end
-function LinearAlgebra.inv(D::Diagonal{T}) where {T<:AbstractTracer}
+function Base.inv(D::Diagonal{T}) where {T<:AbstractTracer}
     ts_in = D.diag
     ts_out = similar(ts_in)
     for i in 1:length(ts_out)
@@ -132,7 +94,25 @@ function LinearAlgebra.pinv(
     t = second_order_or(A)
     return Fill(t, m, n)
 end
-LinearAlgebra.pinv(D::Diagonal{T}) where {T<:AbstractTracer} = LinearAlgebra.inv(D)
+LinearAlgebra.pinv(D::Diagonal{T}) where {T<:AbstractTracer} = inv(D)
+
+## Dot product – adapted from https://github.com/JuliaLang/LinearAlgebra.jl/blob/924dda4d5d26d745fc8993b7ffdfaa80ee0e0c0e/src/generic.jl#L895-L1029
+LinearAlgebra.dot(x::T, y::T) where {T<:AbstractTracer} = x * y # no conjugate required on tracers.
+
+# In the future, we will likely have to add more methods.
+for (Tx, TA, Ty) in Iterators.filter(
+    nopiracy, # only keep tuples of types we own 
+    Iterators.product(
+        # Types for x
+        (Vector, Vector{<:AbstractTracer}, SubArray, SubArray{<:AbstractTracer,1}),
+        # Types for A
+        (Matrix, Matrix{<:AbstractTracer}),
+        # Types for y
+        (Vector, Vector{<:AbstractTracer}, SubArray, SubArray{<:AbstractTracer,1}),
+    ),
+)
+    @eval LinearAlgebra.dot(x::$Tx, A::$TA, y::$Ty) = LinearAlgebra.dot(x, A * y)
+end
 
 ## Division
 function LinearAlgebra.:\(
@@ -143,7 +123,7 @@ function LinearAlgebra.:\(
 end
 
 ## Exponential
-function LinearAlgebra.exp(A::AbstractMatrix{T}) where {T<:AbstractTracer}
+function Base.exp(A::AbstractMatrix{T}) where {T<:AbstractTracer}
     LinearAlgebra.checksquare(A)
     n = size(A, 1)
     t = second_order_or(A)
@@ -166,6 +146,18 @@ function Base.literal_pow(::typeof(^), D::Diagonal{T}, ::Val{0}) where {T<:Abstr
     ts = similar(D.diag)
     ts .= myempty(T)
     return Diagonal(ts)
+end
+
+## clamp!
+Base.clamp!(A::AbstractArray{T}, lo, hi) where {T<:AbstractTracer} = A
+function Base.clamp!(A::AbstractArray{T}, lo::T, hi) where {T<:AbstractTracer}
+    return first_order_or.(A, lo)
+end
+function Base.clamp!(A::AbstractArray{T}, lo, hi::T) where {T<:AbstractTracer}
+    return first_order_or.(A, hi)
+end
+function Base.clamp!(A::AbstractArray{T}, lo::T, hi::T) where {T<:AbstractTracer}
+    return first_order_or.(A, first_order_or(lo, hi))
 end
 
 #==========================#
@@ -204,10 +196,8 @@ end
 # On Tracers, `iszero` and `!iszero` don't return a boolean, 
 # but we need a function that does to handle the structure of the array.
 
-if VERSION >= v"1.9" # _iszero was added in JuliaSparse/SparseArrays.jl#177
-    SparseArrays._iszero(t::AbstractTracer) = isemptytracer(t)
-    SparseArrays._iszero(d::Dual) = isemptytracer(tracer(d)) && iszero(primal(d))
+SparseArrays._iszero(t::AbstractTracer) = isemptytracer(t)
+SparseArrays._iszero(d::Dual) = isemptytracer(tracer(d)) && iszero(primal(d))
 
-    SparseArrays._isnotzero(t::AbstractTracer) = !isemptytracer(t)
-    SparseArrays._isnotzero(d::Dual) = !isemptytracer(tracer(d)) || !iszero(primal(d))
-end
+SparseArrays._isnotzero(t::AbstractTracer) = !isemptytracer(t)
+SparseArrays._isnotzero(d::Dual) = !isemptytracer(tracer(d)) || !iszero(primal(d))

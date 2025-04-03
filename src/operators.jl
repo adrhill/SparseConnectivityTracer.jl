@@ -92,26 +92,10 @@ for op in ops_1_to_1_z
     @eval is_der2_zero_global(::$T) = true
 end
 
-# ops_1_to_1_i:
-# x -> f  == 0
-# ∂f/∂x   == 0
-# ∂²f/∂x² == 0
-ops_1_to_1_i = (
-    zero, one, oneunit,
-    typemin, typemax, eps,
-    floatmin, floatmax, maxintfloat,
-)
-for op in ops_1_to_1_i
-    T = typeof(op)
-    @eval is_der1_zero_global(::$T) = true
-    @eval is_der2_zero_global(::$T) = true
-end
-
 ops_1_to_1 = union(
     ops_1_to_1_s, 
     ops_1_to_1_f, 
     ops_1_to_1_z,
-    ops_1_to_1_i,
 )
 
 ##==================================#
@@ -138,7 +122,7 @@ is_der_cross_zero_local(f::F, x, y) where {F} = is_der_cross_zero_global(f)
 # ∂²f/∂y²  != 0
 # ∂²f/∂x∂y != 0
 ops_2_to_1_ssc = (
-    ^, hypot
+    ^, hypot, atan, log
 )
 for op in ops_2_to_1_ssc
     T = typeof(op)
@@ -223,7 +207,7 @@ for op in ops_2_to_1_fsc
 end
 
 # gradient of x/y: [1/y -x/y²]
-SparseConnectivityTracer.is_der1_arg2_zero_local(::typeof(/), x, y) = iszero(x)
+is_der1_arg2_zero_local(::typeof(/), x, y) = iszero(x)
 
 # ops_2_to_1_fsz: 
 # ∂f/∂x    != 0

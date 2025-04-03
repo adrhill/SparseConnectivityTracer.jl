@@ -1,11 +1,8 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer: Dual, HessianTracer, MissingPrimalError
-using SparseConnectivityTracer: trace_input, create_tracers, pattern, shared
+using SparseConnectivityTracer: create_tracers, pattern, shared
 using Test
-
 using Random: rand, GLOBAL_RNG
-using SpecialFunctions: erf, beta
-using NNlib: NNlib
 
 # Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
 include("tracers_definitions.jl")
@@ -13,8 +10,8 @@ REAL_TYPES = (Float64, Int, Bool, UInt8, Float16, Rational{Int})
 
 # These exists to be able to quickly run tests in the REPL.
 # NOTE: H gets overwritten inside the testsets.
-method = TracerSparsityDetector()
-H(f, x) = hessian_sparsity(f, x, method)
+detector = TracerSparsityDetector()
+H(f, x) = hessian_sparsity(f, x, detector)
 
 P = first(HESSIAN_PATTERNS)
 T = HessianTracer{P}
@@ -23,8 +20,8 @@ D = Dual{Int,T}
 @testset "Global Hessian" begin
     @testset "$P" for P in HESSIAN_PATTERNS
         T = HessianTracer{P}
-        method = TracerSparsityDetector(; hessian_tracer_type=T)
-        H(f, x) = hessian_sparsity(f, x, method)
+        detector = TracerSparsityDetector(; hessian_tracer_type=T)
+        H(f, x) = hessian_sparsity(f, x, detector)
 
         @testset "Trivial examples" begin
             @test H(identity, rand()) ≈ [0;;]
@@ -70,6 +67,16 @@ D = Dual{Int,T}
             @test H(x -> round(Float16, x), 1.1) ≈ [0;;]
             @test H(x -> round(x, RoundNearestTiesAway), 1.1) ≈ [0;;]
             @test H(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
+        end
+
+        @testset "Three-argument operators" begin
+            @test H(x -> clamp(x, 0.1, 0.9), rand()) == [0;;]
+            @test H(x -> clamp(x[1], x[2], 0.9), rand(2)) == [0 0; 0 0]
+            @test H(x -> clamp(x[1], 0.1, x[2]), rand(2)) == [0 0; 0 0]
+            @test H(x -> clamp(x[1], x[2], x[3]), rand(3)) == [0 0 0; 0 0 0; 0 0 0]
+            @test H(x -> x[1] * clamp(x[1], x[2], x[3]), rand(3)) == [1 1 1; 1 0 0; 1 0 0]
+            @test H(x -> x[2] * clamp(x[1], x[2], x[3]), rand(3)) == [0 1 0; 1 1 1; 0 1 0]
+            @test H(x -> x[3] * clamp(x[1], x[2], x[3]), rand(3)) == [0 0 1; 0 0 1; 1 1 1]
         end
 
         @testset "Random" begin
@@ -227,28 +234,26 @@ D = Dual{Int,T}
         end
 
         @testset "ifelse and comparisons" begin
-            if VERSION >= v"1.8"
-                @test H(x -> ifelse(x[1], x[1]^x[2], x[3] * x[4]), rand(4)) == [
-                    1  1  0  0
-                    1  1  0  0
-                    0  0  0  1
-                    0  0  1  0
-                ]
+            @test H(x -> ifelse(x[1], x[1]^x[2], x[3] * x[4]), rand(4)) == [
+                1  1  0  0
+                1  1  0  0
+                0  0  0  1
+                0  0  1  0
+            ]
 
-                @test H(x -> ifelse(x[1], x[1]^x[2], 1.0), rand(4)) == [
-                    1  1  0  0
-                    1  1  0  0
-                    0  0  0  0
-                    0  0  0  0
-                ]
+            @test H(x -> ifelse(x[1], x[1]^x[2], 1.0), rand(4)) == [
+                1  1  0  0
+                1  1  0  0
+                0  0  0  0
+                0  0  0  0
+            ]
 
-                @test H(x -> ifelse(x[1], 1.0, x[3] * x[4]), rand(4)) == [
-                    0  0  0  0
-                    0  0  0  0
-                    0  0  0  1
-                    0  0  1  0
-                ]
-            end
+            @test H(x -> ifelse(x[1], 1.0, x[3] * x[4]), rand(4)) == [
+                0  0  0  0
+                0  0  0  0
+                0  0  0  1
+                0  0  1  0
+            ]
 
             function f_ampgo07(x)
                 return (x[1] <= 0) * convert(eltype(x), Inf) +
@@ -262,18 +267,6 @@ D = Dual{Int,T}
             # TypeError: non-boolean (SparseConnectivityTracer.GradientTracer{BitSet}) used in boolean context
             @test_throws TypeError H(x -> x[1] > x[2] ? x[1]^x[2] : x[3] * x[4], rand(4))
         end
-
-        @testset "SpecialFunctions.jl" begin
-            @test H(x -> erf(x[1]), rand(2)) == [
-                1 0
-                0 0
-            ]
-            @test H(x -> beta(x[1], x[2]), rand(3)) == [
-                1 1 0
-                1 1 0
-                0 0 0
-            ]
-        end
         yield()
     end
 end
@@ -281,8 +274,8 @@ end
 @testset "Local Hessian" begin
     @testset "$P" for P in HESSIAN_PATTERNS
         T = HessianTracer{P}
-        method = TracerLocalSparsityDetector(; hessian_tracer_type=T)
-        H(f, x) = hessian_sparsity(f, x, method)
+        detector = TracerLocalSparsityDetector(; hessian_tracer_type=T)
+        H(f, x) = hessian_sparsity(f, x, detector)
 
         @testset "Trivial examples" begin
             f1(x) = x[1] + x[2] * x[3] + 1 / x[4] + x[2] * max(x[1], x[5])
@@ -394,47 +387,24 @@ end
             @test H(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
         end
 
+        @testset "Three-argument operators" begin
+            @test H(x -> x * clamp(x, 0.0, 1.0), 0.5) == [1;;]
+            @test H(x -> x * clamp(x, 0.0, 1.0), -0.5) == [0;;]
+            @test H(x -> sum(x) * clamp(x[1], x[2], 1.0), [0.5, 0.0]) == [1 1; 1 0]
+            @test H(x -> sum(x) * clamp(x[1], x[2], 1.0), [0.5, 0.6]) == [0 1; 1 1]
+            @test H(x -> sum(x) * clamp(x[1], 0.0, x[2]), [0.5, 1.0]) == [1 1; 1 0]
+            @test H(x -> sum(x) * clamp(x[1], 0.0, x[2]), [0.5, 0.4]) == [0 1; 1 1]
+            @test H(x -> sum(x) * clamp(x[1], x[2], x[3]), [0.5, 0.0, 1.0]) ==
+                [1 1 1; 1 0 0; 1 0 0]
+            @test H(x -> sum(x) * clamp(x[1], x[2], x[3]), [0.5, 0.6, 1.0]) ==
+                [0 1 0; 1 1 1; 0 1 0]
+            @test H(x -> sum(x) * clamp(x[1], x[2], x[3]), [0.5, 0.0, 0.4]) ==
+                [0 0 1; 0 0 1; 1 1 1]
+        end
+
         @testset "Random" begin
             @test H(x -> rand(typeof(x)), 1) ≈ [0;;]
             @test H(x -> rand(GLOBAL_RNG, typeof(x)), 1) ≈ [0;;]
-        end
-
-        @testset "NNlib" begin
-            @test H(NNlib.relu, -1) ≈ [0;;]
-            @test H(NNlib.relu, 1) ≈ [0;;]
-            @test H(NNlib.elu, -1) ≈ [1;;]
-            @test H(NNlib.elu, 1) ≈ [0;;]
-            @test H(NNlib.celu, -1) ≈ [1;;]
-            @test H(NNlib.celu, 1) ≈ [0;;]
-            @test H(NNlib.selu, -1) ≈ [1;;]
-            @test H(NNlib.selu, 1) ≈ [0;;]
-
-            @test H(NNlib.relu6, -1) ≈ [0;;]
-            @test H(NNlib.relu6, 1) ≈ [0;;]
-            @test H(NNlib.relu6, 7) ≈ [0;;]
-
-            @test H(NNlib.trelu, 0.9) ≈ [0;;]
-            @test H(NNlib.trelu, 1.1) ≈ [0;;]
-
-            @test H(NNlib.swish, -5) ≈ [1;;]
-            @test H(NNlib.swish, 0) ≈ [1;;]
-            @test H(NNlib.swish, 5) ≈ [1;;]
-
-            @test H(NNlib.hardswish, -5) ≈ [0;;]
-            @test H(NNlib.hardswish, 0) ≈ [1;;]
-            @test H(NNlib.hardswish, 5) ≈ [0;;]
-
-            @test H(NNlib.hardσ, -4) ≈ [0;;]
-            @test H(NNlib.hardσ, 0) ≈ [0;;]
-            @test H(NNlib.hardσ, 4) ≈ [0;;]
-
-            @test H(NNlib.hardtanh, -2) ≈ [0;;]
-            @test H(NNlib.hardtanh, 0) ≈ [0;;]
-            @test H(NNlib.hardtanh, 2) ≈ [0;;]
-
-            @test H(NNlib.softshrink, -1) ≈ [0;;]
-            @test H(NNlib.softshrink, 0) ≈ [0;;]
-            @test H(NNlib.softshrink, 1) ≈ [0;;]
         end
         yield()
     end

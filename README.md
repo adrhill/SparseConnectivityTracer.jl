@@ -1,10 +1,11 @@
 # SparseConnectivityTracer.jl
 |               |                                                                     | 
 |:--------------|:--------------------------------------------------------------------|
-| Documentation | [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://adrhill.github.io/SparseConnectivityTracer.jl/stable/) [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://adrhill.github.io/SparseConnectivityTracer.jl/dev/) |
+| Documentation | [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://adrhill.github.io/SparseConnectivityTracer.jl/stable/) [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://adrhill.github.io/SparseConnectivityTracer.jl/dev/) [![Changelog](https://img.shields.io/badge/news-changelog-yellow.svg)](https://github.com/adrhill/SparseConnectivityTracer.jl/blob/main/CHANGELOG.md) |
 | Build Status  | [![Build Status](https://github.com/adrhill/SparseConnectivityTracer.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/adrhill/SparseConnectivityTracer.jl/actions/workflows/CI.yml?query=branch%3Amain) [![Coverage](https://codecov.io/gh/adrhill/SparseConnectivityTracer.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/adrhill/SparseConnectivityTracer.jl) [![Aqua](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl) [![JET](https://img.shields.io/badge/%F0%9F%9B%A9%EF%B8%8F_tested_with-JET.jl-233f9a.svg)](https://github.com/aviatesk/JET.jl) |
 | Code Style    | [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle) [![ColPrac: Contributor's Guide on Collaborative Practices for Community Packages](https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviolet)](https://github.com/SciML/ColPrac) | 
-| Citation      | [![DOI](https://zenodo.org/badge/778978853.svg)](https://zenodo.org/doi/10.5281/zenodo.13138554) |
+| Downloads     | [![Downloads](https://img.shields.io/badge/dynamic/json?url=http%3A%2F%2Fjuliapkgstats.com%2Fapi%2Fv1%2Fmonthly_downloads%2FSparseConnectivityTracer&query=total_requests&suffix=%2Fmonth&label=Downloads)](http://juliapkgstats.com/pkg/SparseConnectivityTracer) [![Dependents](https://juliahub.com/docs/General/SparseConnectivityTracer/stable/deps.svg)](https://juliahub.com/ui/Packages/General/SparseConnectivityTracer?t=2) |
+| Citation      | [![arXiv DOI](https://img.shields.io/badge/DOI-10.48550/arXiv.2501.17737-red)](https://arxiv.org/abs/2501.17737) [![Zenodo DOI](https://zenodo.org/badge/778978853.svg)](https://zenodo.org/doi/10.5281/zenodo.13138554) |
 
 Fast Jacobian and Hessian sparsity detection via operator-overloading.
 
@@ -128,9 +129,29 @@ julia> hessian_sparsity(f, [1 3 2 4], detector)
 
 ## ADTypes.jl compatibility
 SparseConnectivityTracer uses [ADTypes.jl](https://github.com/SciML/ADTypes.jl)'s interface for [sparsity detection](https://sciml.github.io/ADTypes.jl/stable/#Sparsity-detector),
-making it compatible with [DifferentiationInterface.jl](https://github.com/gdalle/DifferentiationInterface.jl)'s [sparse automatic differentiation](https://gdalle.github.io/DifferentiationInterface.jl/DifferentiationInterface/stable/tutorial2/) functionality.
+making it compatible with [DifferentiationInterface.jl](https://github.com/gdalle/DifferentiationInterface.jl)'s [sparse automatic differentiation](https://juliadiff.org/DifferentiationInterface.jl/DifferentiationInterface/stable/tutorials/advanced/#Sparsity) functionality.
 In fact, the functions `jacobian_sparsity` and `hessian_sparsity` are re-exported from ADTypes.
 
 ## Related packages
 * [SparseDiffTools.jl](https://github.com/JuliaDiff/SparseDiffTools.jl): automatic sparsity detection via Symbolics.jl and Cassette.jl
 * [SparsityTracing.jl](https://github.com/PALEOtoolkit/SparsityTracing.jl): automatic Jacobian sparsity detection using an algorithm based on SparsLinC by Bischof et al. (1996)
+
+## Citation
+
+If you use SparseConnectivityTracer in your research, please cite our preprint [*Sparser, Better, Faster, Stronger: Efficient Automatic Differentiation for Sparse Jacobians and Hessians*](https://arxiv.org/abs/2501.17737):
+
+```bibtex
+@misc{hill2025sparserbetterfasterstronger,
+      title={Sparser, Better, Faster, Stronger: Efficient Automatic Differentiation for Sparse Jacobians and Hessians}, 
+      author={Adrian Hill and Guillaume Dalle},
+      year={2025},
+      eprint={2501.17737},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2501.17737}, 
+}
+```
+
+## Acknowledgements
+
+Adrian Hill gratefully acknowledges funding from the German Federal Ministry of Education and Research under the grant BIFOLD25B.

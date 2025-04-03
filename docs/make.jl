@@ -1,4 +1,5 @@
 using SparseConnectivityTracer
+using ADTypes
 using Documenter
 using DocumenterMermaid
 
@@ -13,7 +14,7 @@ DocMeta.setdocmeta!(
 )
 
 makedocs(;
-    modules=[SparseConnectivityTracer],
+    modules=[SparseConnectivityTracer, ADTypes],
     authors="Adrian Hill <gh@adrianhill.de>",
     sitename="SparseConnectivityTracer.jl",
     format=Documenter.HTML(;
@@ -25,8 +26,11 @@ makedocs(;
         "Getting Started" => "index.md",
         "User Documentation" =>
             ["user/global_vs_local.md", "user/limitations.md", "user/api.md"],
-        "Developer Documentation" =>
-            ["dev/how_it_works.md", "dev/adding_overloads.md", "dev/api.md"],
+        "Developer Documentation" => [
+            "internals/how_it_works.md",
+            "internals/adding_overloads.md",
+            "internals/api.md",
+        ],
     ],
     warnonly=[:missing_docs],
 )

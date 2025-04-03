@@ -1,12 +1,51 @@
 module SparseConnectivityTracerSpecialFunctionsExt
 
-if isdefined(Base, :get_extension)
-    import SparseConnectivityTracer as SCT
-    using SpecialFunctions
-else
-    import ..SparseConnectivityTracer as SCT
-    using ..SpecialFunctions
-end
+import SparseConnectivityTracer as SCT
+using SpecialFunctions:
+    SpecialFunctions,
+    airyai,
+    airyaiprime,
+    airyaiprimex,
+    airyaix,
+    airybi,
+    airybiprime,
+    airybiprimex,
+    airybix,
+    besseli,
+    besselix,
+    besselj,
+    besselj0,
+    besselj1,
+    besseljx,
+    besselk,
+    besselkx,
+    bessely,
+    bessely0,
+    bessely1,
+    besselyx,
+    beta,
+    cosint,
+    digamma,
+    ellipe,
+    ellipk,
+    erf,
+    erfc,
+    erfcinv,
+    erfcx,
+    erfinv,
+    expint,
+    expinti,
+    expintx,
+    gamma,
+    invdigamma,
+    jinc,
+    logbeta,
+    logerfc,
+    loggamma,
+    sinint,
+    sphericalbesselj,
+    sphericalbessely,
+    trigamma
 
 #=
 Complex functions are ignored.
@@ -111,10 +150,8 @@ end
 ops_2_to_1 = ops_2_to_1_ssc
 
 ## Overloads
-eval(SCT.overload_gradient_1_to_1(:SpecialFunctions, ops_1_to_1))
-eval(SCT.overload_gradient_2_to_1(:SpecialFunctions, ops_2_to_1))
-eval(SCT.overload_hessian_1_to_1(:SpecialFunctions, ops_1_to_1))
-eval(SCT.overload_hessian_2_to_1(:SpecialFunctions, ops_2_to_1))
+eval(SCT.generate_code_1_to_1(:SpecialFunctions, ops_1_to_1))
+eval(SCT.generate_code_2_to_1(:SpecialFunctions, ops_2_to_1))
 
 ## List operators for later testing
 SCT.test_operators_1_to_1(::Val{:SpecialFunctions}) = ops_1_to_1

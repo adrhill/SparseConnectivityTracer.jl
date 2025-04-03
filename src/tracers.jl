@@ -39,22 +39,10 @@ end
 
 GradientTracer{P}(::Real) where {P} = myempty(GradientTracer{P})
 GradientTracer{P}(t::GradientTracer{P}) where {P} = t
-GradientTracer(t::GradientTracer) = t
 
 isemptytracer(t::GradientTracer) = t.isempty
 pattern(t::GradientTracer) = t.pattern
 gradient(t::GradientTracer) = gradient(pattern(t))
-
-function Base.show(io::IO, t::GradientTracer)
-    print(io, typeof(t))
-    if isemptytracer(t)
-        print(io, "()")
-    else
-        printsorted(io, gradient(t))
-    end
-    println(io)
-    return nothing
-end
 
 #===============#
 # HessianTracer #
@@ -81,26 +69,11 @@ end
 
 HessianTracer{P}(::Real) where {P} = myempty(HessianTracer{P})
 HessianTracer{P}(t::HessianTracer{P}) where {P} = t
-HessianTracer(t::HessianTracer) = t
 
 isemptytracer(t::HessianTracer) = t.isempty
 pattern(t::HessianTracer) = t.pattern
 gradient(t::HessianTracer) = gradient(pattern(t))
 hessian(t::HessianTracer) = hessian(pattern(t))
-
-function Base.show(io::IO, t::HessianTracer)
-    print(io, typeof(t))
-    if isemptytracer(t)
-        print(io, "()")
-    else
-        print(io, "(\n", "  Gradient:")
-        printlnsorted(io, gradient(t))
-        print(io, "  Hessian: ")
-        printlnsorted(io, hessian(t))
-        println(io, ")")
-    end
-    return nothing
-end
 
 #================================#
 # Dual numbers for local tracing #
@@ -147,8 +120,6 @@ end
 
 shared(::Type{T}) where {P,T<:HessianTracer{P}} = shared(P)
 
-myempty(::T) where {T<:AbstractTracer} = myempty(T)
-
 myempty(::Type{GradientTracer{P}}) where {P} = GradientTracer{P}(myempty(P), true)
 myempty(::Type{HessianTracer{P}}) where {P}  = HessianTracer{P}(myempty(P), true)
 
@@ -170,20 +141,4 @@ function create_tracers(
 ) where {P,T,D<:Dual{P,T},N}
     tracers = create_tracers(T, xs, indices)
     return D.(xs, tracers)
-end
-
-# Pretty-printing of Dual tracers
-name(::Type{T}) where {T<:GradientTracer} = "GradientTracer"
-name(::Type{T}) where {T<:HessianTracer}  = "HessianTracer"
-name(::Type{D}) where {P,T,D<:Dual{P,T}}  = "Dual-$(name(T))"
-name(::T) where {T<:AbstractTracer}       = name(T)
-name(::D) where {D<:Dual}                 = name(D)
-
-# Utilities for printing sets
-printsorted(io::IO, x) = Base.show_delim_array(io, sort(x), "(", ',', ')', true)
-printsorted(io::IO, s::AbstractSet) = printsorted(io, collect(s))
-function printlnsorted(io::IO, x)
-    printsorted(io, x)
-    println(io)
-    return nothing
 end

@@ -59,9 +59,10 @@ end
 # Constant functions on types #
 #=============================#
 
-# Methods on variables are in operators.jl 
 for f in
     (:zero, :one, :oneunit, :typemin, :typemax, :eps, :floatmin, :floatmax, :maxintfloat)
     @eval Base.$f(::Type{T}) where {T<:AbstractTracer} = myempty(T)
-    @eval Base.$f(::Type{D}) where {P,T,D<:Dual{P,T}} = $f(P) # only return primal
+    @eval Base.$f(::Type{D}) where {P,T,D<:Dual{P,T}} = Dual($f(P), myempty(T))
+    @eval Base.$f(::T) where {T<:AbstractTracer} = myempty(T)
+    @eval Base.$f(d::D) where {P,T,D<:Dual{P,T}} = Dual($f(d.primal), myempty(T))
 end

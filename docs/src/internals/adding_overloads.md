@@ -10,12 +10,17 @@ Having read our guide [*"How SparseConnectivityTracer works"*](@ref how-sct-work
 [`Dual`](@ref SparseConnectivityTracer.Dual)
 to improve the performance of your functions or to work around some of SCT's [limitations](@ref limitations).
 
+## Avoid hand-written overloads
+
 !!! warning "Don't overload manually"
-    We strongly discourage you from manually adding methods on our tracer types.
-    Instead, use the same mechanisms we use ourselves.
+    If you want to overload a `Function` that takes `Real` arguments, 
+    we strongly discourage you from manually adding methods to your function that use our internal tracer types.
+
+    Instead, use the same code generation mechanisms that we use.
+    This page of the documentation shows you how.
 
 !!! tip "Copy one of our package extensions"
-    The easiest way to add overloads is to copy one of our [package extensions](https://github.com/adrhill/SparseConnectivityTracer.jl/tree/main/ext) and to modify it.
+    The easiest way to add overloads is to copy one of our package extensions, [e.g. our NNlib extension](https://github.com/adrhill/SparseConnectivityTracer.jl/blob/main/ext/SparseConnectivityTracerNNlibExt.jl), and to modify it.
     Please upstream your additions by opening a pull request! We will help you out to get your feature merged.
 
 ## Operator classification
@@ -39,15 +44,15 @@ Depending on the type of function you're dealing with, you will have to specify 
 
     | Function                                   | Meaning                                                 |
     |:-------------------------------------------|:--------------------------------------------------------|
-    | `is_der1_zero_global(::typeof{f}) = false` | $\frac{\partial f}{\partial x} \neq 0$ for some $x$     | 
-    | `is_der2_zero_global(::typeof{f}) = false` | $\frac{\partial^2 f}{\partial x^2} \neq 0$ for some $x$ | 
+    | `is_der1_zero_global(::typeof(f)) = false` | $\frac{\partial f}{\partial x} \neq 0$ for some $x$     | 
+    | `is_der2_zero_global(::typeof(f)) = false` | $\frac{\partial^2 f}{\partial x^2} \neq 0$ for some $x$ | 
 
     Optionally, to increase the sparsity of [`TracerLocalSparsityDetector`](@ref), you can additionally implement
 
     | Function                                     | Meaning                                                  |
     |:---------------------------------------------|:---------------------------------------------------------|
-    | `is_der1_zero_local(::typeof{f}, x) = false` | $\frac{\partial f}{\partial x} \neq 0$ for given $x$     | 
-    | `is_der2_zero_local(::typeof{f}, x) = false` | $\frac{\partial^2 f}{\partial x^2} \neq 0$ for given $x$ | 
+    | `is_der1_zero_local(::typeof(f), x) = false` | $\frac{\partial f}{\partial x} \neq 0$ for given $x$     | 
+    | `is_der2_zero_local(::typeof(f), x) = false` | $\frac{\partial^2 f}{\partial x^2} \neq 0$ for given $x$ | 
 
     These fall back to 
 
@@ -61,21 +66,21 @@ Depending on the type of function you're dealing with, you will have to specify 
 
     | Function                                        | Meaning                                                            |
     |:------------------------------------------------|:-------------------------------------------------------------------|
-    | `is_der1_arg1_zero_global(::typeof{f}) = false` | $\frac{\partial f}{\partial x} \neq 0$ for some $x,y$              | 
-    | `is_der2_arg1_zero_global(::typeof{f}) = false` | $\frac{\partial^2 f}{\partial x^2} \neq 0$ for some $x,y$          | 
-    | `is_der1_arg2_zero_global(::typeof{f}) = false` | $\frac{\partial f}{\partial y} \neq 0$ for some $x,y$              | 
-    | `is_der2_arg2_zero_global(::typeof{f}) = false` | $\frac{\partial^2 f}{\partial y^2} \neq 0$ for some $x,y$          | 
-    | `is_der_cross_zero_global(::typeof{f}) = false` | $\frac{\partial^2 f}{\partial x \partial y} \neq 0$ for some $x,y$ | 
+    | `is_der1_arg1_zero_global(::typeof(f)) = false` | $\frac{\partial f}{\partial x} \neq 0$ for some $x,y$              | 
+    | `is_der2_arg1_zero_global(::typeof(f)) = false` | $\frac{\partial^2 f}{\partial x^2} \neq 0$ for some $x,y$          | 
+    | `is_der1_arg2_zero_global(::typeof(f)) = false` | $\frac{\partial f}{\partial y} \neq 0$ for some $x,y$              | 
+    | `is_der2_arg2_zero_global(::typeof(f)) = false` | $\frac{\partial^2 f}{\partial y^2} \neq 0$ for some $x,y$          | 
+    | `is_der_cross_zero_global(::typeof(f)) = false` | $\frac{\partial^2 f}{\partial x \partial y} \neq 0$ for some $x,y$ | 
 
     Optionally, to increase the sparsity of [`TracerLocalSparsityDetector`](@ref), you can additionally implement
 
     | Function                                             | Meaning                                                             |
     |:-----------------------------------------------------|:--------------------------------------------------------------------|
-    | `is_der1_arg1_zero_local(::typeof{f}, x, y) = false` | $\frac{\partial f}{\partial x} \neq 0$ for given $x,y$              | 
-    | `is_der2_arg1_zero_local(::typeof{f}, x, y) = false` | $\frac{\partial^2 f}{\partial x^2} \neq 0$ for given $x,y$          | 
-    | `is_der1_arg2_zero_local(::typeof{f}, x, y) = false` | $\frac{\partial f}{\partial x} \neq 0$ for given $x,y$              | 
-    | `is_der2_arg2_zero_local(::typeof{f}, x, y) = false` | $\frac{\partial^2 f}{\partial x^2} \neq 0$ for given $x,y$          | 
-    | `is_der_cross_zero_local(::typeof{f}, x, y) = false` | $\frac{\partial^2 f}{\partial x \partial y} \neq 0$ for given $x,y$ | 
+    | `is_der1_arg1_zero_local(::typeof(f), x, y) = false` | $\frac{\partial f}{\partial x} \neq 0$ for given $x,y$              | 
+    | `is_der2_arg1_zero_local(::typeof(f), x, y) = false` | $\frac{\partial^2 f}{\partial x^2} \neq 0$ for given $x,y$          | 
+    | `is_der1_arg2_zero_local(::typeof(f), x, y) = false` | $\frac{\partial f}{\partial x} \neq 0$ for given $x,y$              | 
+    | `is_der2_arg2_zero_local(::typeof(f), x, y) = false` | $\frac{\partial^2 f}{\partial x^2} \neq 0$ for given $x,y$          | 
+    | `is_der_cross_zero_local(::typeof(f), x, y) = false` | $\frac{\partial^2 f}{\partial x \partial y} \neq 0$ for given $x,y$ | 
 
 
     These fall back to 
@@ -92,19 +97,19 @@ Depending on the type of function you're dealing with, you will have to specify 
 
     | Function                                       | Meaning                                                   |
     |:-----------------------------------------------|:----------------------------------------------------------|
-    | `is_der1_out1_zero_local(::typeof{f}) = false` | $\frac{\partial f_1}{\partial x} \neq 0$ for some $x$     | 
-    | `is_der2_out1_zero_local(::typeof{f}) = false` | $\frac{\partial^2 f_1}{\partial x^2} \neq 0$ for some $x$ | 
-    | `is_der1_out2_zero_local(::typeof{f}) = false` | $\frac{\partial f_2}{\partial x} \neq 0$ for some $x$     | 
-    | `is_der2_out2_zero_local(::typeof{f}) = false` | $\frac{\partial^2 f_2}{\partial x^2} \neq 0$ for some $x$ | 
+    | `is_der1_out1_zero_local(::typeof(f)) = false` | $\frac{\partial f_1}{\partial x} \neq 0$ for some $x$     | 
+    | `is_der2_out1_zero_local(::typeof(f)) = false` | $\frac{\partial^2 f_1}{\partial x^2} \neq 0$ for some $x$ | 
+    | `is_der1_out2_zero_local(::typeof(f)) = false` | $\frac{\partial f_2}{\partial x} \neq 0$ for some $x$     | 
+    | `is_der2_out2_zero_local(::typeof(f)) = false` | $\frac{\partial^2 f_2}{\partial x^2} \neq 0$ for some $x$ | 
 
     Optionally, to increase the sparsity of [`TracerLocalSparsityDetector`](@ref), you can additionally implement
 
     | Function                                          | Meaning                                                    |
     |:--------------------------------------------------|:-----------------------------------------------------------|
-    | `is_der1_out1_zero_local(::typeof{f}, x) = false` | $\frac{\partial f_1}{\partial x} \neq 0$ for given $x$     | 
-    | `is_der2_out1_zero_local(::typeof{f}, x) = false` | $\frac{\partial^2 f_1}{\partial x^2} \neq 0$ for given $x$ | 
-    | `is_der1_out2_zero_local(::typeof{f}, x) = false` | $\frac{\partial f_2}{\partial x} \neq 0$ for given $x$     | 
-    | `is_der2_out2_zero_local(::typeof{f}, x) = false` | $\frac{\partial^2 f_2}{\partial x^2} \neq 0$ for given $x$ | 
+    | `is_der1_out1_zero_local(::typeof(f), x) = false` | $\frac{\partial f_1}{\partial x} \neq 0$ for given $x$     | 
+    | `is_der2_out1_zero_local(::typeof(f), x) = false` | $\frac{\partial^2 f_1}{\partial x^2} \neq 0$ for given $x$ | 
+    | `is_der1_out2_zero_local(::typeof(f), x) = false` | $\frac{\partial f_2}{\partial x} \neq 0$ for given $x$     | 
+    | `is_der2_out2_zero_local(::typeof(f), x) = false` | $\frac{\partial^2 f_2}{\partial x^2} \neq 0$ for given $x$ | 
 
     These fall back to 
 
@@ -118,19 +123,13 @@ Depending on the type of function you're dealing with, you will have to specify 
 ## [Overloading](@id code-gen)
 
 After implementing the required classification methods for a function, the function has not been overloaded on our tracer types yet.
-SCT provides six functions that generate code via meta-programming:
+SCT provides three functions that generate code via meta-programming:
 
-* 1-to-1
-    * `eval(SCT.overload_gradient_1_to_1(module_symbol, f))`
-    * `eval(SCT.overload_hessian_1_to_1(module_symbol, f))`
-* 2-to-1
-    * `eval(SCT.overload_gradient_1_to_2(module_symbol, f))`
-    * `eval(SCT.overload_hessian_1_to_2(module_symbol, f))`
-* 1-to-2
-    * `eval(SCT.overload_gradient_2_to_1(module_symbol, f))`
-    * `eval(SCT.overload_hessian_2_to_1(module_symbol, f))`
+* 1-to-1: `eval(SCT.generate_code_1_to_1(module_symbol, f))`
+* 2-to-1: `eval(SCT.generate_code_1_to_2(module_symbol, f))`
+* 1-to-2: `eval(SCT.generate_code_2_to_1(module_symbol, f))`
 
-You are required to call the two functions that match your type of operator.
+You are required to call the function that matches your type of operator.
 
 !!! tip "Code generation"
     We will take a look at the code generation mechanism in the example below.
@@ -165,17 +164,16 @@ The `relu` function has not been overloaded on our tracer types yet.
 Let's call the code generation utilities from the [*"Overloading"*](@ref code-gen) section for this purpose:
 
 ```@example overload
-eval(SCT.overload_gradient_1_to_1(:NNlib, relu))
-eval(SCT.overload_hessian_1_to_1(:NNlib, relu))
+eval(SCT.generate_code_1_to_1(:NNlib, relu))
 ```
 
 The `relu` function is now ready to be called with SCT's tracer types.
 
 !!! details "What is the eval call doing?"
-    Let's call `overload_gradient_1_to_1` without wrapping it `eval`:
+    Let's call `generate_code_1_to_1` without wrapping it `eval`:
 
     ```@example overload
-    SCT.overload_gradient_1_to_1(:NNlib, relu)
+    SCT.generate_code_1_to_1(:NNlib, relu)
     ```
 
     As you can see, this returns a `quote`, a type of expression containing our generated Julia code.

@@ -3,7 +3,6 @@ using ADTypes: AbstractSparsityDetector
 using Flux: Conv, relu
 using ReferenceTests
 using SparseConnectivityTracer
-using SparseConnectivityTracer: DuplicateVector, RecursiveSet, SortedVector
 using Test
 
 # Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
@@ -56,25 +55,25 @@ const BIAS_FLUX = [0.1]
 const LAYER = Conv(WEIGHTS_FLUX, BIAS_FLUX) # Conv((2, 2), 2 => 1)
 const LAYER_RELU = Conv(WEIGHTS_FLUX, BIAS_FLUX, relu) # Conv((2, 2), 2 => 1, relu)
 
-function test_flux_conv(method::AbstractSparsityDetector)
-    J = jacobian_sparsity(LAYER, INPUT_FLUX, method)
+function test_flux_conv(detector::AbstractSparsityDetector)
+    J = jacobian_sparsity(LAYER, INPUT_FLUX, detector)
     @test_reference "references/pattern/jacobian/NNlib/conv.txt" BitMatrix(J)
 end
-function test_flux_conv_local(method::AbstractSparsityDetector)
-    J = jacobian_sparsity(LAYER_RELU, INPUT_FLUX, method)
+function test_flux_conv_local(detector::AbstractSparsityDetector)
+    J = jacobian_sparsity(LAYER_RELU, INPUT_FLUX, detector)
     @test_reference "references/pattern/jacobian/NNlib/conv_relu.txt" BitMatrix(J)
 end
 
 @testset "Global" begin
     @testset "$T" for T in GRADIENT_TRACERS
-        method = TracerSparsityDetector(; gradient_tracer_type=T)
-        test_flux_conv(method)
+        detector = TracerSparsityDetector(; gradient_tracer_type=T)
+        test_flux_conv(detector)
     end
 end
 @testset "Local" begin
     @testset "$T" for T in GRADIENT_TRACERS
-        method = TracerLocalSparsityDetector(; gradient_tracer_type=T)
-        test_flux_conv(method)
-        test_flux_conv_local(method)
+        detector = TracerLocalSparsityDetector(; gradient_tracer_type=T)
+        test_flux_conv(detector)
+        test_flux_conv_local(detector)
     end
 end

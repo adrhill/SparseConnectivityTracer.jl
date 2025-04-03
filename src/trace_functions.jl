@@ -1,7 +1,9 @@
-const DEFAULT_GRADIENT_TRACER = GradientTracer{IndexSetGradientPattern{Int,BitSet}}
-const DEFAULT_HESSIAN_TRACER = HessianTracer{
-    DictHessianPattern{Int,BitSet,Dict{Int,BitSet},NotShared}
-}
+#= This file handles the actual tracing of functions:
+1) creating tracers from inputs
+2) evaluating the function with the created tracers
+
+The resulting output is parsed in `src/parse_outputs_to_matrix.jl`.
+=#
 
 #==================#
 # Enumerate inputs #
@@ -47,9 +49,18 @@ function trace_function(::Type{T}, f, x) where {T<:Union{AbstractTracer,Dual}}
     return xt, yt
 end
 
-function trace_function(::Type{T}, f!, y, x) where {T<:Union{AbstractTracer,Dual}}
+function trace_function(::Type{T}, f!, y, x) where {T<:AbstractTracer}
     xt = trace_input(T, x)
     yt = similar(y, T)
+    fill!(yt, myempty(T))
+    f!(yt, xt)
+    return xt, yt
+end
+
+function trace_function(::Type{D}, f!, y, x) where {P,T<:AbstractTracer,D<:Dual{P,T}}
+    t = myempty(T)
+    xt = trace_input(D, x)
+    yt = Dual.(y, t)
     f!(yt, xt)
     return xt, yt
 end
@@ -57,20 +68,16 @@ end
 to_array(x::Real) = [x]
 to_array(x::AbstractArray) = x
 
-# Utilities
-_tracer_or_number(x::Real) = x
-_tracer_or_number(d::Dual) = tracer(d)
-
-#================#
-# GradientTracer #
-#================#
+#==========#
+# Jacobian #
+#==========#
 
 # Compute the sparsity pattern of the Jacobian of `y = f(x)`.
 function _jacobian_sparsity(
     f, x, ::Type{T}=DEFAULT_GRADIENT_TRACER
 ) where {T<:GradientTracer}
     xt, yt = trace_function(T, f, x)
-    return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
+    return jacobian_tracers_to_matrix(to_array(xt), to_array(yt))
 end
 
 # Compute the sparsity pattern of the Jacobian of `f!(y, x)`.
@@ -78,7 +85,7 @@ function _jacobian_sparsity(
     f!, y, x, ::Type{T}=DEFAULT_GRADIENT_TRACER
 ) where {T<:GradientTracer}
     xt, yt = trace_function(T, f!, y, x)
-    return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
+    return jacobian_tracers_to_matrix(to_array(xt), to_array(yt))
 end
 
 # Compute the local sparsity pattern of the Jacobian of `y = f(x)` at `x`.
@@ -87,7 +94,7 @@ function _local_jacobian_sparsity(
 ) where {T<:GradientTracer}
     D = Dual{eltype(x),T}
     xt, yt = trace_function(D, f, x)
-    return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
+    return jacobian_tracers_to_matrix(to_array(xt), to_array(yt))
 end
 
 # Compute the local sparsity pattern of the Jacobian of `f!(y, x)` at `x`.
@@ -96,42 +103,17 @@ function _local_jacobian_sparsity(
 ) where {T<:GradientTracer}
     D = Dual{eltype(x),T}
     xt, yt = trace_function(D, f!, y, x)
-    return jacobian_pattern_to_mat(to_array(xt), to_array(yt))
+    return jacobian_tracers_to_matrix(to_array(xt), to_array(yt))
 end
 
-function jacobian_pattern_to_mat(
-    xt::AbstractArray{T}, yt::AbstractArray{<:Real}
-) where {T<:GradientTracer}
-    n, m = length(xt), length(yt)
-    I = Int[] # row indices
-    J = Int[] # column indices
-    V = Bool[]   # values
-    for (i, y) in enumerate(yt)
-        if y isa T && !isemptytracer(y)
-            for j in gradient(y)
-                push!(I, i)
-                push!(J, j)
-                push!(V, true)
-            end
-        end
-    end
-    return sparse(I, J, V, m, n)
-end
-
-function jacobian_pattern_to_mat(
-    xt::AbstractArray{D}, yt::AbstractArray{<:Real}
-) where {P,T<:GradientTracer,D<:Dual{P,T}}
-    return jacobian_pattern_to_mat(tracer.(xt), _tracer_or_number.(yt))
-end
-
-#===============#
-# HessianTracer #
-#===============#
+#=========#
+# Hessian #
+#=========#
 
 # Compute the sparsity pattern of the Hessian of a scalar function `y = f(x)`.
 function _hessian_sparsity(f, x, ::Type{T}=DEFAULT_HESSIAN_TRACER) where {T<:HessianTracer}
     xt, yt = trace_function(T, f, x)
-    return hessian_pattern_to_mat(to_array(xt), yt)
+    return hessian_tracers_to_matrix(to_array(xt), yt)
 end
 
 # Compute the local sparsity pattern of the Hessian of a scalar function `y = f(x)` at `x`.
@@ -140,42 +122,5 @@ function _local_hessian_sparsity(
 ) where {T<:HessianTracer}
     D = Dual{eltype(x),T}
     xt, yt = trace_function(D, f, x)
-    return hessian_pattern_to_mat(to_array(xt), yt)
-end
-
-function hessian_pattern_to_mat(xt::AbstractArray{T}, yt::T) where {T<:HessianTracer}
-    n = length(xt)
-    I = Int[] # row indices
-    J = Int[] # column indices
-    V = Bool[]   # values
-
-    if !isemptytracer(yt)
-        for (i, j) in tuple_set(hessian(yt))
-            push!(I, i)
-            push!(J, j)
-            push!(V, true)
-            # TODO: return `Symmetric` instead on next breaking release
-            push!(I, j)
-            push!(J, i)
-            push!(V, true)
-        end
-    end
-    h = sparse(I, J, V, n, n)
-    return h
-end
-
-function hessian_pattern_to_mat(
-    xt::AbstractArray{D1}, yt::D2
-) where {P1,P2,T<:HessianTracer,D1<:Dual{P1,T},D2<:Dual{P2,T}}
-    return hessian_pattern_to_mat(tracer.(xt), tracer(yt))
-end
-
-function hessian_pattern_to_mat(xt::AbstractArray{T}, yt::Number) where {T<:HessianTracer}
-    return hessian_pattern_to_mat(xt, myempty(T))
-end
-
-function hessian_pattern_to_mat(
-    xt::AbstractArray{D1}, yt::Number
-) where {P1,T<:HessianTracer,D1<:Dual{P1,T}}
-    return hessian_pattern_to_mat(tracer.(xt), myempty(T))
+    return hessian_tracers_to_matrix(to_array(xt), yt)
 end

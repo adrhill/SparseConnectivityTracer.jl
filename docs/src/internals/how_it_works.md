@@ -1,9 +1,12 @@
 # [How SparseConnectivityTracer works](@id how-sct-works)
 
+!!! tip "Read the paper"
+    Please read our preprint describing SparseConnectivityTracer:
+    [*Sparser, Better, Faster, Stronger: Efficient Automatic Differentiation for Sparse Jacobians and Hessians*](https://arxiv.org/abs/2501.17737).
+
 !!! danger "Internals may change"
     The developer documentation might refer to internals which can change without warning in a future release of SparseConnectivityTracer.
     Only functionality that is exported or part of the [user documentation](@ref api) adheres to semantic versioning.
-
 
 ## Tracers are scalars
 
@@ -22,7 +25,6 @@ This is how [**local** sparsity patterns](@ref TracerLocalSparsityDetector) are 
      SparseConnectivityTracer's `Dual{T, GradientTracer}` can be thought of as a binary version of [ForwardDiff](https://github.com/JuliaDiff/ForwardDiff.jl)'s own `Dual` number type.
      This is a good mental model for SparseConnectivityTracer if you are familiar with ForwardDiff and its limitations.
 
-
 ## Index sets
 
 Let's take a look at a scalar function $f: \mathbb{R}^n \rightarrow \mathbb{R}$.
@@ -33,9 +35,8 @@ and the Hessian as $\left(\nabla^2 f(\mathbf{x})\right)_{i,j} = \frac{\partial^2
 Sparsity patterns correspond to the mask of non-zero values in the gradient and Hessian.
 Instead of saving the values of individual partial derivatives, they can efficiently be represented by the set of indices corresponding to non-zero values:
 
-* Gradient patterns are represented by sets of indices $\left\{i \;\big|\; \left(\nabla f(\mathbf{x})\right)_{i} \neq 1\right\}$
-* Hessian patterns are represented by sets of index tuples $\left\{(i, j) \;\Big|\; \left(\nabla^2 f(\mathbf{x})\right)_{i,j} \neq 1\right\}$
-
+* Gradient patterns are represented by sets of indices $\left\{i \;\big|\; \frac{\partial f}{\partial x_i} \neq 0\right\}$
+* Hessian patterns are represented by sets of index tuples $\left\{(i, j) \;\Big|\; \frac{\partial^2 f}{\partial x_i \partial x_j} \neq 0\right\}$
 
 !!! warning "Global vs. Local"
     As shown in the page [*"Global vs. Local"*](@ref global-vs-local),
@@ -48,7 +49,6 @@ Instead of saving the values of individual partial derivatives, they can efficie
 
 Let's take a look at the computational graph of the equation $f(\mathbf{x}) = x_1 + x_2x_3 + \text{sgn}(x_4)$,
 where $\text{sgn}$ is the [sign function](https://en.wikipedia.org/wiki/Sign_function):
-
 
 ```mermaid
 flowchart LR
@@ -81,7 +81,7 @@ The sign function has zero derivatives for any input value. It therefore doesn't
 
 [^1]: $\frac{\partial x_i}{\partial x_j} \neq 0$ only holds for $i=j$
 
-The resulting **global** gradient sparsity pattern $\left(\nabla f(\mathbf{x})\right)_{i} \neq 1$ for $i$ in $\{1, 2, 3\}$ matches the analytical gradient
+The resulting **global** gradient sparsity pattern $\left(\nabla f(\mathbf{x})\right)_{i} \neq 0$ for $i$ in $\{1, 2, 3\}$ matches the analytical gradient
 
 ```math 
 \nabla f(\mathbf{x}) = \begin{bmatrix}

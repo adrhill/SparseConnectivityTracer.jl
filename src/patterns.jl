@@ -117,7 +117,7 @@ function union_product!(
 end
 
 # Some custom set types don't support `push!`
-for S in (:DuplicateVector, :SortedVector, :RecursiveSet)
+for S in (:SortedVector, :RecursiveSet)
     @eval function union_product!(
         hessian::$S{Tuple{I,I}}, gradient_x::$S{I}, gradient_y::$S{I}
     ) where {I<:Integer}
@@ -176,13 +176,11 @@ struct IndexSetGradientPattern{I<:Integer,S<:AbstractSet{I}} <: AbstractGradient
     gradient::S
 end
 
-Base.show(io::IO, p::IndexSetGradientPattern) = Base.show(io, gradient(p))
-
 function myempty(::Type{IndexSetGradientPattern{I,S}}) where {I,S}
     return IndexSetGradientPattern{I,S}(myempty(S))
 end
 function create_patterns(::Type{P}, xs, is) where {I,S,P<:IndexSetGradientPattern{I,S}}
-    sets = seed.(S, is)
+    sets = seed.(Ref(S), is)
     return P.(sets)
 end
 
@@ -276,7 +274,7 @@ function myempty(::Type{DictHessianPattern{I,S,D,SB}}) where {I,S,D,SB}
     return DictHessianPattern{I,S,D,SB}(myempty(S), myempty(D))
 end
 function create_patterns(::Type{P}, xs, is) where {I,S,D,SB,P<:DictHessianPattern{I,S,D,SB}}
-    gradients = seed.(S, is)
+    gradients = seed.(Ref(S), is)
     hessian = myempty(D)
     # Even if `NotShared`, sharing a single reference to `hessian` is allowed upon initialization, 
     # since mutation is prohibited when `isshared` is false.

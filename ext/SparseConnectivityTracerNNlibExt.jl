@@ -2,13 +2,32 @@
 # Parametric activation functions with two or more arguments are ignored.
 module SparseConnectivityTracerNNlibExt
 
-if isdefined(Base, :get_extension)
-    import SparseConnectivityTracer as SCT
-    using NNlib
-else
-    import ..SparseConnectivityTracer as SCT
-    using ..NNlib
-end
+import SparseConnectivityTracer as SCT
+using NNlib:
+    NNlib,
+    celu,
+    elu,
+    gelu,
+    hardswish,
+    hardtanh,
+    hardσ,
+    leakyrelu,
+    lisht,
+    logcosh,
+    logσ,
+    mish,
+    relu,
+    relu6,
+    selu,
+    sigmoid_fast,
+    softplus,
+    softshrink,
+    softsign,
+    swish,
+    tanh_fast,
+    tanhshrink,
+    trelu,
+    σ
 
 ## 1-to-1
 
@@ -83,8 +102,7 @@ SCT.is_der1_zero_local(::typeof(softshrink), x) = x > -0.5 && x < 0.5
 ops_1_to_1 = union(ops_1_to_1_s, ops_1_to_1_f)
 
 ## Overload
-eval(SCT.overload_gradient_1_to_1(:NNlib, ops_1_to_1))
-eval(SCT.overload_hessian_1_to_1(:NNlib, ops_1_to_1))
+eval(SCT.generate_code_1_to_1(:NNlib, ops_1_to_1))
 
 ## List operators for later testing
 SCT.test_operators_1_to_1(::Val{:NNlib}) = ops_1_to_1

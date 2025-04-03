@@ -2,9 +2,7 @@ SCT = SparseConnectivityTracer
 
 ## 1-to-1
 
-@noinline function gradient_tracer_1_to_1(
-    t::T, is_der1_zero::Bool
-) where {T<:GradientTracer}
+function gradient_tracer_1_to_1(t::T, is_der1_zero::Bool) where {T<:GradientTracer}
     if is_der1_zero && !isemptytracer(t)
         return myempty(T)
     else
@@ -12,14 +10,7 @@ SCT = SparseConnectivityTracer
     end
 end
 
-function gradient_tracer_1_to_1_inner(
-    p::P, is_der1_zero::Bool
-) where {P<:IndexSetGradientPattern}
-    return P(gradient_tracer_1_to_1_inner(gradient(p), is_der1_zero)) # return pattern
-end
-
 # This is only required because it is called by HessianTracer with IndexSetHessianPattern
-# Otherwise, we would just have the method on IndexSetGradientPattern above.
 function gradient_tracer_1_to_1_inner(
     s::S, is_der1_zero::Bool
 ) where {S<:AbstractSet{<:Integer}}
@@ -30,13 +21,13 @@ function gradient_tracer_1_to_1_inner(
     end
 end
 
-function overload_gradient_1_to_1(M::Symbol, f)
+function generate_code_gradient_1_to_1(M::Symbol, f::Function)
     fname = nameof(f)
     is_der1_zero_g = is_der1_zero_global(f)
 
     expr_gradienttracer = quote
         function $M.$fname(t::$SCT.GradientTracer)
-            return $SCT.gradient_tracer_1_to_1(t, $is_der1_zero_g)
+            return @noinline $SCT.gradient_tracer_1_to_1(t, $is_der1_zero_g)
         end
     end
 
@@ -55,7 +46,7 @@ function overload_gradient_1_to_1(M::Symbol, f)
 
                 t = $SCT.tracer(d)
                 is_der1_zero = $SCT.is_der1_zero_local($M.$fname, x)
-                t_out = $SCT.gradient_tracer_1_to_1(t, is_der1_zero)
+                t_out = @noinline $SCT.gradient_tracer_1_to_1(t, is_der1_zero)
                 return $SCT.Dual(p_out, t_out)
             end
         end
@@ -65,7 +56,7 @@ end
 
 ## 2-to-1
 
-@noinline function gradient_tracer_2_to_1(
+function gradient_tracer_2_to_1(
     tx::T, ty::T, is_der1_arg1_zero::Bool, is_der1_arg2_zero::Bool
 ) where {T<:GradientTracer}
     # TODO: add tests for isempty
@@ -109,29 +100,19 @@ function gradient_tracer_2_to_1_inner(
     end
 end
 
-function overload_gradient_2_to_1(M::Symbol, f)
+function generate_code_gradient_2_to_1(M::Symbol, f::Function)
     fname = nameof(f)
     is_der1_arg1_zero_g = is_der1_arg1_zero_global(f)
     is_der1_arg2_zero_g = is_der1_arg2_zero_global(f)
 
-    ## GradientTracer
-    expr_gradienttracer = quote
+    expr_tracer_tracer = quote
         function $M.$fname(tx::T, ty::T) where {T<:$SCT.GradientTracer}
-            return $SCT.gradient_tracer_2_to_1(
+            return @noinline $SCT.gradient_tracer_2_to_1(
                 tx, ty, $is_der1_arg1_zero_g, $is_der1_arg2_zero_g
             )
         end
-
-        function $M.$fname(tx::$SCT.GradientTracer, ::Real)
-            return $SCT.gradient_tracer_1_to_1(tx, $is_der1_arg1_zero_g)
-        end
-
-        function $M.$fname(::Real, ty::$SCT.GradientTracer)
-            return $SCT.gradient_tracer_1_to_1(ty, $is_der1_arg2_zero_g)
-        end
     end
 
-    ## Dual
     expr_dual_dual = if is_der1_arg1_zero_g && is_der1_arg2_zero_g
         quote
             function $M.$fname(dx::D, dy::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
@@ -151,68 +132,84 @@ function overload_gradient_2_to_1(M::Symbol, f)
                 ty = $SCT.tracer(dy)
                 is_der1_arg1_zero = $SCT.is_der1_arg1_zero_local($M.$fname, x, y)
                 is_der1_arg2_zero = $SCT.is_der1_arg2_zero_local($M.$fname, x, y)
-                t_out = $SCT.gradient_tracer_2_to_1(
+                t_out = @noinline $SCT.gradient_tracer_2_to_1(
                     tx, ty, is_der1_arg1_zero, is_der1_arg2_zero
                 )
                 return $SCT.Dual(p_out, t_out)
             end
         end
     end
-    expr_dual_real = if is_der1_arg1_zero_g
+
+    exprs_typed = generate_code_gradient_2_to_1_typed(M, f, Real)
+    return Expr(:block, expr_tracer_tracer, expr_dual_dual, exprs_typed)
+end
+
+function generate_code_gradient_2_to_1_typed(
+    M::Symbol,   # Symbol indicating Module of f, usually `:Base`
+    f::Function, # function to overload
+    Z::Type,     # external non-tracer-type to overload on 
+)
+    fname = nameof(f)
+    is_der1_arg1_zero_g = is_der1_arg1_zero_global(f)
+    is_der1_arg2_zero_g = is_der1_arg2_zero_global(f)
+
+    expr_tracer_type = quote
+        function $M.$fname(tx::$SCT.GradientTracer, ::$Z)
+            return @noinline $SCT.gradient_tracer_1_to_1(tx, $is_der1_arg1_zero_g)
+        end
+    end
+    expr_type_tracer = quote
+        function $M.$fname(::$Z, ty::$SCT.GradientTracer)
+            return @noinline $SCT.gradient_tracer_1_to_1(ty, $is_der1_arg2_zero_g)
+        end
+    end
+
+    expr_dual_type = if is_der1_arg1_zero_g
         quote
-            function $M.$fname(
-                dx::D, y::Real
-            ) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+            function $M.$fname(dx::D, y::$Z) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
                 x = $SCT.primal(dx)
                 return $M.$fname(x, y)
             end
         end
     else
         quote
-            function $M.$fname(
-                dx::D, y::Real
-            ) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+            function $M.$fname(dx::D, y::$Z) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
                 x = $SCT.primal(dx)
                 p_out = $M.$fname(x, y)
 
                 tx = $SCT.tracer(dx)
                 is_der1_arg1_zero = $SCT.is_der1_arg1_zero_local($M.$fname, x, y)
-                t_out = $SCT.gradient_tracer_1_to_1(tx, is_der1_arg1_zero)
+                t_out = @noinline $SCT.gradient_tracer_1_to_1(tx, is_der1_arg1_zero)
                 return $SCT.Dual(p_out, t_out)
             end
         end
     end
-    expr_real_dual = if is_der1_arg2_zero_g
+    expr_type_dual = if is_der1_arg2_zero_g
         quote
-            function $M.$fname(
-                x::Real, dy::D
-            ) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+            function $M.$fname(x::$Z, dy::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
                 y = $SCT.primal(dy)
                 return $M.$fname(x, y)
             end
         end
     else
         quote
-            function $M.$fname(
-                x::Real, dy::D
-            ) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
+            function $M.$fname(x::$Z, dy::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
                 y = $SCT.primal(dy)
                 p_out = $M.$fname(x, y)
 
                 ty = $SCT.tracer(dy)
                 is_der1_arg2_zero = $SCT.is_der1_arg2_zero_local($M.$fname, x, y)
-                t_out = $SCT.gradient_tracer_1_to_1(ty, is_der1_arg2_zero)
+                t_out = @noinline $SCT.gradient_tracer_1_to_1(ty, is_der1_arg2_zero)
                 return $SCT.Dual(p_out, t_out)
             end
         end
     end
-
-    return Expr(:block, expr_gradienttracer, expr_dual_dual, expr_dual_real, expr_real_dual)
+    return Expr(:block, expr_tracer_type, expr_type_tracer, expr_dual_type, expr_type_dual)
 end
 
 ## 1-to-2
 
-@noinline function gradient_tracer_1_to_2(
+function gradient_tracer_1_to_2(
     t::T, is_der1_out1_zero::Bool, is_der1_out2_zero::Bool
 ) where {T<:GradientTracer}
     if isemptytracer(t) # TODO: add test
@@ -224,14 +221,16 @@ end
     end
 end
 
-function overload_gradient_1_to_2(M::Symbol, f)
+function generate_code_gradient_1_to_2(M::Symbol, f::Function)
     fname = nameof(f)
     is_der1_out1_zero_g = is_der1_out1_zero_global(f)
     is_der1_out2_zero_g = is_der1_out2_zero_global(f)
 
     expr_gradienttracer = quote
         function $M.$fname(t::$SCT.GradientTracer)
-            return $SCT.gradient_tracer_1_to_2(t, $is_der1_out1_zero_g, $is_der1_out2_zero_g)
+            return @noinline $SCT.gradient_tracer_1_to_2(
+                t, $is_der1_out1_zero_g, $is_der1_out2_zero_g
+            )
         end
     end
 
@@ -251,7 +250,7 @@ function overload_gradient_1_to_2(M::Symbol, f)
                 t = $SCT.tracer(d)
                 is_der1_out2_zero = $SCT.is_der1_out2_zero_local($M.$fname, x)
                 is_der1_out1_zero = $SCT.is_der1_out1_zero_local($M.$fname, x)
-                t_out1, t_out2 = $SCT.gradient_tracer_1_to_2(
+                t_out1, t_out2 = @noinline $SCT.gradient_tracer_1_to_2(
                     t, is_der1_out1_zero, is_der1_out2_zero
                 )
                 return ($SCT.Dual(p_out1, t_out1), $SCT.Dual(p_out2, t_out2))  # TODO: this was wrong, add test
@@ -260,50 +259,4 @@ function overload_gradient_1_to_2(M::Symbol, f)
     end
 
     return Expr(:block, expr_gradienttracer, expr_dual)
-end
-
-## Special overloads to avoid ambiguity errors
-
-for S in (Integer, Rational, Irrational{:ℯ})
-    Base.:^(t::T, ::S) where {T<:GradientTracer} = t
-    Base.:^(::S, t::T) where {T<:GradientTracer} = t
-    function Base.:^(d::D, y::S) where {P,T<:GradientTracer,D<:Dual{P,T}}
-        x = primal(d)
-        t = gradient_tracer_1_to_1(tracer(d), false)
-        return Dual(x^y, t)
-    end
-    function Base.:^(x::S, d::D) where {P,T<:GradientTracer,D<:Dual{P,T}}
-        y = primal(d)
-        t = gradient_tracer_1_to_1(tracer(d), false)
-        return Dual(x^y, t)
-    end
-end
-
-function Base.isless(dx::D, y::AbstractFloat) where {P<:Real,T<:GradientTracer,D<:Dual{P,T}}
-    return isless(primal(dx), y)
-end
-
-## Rounding
-Base.round(::T, ::RoundingMode; kwargs...) where {T<:GradientTracer} = myempty(T)
-function Base.round(
-    d::D, mode::RoundingMode; kwargs...
-) where {P,T<:GradientTracer,D<:Dual{P,T}}
-    return round(primal(d), mode; kwargs...) # only return primal
-end
-
-for RR in (Real, Integer, Bool)
-    Base.round(::Type{R}, ::T) where {R<:RR,T<:GradientTracer} = myempty(T)
-    function Base.round(::Type{R}, d::D) where {R<:RR,P,T<:GradientTracer,D<:Dual{P,T}}
-        return round(R, primal(d)) # only return primal
-    end
-end
-
-## Random numbers 
-Base.rand(::AbstractRNG, ::SamplerType{T}) where {T<:GradientTracer} = myempty(T)
-function Base.rand(
-    rng::AbstractRNG, ::SamplerType{D}
-) where {P,T<:GradientTracer,D<:Dual{P,T}}
-    p = rand(rng, P)
-    t = myempty(T)
-    return Dual(p, t)
 end

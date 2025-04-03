@@ -1,57 +1,29 @@
 using SparseConnectivityTracer
-using SparseConnectivityTracer: GradientTracer, Dual, MissingPrimalError, trace_input
+using SparseConnectivityTracer: GradientTracer, Dual, MissingPrimalError
 using Test
 
-using Compat: Returns
 using Random: rand, GLOBAL_RNG
 using LinearAlgebra: det, dot, logdet
-using SpecialFunctions: erf, beta
-using NNlib: NNlib
 
 # Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
 include("tracers_definitions.jl")
-
-NNLIB_ACTIVATIONS_S = (
-    NNlib.σ,
-    NNlib.celu,
-    NNlib.elu,
-    NNlib.gelu,
-    NNlib.hardswish,
-    NNlib.lisht,
-    NNlib.logσ,
-    NNlib.logcosh,
-    NNlib.mish,
-    NNlib.selu,
-    NNlib.softplus,
-    NNlib.softsign,
-    NNlib.swish,
-    NNlib.sigmoid_fast,
-    NNlib.tanhshrink,
-    NNlib.tanh_fast,
-)
-NNLIB_ACTIVATIONS_F = (
-    NNlib.hardσ,
-    NNlib.hardtanh,
-    NNlib.leakyrelu,
-    NNlib.relu,
-    NNlib.relu6,
-    NNlib.softshrink,
-    NNlib.trelu,
-)
-NNLIB_ACTIVATIONS = union(NNLIB_ACTIVATIONS_S, NNLIB_ACTIVATIONS_F)
 
 REAL_TYPES = (Float64, Int, Bool, UInt8, Float16, Rational{Int})
 
 # These exists to be able to quickly run tests in the REPL.
 # NOTE: J gets overwritten inside the testsets.
-method = TracerSparsityDetector()
-J(f, x) = jacobian_sparsity(f, x, method)
+detector = TracerSparsityDetector()
+J(f, x) = jacobian_sparsity(f, x, detector)
+J(f!, y, x) = jacobian_sparsity(f!, y, x, detector)
+P = first(GRADIENT_PATTERNS)
+T = GradientTracer{P}
 
 @testset "Jacobian Global" begin
     @testset "$P" for P in GRADIENT_PATTERNS
         T = GradientTracer{P}
-        method = TracerSparsityDetector(; gradient_tracer_type=T)
-        J(f, x) = jacobian_sparsity(f, x, method)
+        detector = TracerSparsityDetector(; gradient_tracer_type=T)
+        J(f, x) = jacobian_sparsity(f, x, detector)
+        J(f!, y, x) = jacobian_sparsity(f!, y, x, detector)
 
         @testset "Trivial examples" begin
             f(x) = [x[1]^2, 2 * x[1] * x[2]^2, sin(x[3])]
@@ -85,6 +57,18 @@ J(f, x) = jacobian_sparsity(f, x, method)
             @test J(x -> ℯ^zero(x), 1) ≈ [0;;]
         end
 
+        @testset "In-place functions" begin
+            x = rand(5)
+            y = similar(x)
+
+            function f!(y, x)
+                for i in 1:(length(x) - 1)
+                    y[i] = x[i + 1] - x[i]
+                end
+            end
+            @test_nowarn J(f!, y, x)
+        end
+
         # Conversions
         @testset "Conversion" begin
             @testset "to $T" for T in REAL_TYPES
@@ -101,6 +85,13 @@ J(f, x) = jacobian_sparsity(f, x, method)
             @test J(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
         end
 
+        @testset "Three-argument operators" begin
+            @test J(x -> clamp(x, 0.0, 1.0), rand()) == [1;;]
+            @test J(x -> clamp(x[1], x[2], 1.0), rand(2)) == [1 1]
+            @test J(x -> clamp(x[1], 0.0, x[2]), rand(2)) == [1 1]
+            @test J(x -> clamp(x[1], x[2], x[3]), rand(3)) == [1 1 1]
+        end
+
         @testset "Random" begin
             @test J(x -> rand(typeof(x)), 1) ≈ [0;;]
             @test J(x -> rand(GLOBAL_RNG, typeof(x)), 1) ≈ [0;;]
@@ -108,11 +99,6 @@ J(f, x) = jacobian_sparsity(f, x, method)
 
         @testset "LinearAlgebra" begin
             @test J(x -> dot(x[1:2], x[4:5]), rand(5)) == [1 1 0 1 1]
-        end
-
-        @testset "SpecialFunctions extension" begin
-            @test J(x -> erf(x[1]), rand(2)) == [1 0]
-            @test J(x -> beta(x[1], x[2]), rand(3)) == [1 1 0]
         end
 
         @testset "MissingPrimalError" begin
@@ -133,19 +119,11 @@ J(f, x) = jacobian_sparsity(f, x, method)
             end
         end
 
-        @testset "NNlib" begin
-            @testset "$f" for f in NNLIB_ACTIVATIONS
-                @test J(f, 1) ≈ [1;;]
-            end
-        end
-
         @testset "ifelse and comparisons" begin
-            if VERSION >= v"1.8"
-                @test J(x -> ifelse(x[2] < x[3], x[1] + x[2], x[3] * x[4]), [1 2 3 4]) ==
-                    [1 1 1 1]
-                @test J(x -> ifelse(x[2] < x[3], x[1] + x[2], 1.0), [1 2 3 4]) == [1 1 0 0]
-                @test J(x -> ifelse(x[2] < x[3], 1.0, x[3] * x[4]), [1 2 3 4]) == [0 0 1 1]
-            end
+            @test J(x -> ifelse(x[2] < x[3], x[1] + x[2], x[3] * x[4]), [1 2 3 4]) ==
+                [1 1 1 1]
+            @test J(x -> ifelse(x[2] < x[3], x[1] + x[2], 1.0), [1 2 3 4]) == [1 1 0 0]
+            @test J(x -> ifelse(x[2] < x[3], 1.0, x[3] * x[4]), [1 2 3 4]) == [0 0 1 1]
 
             function f_ampgo07(x)
                 return (x[1] <= 0) * convert(eltype(x), Inf) +
@@ -161,6 +139,36 @@ J(f, x) = jacobian_sparsity(f, x, method)
                 x -> x[1] > x[2] ? x[3] : x[4], [1.0, 2.0, 3.0, 4.0]
             ) == [0 0 1 1;]
         end
+
+        @testset "Output of type Vector{Any}" begin
+            function f(x::AbstractVector)
+                n = length(x)
+                ret = [] # return type will be Vector{Any}
+                for i in 1:(n - 1)
+                    append!(
+                        ret,
+                        abs2(x[i + 1]) - abs2(x[i]) + abs2(x[n - i]) - abs2(x[n - i + 1]),
+                    )
+                end
+                return ret
+            end
+            x = [
+                0.263914
+                0.605532
+                1.281598
+                1.413663
+                0.178133
+                -1.705427
+            ]
+            @test J(f, x) == [
+                1  1  0  0  1  1
+                0  1  1  1  1  0
+                0  0  1  1  0  0
+                0  1  1  1  1  0
+                1  1  0  0  1  1
+            ]
+        end
+
         yield()
     end
 end
@@ -168,8 +176,9 @@ end
 @testset "Jacobian Local" begin
     @testset "$P" for P in GRADIENT_PATTERNS
         T = GradientTracer{P}
-        method = TracerLocalSparsityDetector(; gradient_tracer_type=T)
-        J(f, x) = jacobian_sparsity(f, x, method)
+        detector = TracerLocalSparsityDetector(; gradient_tracer_type=T)
+        J(f, x) = jacobian_sparsity(f, x, detector)
+        J(f!, y, x) = jacobian_sparsity(f!, y, x, detector)
 
         @testset "Trivial examples" begin
 
@@ -250,6 +259,18 @@ end
             @test J(x -> 0, 1) ≈ [0;;]
         end
 
+        @testset "In-place functions" begin
+            x = rand(5)
+            y = similar(x)
+
+            function f!(y, x)
+                for i in 1:(length(x) - 1)
+                    y[i] = x[i + 1] - x[i]
+                end
+            end
+            @test_nowarn J(f!, y, x)
+        end
+
         # Conversions
         @testset "Conversion" begin
             @testset "Conversion to $T" for T in REAL_TYPES
@@ -264,6 +285,18 @@ end
             @test J(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
         end
 
+        @testset "Three-argument operators" begin
+            @test J(x -> clamp(x, 0.0, 1.0), 0.5) == [1;;]
+            @test J(x -> clamp(x, 0.0, 1.0), -0.5) == [0;;]
+            @test J(x -> clamp(x[1], x[2], 1.0), [0.5, 0.0]) == [1 0]
+            @test J(x -> clamp(x[1], x[2], 1.0), [0.5, 0.6]) == [0 1]
+            @test J(x -> clamp(x[1], 0.0, x[2]), [0.5, 1.0]) == [1 0]
+            @test J(x -> clamp(x[1], 0.0, x[2]), [0.5, 0.4]) == [0 1]
+            @test J(x -> clamp(x[1], x[2], x[3]), [0.5, 0.0, 1.0]) == [1 0 0]
+            @test J(x -> clamp(x[1], x[2], x[3]), [0.5, 0.6, 1.0]) == [0 1 0]
+            @test J(x -> clamp(x[1], x[2], x[3]), [0.5, 0.0, 0.4]) == [0 0 1]
+        end
+
         @testset "Random" begin
             @test J(x -> rand(typeof(x)), 1) ≈ [0;;]
             @test J(x -> rand(GLOBAL_RNG, typeof(x)), 1) ≈ [0;;]
@@ -274,44 +307,35 @@ end
             @test J(x -> log(det(x)), [1.0 -1.0; 2.0 2.0]) == [1 1 1 1]
             @test J(x -> dot(x[1:2], x[4:5]), [0, 1, 0, 1, 0]) == [1 0 0 0 1]
         end
-
-        @testset "NNlib" begin
-            @test J(NNlib.relu, -1) ≈ [0;;]
-            @test J(NNlib.relu, 1) ≈ [1;;]
-            @test J(NNlib.elu, -1) ≈ [1;;]
-            @test J(NNlib.elu, 1) ≈ [1;;]
-            @test J(NNlib.celu, -1) ≈ [1;;]
-            @test J(NNlib.celu, 1) ≈ [1;;]
-            @test J(NNlib.selu, -1) ≈ [1;;]
-            @test J(NNlib.selu, 1) ≈ [1;;]
-
-            @test J(NNlib.relu6, -1) ≈ [0;;]
-            @test J(NNlib.relu6, 1) ≈ [1;;]
-            @test J(NNlib.relu6, 7) ≈ [0;;]
-
-            @test J(NNlib.trelu, 0.9) ≈ [0;;]
-            @test J(NNlib.trelu, 1.1) ≈ [1;;]
-
-            @test J(NNlib.swish, -5) ≈ [1;;]
-            @test J(NNlib.swish, 0) ≈ [1;;]
-            @test J(NNlib.swish, 5) ≈ [1;;]
-
-            @test J(NNlib.hardswish, -5) ≈ [0;;]
-            @test J(NNlib.hardswish, 0) ≈ [1;;]
-            @test J(NNlib.hardswish, 5) ≈ [1;;]
-
-            @test J(NNlib.hardσ, -4) ≈ [0;;]
-            @test J(NNlib.hardσ, 0) ≈ [1;;]
-            @test J(NNlib.hardσ, 4) ≈ [0;;]
-
-            @test J(NNlib.hardtanh, -2) ≈ [0;;]
-            @test J(NNlib.hardtanh, 0) ≈ [1;;]
-            @test J(NNlib.hardtanh, 2) ≈ [0;;]
-
-            @test J(NNlib.softshrink, -1) ≈ [1;;]
-            @test J(NNlib.softshrink, 0) ≈ [0;;]
-            @test J(NNlib.softshrink, 1) ≈ [1;;]
+        @testset "Output of type Vector{Any}" begin
+            function f(x::AbstractVector)
+                n = length(x)
+                ret = [] # return type will be Vector{Any}
+                for i in 1:(n - 1)
+                    append!(
+                        ret,
+                        abs2(x[i + 1]) - abs2(x[i]) + abs2(x[n - i]) - abs2(x[n - i + 1]),
+                    )
+                end
+                return ret
+            end
+            x = [
+                0.263914
+                0.605532
+                1.281598
+                1.413663
+                0.178133
+                -1.705427
+            ]
+            @test J(f, x) == [
+                1  1  0  0  1  1
+                0  1  1  1  1  0
+                0  0  1  1  0  0
+                0  1  1  1  1  0
+                1  1  0  0  1  1
+            ]
         end
+
         yield()
     end
 end

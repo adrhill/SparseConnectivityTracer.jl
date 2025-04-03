@@ -1,3 +1,11 @@
+#= This file implements the ADTypes interface for `AbstractSparsityDetector`s =#
+
+const DEFAULT_GRADIENT_PATTERN = IndexSetGradientPattern{Int,BitSet}
+const DEFAULT_GRADIENT_TRACER = GradientTracer{DEFAULT_GRADIENT_PATTERN}
+
+const DEFAULT_HESSIAN_PATTERN = DictHessianPattern{Int,BitSet,Dict{Int,BitSet},NotShared}
+const DEFAULT_HESSIAN_TRACER = HessianTracer{DEFAULT_HESSIAN_PATTERN}
+
 """
     TracerSparsityDetector <: ADTypes.AbstractSparsityDetector
 
@@ -11,17 +19,18 @@ For local sparsity patterns at a specific input point, use [`TracerLocalSparsity
 ```jldoctest
 julia> using SparseConnectivityTracer
 
-julia> jacobian_sparsity(diff, rand(4), TracerSparsityDetector())
+julia> detector = TracerSparsityDetector()
+TracerSparsityDetector()
+
+julia> jacobian_sparsity(diff, rand(4), detector)
 3×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 6 stored entries:
  1  1  ⋅  ⋅
  ⋅  1  1  ⋅
  ⋅  ⋅  1  1
-```
 
-```jldoctest
 julia> f(x) = x[1] + x[2]*x[3] + 1/x[4];
 
-julia> hessian_sparsity(f, rand(4), TracerSparsityDetector())
+julia> hessian_sparsity(f, rand(4), detector)
 4×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 3 stored entries:
  ⋅  ⋅  ⋅  ⋅
  ⋅  ⋅  1  ⋅
@@ -70,23 +79,24 @@ Local sparsity patterns are less convervative than global patterns and need to b
 ```jldoctest
 julia> using SparseConnectivityTracer
 
-julia> method = TracerLocalSparsityDetector();
+julia> detector = TracerLocalSparsityDetector()
+TracerLocalSparsityDetector()
 
 julia> f(x) = x[1] * x[2]; # J_f = [x[2], x[1]]
 
-julia> jacobian_sparsity(f, [1, 0], method)
+julia> jacobian_sparsity(f, [1, 0], detector)
 1×2 SparseArrays.SparseMatrixCSC{Bool, Int64} with 1 stored entry:
  ⋅  1
 
-julia> jacobian_sparsity(f, [0, 1], method)
+julia> jacobian_sparsity(f, [0, 1], detector)
 1×2 SparseArrays.SparseMatrixCSC{Bool, Int64} with 1 stored entry:
  1  ⋅
 
-julia> jacobian_sparsity(f, [0, 0], method)
+julia> jacobian_sparsity(f, [0, 0], detector)
 1×2 SparseArrays.SparseMatrixCSC{Bool, Int64} with 0 stored entries:
  ⋅  ⋅
 
-julia> jacobian_sparsity(f, [1, 1], method)
+julia> jacobian_sparsity(f, [1, 1], detector)
 1×2 SparseArrays.SparseMatrixCSC{Bool, Int64} with 2 stored entries:
  1  1
 ```
@@ -147,4 +157,62 @@ end
 
 function ADTypes.hessian_sparsity(f, x, ::TracerLocalSparsityDetector{TG,TH}) where {TG,TH}
     return _local_hessian_sparsity(f, x, TH)
+end
+
+## Pretty printing
+for detector in (:TracerSparsityDetector, :TracerLocalSparsityDetector)
+    @eval function Base.show(io::IO, d::$detector{TG,TH}) where {TG,TH}
+        if TG == DEFAULT_GRADIENT_TRACER && TH == DEFAULT_HESSIAN_TRACER
+            print(io, $detector, "()")
+        else
+            print(io, $detector, "{", TG, ",", TH, "}()")
+        end
+        return nothing
+    end
+end
+
+## Stable API to allow packages like DI to allocate caches of tracers
+
+"""
+    jacobian_eltype(x, detector)
+
+Act like `eltype(x)` but return the matching number type used inside Jacobian sparsity detection.
+"""
+jacobian_eltype(x, ::TracerSparsityDetector{TG}) where {TG} = TG
+function jacobian_eltype(x, ::TracerLocalSparsityDetector{TG}) where {TG}
+    return Dual{eltype(x),TG}
+end
+
+"""
+    hessian_eltype(x, detector)
+
+Act like `eltype(x)` but return the matching number type used inside Hessian sparsity detection.
+"""
+hessian_eltype(x, ::TracerSparsityDetector{TG,TH}) where {TG,TH} = TH
+function hessian_eltype(x, ::TracerLocalSparsityDetector{TG,TH}) where {TG,TH}
+    return Dual{eltype(x),TH}
+end
+
+"""
+    jacobian_buffer(x, detector)
+
+Allocate a buffer similiar to `x` with the required tracer type for Jacobian sparsity detection.
+Thin wrapper around `similar` that doesn't expose internal types.
+"""
+function jacobian_buffer(
+    x, detector::Union{TracerSparsityDetector,TracerLocalSparsityDetector}
+)
+    return similar(x, jacobian_eltype(x, detector))
+end
+
+"""
+    hessian_buffer(x, detector)
+
+Allocate a buffer similiar to `x` with the required tracer type for Hessian sparsity detection.
+Thin wrapper around `similar` that doesn't expose internal types.
+"""
+function hessian_buffer(
+    x, detector::Union{TracerSparsityDetector,TracerLocalSparsityDetector}
+)
+    return similar(x, hessian_eltype(x, detector))
 end

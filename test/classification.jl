@@ -1,4 +1,4 @@
-using SparseConnectivityTracer: # 1-to-1    
+using SparseConnectivityTracer: # 1-to-1
     is_der1_zero_global,
     is_der2_zero_global,
     is_der1_zero_local,
@@ -29,6 +29,8 @@ using SparseConnectivityTracer: # testing
     test_operators_1_to_2
 using SpecialFunctions: SpecialFunctions
 using NNlib: NNlib
+using LogExpFunctions: LogExpFunctions
+using NaNMath: NaNMath
 using Test
 using ForwardDiff: derivative, gradient, hessian
 
@@ -42,6 +44,15 @@ DEFAULT_TRIALS = 20
 random_input(op) = rand()
 random_input(::Union{typeof(acosh),typeof(acoth),typeof(acsc),typeof(asec)}) = 1 + rand()
 random_input(::typeof(sincosd)) = 180 * rand()
+
+# LogExpFunctions.jl
+random_input(::typeof(LogExpFunctions.log1mexp)) = -rand()  # log1mexp(x) is defined for x < 0
+random_input(::typeof(LogExpFunctions.log2mexp)) = -rand()  # log2mexp(x) is defined for x < 0
+random_input(::typeof(LogExpFunctions.logitexp)) = -rand()  # logitexp(x) is defined for x < 0
+random_input(::typeof(LogExpFunctions.logit1mexp)) = -rand() # logit1mexp(x) is defined for x < 0
+
+# NaNMath.jl
+random_input(::typeof(NaNMath.acosh)) = 1 + rand()  # Range: [1, ∞)
 
 random_first_input(op) = random_input(op)
 random_second_input(op) = random_input(op)
@@ -90,7 +101,7 @@ function correct_classification_1_to_1(op, x; atol)
 end
 
 @testset verbose = true "1-to-1" begin
-    @testset "$m" for m in (Base, SpecialFunctions, NNlib)
+    @testset "$m" for m in (Base, SpecialFunctions, NNlib, LogExpFunctions, NaNMath)
         @testset "$op" for op in test_operators_1_to_1(Val(Symbol(m)))
             @test all(
                 correct_classification_1_to_1(op, random_input(op); atol=DEFAULT_ATOL) for
@@ -133,7 +144,7 @@ function correct_classification_2_to_1(op, x, y; atol)
 end
 
 @testset verbose = true "2-to-1" begin
-    @testset "$m" for m in (Base, SpecialFunctions, NNlib)
+    @testset "$m" for m in (Base, SpecialFunctions, NNlib, LogExpFunctions, NaNMath)
         @testset "$op" for op in test_operators_2_to_1(Val(Symbol(m)))
             @test all(
                 correct_classification_2_to_1(
@@ -173,7 +184,7 @@ function correct_classification_1_to_2(op, x; atol)
 end
 
 @testset verbose = true "1-to-2" begin
-    @testset "$m" for m in (Base, SpecialFunctions, NNlib)
+    @testset "$m" for m in (Base, SpecialFunctions, NNlib, LogExpFunctions, NaNMath)
         @testset "$op" for op in test_operators_1_to_2(Val(Symbol(m)))
             @test all(
                 correct_classification_1_to_2(op, random_input(op); atol=DEFAULT_ATOL) for
