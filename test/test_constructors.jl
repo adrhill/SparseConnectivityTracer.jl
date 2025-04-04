@@ -239,6 +239,7 @@ end
 
         dualized_A = Dual.(A, t_full)
         dualized_B = Dual.(B, t_full)
+        dualized_x = dualized_A \ dualized_B
 
         @test_nowarn dualized_x = dualized_A \ dualized_B
         @test_nowarn A \ dualized_B
