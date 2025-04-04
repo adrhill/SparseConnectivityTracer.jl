@@ -399,6 +399,9 @@ end
 
     x = rand(2)
     b = A \ x
+
+    A = rand(2, 2)
+    x = [t1; t2]
     @test all(t -> sameidx(t, s_out), b)
 end
 

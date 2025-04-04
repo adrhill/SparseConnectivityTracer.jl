@@ -234,10 +234,15 @@ end
 
         p      = P(BitSet(2))
         t_full = T(p)
+        A      = rand(BigFloat, 2, 2)
+        B      = rand(BigFloat, 2)
 
-        dualized_A = Dual.(rand(BigFloat, 2, 2), t_full)
-        dualized_B = Dual.(rand(BigFloat, 2), t_full)
+        dualized_A = Dual.(A, t_full)
+        dualized_B = Dual.(B, t_full)
 
-        @test_nowarn dualized_A \ dualized_B
+        @test_nowarn dualized_x = dualized_A \ dualized_B
+        @test_nowarn A \ dualized_B
+        @test_nowarn dualized_A \ B
+        @test eltype(dualized_x) == eltype(dualized_A)
     end
 end
