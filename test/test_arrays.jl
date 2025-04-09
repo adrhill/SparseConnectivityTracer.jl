@@ -37,9 +37,7 @@ end
 sameidx(t::GradientTracer, s::AbstractSet) = sameidx(SCT.gradient(t), s)
 sameidx(t::GradientTracer, i) = sameidx(t, idx2set(i))
 
-#=========================#
 # Weird function wrappers #
-#=========================#
 
 # These print better stack traces than lambda functions.
 
@@ -69,9 +67,7 @@ logabsdet_last(A) = last(logabsdet(A))
 pow0(A) = A^0
 pow3(A) = A^3
 
-#===================#
 # Testing utilities #
-#===================#
 
 detector = TracerSparsityDetector()
 
@@ -130,9 +126,7 @@ function testH1(f, A::Diagonal)
     end
 end
 
-#===================#
 # Arrays to test on #
-#===================#
 
 mat33 = rand(3, 3)
 mat34 = rand(3, 4)
@@ -148,9 +142,7 @@ DIAG_SQUARE_MATRICES = (dia33,)
 
 arrayname(A) = "$(typeof(A)) $(size(A))"
 
-#=================#
 # TEST START HERE #
-#=================#
 
 @testset "Scalar functions" begin
     @testset "det $(arrayname(A))" for A in NONDIAG_MATRICES

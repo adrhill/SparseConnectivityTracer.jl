@@ -65,9 +65,7 @@ Return a representation of non-zero values ``∇²f(x)_{ij} ≠ 0`` in the Hessi
 """
 hessian
 
-#===========#
 # Utilities #
-#===========#
 
 myempty(::S) where {S<:AbstractSet} = S()
 myempty(::Type{S}) where {S<:AbstractSet} = S()
@@ -142,9 +140,7 @@ function union_product!(
     return hessian
 end
 
-#=========================#
 # AbstractGradientPattern #
-#=========================#
 
 # For use with GradientTracer.
 
@@ -187,9 +183,7 @@ end
 # Tracer compatibility
 gradient(s::IndexSetGradientPattern) = s.gradient
 
-#========================#
 # AbstractHessianPattern #
-#========================#
 
 # For use with HessianTracer.
 

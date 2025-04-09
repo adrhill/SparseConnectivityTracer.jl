@@ -1,4 +1,3 @@
-#= This file implements the ADTypes interface for `AbstractSparsityDetector`s =#
 
 const DEFAULT_GRADIENT_PATTERN = IndexSetGradientPattern{Int,BitSet}
 const DEFAULT_GRADIENT_TRACER = GradientTracer{DEFAULT_GRADIENT_PATTERN}

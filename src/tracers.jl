@@ -14,9 +14,7 @@ Note that [`Dual`](@ref) is not an `AbstractTracer`.
 """
 abstract type AbstractTracer{P<:AbstractPattern} <: Real end
 
-#================#
 # GradientTracer #
-#================#
 
 """
 $(TYPEDEF)
@@ -44,9 +42,7 @@ isemptytracer(t::GradientTracer) = t.isempty
 pattern(t::GradientTracer) = t.pattern
 gradient(t::GradientTracer) = gradient(pattern(t))
 
-#===============#
 # HessianTracer #
-#===============#
 
 """
 $(TYPEDEF)
@@ -75,9 +71,7 @@ pattern(t::HessianTracer) = t.pattern
 gradient(t::HessianTracer) = gradient(pattern(t))
 hessian(t::HessianTracer) = hessian(pattern(t))
 
-#================================#
 # Dual numbers for local tracing #
-#================================#
 
 """
 $(TYPEDEF)
@@ -114,9 +108,7 @@ function Dual{P,T}(x::Real) where {P<:Real,T<:AbstractTracer}
     return Dual(convert(P, x), myempty(T))
 end
 
-#===========#
 # Utilities #
-#===========#
 
 shared(::Type{T}) where {P,T<:HessianTracer{P}} = shared(P)
 

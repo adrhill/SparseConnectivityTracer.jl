@@ -59,7 +59,9 @@ function jacbench_brusselator(detector)
         solver = SimpleEuler()
         prob = ODEProblem(brusselator_2d_loop!, x, (0.0, 1.0), f!.params)
         function brusselator_ode_solve(x)
-            return solve(ODEProblem(brusselator_2d_loop!, x, (0.0, 1.0), f!.params), solver; dt=0.5).u[end]
+            return solve(
+                ODEProblem(brusselator_2d_loop!, x, (0.0, 1.0), f!.params), solver; dt=0.5
+            ).u[end]
         end
         suite["ODE"]["N=$N"] = @benchmarkable jacobian_sparsity(
             $brusselator_ode_solve, $x, $detector

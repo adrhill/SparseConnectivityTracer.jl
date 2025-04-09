@@ -21,9 +21,7 @@ import DataInterpolations:
     # PCHIPInterpolation,
     QuinticHermiteSpline
 
-#===========#
 # Utilities #
-#===========#
 
 function _sct_interpolate(
     ::AbstractInterpolation{T,N},
@@ -64,9 +62,7 @@ function _sct_interpolate(
     return Fill(t, N)
 end
 
-#===========#
 # Overloads #
-#===========#
 
 # We assume that with the exception of ConstantInterpolation and LinearInterpolation,
 # all interpolations have a non-zero second derivative at some point in the input domain.

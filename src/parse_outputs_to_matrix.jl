@@ -1,11 +1,8 @@
-#= Parse tracers from function evaluation in `src/trace_functions.jl` into an output matrix. =#
 
 _tracer_or_number(x::Real) = x
 _tracer_or_number(d::Dual) = tracer(d)
 
-#==========#
 # Jacobian #
-#==========#
 
 function jacobian_tracers_to_matrix(
     xt::AbstractArray{T}, yt::AbstractArray
@@ -32,9 +29,7 @@ function jacobian_tracers_to_matrix(
     return jacobian_tracers_to_matrix(tracer.(xt), _tracer_or_number.(yt))
 end
 
-#=========#
 # Hessian #
-#=========#
 
 function hessian_tracers_to_matrix(xt::AbstractArray{T}, yt::T) where {T<:HessianTracer}
     n = length(xt)
