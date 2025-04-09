@@ -122,6 +122,19 @@ function LinearAlgebra.:\(
     return Ainv * B
 end
 
+function LinearAlgebra.:\(
+    A::AbstractMatrix, B::AbstractVecOrMat{T}
+) where {T<:AbstractTracer}
+    return inv(A) * B
+end
+
+function LinearAlgebra.:\(
+    A::AbstractMatrix{T1}, B::AbstractVecOrMat{T2}
+) where {T1<:AbstractTracer,T2<:AbstractTracer}
+    Ainv = LinearAlgebra.pinv(A)
+    return Ainv * B
+end
+
 ## Exponential
 function Base.exp(A::AbstractMatrix{T}) where {T<:AbstractTracer}
     LinearAlgebra.checksquare(A)
@@ -194,7 +207,10 @@ function LinearAlgebra.:\(A::AbstractMatrix{<:Dual}, B::AbstractVector)
     return Dual.(p, t)
 end
 function LinearAlgebra.:\(A::AbstractMatrix, B::AbstractVector{D}) where {D<:Dual}
-    return D.(A) \ B
+    primals, tracers = split_dual_array(B)
+    p = A \ primals
+    t = A \ tracers
+    return Dual.(p, t)
 end
 function LinearAlgebra.:\(
     A::AbstractMatrix{D1}, B::AbstractVector{D2}
