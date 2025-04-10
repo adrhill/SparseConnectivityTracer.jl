@@ -128,8 +128,9 @@ end
 function LinearAlgebra.:\(
     A::AbstractMatrix{T1}, B::AbstractVecOrMat{T2}
 ) where {T1<:AbstractTracer,T2<:AbstractTracer}
-    Ainv = LinearAlgebra.pinv(A)
-    return Ainv * B
+    n, m = size(A)
+    t = second_order_or(A)
+    return Fill(t, m, n) * B
 end
 
 ## Exponential
