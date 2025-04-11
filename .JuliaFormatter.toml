@@ -1,4 +1,5 @@
 style = "blue"
+always_use_return = true
 align_assignment = true
 align_struct_field = true
 align_conditional = true

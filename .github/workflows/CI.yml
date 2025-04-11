@@ -25,7 +25,7 @@ jobs:
         version:
           - 'lts'
           - '1'
-          - 'pre'
+          # - 'pre'
         group:
           - Core
           - Benchmarks

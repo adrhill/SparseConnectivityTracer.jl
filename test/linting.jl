@@ -13,6 +13,8 @@ using NNlib: NNlib
 using SpecialFunctions: SpecialFunctions
 
 @testset "Code formatting" begin
+    # Using JuliaFormatter v1 (`add JuliaFormatter@1`)
+    # https://github.com/domluna/JuliaFormatter.jl/issues/909
     @info "...with JuliaFormatter.jl"
     @test JuliaFormatter.format(SparseConnectivityTracer; verbose=false, overwrite=false)
 end
@@ -27,9 +29,14 @@ end
     )
 end
 
-@testset "JET tests" begin
-    @info "...with JET.jl"
-    JET.test_package(SparseConnectivityTracer; target_defined_modules=true)
+if VERSION < v"1.12"
+    # JET v0.9  is compatible with Julia <1.12
+    # JET v0.10 is compatible with Julia ≥1.12
+    # TODO: Update when 1.12 releases
+    @testset "JET tests" begin
+        @info "...with JET.jl"
+        JET.test_package(SparseConnectivityTracer; target_defined_modules=true)
+    end
 end
 
 @testset "ExplicitImports tests" begin
