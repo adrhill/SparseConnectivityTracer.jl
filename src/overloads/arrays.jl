@@ -115,25 +115,57 @@ for (Tx, TA, Ty) in Iterators.filter(
 end
 
 ## Division
-function LinearAlgebra.:\(
-    A::AbstractMatrix{T}, B::AbstractVecOrMat
-) where {T<:AbstractTracer}
-    Ainv = LinearAlgebra.pinv(A)
-    return Ainv * B
-end
-
-function LinearAlgebra.:\(
-    A::AbstractMatrix, B::AbstractVecOrMat{T}
-) where {T<:AbstractTracer}
-    return inv(A) * B
-end
-
-function LinearAlgebra.:\(
-    A::AbstractMatrix{T1}, B::AbstractVecOrMat{T2}
-) where {T1<:AbstractTracer,T2<:AbstractTracer}
-    n, m = size(A)
+function LinearAlgebra.:\(A::AbstractMatrix{T}, B::AbstractMatrix) where {T<:AbstractTracer}
+    if size(A, 1) != size(B, 1)
+        throw(DimensionMismatch("arguments must have the same number of rows"))
+    end
     t = second_order_or(A)
-    return Fill(t, m, n) * B
+    return Fill(t, size(A, 2), size(B, 2))
+end
+function LinearAlgebra.:\(A::AbstractMatrix{T}, B::AbstractVector) where {T<:AbstractTracer}
+    if size(A, 1) != size(B, 1)
+        throw(DimensionMismatch("arguments must have the same number of rows"))
+    end
+    t = second_order_or(A)
+    return Fill(t, size(A, 2))
+end
+
+function LinearAlgebra.:\(A::AbstractMatrix, B::AbstractMatrix{T}) where {T<:AbstractTracer}
+    if size(A, 1) != size(B, 1)
+        throw(DimensionMismatch("arguments must have the same number of rows"))
+    end
+    t = second_order_or(B)
+    return Fill(t, size(A, 2), size(B, 2))
+end
+function LinearAlgebra.:\(A::AbstractMatrix, B::AbstractVector{T}) where {T<:AbstractTracer}
+    if size(A, 1) != size(B, 1)
+        throw(DimensionMismatch("arguments must have the same number of rows"))
+    end
+    t = second_order_or(B)
+    return Fill(t, size(A, 2))
+end
+
+function LinearAlgebra.:\(
+    A::AbstractMatrix{T}, B::AbstractMatrix{T}
+) where {T<:AbstractTracer}
+    if size(A, 1) != size(B, 1)
+        throw(DimensionMismatch("arguments must have the same number of rows"))
+    end
+    tA = second_order_or(A)
+    tB = second_order_or(B)
+    t = second_order_or(tA, tB)
+    return Fill(t, size(A, 2), size(B, 2))
+end
+function LinearAlgebra.:\(
+    A::AbstractMatrix{T}, B::AbstractVector{T}
+) where {T<:AbstractTracer}
+    if size(A, 1) != size(B, 1)
+        throw(DimensionMismatch("arguments must have the same number of rows"))
+    end
+    tA = second_order_or(A)
+    tB = second_order_or(B)
+    t = second_order_or(tA, tB)
+    return Fill(t, size(A, 2))
 end
 
 ## Exponential
