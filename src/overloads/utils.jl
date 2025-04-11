@@ -1,5 +1,6 @@
-
+#===============#
 # Tracer unions #
+#===============#
 
 """
     first_order_or(tracers)
@@ -46,7 +47,9 @@ function second_order_or(a::T, b::T) where {T<:HessianTracer}
     return hessian_tracer_2_to_1(a, b, false, false, false, false, false)
 end
 
+#=================#
 # Code generation #
+#=================#
 
 dims = (Symbol("1_to_1"), Symbol("2_to_1"), Symbol("1_to_2"))
 

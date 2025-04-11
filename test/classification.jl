@@ -117,10 +117,10 @@ end;
 function correct_classification_2_to_1(op, x, y; atol)
     g, H = both_derivatives_2_to_1(op, x, y)
 
-    ∂f∂x = g[1]
-    ∂f∂y = g[2]
-    ∂²f∂x² = H[1, 1]
-    ∂²f∂y² = H[2, 2]
+    ∂f∂x    = g[1]
+    ∂f∂y    = g[2]
+    ∂²f∂x²  = H[1, 1]
+    ∂²f∂y²  = H[2, 2]
     ∂²f∂x∂y = H[1, 2]
 
     if (is_der1_arg1_zero_global(op) | is_der1_arg1_zero_local(op, x, y)) &&

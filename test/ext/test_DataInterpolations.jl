@@ -10,7 +10,9 @@ using Test
 myprimal(x) = x
 myprimal(d::Dual) = primal(d)
 
+#===========#
 # Test data #
+#===========#
 
 t = [0.0, 1.0, 2.5, 4.0, 6.0];
 t_scalar = 2.0
@@ -22,7 +24,9 @@ u = sin.(t) # vector
 du = cos.(t)
 ddu = -sin.(t)
 
+#==================#
 # Test definitions #
+#==================#
 
 struct InterpolationTest{N,I<:AbstractInterpolation} # N = output dim. of interpolation
     interp::I
@@ -36,7 +40,9 @@ function InterpolationTest(
 end
 testname(t::InterpolationTest{N}) where {N} = "$N-dim $(typeof(t.interp))"
 
+#================#
 # Jacobian Tests #
+#================#
 
 function test_jacobian(t::InterpolationTest)
     @testset "Jacobian" begin
@@ -108,7 +114,9 @@ function test_jacobian(t::InterpolationTest{N}, input::AbstractVector) where {N}
     end
 end
 
+#===============#
 # Hessian Tests #
+#===============#
 
 function test_hessian(t::InterpolationTest)
     @testset "Hessian" begin
@@ -216,7 +224,9 @@ function test_output(t::InterpolationTest)
     end
 end
 
+#===========#
 # Run tests #
+#===========#
 
 @testset "1D Interpolations" begin
     @testset "$(testname(t))" for t in (

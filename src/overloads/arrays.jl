@@ -1,5 +1,6 @@
-
+#===========#
 # Utilities #
+#===========#
 
 function split_dual_array(A::AbstractArray{D}) where {D<:Dual}
     primals = getproperty.(A, :primal)
@@ -14,7 +15,9 @@ sct_owns_type(::Type{A}) where {T,A<:AbstractArray{T}} = sct_owns_type(T)
 
 nopiracy(types) = any(sct_owns_type, types)
 
+#==================#
 # LinearAlgebra.jl #
+#==================#
 
 # TODO: replace `second_order_or` by less conservative sparsity patterns when possible
 
@@ -171,7 +174,9 @@ function Base.clamp!(A::AbstractArray{T}, lo::T, hi::T) where {T<:AbstractTracer
     return first_order_or.(A, first_order_or(lo, hi))
 end
 
+#==========================#
 # LinearAlgebra.jl on Dual #
+#==========================#
 
 # `Duals` should use LinearAlgebra's generic fallback implementations
 # to compute the "least conservative" sparsity patterns possible on a scalar level.
@@ -218,7 +223,9 @@ function LinearAlgebra.:\(
     return Dual.(p, t)
 end
 
+#==============#
 # SparseArrays #
+#==============#
 
 # Helper function needed in SparseArrays's sparsematrix, sparsevector and higherorderfns.
 # On Tracers, `iszero` and `!iszero` don't return a boolean, 

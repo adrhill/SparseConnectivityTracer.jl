@@ -1,5 +1,6 @@
 ##===============#
 # AbstractTracer #
+#================#
 
 Base.promote_rule(::Type{T}, ::Type{N}) where {T<:AbstractTracer,N<:Real} = T
 Base.promote_rule(::Type{N}, ::Type{T}) where {T<:AbstractTracer,N<:Real} = T
@@ -10,6 +11,7 @@ Base.convert(::Type{<:Real}, t::T) where {T<:AbstractTracer} = t
 
 ##======#
 # Duals #
+#=======#
 
 function Base.promote_rule(::Type{Dual{P1,T}}, ::Type{Dual{P2,T}}) where {P1,P2,T}
     PP = Base.promote_type(P1, P2) # TODO: possible method call error?
@@ -34,6 +36,7 @@ end
 
 ##==========================#
 # Explicit type conversions #
+#===========================#
 
 for T in (:Int, :Integer, :Float64, :Float32)
     # Currently only defined on Dual to avoid invalidations.
@@ -45,6 +48,7 @@ end
 
 ##======================#
 # Named type promotions #
+#=======================#
 
 for f in (:big, :widen, :float)
     @eval Base.$f(::Type{T}) where {T<:AbstractTracer} = T
@@ -53,6 +57,7 @@ end
 
 ##============================#
 # Constant functions on types #
+#=============================#
 
 for f in
     (:zero, :one, :oneunit, :typemin, :typemax, :eps, :floatmin, :floatmax, :maxintfloat)
