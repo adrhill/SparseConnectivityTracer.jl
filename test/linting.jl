@@ -12,11 +12,12 @@ using NaNMath: NaNMath
 using NNlib: NNlib
 using SpecialFunctions: SpecialFunctions
 
-# Temporarily excluded due to https://github.com/domluna/JuliaFormatter.jl/issues/909
-# @testset "Code formatting" begin
-#     @info "...with JuliaFormatter.jl"
-#     @test JuliaFormatter.format(SparseConnectivityTracer; verbose=false, overwrite=false)
-# end
+@testset "Code formatting" begin
+    # Using JuliaFormatter v1 (`add JuliaFormatter@1`)
+    # https://github.com/domluna/JuliaFormatter.jl/issues/909
+    @info "...with JuliaFormatter.jl"
+    @test JuliaFormatter.format(SparseConnectivityTracer; verbose=false, overwrite=false)
+end
 
 @testset "Aqua tests" begin
     @info "...with Aqua.jl"
