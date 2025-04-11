@@ -1,7 +1,7 @@
 # SparseConnectivityTracer.jl
 
 ## Version `v0.6.16`
-* ![Feature][badge-feature] Support LinearAlgebra.jl's `\` operator ([#236])
+* ![Feature][badge-feature] Support LinearAlgebra.jl's `\` operator on local tracers ([#236])
 
 ## Version `v0.6.15`
 * ![Feature][badge-feature] Add stable API for tracer type via `jacobian_eltype` and `hessian_eltype` ([#233])

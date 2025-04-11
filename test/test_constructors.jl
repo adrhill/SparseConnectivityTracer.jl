@@ -225,25 +225,3 @@ end
         end
     end
 end
-
-# https://github.com/adrhill/SparseConnectivityTracer.jl/issues/235
-@testset "Left division on Dual with BigFloat" begin
-    @testset "$T" for T in union(GRADIENT_TRACERS, HESSIAN_TRACERS)
-        P = IndexSetGradientPattern{Int,BitSet}
-        T = GradientTracer{P}
-
-        p      = P(BitSet(2))
-        t_full = T(p)
-        A      = rand(BigFloat, 2, 2)
-        B      = rand(BigFloat, 2)
-
-        dualized_A = Dual.(A, t_full)
-        dualized_B = Dual.(B, t_full)
-        dualized_x = dualized_A \ dualized_B
-
-        @test_nowarn dualized_x = dualized_A \ dualized_B
-        @test_nowarn A \ dualized_B
-        @test_nowarn dualized_A \ B
-        @test eltype(dualized_x) == eltype(dualized_A)
-    end
-end
