@@ -114,6 +114,56 @@ for (Tx, TA, Ty) in Iterators.filter(
     @eval LinearAlgebra.dot(x::$Tx, A::$TA, y::$Ty) = LinearAlgebra.dot(x, A * y)
 end
 
+## Multiplication
+function Base.:*(A::AbstractMatrix{T}, B::AbstractMatrix) where {T<:AbstractTracer}
+    if size(A, 2) != size(B, 1)
+        throw(DimensionMismatch("arguments must have compatible dimensions"))
+    end
+    t = second_order_or(A)
+    return Fill(t, size(A, 1), size(B, 2))
+end
+function Base.:*(A::AbstractMatrix{T}, B::AbstractVector) where {T<:AbstractTracer}
+    if size(A, 2) != length(B)
+        throw(DimensionMismatch("arguments must have compatible dimensions"))
+    end
+    t = second_order_or(A)
+    return Fill(t, size(A, 1))
+end
+
+function Base.:*(A::AbstractMatrix, B::AbstractMatrix{T}) where {T<:AbstractTracer}
+    if size(A, 2) != size(B, 1)
+        throw(DimensionMismatch("arguments must have compatible dimensions"))
+    end
+    t = second_order_or(B)
+    return Fill(t, size(A, 1), size(B, 2))
+end
+function Base.:*(A::AbstractMatrix, B::AbstractVector{T}) where {T<:AbstractTracer}
+    if size(A, 2) != length(B)
+        throw(DimensionMismatch("arguments must have compatible dimensions"))
+    end
+    t = second_order_or(B)
+    return Fill(t, size(A, 1))
+end
+
+function Base.:*(A::AbstractMatrix{T}, B::AbstractMatrix{T}) where {T<:AbstractTracer}
+    if size(A, 2) != size(B, 1)
+        throw(DimensionMismatch("arguments must have compatible dimensions"))
+    end
+    tA = second_order_or(A)
+    tB = second_order_or(B)
+    t = second_order_or(tA, tB)
+    return Fill(t, size(A, 1), size(B, 2))
+end
+function Base.:*(A::AbstractMatrix{T}, B::AbstractVector{T}) where {T<:AbstractTracer}
+    if size(A, 2) != length(B)
+        throw(DimensionMismatch("arguments must have compatible dimensions"))
+    end
+    tA = second_order_or(A)
+    tB = second_order_or(B)
+    t = second_order_or(tA, tB)
+    return Fill(t, size(A, 1))
+end
+
 ## Division
 function LinearAlgebra.:\(A::AbstractMatrix{T}, B::AbstractMatrix) where {T<:AbstractTracer}
     if size(A, 1) != size(B, 1)
