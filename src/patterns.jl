@@ -180,7 +180,7 @@ function myempty(::Type{IndexSetGradientPattern{I,S}}) where {I,S}
     return IndexSetGradientPattern{I,S}(myempty(S))
 end
 function create_patterns(::Type{P}, xs, is) where {I,S,P<:IndexSetGradientPattern{I,S}}
-    sets = seed.(Ref(S), is)
+    sets = map(Base.Fix1(seed, S), is)
     return P.(sets)
 end
 
