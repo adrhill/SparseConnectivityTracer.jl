@@ -395,32 +395,6 @@ end
     @test sameidx(out[2, 2], [4, 5, 6])
 end
 
-t1 = idx2tracer([1])
-t2 = idx2tracer([2])
-t3 = idx2tracer([3])
-t4 = idx2tracer([4])
-t5 = idx2tracer([5])
-t6 = idx2tracer([6])
-t7 = idx2tracer([7])
-t8 = idx2tracer([8])
-t9 = idx2tracer([9])
-
-A_t = [
-    t1 t2
-    t3 t4
-    t5 t6
-]
-A_p = rand(3, 2)
-
-x_t = [t7, t8]
-y_t = [t7, t9]
-
-x_p = rand(2)
-y_p = rand(2)
-
-B_tp = A_t * hcat(x_p, y_p)
-@which A_t * hcat(x_p, y_p)
-
 @testset "Matrix multiplication" begin
     t1 = idx2tracer([1])
     t2 = idx2tracer([2])
