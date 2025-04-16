@@ -114,6 +114,56 @@ for (Tx, TA, Ty) in Iterators.filter(
     @eval LinearAlgebra.dot(x::$Tx, A::$TA, y::$Ty) = LinearAlgebra.dot(x, A * y)
 end
 
+## Multiplication
+function Base.:*(A::Matrix{T}, B::Matrix) where {T<:AbstractTracer}
+    if size(A, 2) != size(B, 1)
+        throw(DimensionMismatch("arguments must have compatible dimensions"))
+    end
+    t = map(first_order_or, eachrow(A))
+    return repeat(t, 1, size(B, 2))
+end
+function Base.:*(A::Matrix{T}, B::Vector) where {T<:AbstractTracer}
+    if size(A, 2) != length(B)
+        throw(DimensionMismatch("arguments must have compatible dimensions"))
+    end
+    t = map(first_order_or, eachrow(A))
+    return t
+end
+
+function Base.:*(A::Matrix, B::Matrix{T}) where {T<:AbstractTracer}
+    if size(A, 2) != size(B, 1)
+        throw(DimensionMismatch("arguments must have compatible dimensions"))
+    end
+    t = map(first_order_or, eachcol(B))
+    return repeat(transpose(t), size(A, 1), 1)
+end
+function Base.:*(A::Matrix, B::Vector{T}) where {T<:AbstractTracer}
+    if size(A, 2) != length(B)
+        throw(DimensionMismatch("arguments must have compatible dimensions"))
+    end
+    t = first_order_or(B)
+    return fill(t, size(A, 1))
+end
+
+function Base.:*(A::Matrix{T}, B::Matrix{T}) where {T<:AbstractTracer}
+    if size(A, 2) != size(B, 1)
+        throw(DimensionMismatch("arguments must have compatible dimensions"))
+    end
+    tA = map(first_order_or, eachrow(A))
+    tB = map(first_order_or, eachcol(B))
+    C = second_order_or.(tA, transpose(tB))
+    return C
+end
+function Base.:*(A::Matrix{T}, B::Vector{T}) where {T<:AbstractTracer}
+    if size(A, 2) != length(B)
+        throw(DimensionMismatch("arguments must have compatible dimensions"))
+    end
+    tA = map(first_order_or, eachrow(A))
+    tB = first_order_or(B)
+    t = second_order_or.(tA, Ref(tB))
+    return t
+end
+
 ## Division
 function LinearAlgebra.:\(A::AbstractMatrix{T}, B::AbstractMatrix) where {T<:AbstractTracer}
     if size(A, 1) != size(B, 1)
