@@ -115,14 +115,14 @@ for (Tx, TA, Ty) in Iterators.filter(
 end
 
 ## Multiplication
-function Base.:*(A::AbstractMatrix{T}, B::AbstractMatrix) where {T<:AbstractTracer}
+function Base.:*(A::Matrix{T}, B::Matrix) where {T<:AbstractTracer}
     if size(A, 2) != size(B, 1)
         throw(DimensionMismatch("arguments must have compatible dimensions"))
     end
     t = second_order_or(A)
     return Fill(t, size(A, 1), size(B, 2))
 end
-function Base.:*(A::AbstractMatrix{T}, B::AbstractVector) where {T<:AbstractTracer}
+function Base.:*(A::Matrix{T}, B::Vector) where {T<:AbstractTracer}
     if size(A, 2) != length(B)
         throw(DimensionMismatch("arguments must have compatible dimensions"))
     end
@@ -130,14 +130,14 @@ function Base.:*(A::AbstractMatrix{T}, B::AbstractVector) where {T<:AbstractTrac
     return Fill(t, size(A, 1))
 end
 
-function Base.:*(A::AbstractMatrix, B::AbstractMatrix{T}) where {T<:AbstractTracer}
+function Base.:*(A::Matrix, B::Matrix{T}) where {T<:AbstractTracer}
     if size(A, 2) != size(B, 1)
         throw(DimensionMismatch("arguments must have compatible dimensions"))
     end
     t = second_order_or(B)
     return Fill(t, size(A, 1), size(B, 2))
 end
-function Base.:*(A::AbstractMatrix, B::AbstractVector{T}) where {T<:AbstractTracer}
+function Base.:*(A::Matrix, B::Vector{T}) where {T<:AbstractTracer}
     if size(A, 2) != length(B)
         throw(DimensionMismatch("arguments must have compatible dimensions"))
     end
@@ -145,7 +145,7 @@ function Base.:*(A::AbstractMatrix, B::AbstractVector{T}) where {T<:AbstractTrac
     return Fill(t, size(A, 1))
 end
 
-function Base.:*(A::AbstractMatrix{T}, B::AbstractMatrix{T}) where {T<:AbstractTracer}
+function Base.:*(A::Matrix{T}, B::Matrix{T}) where {T<:AbstractTracer}
     if size(A, 2) != size(B, 1)
         throw(DimensionMismatch("arguments must have compatible dimensions"))
     end
@@ -154,7 +154,7 @@ function Base.:*(A::AbstractMatrix{T}, B::AbstractMatrix{T}) where {T<:AbstractT
     t = second_order_or(tA, tB)
     return Fill(t, size(A, 1), size(B, 2))
 end
-function Base.:*(A::AbstractMatrix{T}, B::AbstractVector{T}) where {T<:AbstractTracer}
+function Base.:*(A::Matrix{T}, B::Vector{T}) where {T<:AbstractTracer}
     if size(A, 2) != length(B)
         throw(DimensionMismatch("arguments must have compatible dimensions"))
     end
