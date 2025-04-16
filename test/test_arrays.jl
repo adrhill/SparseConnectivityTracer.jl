@@ -395,57 +395,137 @@ end
     @test sameidx(out[2, 2], [4, 5, 6])
 end
 
+t1 = idx2tracer([1])
+t2 = idx2tracer([2])
+t3 = idx2tracer([3])
+t4 = idx2tracer([4])
+t5 = idx2tracer([5])
+t6 = idx2tracer([6])
+t7 = idx2tracer([7])
+t8 = idx2tracer([8])
+t9 = idx2tracer([9])
+
+A_t = [
+    t1 t2
+    t3 t4
+    t5 t6
+]
+A_p = rand(3, 2)
+
+x_t = [t7, t8]
+y_t = [t7, t9]
+
+x_p = rand(2)
+y_p = rand(2)
+
+B_tp = A_t * hcat(x_p, y_p)
+@which A_t * hcat(x_p, y_p)
+
 @testset "Matrix multiplication" begin
-    t1 = idx2tracer([1, 3, 4])
-    t2 = idx2tracer([2, 4])
-    t3 = idx2tracer([8, 9])
-    t4 = idx2tracer([8, 10])
-    t5 = idx2tracer([12])
-    t6 = idx2tracer([10, 15])
-    A_t = [t1 t2; t3 t4; t5 t6]
+    t1 = idx2tracer([1])
+    t2 = idx2tracer([2])
+    t3 = idx2tracer([3])
+    t4 = idx2tracer([4])
+    t5 = idx2tracer([5])
+    t6 = idx2tracer([6])
+    t7 = idx2tracer([7])
+    t8 = idx2tracer([8])
+    t9 = idx2tracer([9])
+
+    A_t = [
+        t1 t2
+        t3 t4
+        t5 t6
+    ]
     A_p = rand(3, 2)
 
-    t7 = idx2tracer([6])
-    t8 = idx2tracer([5, 7])
-    t9 = idx2tracer([99])
-    x_t = [t7; t8]
-    y_t = [t7; t9]
+    x_t = [t7, t8]
+    y_t = [t7, t9]
+
     x_p = rand(2)
     y_p = rand(2)
-
-    set_tp = set_A = idx2set([1, 2, 3, 4, 8, 9, 10, 12, 15])
-    set_pt = set_x = idx2set([5, 6, 7])
-    set_tt = union(set_tp, set_pt)
 
     @testset "Global" begin
         b_pp = A_p * x_p
         @testset "Tracer-Primal" begin
             b_tp = A_t * x_p
             @test size(b_tp) == size(b_pp)
-            @test all(t -> sameidx(t, set_tp), b_tp)
+            @test all(map(
+                sameidx,
+                b_tp,
+                [
+                    t1 + t2
+                    t3 + t4
+                    t5 + t6
+                ],
+            ))
             B_tp = A_t * hcat(x_p, y_p)
             @test size(B_tp) == (3, 2)
-            @test all(t -> sameidx(t, set_tp), B_tp)
+            @test all(map(
+                sameidx,
+                B_tp,
+                [
+                    (t1+t2)       (t1+t2)
+                    (t3+t4)       (t3+t4)
+                    (t5+t6)       (t5+t6)
+                ],
+            ))
             @test_throws DimensionMismatch A_t * vcat(x_p, x_p)
             @test_throws DimensionMismatch A_t * hcat(x_p[1:1], x_p[1:1])
         end
         @testset "Primal-Tracer" begin
             b_pt = A_p * x_t
             @test size(b_pt) == size(b_pp)
-            @test all(t -> sameidx(t, set_pt), b_pt)
+            @test all(map(
+                sameidx,
+                b_pt,
+                [
+                    t7 + t8
+                    t7 + t8
+                    t7 + t8
+                ],
+            ))
             B_pt = A_p * hcat(x_t, y_t)
             @test size(B_pt) == (3, 2)
-            @test all(t -> sameidx(t, union(set_pt, 99)), B_pt)
+            @test all(map(
+                sameidx,
+                B_pt,
+                [
+                    (t7+t8)         (t7+t9)
+                    (t7+t8)         (t7+t9)
+                    (t7+t8)         (t7+t9)
+                ],
+            ))
             @test_throws DimensionMismatch A_p * vcat(x_t, x_t)
             @test_throws DimensionMismatch A_p * hcat(x_t[1:1], x_t[1:1])
         end
         @testset "Tracer-Tracer" begin
             b_tt = A_t * x_t
             @test size(b_tt) == size(b_pp)
-            @test all(t -> sameidx(t, set_tt), b_tt)
+            @test all(
+                map(
+                    sameidx,
+                    b_tt,
+                    [
+                        t1 + t2 + t7 + t8
+                        t3 + t4 + t7 + t8
+                        t5 + t6 + t7 + t8
+                    ],
+                )
+            )
             B_tt = A_t * hcat(x_t, y_t)
             @test size(B_tt) == (3, 2)
-            @test all(t -> sameidx(t, union(set_tt, 99)), B_tt)
+            @test all(
+                map(
+                    sameidx,
+                    B_tt,
+                    [
+                        (t1+t2+t7+t8)           (t1+t2+t7+t9)
+                        (t3+t4+t7+t8)           (t3+t4+t7+t9)
+                        (t5+t6+t7+t8)           (t5+t6+t7+t9)
+                    ],
+                ),
+            )
             @test_throws DimensionMismatch A_t * vcat(x_t, x_t)
             @test_throws DimensionMismatch A_t * hcat(x_t[1:1], x_t[1:1])
         end
