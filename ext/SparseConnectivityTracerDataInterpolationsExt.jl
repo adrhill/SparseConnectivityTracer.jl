@@ -91,7 +91,9 @@ for (I, is_der1_zero, is_der2_zero) in (
     (:CubicHermiteSpline, false, false),
     (:QuinticHermiteSpline, false, false),
 )
-    @eval function (interp::$(I){uType})(t::AbstractTracer) where {uType<:AbstractArray{<:Number}}
+    @eval function (interp::$(I){uType})(
+        t::AbstractTracer
+    ) where {uType<:AbstractArray{<:Number}}
         return _sct_interpolate(interp, uType, t, $is_der1_zero, $is_der2_zero)
     end
 end
