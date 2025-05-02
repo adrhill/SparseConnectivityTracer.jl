@@ -1,5 +1,8 @@
 # SparseConnectivityTracer.jl
 
+## Version `v0.6.18`
+* ![Enhancement][badge-enhancement] Stop tracing through multiplication by zero ([#243])
+
 ## Version `v0.6.17`
 * ![Enhancement][badge-enhancement] Performance optimization in pattern creation ([#239])
 
@@ -115,6 +118,7 @@
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#243]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/243
 [#239]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/239
 [#236]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/236
 [#233]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/233

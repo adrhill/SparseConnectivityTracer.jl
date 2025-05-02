@@ -267,6 +267,12 @@ D = Dual{Int,T}
             # TypeError: non-boolean (SparseConnectivityTracer.GradientTracer{BitSet}) used in boolean context
             @test_throws TypeError H(x -> x[1] > x[2] ? x[1]^x[2] : x[3] * x[4], rand(4))
         end
+
+        @testset "Multiplication by zero" begin
+            f(x) = dot(x, Matrix(I(length(x))), x)
+            @test H(f, ones(10)) == I(10)
+        end
+
         yield()
     end
 end

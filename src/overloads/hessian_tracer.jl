@@ -261,18 +261,37 @@ function generate_code_hessian_2_to_1_typed(
     is_der1_arg2_zero_g = is_der1_arg2_zero_global(f)
     is_der2_arg2_zero_g = is_der2_arg2_zero_global(f)
 
-    expr_tracer_type = quote
-        function $M.$fname(tx::$SCT.HessianTracer, y::$Z)
-            return @noinline $SCT.hessian_tracer_1_to_1(
-                tx, $is_der1_arg1_zero_g, $is_der2_arg1_zero_g
-            )
+    if f === Base.:*  # special case
+        expr_tracer_type = quote
+            function $M.$fname(tx::$SCT.HessianTracer, y::$Z)
+                is_der1_arg1_zero_g_tweaked = iszero(y)
+                return @noinline $SCT.hessian_tracer_1_to_1(
+                    tx, is_der1_arg1_zero_g_tweaked, true
+                )
+            end
         end
-    end
-    expr_type_tracer = quote
-        function $M.$fname(x::$Z, ty::$SCT.HessianTracer)
-            return @noinline $SCT.hessian_tracer_1_to_1(
-                ty, $is_der1_arg2_zero_g, $is_der2_arg2_zero_g
-            )
+        expr_type_tracer = quote
+            function $M.$fname(x::$Z, ty::$SCT.HessianTracer)
+                is_der1_arg2_zero_g_tweaked = iszero(x)
+                return @noinline $SCT.hessian_tracer_1_to_1(
+                    ty, is_der1_arg2_zero_g_tweaked, true
+                )
+            end
+        end
+    else
+        expr_tracer_type = quote
+            function $M.$fname(tx::$SCT.HessianTracer, y::$Z)
+                return @noinline $SCT.hessian_tracer_1_to_1(
+                    tx, $is_der1_arg1_zero_g, $is_der2_arg1_zero_g
+                )
+            end
+        end
+        expr_type_tracer = quote
+            function $M.$fname(x::$Z, ty::$SCT.HessianTracer)
+                return @noinline $SCT.hessian_tracer_1_to_1(
+                    ty, $is_der1_arg2_zero_g, $is_der2_arg2_zero_g
+                )
+            end
         end
     end
 
