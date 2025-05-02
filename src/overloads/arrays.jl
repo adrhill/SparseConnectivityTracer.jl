@@ -115,11 +115,57 @@ for (Tx, TA, Ty) in Iterators.filter(
 end
 
 ## Division
+function LinearAlgebra.:\(A::AbstractMatrix{T}, B::AbstractMatrix) where {T<:AbstractTracer}
+    if size(A, 1) != size(B, 1)
+        throw(DimensionMismatch("arguments must have the same number of rows"))
+    end
+    t = second_order_or(A)
+    return Fill(t, size(A, 2), size(B, 2))
+end
+function LinearAlgebra.:\(A::AbstractMatrix{T}, B::AbstractVector) where {T<:AbstractTracer}
+    if size(A, 1) != size(B, 1)
+        throw(DimensionMismatch("arguments must have the same number of rows"))
+    end
+    t = second_order_or(A)
+    return Fill(t, size(A, 2))
+end
+
+function LinearAlgebra.:\(A::AbstractMatrix, B::AbstractMatrix{T}) where {T<:AbstractTracer}
+    if size(A, 1) != size(B, 1)
+        throw(DimensionMismatch("arguments must have the same number of rows"))
+    end
+    t = second_order_or(B)
+    return Fill(t, size(A, 2), size(B, 2))
+end
+function LinearAlgebra.:\(A::AbstractMatrix, B::AbstractVector{T}) where {T<:AbstractTracer}
+    if size(A, 1) != size(B, 1)
+        throw(DimensionMismatch("arguments must have the same number of rows"))
+    end
+    t = second_order_or(B)
+    return Fill(t, size(A, 2))
+end
+
 function LinearAlgebra.:\(
-    A::AbstractMatrix{T}, B::AbstractVecOrMat
+    A::AbstractMatrix{T}, B::AbstractMatrix{T}
 ) where {T<:AbstractTracer}
-    Ainv = LinearAlgebra.pinv(A)
-    return Ainv * B
+    if size(A, 1) != size(B, 1)
+        throw(DimensionMismatch("arguments must have the same number of rows"))
+    end
+    tA = second_order_or(A)
+    tB = second_order_or(B)
+    t = second_order_or(tA, tB)
+    return Fill(t, size(A, 2), size(B, 2))
+end
+function LinearAlgebra.:\(
+    A::AbstractMatrix{T}, B::AbstractVector{T}
+) where {T<:AbstractTracer}
+    if size(A, 1) != size(B, 1)
+        throw(DimensionMismatch("arguments must have the same number of rows"))
+    end
+    tA = second_order_or(A)
+    tB = second_order_or(B)
+    t = second_order_or(tA, tB)
+    return Fill(t, size(A, 2))
 end
 
 ## Exponential
@@ -186,6 +232,27 @@ function LinearAlgebra.logabsdet(A::AbstractMatrix{D}) where {D<:Dual}
     p1, p2 = LinearAlgebra.logabsdet(primals)
     t1, t2 = LinearAlgebra.logabsdet(tracers)
     return (D(p1, t1), D(p2, t2))
+end
+function LinearAlgebra.:\(A::AbstractMatrix{<:Dual}, B::AbstractVector)
+    primals, tracers = split_dual_array(A)
+    p = primals \ B
+    t = tracers \ B
+    return Dual.(p, t)
+end
+function LinearAlgebra.:\(A::AbstractMatrix, B::AbstractVector{D}) where {D<:Dual}
+    primals, tracers = split_dual_array(B)
+    p = A \ primals
+    t = A \ tracers
+    return Dual.(p, t)
+end
+function LinearAlgebra.:\(
+    A::AbstractMatrix{D1}, B::AbstractVector{D2}
+) where {D1<:Dual,D2<:Dual}
+    A_primals, A_tracers = split_dual_array(A)
+    B_primals, B_tracers = split_dual_array(B)
+    p = A_primals \ B_primals
+    t = A_tracers \ B_tracers
+    return Dual.(p, t)
 end
 
 #==============#

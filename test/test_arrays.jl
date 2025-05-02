@@ -1,7 +1,13 @@
 import SparseConnectivityTracer as SCT
 using SparseConnectivityTracer
 using SparseConnectivityTracer:
-    GradientTracer, IndexSetGradientPattern, isemptytracer, MissingPrimalError
+    GradientTracer,
+    Dual,
+    IndexSetGradientPattern,
+    isemptytracer,
+    MissingPrimalError,
+    split_dual_array,
+    tracer
 using Test
 
 using LinearAlgebra: Symmetric, Diagonal, diagind
@@ -394,12 +400,73 @@ end
     t2 = idx2tracer([2, 4])
     t3 = idx2tracer([8, 9])
     t4 = idx2tracer([8, 9])
-    A = [t1 t2; t3 t4]
-    s_out = idx2set([1, 2, 3, 4, 8, 9])
+    A_t = [t1 t2; t3 t4]
+    A_p = rand(2, 2)
 
-    x = rand(2)
-    b = A \ x
-    @test all(t -> sameidx(t, s_out), b)
+    t5 = idx2tracer([6])
+    t6 = idx2tracer([5, 7])
+    x_t = [t5; t6]
+    x_p = rand(2)
+
+    set_tp = set_A = idx2set([1, 2, 3, 4, 8, 9])
+    set_pt = set_x = idx2set([5, 6, 7])
+    set_tt = union(set_tp, set_pt)
+
+    @testset "Global" begin
+        b_pp = A_p \ x_p
+        @testset "Tracer-Primal" begin
+            b_tp = A_t \ x_p
+            @test size(b_tp) == size(b_pp)
+            @test all(t -> sameidx(t, set_tp), b_tp)
+        end
+        @testset "Primal-Tracer" begin
+            b_pt = A_p \ x_t
+            @test size(b_pt) == size(b_pp)
+            @test all(t -> sameidx(t, set_pt), b_pt)
+        end
+        @testset "Tracer-Tracer" begin
+            b_tt = A_t \ x_t
+            @test size(b_tt) == size(b_pp)
+            @test all(t -> sameidx(t, set_tt), b_tt)
+        end
+    end
+    @testset "Local" begin
+        @testset "$P" for P in (Float32, BigFloat)
+            # https://github.com/adrhill/SparseConnectivityTracer.jl/issues/235
+
+            A_p = rand(P, 2, 2)
+            A_d = Dual.(A_p, A_t)
+            @test size(A_d) == size(A_p)
+
+            x_p = rand(P, 2)
+            x_d = Dual.(x_p, x_t)
+            @test size(x_d) == size(x_p)
+
+            b_pp = A_p \ x_p
+
+            @testset "Dual-Primal" begin
+                b_dp = A_d \ x_p
+                primals_dp, _ = split_dual_array(b_dp)
+                @test size(b_dp) == size(b_pp)
+                @test primals_dp == b_pp
+                @test all(d -> sameidx(tracer(d), set_tp), b_dp)
+            end
+            @testset "Primal-Dual" begin
+                b_pd = A_p \ x_d
+                primals_pd, _ = split_dual_array(b_pd)
+                @test size(b_pd) == size(b_pp)
+                @test primals_pd == b_pp
+                @test all(d -> sameidx(tracer(d), set_pt), b_pd)
+            end
+            @testset "Dual-Dual" begin
+                b_dd = A_d \ x_d
+                primals_dd, _ = split_dual_array(b_dd)
+                @test size(b_dd) == size(b_pp)
+                @test primals_dd == b_pp
+                @test all(d -> sameidx(tracer(d), set_tt), b_dd)
+            end
+        end
+    end
 end
 
 @testset "Dot" begin
