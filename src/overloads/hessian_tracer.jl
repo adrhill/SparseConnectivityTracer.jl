@@ -31,7 +31,7 @@ function hessian_tracer_1_to_1_inner(
         h
     elseif is_der1_zero && !is_der2_zero # 𝟙[∇²γ] = 𝟙[∇α] ∨ 𝟙[∇α]ᵀ
         # TODO: this branch of the code currently isn't tested.
-        # Covering it would require a scalar 1-to-1 function with local overloads, 
+        # Covering it would require a scalar 1-to-1 function with local overloads,
         # such that ∂f/∂x == 0 and ∂²f/∂x² != 0.
         union_product!(myempty(h), g, g)
     else # !is_der1_zero && !is_der2_zero,  𝟙[∇²γ] = 𝟙[∇²α] ∨ (𝟙[∇α] ∨ 𝟙[∇α]ᵀ)
@@ -178,7 +178,7 @@ end
 function generate_code_hessian_2_to_1(
     M::Symbol,    # Symbol indicating Module of f, usually `:Base`
     f::Function,  # function to overload
-    Z::Type=Real, # external non-tracer-type to overload on 
+    Z::Type=Real, # external non-tracer-type to overload on
 )
     fname = nameof(f)
     is_der1_arg1_zero_g = is_der1_arg1_zero_global(f)
@@ -253,7 +253,7 @@ end
 function generate_code_hessian_2_to_1_typed(
     M::Symbol,   # Symbol indicating Module of f, usually `:Base`
     f::Function, # function to overload
-    Z::Type,     # external non-tracer-type to overload on 
+    Z::Type,     # external non-tracer-type to overload on
 )
     fname = nameof(f)
     is_der1_arg1_zero_g = is_der1_arg1_zero_global(f)
@@ -261,7 +261,7 @@ function generate_code_hessian_2_to_1_typed(
     is_der1_arg2_zero_g = is_der1_arg2_zero_global(f)
     is_der2_arg2_zero_g = is_der2_arg2_zero_global(f)
 
-    if f === Base.:*  # special case
+    if f === Base.:*  # TODO: generalize to other cases (#244)
         expr_tracer_type = quote
             function $M.$fname(tx::$SCT.HessianTracer, y::$Z)
                 is_der1_arg1_zero_g_tweaked = iszero(y)
