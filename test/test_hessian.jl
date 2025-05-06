@@ -269,7 +269,7 @@ D = Dual{Int,T}
         end
 
         @testset "Multiplication by zero" begin
-            f1(x) = [0 * x[1]^2]
+            f1(x) = 0 * x[1]^2
             @test H(f1, [1.0]) == [0;;]
             f2(x) = dot(x, Matrix(I(length(x))), x)
             @test H(f2, ones(10)) == I(10)
