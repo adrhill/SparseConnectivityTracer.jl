@@ -1,7 +1,10 @@
 # SparseConnectivityTracer.jl
 
-## Version `v0.6.18`
+## Version `v0.6.19`
 * ![Enhancement][badge-enhancement] Stop tracing through multiplication by zero ([#243])
+
+## Version `v0.6.18`
+* ![Maintenance][badge-maintenance] DataInterpolations `v8` compatiblity ([#234])
 
 ## Version `v0.6.17`
 * ![Enhancement][badge-enhancement] Performance optimization in pattern creation ([#239])
@@ -121,6 +124,7 @@
 [#243]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/243
 [#239]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/239
 [#236]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/236
+[#234]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/234
 [#233]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/233
 [#232]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/232
 [#231]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/231
