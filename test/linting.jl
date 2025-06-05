@@ -21,10 +21,7 @@ using SpecialFunctions: SpecialFunctions
     )
 end
 
-if VERSION < v"1.12"
-    # JET v0.9  is compatible with Julia <1.12
-    # JET v0.10 is compatible with Julia ≥1.12
-    # TODO: Update when 1.12 releases
+if VERSION > v"1.11" # JET v0.10 requires Julia v1.12
     @testset "JET tests" begin
         @info "...with JET.jl"
         JET.test_package(SparseConnectivityTracer; target_defined_modules = true)
