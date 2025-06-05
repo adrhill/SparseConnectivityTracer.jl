@@ -147,20 +147,37 @@ end
 function generate_code_gradient_2_to_1_typed(
     M::Symbol,   # Symbol indicating Module of f, usually `:Base`
     f::Function, # function to overload
-    Z::Type,     # external non-tracer-type to overload on 
+    Z::Type,     # external non-tracer-type to overload on
 )
     fname = nameof(f)
     is_der1_arg1_zero_g = is_der1_arg1_zero_global(f)
     is_der1_arg2_zero_g = is_der1_arg2_zero_global(f)
 
-    expr_tracer_type = quote
-        function $M.$fname(tx::$SCT.GradientTracer, ::$Z)
-            return @noinline $SCT.gradient_tracer_1_to_1(tx, $is_der1_arg1_zero_g)
+    if f === Base.:*  # TODO: generalize to other cases (#244)
+        expr_tracer_type = quote
+            function $M.$fname(tx::$SCT.GradientTracer, y::$Z)
+                is_der1_arg1_zero_g_tweaked = iszero(y)
+                return @noinline $SCT.gradient_tracer_1_to_1(
+                    tx, is_der1_arg1_zero_g_tweaked
+                )
+            end
         end
-    end
-    expr_type_tracer = quote
-        function $M.$fname(::$Z, ty::$SCT.GradientTracer)
-            return @noinline $SCT.gradient_tracer_1_to_1(ty, $is_der1_arg2_zero_g)
+        expr_type_tracer = quote
+            function $M.$fname(x::$Z, ty::$SCT.GradientTracer)
+                is_der1_arg2_zero_tweaked = iszero(x)
+                return @noinline $SCT.gradient_tracer_1_to_1(ty, is_der1_arg2_zero_tweaked)
+            end
+        end
+    else
+        expr_tracer_type = quote
+            function $M.$fname(tx::$SCT.GradientTracer, ::$Z)
+                return @noinline $SCT.gradient_tracer_1_to_1(tx, $is_der1_arg1_zero_g)
+            end
+        end
+        expr_type_tracer = quote
+            function $M.$fname(::$Z, ty::$SCT.GradientTracer)
+                return @noinline $SCT.gradient_tracer_1_to_1(ty, $is_der1_arg2_zero_g)
+            end
         end
     end
 

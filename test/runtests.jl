@@ -5,7 +5,7 @@ Pkg.develop(;
 
 using SparseConnectivityTracer
 using Documenter: Documenter, DocMeta
-using Test
+using Test, LinearAlgebra
 
 DocMeta.setdocmeta!(
     SparseConnectivityTracer,

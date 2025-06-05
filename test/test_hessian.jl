@@ -1,6 +1,7 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer: Dual, HessianTracer, MissingPrimalError
 using SparseConnectivityTracer: create_tracers, pattern, shared
+using LinearAlgebra: I, dot
 using Test
 using Random: rand, GLOBAL_RNG
 
@@ -267,6 +268,16 @@ D = Dual{Int,T}
             # TypeError: non-boolean (SparseConnectivityTracer.GradientTracer{BitSet}) used in boolean context
             @test_throws TypeError H(x -> x[1] > x[2] ? x[1]^x[2] : x[3] * x[4], rand(4))
         end
+
+        @testset "Multiplication by zero" begin
+            if !Bool(shared(T))
+                f1(x) = 0 * x[1]^2
+                @test H(f1, [1.0]) == [0;;]
+                f2(x) = dot(x, Matrix(I(length(x))), x)
+                @test H(f2, ones(10)) == I(10)
+            end
+        end
+
         yield()
     end
 end
