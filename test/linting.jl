@@ -16,16 +16,16 @@ using SpecialFunctions: SpecialFunctions
     # Using JuliaFormatter v1 (`add JuliaFormatter@1`)
     # https://github.com/domluna/JuliaFormatter.jl/issues/909
     @info "...with JuliaFormatter.jl"
-    @test JuliaFormatter.format(SparseConnectivityTracer; verbose=false, overwrite=false)
+    @test JuliaFormatter.format(SparseConnectivityTracer; verbose = false, overwrite = false)
 end
 
 @testset "Aqua tests" begin
     @info "...with Aqua.jl"
     Aqua.test_all(
         SparseConnectivityTracer;
-        ambiguities=false,
-        deps_compat=(check_extras=false,),
-        persistent_tasks=false,
+        ambiguities = false,
+        deps_compat = (check_extras = false,),
+        persistent_tasks = false,
     )
 end
 
@@ -35,7 +35,7 @@ if VERSION < v"1.12"
     # TODO: Update when 1.12 releases
     @testset "JET tests" begin
         @info "...with JET.jl"
-        JET.test_package(SparseConnectivityTracer; target_defined_modules=true)
+        JET.test_package(SparseConnectivityTracer; target_defined_modules = true)
     end
 end
 
@@ -48,7 +48,7 @@ end
     @testset "Improper explicit imports" begin
         @test ExplicitImports.check_no_stale_explicit_imports(
             SparseConnectivityTracer;
-            ignore=(
+            ignore = (
                 # Used in code generation, which ExplicitImports doesn't pick up
                 :AbstractTracer,
                 :AkimaInterpolation,
