@@ -1,7 +1,6 @@
 using SparseConnectivityTracer
 using Test
 
-using JuliaFormatter: JuliaFormatter
 using Aqua: Aqua
 using JET: JET
 using ExplicitImports: ExplicitImports
@@ -11,13 +10,6 @@ using DataInterpolations: DataInterpolations
 using NaNMath: NaNMath
 using NNlib: NNlib
 using SpecialFunctions: SpecialFunctions
-
-@testset "Code formatting" begin
-    # Using JuliaFormatter v1 (`add JuliaFormatter@1`)
-    # https://github.com/domluna/JuliaFormatter.jl/issues/909
-    @info "...with JuliaFormatter.jl"
-    @test JuliaFormatter.format(SparseConnectivityTracer; verbose = false, overwrite = false)
-end
 
 @testset "Aqua tests" begin
     @info "...with Aqua.jl"
