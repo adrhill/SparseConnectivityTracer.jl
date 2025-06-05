@@ -3,7 +3,7 @@ using SparseConnectivityTracer: GradientTracer, Dual, MissingPrimalError
 using Test
 
 using Random: rand, GLOBAL_RNG
-using LinearAlgebra: det, dot, logdet
+using LinearAlgebra: I, det, dot, logdet
 
 # Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
 include("tracers_definitions.jl")

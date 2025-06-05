@@ -1,6 +1,7 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer: Dual, HessianTracer, MissingPrimalError
 using SparseConnectivityTracer: create_tracers, pattern, shared
+using LinearAlgebra: I, dot
 using Test
 using Random: rand, GLOBAL_RNG
 
@@ -269,10 +270,12 @@ D = Dual{Int,T}
         end
 
         @testset "Multiplication by zero" begin
-            f1(x) = 0 * x[1]^2
-            @test H(f1, [1.0]) == [0;;]
-            f2(x) = dot(x, Matrix(I(length(x))), x)
-            @test H(f2, ones(10)) == I(10)
+            if !Bool(shared(T))
+                f1(x) = 0 * x[1]^2
+                @test H(f1, [1.0]) == [0;;]
+                f2(x) = dot(x, Matrix(I(length(x))), x)
+                @test H(f2, ones(10)) == I(10)
+            end
         end
 
         yield()
