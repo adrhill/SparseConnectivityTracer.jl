@@ -2,6 +2,7 @@
 
 ## Version `v0.6.19`
 * ![Enhancement][badge-enhancement] Stop tracing through multiplication by zero ([#243])
+* ![Maintenance][badge-maintenance] Update code style and formatter to Runic.jl
 
 ## Version `v0.6.18`
 * ![Maintenance][badge-maintenance] DataInterpolations `v8` compatiblity ([#234])
