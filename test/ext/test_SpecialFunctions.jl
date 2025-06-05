@@ -1,4 +1,3 @@
-
 using SparseConnectivityTracer
 using SpecialFunctions: erf, beta
 using Test

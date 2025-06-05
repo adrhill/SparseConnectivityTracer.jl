@@ -57,22 +57,22 @@ const LAYER_RELU = Conv(WEIGHTS_FLUX, BIAS_FLUX, relu) # Conv((2, 2), 2 => 1, re
 
 function test_flux_conv(detector::AbstractSparsityDetector)
     J = jacobian_sparsity(LAYER, INPUT_FLUX, detector)
-    @test_reference "references/pattern/jacobian/NNlib/conv.txt" BitMatrix(J)
+    return @test_reference "references/pattern/jacobian/NNlib/conv.txt" BitMatrix(J)
 end
 function test_flux_conv_local(detector::AbstractSparsityDetector)
     J = jacobian_sparsity(LAYER_RELU, INPUT_FLUX, detector)
-    @test_reference "references/pattern/jacobian/NNlib/conv_relu.txt" BitMatrix(J)
+    return @test_reference "references/pattern/jacobian/NNlib/conv_relu.txt" BitMatrix(J)
 end
 
 @testset "Global" begin
     @testset "$T" for T in GRADIENT_TRACERS
-        detector = TracerSparsityDetector(; gradient_tracer_type=T)
+        detector = TracerSparsityDetector(; gradient_tracer_type = T)
         test_flux_conv(detector)
     end
 end
 @testset "Local" begin
     @testset "$T" for T in GRADIENT_TRACERS
-        detector = TracerLocalSparsityDetector(; gradient_tracer_type=T)
+        detector = TracerLocalSparsityDetector(; gradient_tracer_type = T)
         test_flux_conv(detector)
         test_flux_conv_local(detector)
     end

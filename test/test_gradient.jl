@@ -21,7 +21,7 @@ T = GradientTracer{P}
 @testset "Jacobian Global" begin
     @testset "$P" for P in GRADIENT_PATTERNS
         T = GradientTracer{P}
-        detector = TracerSparsityDetector(; gradient_tracer_type=T)
+        detector = TracerSparsityDetector(; gradient_tracer_type = T)
         J(f, x) = jacobian_sparsity(f, x, detector)
         J(f!, y, x) = jacobian_sparsity(f!, y, x, detector)
 
@@ -44,15 +44,15 @@ T = GradientTracer{P}
         @testset "Miscellaneous" begin
             @test J(x -> [sincos(x)...], 1) ≈ [1; 1]
             @test J(typemax, 1) ≈ [0;;]
-            @test J(x -> x^(2//3), 1) ≈ [1;;]
-            @test J(x -> (2//3)^x, 1) ≈ [1;;]
+            @test J(x -> x^(2 // 3), 1) ≈ [1;;]
+            @test J(x -> (2 // 3)^x, 1) ≈ [1;;]
             @test J(x -> x^ℯ, 1) ≈ [1;;]
             @test J(x -> ℯ^x, 1) ≈ [1;;]
             @test J(x -> 0, 1) ≈ [0;;]
 
             # Test special cases on empty tracer
-            @test J(x -> zero(x)^(2//3), 1) ≈ [0;;]
-            @test J(x -> (2//3)^zero(x), 1) ≈ [0;;]
+            @test J(x -> zero(x)^(2 // 3), 1) ≈ [0;;]
+            @test J(x -> (2 // 3)^zero(x), 1) ≈ [0;;]
             @test J(x -> zero(x)^ℯ, 1) ≈ [0;;]
             @test J(x -> ℯ^zero(x), 1) ≈ [0;;]
         end
@@ -82,7 +82,7 @@ T = GradientTracer{P}
             @test J(x -> round(Bool, x), 1.1) ≈ [0;;]
             @test J(x -> round(Float16, x), 1.1) ≈ [0;;]
             @test J(x -> round(x, RoundNearestTiesAway), 1.1) ≈ [0;;]
-            @test J(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
+            @test J(x -> round(x; digits = 3, base = 2), 1.1) ≈ [0;;]
         end
 
         @testset "Three-argument operators" begin
@@ -103,18 +103,18 @@ T = GradientTracer{P}
 
         @testset "MissingPrimalError" begin
             @testset "$f" for f in (
-                iseven,
-                isfinite,
-                isinf,
-                isinteger,
-                ismissing,
-                isnan,
-                isnothing,
-                isodd,
-                isone,
-                isreal,
-                iszero,
-            )
+                    iseven,
+                    isfinite,
+                    isinf,
+                    isinteger,
+                    ismissing,
+                    isnan,
+                    isnothing,
+                    isodd,
+                    isone,
+                    isreal,
+                    iszero,
+                )
                 @test_throws MissingPrimalError J(f, rand())
             end
         end
@@ -127,9 +127,9 @@ T = GradientTracer{P}
 
             function f_ampgo07(x)
                 return (x[1] <= 0) * convert(eltype(x), Inf) +
-                       sin(x[1]) +
-                       sin(10//3 * x[1]) +
-                       log(abs(x[1])) - 84//100 * x[1] + 3
+                    sin(x[1]) +
+                    sin(10 // 3 * x[1]) +
+                    log(abs(x[1])) - 84 // 100 * x[1] + 3
             end
             @test J(f_ampgo07, [1.0]) ≈ [1;;]
 
@@ -183,7 +183,7 @@ end
 @testset "Jacobian Local" begin
     @testset "$P" for P in GRADIENT_PATTERNS
         T = GradientTracer{P}
-        detector = TracerLocalSparsityDetector(; gradient_tracer_type=T)
+        detector = TracerLocalSparsityDetector(; gradient_tracer_type = T)
         J(f, x) = jacobian_sparsity(f, x, detector)
         J(f!, y, x) = jacobian_sparsity(f!, y, x, detector)
 
@@ -259,8 +259,8 @@ end
         @testset "Miscellaneous" begin
             @test J(x -> [sincos(x)...], 1) ≈ [1; 1]
             @test J(typemax, 1) ≈ [0;;]
-            @test J(x -> x^(2//3), 1) ≈ [1;;]
-            @test J(x -> (2//3)^x, 1) ≈ [1;;]
+            @test J(x -> x^(2 // 3), 1) ≈ [1;;]
+            @test J(x -> (2 // 3)^x, 1) ≈ [1;;]
             @test J(x -> x^ℯ, 1) ≈ [1;;]
             @test J(x -> ℯ^x, 1) ≈ [1;;]
             @test J(x -> 0, 1) ≈ [0;;]
@@ -289,7 +289,7 @@ end
             @test J(x -> round(Int, x), 1.1) ≈ [0;;]
             @test J(x -> round(Bool, x), 1.1) ≈ [0;;]
             @test J(x -> round(x, RoundNearestTiesAway), 1.1) ≈ [0;;]
-            @test J(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
+            @test J(x -> round(x; digits = 3, base = 2), 1.1) ≈ [0;;]
         end
 
         @testset "Three-argument operators" begin

@@ -6,7 +6,7 @@ Sorted vector without duplicates, designed for fast set unions with merging.
 struct SortedVector{T} <: AbstractSet{T}
     data::Vector{T}
 
-    function SortedVector{T}(data::AbstractVector; sorted=false) where {T}
+    function SortedVector{T}(data::AbstractVector; sorted = false) where {T}
         sorted_data = if sorted
             data
         else
@@ -25,7 +25,7 @@ struct SortedVector{T} <: AbstractSet{T}
 end
 
 function Base.convert(::Type{SortedVector{T}}, v::Vector{T}) where {T}
-    return SortedVector{T}(v; sorted=false)
+    return SortedVector{T}(v; sorted = false)
 end
 
 Base.show(io::IO, v::SortedVector) = print(io, "SortedVector($(v.data))")
@@ -36,7 +36,7 @@ end
 
 Base.eltype(::Type{SortedVector{T}}) where {T} = T
 Base.length(v::SortedVector) = length(v.data)
-Base.copy(v::SortedVector{T}) where {T} = SortedVector{T}(copy(v.data); sorted=true)
+Base.copy(v::SortedVector{T}) where {T} = SortedVector{T}(copy(v.data); sorted = true)
 
 function merge_sorted!(result::Vector{T}, left::Vector{T}, right::Vector{T}) where {T}
     resize!(result, length(left) + length(right))
@@ -79,7 +79,7 @@ function merge_sorted(left::Vector{T}, right::Vector{T}) where {T}
 end
 
 function Base.union(v1::SortedVector{T}, v2::SortedVector{T}) where {T}
-    return SortedVector{T}(merge_sorted(v1.data, v2.data); sorted=true)
+    return SortedVector{T}(merge_sorted(v1.data, v2.data); sorted = true)
 end
 
 function Base.union!(v1::SortedVector{T}, v2::SortedVector{T}) where {T}
@@ -89,10 +89,10 @@ end
 
 Base.collect(v::SortedVector) = v.data
 
-Base.iterate(v::SortedVector)             = iterate(v.data)
+Base.iterate(v::SortedVector) = iterate(v.data)
 Base.iterate(v::SortedVector, i::Integer) = iterate(v.data, i)
 
 function product(v1::SortedVector{T}, v2::SortedVector{T}) where {T}
     prod_data = vec(collect((i, j) for i in v1.data, j in v2.data if i <= j))
-    return SortedVector{Tuple{T,T}}(prod_data; sorted=true)
+    return SortedVector{Tuple{T, T}}(prod_data; sorted = true)
 end
