@@ -263,19 +263,15 @@ function generate_code_hessian_2_to_1_typed(
 
     expr_tracer_type = quote
         function $M.$fname(tx::$SCT.HessianTracer, y::$Z)
-            is_der1_arg1_zero = $SCT.is_der1_arg1_zero_global_aux2($M.$fname, y)
-            is_der2_arg1_zero = $SCT.is_der2_arg1_zero_global_aux2($M.$fname, y)
             return @noinline $SCT.hessian_tracer_1_to_1(
-                tx, is_der1_arg1_zero, is_der2_arg1_zero
+                tx, is_der1_arg1_zero_g, is_der2_arg1_zero_g
             )
         end
     end
     expr_type_tracer = quote
         function $M.$fname(x::$Z, ty::$SCT.HessianTracer)
-            is_der1_arg2_zero = $SCT.is_der1_arg2_zero_global_aux1($M.$fname, x)
-            is_der2_arg2_zero = $SCT.is_der2_arg2_zero_global_aux1($M.$fname, x)
             return @noinline $SCT.hessian_tracer_1_to_1(
-                ty, is_der1_arg2_zero, is_der2_arg2_zero
+                ty, is_der1_arg2_zero_g, is_der2_arg2_zero_g
             )
         end
     end
