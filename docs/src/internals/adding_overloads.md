@@ -10,20 +10,19 @@ Having read our guide [*"How SparseConnectivityTracer works"*](@ref how-sct-work
 [`Dual`](@ref SparseConnectivityTracer.Dual)
 to improve the performance of your functions or to work around some of SCT's [limitations](@ref limitations).
 
-## Avoid hand-written overloads
-
 !!! warning "Don't overload manually"
     If you want to overload a `Function` that takes `Real` arguments, 
     we strongly discourage you from manually adding methods to your function that use our internal tracer types.
 
-    Instead, use the same code generation mechanisms that we use.
-    This page of the documentation shows you how.
+    Instead, use the same code generation mechanisms that we use. This page shows you how.
+
+## Generated overloads
 
 !!! tip "Copy one of our package extensions"
     The easiest way to add overloads is to copy one of our package extensions, [e.g. our NNlib extension](https://github.com/adrhill/SparseConnectivityTracer.jl/blob/main/ext/SparseConnectivityTracerNNlibExt.jl), and to modify it.
     Please upstream your additions by opening a pull request! We will help you out to get your feature merged.
 
-## Operator classification
+### Operator classification
 
 SCT currently supports three types of functions:
 
@@ -60,7 +59,6 @@ Depending on the type of function you're dealing with, you will have to specify 
     is_der1_zero_local(f::F, x) where {F} = is_der1_zero_global(f)
     is_der2_zero_local(f::F, x) where {F} = is_der2_zero_global(f)
     ```
-
 
 !!! details "Methods you have to implement for 2-to-1 operators"
 
@@ -120,7 +118,7 @@ Depending on the type of function you're dealing with, you will have to specify 
     is_der2_out2_zero_local(f::F, x) where {F} = is_der2_out2_zero_global(f)
     ```
 
-## [Overloading](@id code-gen)
+### [Generating code](@id code-gen)
 
 After implementing the required classification methods for a function, the function has not been overloaded on our tracer types yet.
 SCT provides three functions that generate code via meta-programming:
@@ -134,12 +132,12 @@ You are required to call the function that matches your type of operator.
 !!! tip "Code generation"
     We will take a look at the code generation mechanism in the example below.
 
-## Example
+### Example
 
 For some examples on how to overload methods, take a look at our [package extensions](https://github.com/adrhill/SparseConnectivityTracer.jl/tree/main/ext).
 Let's look at the `relu` activation function from `ext/SparseConnectivityTracerNNlibExt.jl`, which is a 1-to-1 operator defined as $\text{relu}(x) = \text{max}(0, x)$.
 
-### Step 1: Classification
+#### Step 1: Classification
 
 The `relu` function has a non-zero first-order derivative $\frac{\partial f}{\partial x}=1$ for inputs $x>0$. 
 The second derivative is zero everywhere.
@@ -158,10 +156,10 @@ SCT.is_der1_zero_local(::typeof(relu), x) = x < 0
 !!! warning "import SparseConnectivityTracer"
     Note that we imported SCT to extend its operator classification methods on `typeof(relu)`.
 
-### Step 2: Overloading
+#### Step 2: Generating code
 
 The `relu` function has not been overloaded on our tracer types yet.
-Let's call the code generation utilities from the [*"Overloading"*](@ref code-gen) section for this purpose:
+Let's call the code generation utilities from the [*"Generating code"*](@ref code-gen) section for this purpose:
 
 ```@example overload
 eval(SCT.generate_code_1_to_1(:NNlib, relu))
@@ -181,3 +179,27 @@ The `relu` function is now ready to be called with SCT's tracer types.
     **We have to use quotes:** 
     The code generation mechanism lives in SCT, but the generated code has to be evaluated in the package extension, not SCT.
     As you can see in the generated quote, we handle the necessary name-spacing for you.
+
+## Manual overloads
+
+As mentioned above, for functions that take `Real` arguments, manual overloads should generally be avoided.
+If such an overload is necessary (e.g. for array inputs), it should follow the following design priciples, ordered by importance:
+
+**Local sparsity detection (`Dual`):**
+
+- Overloads must return conservative sparsity patterns (no false negatives) at the given input.
+- Local tracers are allowed to enter branches in user code. User code can be stateful.
+- `MethodError`s due to missing overloads can be avoided by returning a very conservative sparsity pattern.
+
+**Global sparsity detection (`GradientTracer` and `HessianTracer`):**
+
+- Overloads must return conservative sparsity patterns (no false negatives) over the entire input domain.
+- Tracers must error instead of entering branches in user code. 
+  This requires that overloads return tracers instead of `Bool` (or numbers), 
+  as the former are designed to error in comparisons.
+- Overloads must ignore auxiliary, non-tracer values. 
+  While SCT can't guarantee conserservative sparsity patterns on stateful user code (e.g. due to auxiliary inputs entering branches), 
+  we try to support as much stateful code as possible. As such, we can't assume auxiliary values to stay constant.
+  *(While not set in stone, changing this rule in future would require a breaking release.)*
+- Sparsity should be prioritized over performance. We assume global sparsity detection can be amortized.
+- `MethodError`s due to missing overloads can be avoided by returning a very conservative sparsity pattern.
