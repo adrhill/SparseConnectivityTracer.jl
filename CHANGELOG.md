@@ -1,5 +1,8 @@
 # SparseConnectivityTracer.jl
 
+## Version `v0.6.20`
+* ![Bugfix][badge-bugfix] Revert PR [#243] due to concerns of non-spare patterns ([#248])
+
 ## Version `v0.6.19`
 * ![Enhancement][badge-enhancement] Stop tracing through multiplication by zero ([#243])
 * ![Maintenance][badge-maintenance] Update code style and formatter to Runic.jl
@@ -122,6 +125,7 @@
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#248]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/248
 [#243]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/243
 [#239]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/239
 [#236]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/236
