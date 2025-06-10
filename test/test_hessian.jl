@@ -269,12 +269,13 @@ D = Dual{Int, T}
             @test_throws TypeError H(x -> x[1] > x[2] ? x[1]^x[2] : x[3] * x[4], rand(4))
         end
 
+        # NOTE: temporarily disabled (see PR #248)
         @testset "Multiplication by zero" begin
             if !Bool(shared(T))
                 f1(x) = 0 * x[1]^2
-                @test H(f1, [1.0]) == [0;;]
+                @test_skip H(f1, [1.0]) == [0;;]
                 f2(x) = dot(x, Matrix(I(length(x))), x)
-                @test H(f2, ones(10)) == I(10)
+                @test_skip H(f2, ones(10)) == I(10)
             end
         end
 

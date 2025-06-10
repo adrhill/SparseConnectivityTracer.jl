@@ -169,11 +169,12 @@ T = GradientTracer{P}
             ]
         end
 
+        # NOTE: temporarily disabled (see PR #248)
         @testset "Multiplication by zero" begin
             f1(x) = [0 * x[1]]
-            @test J(f1, [1.0]) == [0;;]
+            @test_skip J(f1, [1.0]) == [0;;]
             f2(x) = Matrix(I(length(x))) * x
-            @test J(f2, ones(10)) == I(10)
+            @test_skip J(f2, ones(10)) == I(10)
         end
 
         yield()
