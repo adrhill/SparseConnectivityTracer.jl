@@ -155,12 +155,12 @@ function generate_code_gradient_2_to_1_typed(
 
     expr_tracer_type = quote
         function $M.$fname(tx::$SCT.GradientTracer, y::$Z)
-            return @noinline $SCT.gradient_tracer_1_to_1(tx, is_der1_arg1_zero_g)
+            return @noinline $SCT.gradient_tracer_1_to_1(tx, $is_der1_arg1_zero_g)
         end
     end
     expr_type_tracer = quote
         function $M.$fname(x::$Z, ty::$SCT.GradientTracer)
-            return @noinline $SCT.gradient_tracer_1_to_1(ty, is_der1_arg2_zero_g)
+            return @noinline $SCT.gradient_tracer_1_to_1(ty, $is_der1_arg2_zero_g)
         end
     end
 

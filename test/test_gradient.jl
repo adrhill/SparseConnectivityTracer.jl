@@ -171,10 +171,10 @@ T = GradientTracer{P}
 
         # NOTE: If these tests fail, changes might be breaking on stateful code (see PR #248).
         @testset "Ignore multiplication by zero" begin
-            f(x) = [0 * x[1]]
-            @test J(f, [1.0]) == [1;;]
-            f(x) = [x[1] * 0]
-            @test J(f, [1.0]) == [1;;]
+            f1(x) = [0 * x[1]]
+            @test J(f1, [1.0]) == [1;;]
+            f2(x) = [x[1] * 0]
+            @test J(f2, [1.0]) == [1;;]
         end
 
         yield()

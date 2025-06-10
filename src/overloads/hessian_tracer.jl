@@ -264,14 +264,14 @@ function generate_code_hessian_2_to_1_typed(
     expr_tracer_type = quote
         function $M.$fname(tx::$SCT.HessianTracer, y::$Z)
             return @noinline $SCT.hessian_tracer_1_to_1(
-                tx, is_der1_arg1_zero_g, is_der2_arg1_zero_g
+                tx, $is_der1_arg1_zero_g, $is_der2_arg1_zero_g
             )
         end
     end
     expr_type_tracer = quote
         function $M.$fname(x::$Z, ty::$SCT.HessianTracer)
             return @noinline $SCT.hessian_tracer_1_to_1(
-                ty, is_der1_arg2_zero_g, is_der2_arg2_zero_g
+                ty, $is_der1_arg2_zero_g, $is_der2_arg2_zero_g
             )
         end
     end

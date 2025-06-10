@@ -271,10 +271,10 @@ D = Dual{Int, T}
 
         # NOTE: If these tests fail, changes might be breaking on stateful code (see PR #248).
         @testset "Ignore multiplication by zero" begin
-            f(x) = 0 * x[1]^2
-            @test H(f, [1.0]) == [1;;]
-            f(x) = x[1]^2 * 0
-            @test H(f, [1.0]) == [1;;]
+            f1(x) = 0 * x[1]^2
+            @test H(f1, [1.0]) == [1;;]
+            f2(x) = x[1]^2 * 0
+            @test H(f2, [1.0]) == [1;;]
         end
 
         yield()
