@@ -108,12 +108,6 @@ function is_der1_arg2_zero_global end
 function is_der2_arg2_zero_global end
 function is_der_cross_zero_global end
 
-# Fallbacks for global differentiability for non-tracer (auxilliary) inputs
-is_der1_arg1_zero_global_aux2(f::F, y) where {F} = is_der1_arg1_zero_global(f)
-is_der2_arg1_zero_global_aux2(f::F, y) where {F} = is_der2_arg1_zero_global(f)
-is_der1_arg2_zero_global_aux1(f::F, x) where {F} = is_der1_arg2_zero_global(f)
-is_der2_arg2_zero_global_aux1(f::F, x) where {F} = is_der2_arg2_zero_global(f)
-
 # Fallbacks for local derivatives:
 is_der1_arg1_zero_local(f::F, x, y) where {F} = is_der1_arg1_zero_global(f)
 is_der2_arg1_zero_local(f::F, x, y) where {F} = is_der2_arg1_zero_global(f)
@@ -254,9 +248,6 @@ end
 # gradient of x*y: [y x]
 is_der1_arg1_zero_local(::typeof(*), x, y) = iszero(y)
 is_der1_arg2_zero_local(::typeof(*), x, y) = iszero(x)
-# NOTE: temporarily disabled (see PR #248)
-# is_der1_arg1_zero_global_aux2(::typeof(*), y) = iszero(y)
-# is_der1_arg2_zero_global_aux1(::typeof(*), x) = iszero(x)
 
 # ops_2_to_1_ffz: 
 # ∂f/∂x    != 0
