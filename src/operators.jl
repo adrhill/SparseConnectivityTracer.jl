@@ -254,8 +254,9 @@ end
 # gradient of x*y: [y x]
 is_der1_arg1_zero_local(::typeof(*), x, y) = iszero(y)
 is_der1_arg2_zero_local(::typeof(*), x, y) = iszero(x)
-is_der1_arg1_zero_global_aux2(::typeof(*), y) = iszero(y)
-is_der1_arg2_zero_global_aux1(::typeof(*), x) = iszero(x)
+# NOTE: temporarily disabled
+# is_der1_arg1_zero_global_aux2(::typeof(*), y) = iszero(y)
+# is_der1_arg2_zero_global_aux1(::typeof(*), x) = iszero(x)
 
 # ops_2_to_1_ffz: 
 # ∂f/∂x    != 0
