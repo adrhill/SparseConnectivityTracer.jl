@@ -127,16 +127,16 @@ Using an approach based on operator-overloading, this means that global sparsity
     jacobian_sparsity(f, [1, 2], TracerSparsityDetector())
     ```
 
-## [No guarantee of correctness on stateful code](@id stateful-code)
+## [No guarantee of conservative global sparsity patterns on stateful code](@id stateful-code)
 
-SCT can't guarantee conservative global sparsity patterns on stateful functions `f(x)` whose output isn't fully determined by the input `x`.
+SCT can't guarantee correct, conservative global sparsity patterns on stateful functions `f(x)` whose output isn't fully determined by the input `x`.
 We provide some common examples:
 
 !!! details "Example: Stateful branching code"
 
-    As motivated in the example above, global sparsity detection isn't allowed to hit any branching code.
-    While SCT's overloads try to enforce this by throwing errors, branches can in some cases be entered by stateful functions.
-    Let's look at a function whose output doesn't only depend on `x`, but also on an internal state, in this case a random number:
+    As motivated in the section above, global sparsity detection isn't allowed to hit any branching code.
+    While SCT's overloads try to avoid branches by throwing errors, they can in some cases be entered by stateful functions.
+    Let's look at a function whose output doesn't only depend on the input `x`, but also on an internal state, in this case a random number:
 
     ```@repl stateful
     using SparseConnectivityTracer
@@ -150,12 +150,11 @@ We provide some common examples:
 
     This issue can be circumvented by [adding an overload](@ref adding-overloads) on `stateful_function` that returns a conservative pattern.
 
-
-
 !!! details "Example: Stateful mutable caches"
 
     Problems can also arise when statefulness is introduced via mutable caches.
-    In this example, we assume a stateful function `f` whose output not only depends on `x`, but also on a mutable array defined outside of the function call:
+    In this example, we assume a stateful function `f` whose output not only depends on the input `x`, but also on a mutable array defined outside of the function call:
+
     ```@repl stateful2
     using SparseConnectivityTracer, SparseArrays
 
@@ -166,7 +165,7 @@ We provide some common examples:
     pattern1 = jacobian_sparsity(f, [1, 2], TracerSparsityDetector())
     ```
 
-    While this sparsity pattern is correct at the time of sparsity pattern detection,
+    While this sparsity pattern is correct at the time of detection,
     it can be invalidated by mutating the array `A_cache`:
 
     ```@repl stateful2
@@ -177,7 +176,9 @@ We provide some common examples:
     pattern2 = jacobian_sparsity(f, [1, 2], TracerSparsityDetector())
     ```
 
-    For dense caches of type `Array`, SCT tries to circumvent this issue by returning a conservative sparsity pattern
+    With the wisdom of hindsight, `pattern1` can therefore be seen as "non-conservative".
+
+    For dense caches of type `Array`, SCT tries to circumvent this issue by returning a conservative sparsity pattern:
 
     ```@repl stateful2
     A_cache = [1 0; 0 1]
@@ -185,4 +186,4 @@ We provide some common examples:
     pattern1 = jacobian_sparsity(f, [1, 2], TracerSparsityDetector())
     ```
 
-    However, such guarantees can't be made for arbitrary cache types (like the `SparseMatrixCSC` above).
+    *(Note that this conservative behavior on dense arrays could be changed in a future breaking release.)*
