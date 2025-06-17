@@ -195,9 +195,9 @@ If such an overload is necessary (e.g. for array inputs), it should follow the f
 
 - Overloads must return conservative sparsity patterns (no false negatives) over the entire input domain.
 - Tracers must error instead of entering branches in user code. 
-  This requires that overloads return tracers instead of `Bool` (or numbers), 
+  This requires that overloaded functions return tracers instead of `Bool` (or numbers), 
   as the former are designed to error in comparisons.
-- Overloads must ignore values of non-tracer inputs. 
+- Overloads must ignore scalar values of non-tracer inputs. 
   While SCT can't guarantee conserservative sparsity patterns on stateful user code 
   (e.g. due to stateful non-tracer values entering branches, see `f(x) = randn() > 0.5 ? x : 0`), 
   we try to support as much of it as possible. 
