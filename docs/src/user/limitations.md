@@ -27,7 +27,8 @@ it must be written generically enough to accept numbers of type `T<:Real` as (or
     detector = TracerSparsityDetector()
 
     relu_bad(x::AbstractFloat) = max(zero(x), x)
-    outer_function_bad(xs) = sum(relu_bad, xs)
+
+    f_bad(xs) = sum(relu_bad, xs)
     nothing # hide
     ```
 
@@ -37,21 +38,22 @@ it must be written generically enough to accept numbers of type `T<:Real` as (or
     ```@repl notgeneric
     xs = [1.0, -2.0, 3.0];
 
-    outer_function_bad(xs)
+    f_bad(xs)
 
-    jacobian_sparsity(outer_function_bad, xs, detector)
+    jacobian_sparsity(f_bad, xs, detector)
     ```
 
     This is easily fixed by loosening type restrictions or adding an additional methods on `Real`:
 
     ```@example notgeneric
     relu_good(x) = max(zero(x), x)
-    outer_function_good(xs) = sum(relu_good, xs)
+
+    f_good(xs) = sum(relu_good, xs)
     nothing # hide
     ```
 
     ```@repl notgeneric
-    jacobian_sparsity(outer_function_good, xs, detector)
+    jacobian_sparsity(f_good, xs, detector)
     ```
 
 ## Limited control flow
@@ -98,7 +100,7 @@ Using an approach based on operator-overloading, this means that global sparsity
     The local sparsity patterns of [`TracerLocalSparsityDetector`](@ref) are easy to compute using operator overloading by using [dual numbers](@ref SparseConnectivityTracer.Dual) 
     which contain primal values on which we can evaluate comparisons like `>`:
 
-    ```@repl ctrlflow
+    ```@example ctrlflow
     using SparseConnectivityTracer
 
     jacobian_sparsity(f, [2, 1], TracerLocalSparsityDetector())
@@ -119,8 +121,68 @@ Using an approach based on operator-overloading, this means that global sparsity
     In some cases, we can work around this by using `ifelse`.
     Since `ifelse` is a method, it can evaluate "both branches" and take a conservative union of both resulting sparsity patterns:
 
-    ```@repl ctrlflow
+    ```@example ctrlflow
     f(x) = ifelse(x[1] > x[2], x[1], x[2])
 
     jacobian_sparsity(f, [1, 2], TracerSparsityDetector())
     ```
+
+## [No guarantee of correctness on stateful code](@id stateful-code)
+
+SCT can't guarantee conservative global sparsity patterns on stateful functions `f(x)` whose output isn't fully determined by the input `x`.
+We provide some common examples:
+
+!!! details "Example: Stateful branching code"
+
+    As motivated in the example above, global sparsity detection isn't allowed to hit any branching code.
+    While SCT's overloads try to enforce this by throwing errors, branches can in some cases be entered by stateful functions.
+    Let's look at a function whose output doesn't only depend on `x`, but also on an internal state, in this case a random number:
+
+    ```@repl stateful
+    using SparseConnectivityTracer
+
+    f(x) = randn() > 0.5 ? x[1] : x[2];
+
+    jacobian_sparsity(f, [1, 2], TracerSparsityDetector())
+    ```
+
+    SCT cannot return the correct global sparsity pattern `[1 1]` for this code.
+
+    This issue can be circumvented by [adding an overload](@ref adding-overloads) on `stateful_function` that returns a conservative pattern.
+
+
+
+!!! details "Example: Stateful mutable caches"
+
+    Problems can also arise when statefulness is introduced via mutable caches.
+    In this example, we assume a stateful function `f` whose output not only depends on `x`, but also on a mutable array defined outside of the function call:
+    ```@repl stateful2
+    using SparseConnectivityTracer, SparseArrays
+
+    A_cache = sparse([1 0; 0 1])
+
+    f(x) = A_cache * x;
+
+    pattern1 = jacobian_sparsity(f, [1, 2], TracerSparsityDetector())
+    ```
+
+    While this sparsity pattern is correct at the time of sparsity pattern detection,
+    it can be invalidated by mutating the array `A_cache`:
+
+    ```@repl stateful2
+    A_cache[1, 2] = 3;
+
+    A_cache
+
+    pattern2 = jacobian_sparsity(f, [1, 2], TracerSparsityDetector())
+    ```
+
+    For dense caches of type `Array`, SCT tries to circumvent this issue by returning a conservative sparsity pattern
+
+    ```@repl stateful2
+    A_cache = [1 0; 0 1]
+
+    pattern1 = jacobian_sparsity(f, [1, 2], TracerSparsityDetector())
+    ```
+
+    However, such guarantees can't be made for arbitrary cache types (like the `SparseMatrixCSC` above).

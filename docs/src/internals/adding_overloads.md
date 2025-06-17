@@ -1,4 +1,4 @@
-# Adding Overloads
+# [Adding Overloads](@id adding-overloads)
 
 !!! danger "Internals may change"
     The developer documentation might refer to internals which can change without warning in a future release of SparseConnectivityTracer.
@@ -197,11 +197,7 @@ If such an overload is necessary (e.g. for array inputs), it should follow the f
 - Tracers must error instead of entering branches in user code. 
   This requires that overloaded functions return tracers instead of `Bool` (or numbers), 
   as the former are designed to error in comparisons.
-- Overloads must ignore scalar values of non-tracer inputs. 
-  While SCT can't guarantee conserservative sparsity patterns on stateful user code 
-  (e.g. due to stateful non-tracer values entering branches, see `f(x) = randn() > 0.5 ? x : 0`), 
-  we try to support as much of it as possible. 
-  Overloads therefore can't assume non-tracer values to stay constant and instead need to return conservative patterns.
+- Overloads must ignore scalar values of non-tracer inputs.
   *(While not set in stone, changing this rule in the future would require a breaking release.)*
 - Sparsity should be prioritized over performance. We assume global sparsity detection can be amortized.
 - `MethodError`s due to missing overloads can be avoided by returning a very conservative sparsity pattern.
