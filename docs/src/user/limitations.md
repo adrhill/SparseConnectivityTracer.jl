@@ -147,7 +147,6 @@ We provide some common examples:
     ```
 
     SCT cannot return the correct global sparsity pattern `[1 1]` for this code.
-
     This issue can be circumvented by [adding an overload](@ref adding-overloads) on `f` that returns a conservative pattern.
 
 !!! details "Example: Stateful mutable caches"
@@ -158,18 +157,20 @@ We provide some common examples:
     ```@repl stateful2
     using SparseConnectivityTracer, SparseArrays
 
-    A_cache = sparse([1 0; 0 1])
+    A_cache = sparse([2 0; 0 3])
 
     f(x) = A_cache * x;
 
     pattern1 = jacobian_sparsity(f, [1, 2], TracerSparsityDetector())
     ```
 
+    #### Invalidation of global sparsity patterns 
+
     While this sparsity pattern is correct at the time of detection,
     it can be invalidated by mutating the array `A_cache`:
 
     ```@repl stateful2
-    A_cache[1, 2] = 3;
+    A_cache[1, 2] = 4;
 
     A_cache
 
@@ -178,15 +179,16 @@ We provide some common examples:
 
     With the wisdom of hindsight, `pattern1` can therefore be seen as "non-conservative".
 
-    For dense caches of type `Array`, SCT tries to circumvent this issue by returning a conservative sparsity pattern:
+    #### Exception: Dense arrays
+
+    For dense caches of type `Array` (including `Matrix` and `Vector`), SCT tries to circumvent this issue by returning a conservative sparsity pattern
+    *(note that this behavior could be changed in a future breaking release)*:
 
     ```@repl stateful2
-    A_cache = [1 0; 0 1]
+    A_cache = [2 0; 0 3]
 
     pattern1 = jacobian_sparsity(f, [1, 2], TracerSparsityDetector())
     ```
 
     However, such guarantees can't be made for arbitrary cache types (like the `SparseMatrixCSC` above).
-
-    *(Note that the conservative behavior on dense arrays could be changed in a future breaking release.)*
-
+    
