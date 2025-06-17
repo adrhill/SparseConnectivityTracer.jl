@@ -136,7 +136,7 @@ We provide some common examples:
 
     As motivated in the section above, global sparsity detection isn't allowed to hit any branching code.
     While SCT's overloads try to avoid branches by throwing errors, they can in some cases be entered by stateful functions.
-    Let's look at a function whose output doesn't only depend on the input `x`, but also on an internal state, in this case a random number:
+    Let's look at a function whose output doesn't only depend on the input `x`, but also on an internal state (in this case a random number):
 
     ```@repl stateful
     using SparseConnectivityTracer
@@ -148,7 +148,7 @@ We provide some common examples:
 
     SCT cannot return the correct global sparsity pattern `[1 1]` for this code.
 
-    This issue can be circumvented by [adding an overload](@ref adding-overloads) on `stateful_function` that returns a conservative pattern.
+    This issue can be circumvented by [adding an overload](@ref adding-overloads) on `f` that returns a conservative pattern.
 
 !!! details "Example: Stateful mutable caches"
 
