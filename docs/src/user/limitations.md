@@ -186,4 +186,7 @@ We provide some common examples:
     pattern1 = jacobian_sparsity(f, [1, 2], TracerSparsityDetector())
     ```
 
-    *(Note that this conservative behavior on dense arrays could be changed in a future breaking release.)*
+    However, such guarantees can't be made for arbitrary cache types (like the `SparseMatrixCSC` above).
+
+    *(Note that the conservative behavior on dense arrays could be changed in a future breaking release.)*
+
