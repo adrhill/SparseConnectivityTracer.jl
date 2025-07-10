@@ -1,6 +1,7 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer: Dual, HessianTracer, MissingPrimalError
 using SparseConnectivityTracer: create_tracers, pattern, shared
+using LinearAlgebra: I, dot
 using Test
 using Random: rand, GLOBAL_RNG
 
@@ -15,12 +16,12 @@ H(f, x) = hessian_sparsity(f, x, detector)
 
 P = first(HESSIAN_PATTERNS)
 T = HessianTracer{P}
-D = Dual{Int,T}
+D = Dual{Int, T}
 
 @testset "Global Hessian" begin
     @testset "$P" for P in HESSIAN_PATTERNS
         T = HessianTracer{P}
-        detector = TracerSparsityDetector(; hessian_tracer_type=T)
+        detector = TracerSparsityDetector(; hessian_tracer_type = T)
         H(f, x) = hessian_sparsity(f, x, detector)
 
         @testset "Trivial examples" begin
@@ -35,8 +36,8 @@ D = Dual{Int,T}
         @testset "Miscellaneous" begin
             @test H(sign, 1) ≈ [0;;]
             @test H(typemax, 1) ≈ [0;;]
-            @test H(x -> x^(2//3), 1) ≈ [1;;]
-            @test H(x -> (2//3)^x, 1) ≈ [1;;]
+            @test H(x -> x^(2 // 3), 1) ≈ [1;;]
+            @test H(x -> (2 // 3)^x, 1) ≈ [1;;]
             @test H(x -> x^ℯ, 1) ≈ [1;;]
             @test H(x -> ℯ^x, 1) ≈ [1;;]
             @test H(x -> 0, 1) ≈ [0;;]
@@ -66,7 +67,7 @@ D = Dual{Int,T}
             @test H(x -> round(Bool, x), 1.1) ≈ [0;;]
             @test H(x -> round(Float16, x), 1.1) ≈ [0;;]
             @test H(x -> round(x, RoundNearestTiesAway), 1.1) ≈ [0;;]
-            @test H(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
+            @test H(x -> round(x; digits = 3, base = 2), 1.1) ≈ [0;;]
         end
 
         @testset "Three-argument operators" begin
@@ -217,18 +218,18 @@ D = Dual{Int,T}
         # Missing primal errors
         @testset "MissingPrimalError" begin
             @testset "$f" for f in (
-                iseven,
-                isfinite,
-                isinf,
-                isinteger,
-                ismissing,
-                isnan,
-                isnothing,
-                isodd,
-                isone,
-                isreal,
-                iszero,
-            )
+                    iseven,
+                    isfinite,
+                    isinf,
+                    isinteger,
+                    ismissing,
+                    isnan,
+                    isnothing,
+                    isodd,
+                    isone,
+                    isreal,
+                    iszero,
+                )
                 @test_throws MissingPrimalError H(f, rand())
             end
         end
@@ -257,9 +258,9 @@ D = Dual{Int,T}
 
             function f_ampgo07(x)
                 return (x[1] <= 0) * convert(eltype(x), Inf) +
-                       sin(x[1]) +
-                       sin(10//3 * x[1]) +
-                       log(abs(x[1])) - 84//100 * x[1] + 3
+                    sin(x[1]) +
+                    sin(10 // 3 * x[1]) +
+                    log(abs(x[1])) - 84 // 100 * x[1] + 3
             end
             @test H(f_ampgo07, [1.0]) ≈ [1;;]
 
@@ -267,6 +268,15 @@ D = Dual{Int,T}
             # TypeError: non-boolean (SparseConnectivityTracer.GradientTracer{BitSet}) used in boolean context
             @test_throws TypeError H(x -> x[1] > x[2] ? x[1]^x[2] : x[3] * x[4], rand(4))
         end
+
+        # NOTE: If these tests fail, changes might be breaking on stateful code (see PR #248).
+        @testset "Ignore multiplication by zero" begin
+            f1(x) = 0 * x[1]^2
+            @test H(f1, [1.0]) == [1;;]
+            f2(x) = x[1]^2 * 0
+            @test H(f2, [1.0]) == [1;;]
+        end
+
         yield()
     end
 end
@@ -274,7 +284,7 @@ end
 @testset "Local Hessian" begin
     @testset "$P" for P in HESSIAN_PATTERNS
         T = HessianTracer{P}
-        detector = TracerLocalSparsityDetector(; hessian_tracer_type=T)
+        detector = TracerLocalSparsityDetector(; hessian_tracer_type = T)
         H(f, x) = hessian_sparsity(f, x, detector)
 
         @testset "Trivial examples" begin
@@ -357,16 +367,16 @@ end
         @testset "Miscellaneous" begin
             @test H(sign, 1) ≈ [0;;]
             @test H(typemax, 1) ≈ [0;;]
-            @test H(x -> x^(2//3), 1) ≈ [1;;]
-            @test H(x -> (2//3)^x, 1) ≈ [1;;]
+            @test H(x -> x^(2 // 3), 1) ≈ [1;;]
+            @test H(x -> (2 // 3)^x, 1) ≈ [1;;]
             @test H(x -> x^ℯ, 1) ≈ [1;;]
             @test H(x -> ℯ^x, 1) ≈ [1;;]
             @test H(x -> 0, 1) ≈ [0;;]
 
             # Test special cases on empty tracer
 
-            @test H(x -> zero(x)^(2//3), 1) ≈ [0;;]
-            @test H(x -> (2//3)^zero(x), 1) ≈ [0;;]
+            @test H(x -> zero(x)^(2 // 3), 1) ≈ [0;;]
+            @test H(x -> (2 // 3)^zero(x), 1) ≈ [0;;]
             @test H(x -> zero(x)^ℯ, 1) ≈ [0;;]
             @test H(x -> ℯ^zero(x), 1) ≈ [0;;]
         end
@@ -384,7 +394,7 @@ end
             @test H(x -> round(Int, x), 1.1) ≈ [0;;]
             @test H(x -> round(Bool, x), 1.1) ≈ [0;;]
             @test H(x -> round(x, RoundNearestTiesAway), 1.1) ≈ [0;;]
-            @test H(x -> round(x; digits=3, base=2), 1.1) ≈ [0;;]
+            @test H(x -> round(x; digits = 3, base = 2), 1.1) ≈ [0;;]
         end
 
         @testset "Three-argument operators" begin

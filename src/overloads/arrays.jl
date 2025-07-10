@@ -2,16 +2,16 @@
 # Utilities #
 #===========#
 
-function split_dual_array(A::AbstractArray{D}) where {D<:Dual}
+function split_dual_array(A::AbstractArray{D}) where {D <: Dual}
     primals = getproperty.(A, :primal)
     tracers = getproperty.(A, :tracer)
     return primals, tracers
 end
 
 sct_owns_type(::Type) = false
-sct_owns_type(::Type{T}) where {T<:AbstractTracer} = true
-sct_owns_type(::Type{A}) where {A<:AbstractArray{<:AbstractTracer}} = true
-sct_owns_type(::Type{A}) where {T,A<:AbstractArray{T}} = sct_owns_type(T)
+sct_owns_type(::Type{T}) where {T <: AbstractTracer} = true
+sct_owns_type(::Type{A}) where {A <: AbstractArray{<:AbstractTracer}} = true
+sct_owns_type(::Type{A}) where {T, A <: AbstractArray{T}} = sct_owns_type(T)
 
 nopiracy(types) = any(sct_owns_type, types)
 
@@ -22,23 +22,23 @@ nopiracy(types) = any(sct_owns_type, types)
 # TODO: replace `second_order_or` by less conservative sparsity patterns when possible
 
 ## Determinant
-LinearAlgebra.det(A::AbstractMatrix{T}) where {T<:AbstractTracer} = second_order_or(A)
-LinearAlgebra.logdet(A::AbstractMatrix{T}) where {T<:AbstractTracer} = second_order_or(A)
-function LinearAlgebra.logabsdet(A::AbstractMatrix{T}) where {T<:AbstractTracer}
+LinearAlgebra.det(A::AbstractMatrix{T}) where {T <: AbstractTracer} = second_order_or(A)
+LinearAlgebra.logdet(A::AbstractMatrix{T}) where {T <: AbstractTracer} = second_order_or(A)
+function LinearAlgebra.logabsdet(A::AbstractMatrix{T}) where {T <: AbstractTracer}
     t1 = second_order_or(A)
     t2 = sign(t1) # corresponds to sign of det(A): set first- and second-order derivatives to zero
     return (t1, t2)
 end
 
 ## Norm
-function LinearAlgebra.norm(A::AbstractArray{T}, p::Real=2) where {T<:AbstractTracer}
+function LinearAlgebra.norm(A::AbstractArray{T}, p::Real = 2) where {T <: AbstractTracer}
     if isone(p) || isinf(p)
         return first_order_or(A)
     else
         return second_order_or(A)
     end
 end
-function LinearAlgebra.opnorm(A::AbstractMatrix{T}, p::Real=2) where {T<:AbstractTracer}
+function LinearAlgebra.opnorm(A::AbstractMatrix{T}, p::Real = 2) where {T <: AbstractTracer}
     if isone(p) || isinf(p)
         return first_order_or(A)
     else
@@ -49,21 +49,21 @@ end
 ## Eigenvalues
 
 function LinearAlgebra.eigmax(
-    A::Union{T,AbstractMatrix{T}}; permute::Bool=true, scale::Bool=true
-) where {T<:AbstractTracer}
+        A::Union{T, AbstractMatrix{T}}; permute::Bool = true, scale::Bool = true
+    ) where {T <: AbstractTracer}
     return second_order_or(A)
 end
 function LinearAlgebra.eigmin(
-    A::Union{T,AbstractMatrix{T}}; permute::Bool=true, scale::Bool=true
-) where {T<:AbstractTracer}
+        A::Union{T, AbstractMatrix{T}}; permute::Bool = true, scale::Bool = true
+    ) where {T <: AbstractTracer}
     return second_order_or(A)
 end
 function LinearAlgebra.eigen(
-    A::AbstractMatrix{T};
-    permute::Bool=true,
-    scale::Bool=true,
-    sortby::Union{Function,Nothing}=nothing,
-) where {T<:AbstractTracer}
+        A::AbstractMatrix{T};
+        permute::Bool = true,
+        scale::Bool = true,
+        sortby::Union{Function, Nothing} = nothing,
+    ) where {T <: AbstractTracer}
     LinearAlgebra.checksquare(A)
     n = size(A, 1)
     t = second_order_or(A)
@@ -73,12 +73,12 @@ function LinearAlgebra.eigen(
 end
 
 ## Inverse
-function Base.inv(A::StridedMatrix{T}) where {T<:AbstractTracer}
+function Base.inv(A::StridedMatrix{T}) where {T <: AbstractTracer}
     LinearAlgebra.checksquare(A)
     t = second_order_or(A)
     return Fill(t, size(A)...)
 end
-function Base.inv(D::Diagonal{T}) where {T<:AbstractTracer}
+function Base.inv(D::Diagonal{T}) where {T <: AbstractTracer}
     ts_in = D.diag
     ts_out = similar(ts_in)
     for i in 1:length(ts_out)
@@ -88,42 +88,108 @@ function Base.inv(D::Diagonal{T}) where {T<:AbstractTracer}
 end
 
 function LinearAlgebra.pinv(
-    A::AbstractMatrix{T}; atol::Real=0.0, rtol::Real=0.0
-) where {T<:AbstractTracer}
+        A::AbstractMatrix{T}; atol::Real = 0.0, rtol::Real = 0.0
+    ) where {T <: AbstractTracer}
     n, m = size(A)
     t = second_order_or(A)
     return Fill(t, m, n)
 end
-LinearAlgebra.pinv(D::Diagonal{T}) where {T<:AbstractTracer} = inv(D)
+LinearAlgebra.pinv(D::Diagonal{T}) where {T <: AbstractTracer} = inv(D)
 
 ## Dot product – adapted from https://github.com/JuliaLang/LinearAlgebra.jl/blob/924dda4d5d26d745fc8993b7ffdfaa80ee0e0c0e/src/generic.jl#L895-L1029
-LinearAlgebra.dot(x::T, y::T) where {T<:AbstractTracer} = x * y # no conjugate required on tracers.
+LinearAlgebra.dot(x::T, y::T) where {T <: AbstractTracer} = x * y # no conjugate required on tracers.
 
 # In the future, we will likely have to add more methods.
 for (Tx, TA, Ty) in Iterators.filter(
-    nopiracy, # only keep tuples of types we own 
-    Iterators.product(
-        # Types for x
-        (Vector, Vector{<:AbstractTracer}, SubArray, SubArray{<:AbstractTracer,1}),
-        # Types for A
-        (Matrix, Matrix{<:AbstractTracer}),
-        # Types for y
-        (Vector, Vector{<:AbstractTracer}, SubArray, SubArray{<:AbstractTracer,1}),
-    ),
-)
+        nopiracy, # only keep tuples of types we own
+        Iterators.product(
+            # Types for x
+            (Vector, Vector{<:AbstractTracer}, SubArray, SubArray{<:AbstractTracer, 1}),
+            # Types for A
+            (Matrix, Matrix{<:AbstractTracer}),
+            # Types for y
+            (Vector, Vector{<:AbstractTracer}, SubArray, SubArray{<:AbstractTracer, 1}),
+        ),
+    )
     @eval LinearAlgebra.dot(x::$Tx, A::$TA, y::$Ty) = LinearAlgebra.dot(x, A * y)
 end
 
+## Multiplication
+function Base.:*(A::Matrix{T}, B::Matrix{T}) where {T <: GradientTracer}
+    if size(A, 2) != size(B, 1)
+        throw(DimensionMismatch("arguments must have compatible dimensions"))
+    end
+    tA = map(first_order_or, eachrow(A))
+    tB = map(first_order_or, eachcol(B))
+    C = second_order_or.(tA, transpose(tB))
+    return C
+end
+function Base.:*(A::Matrix{T}, B::Vector{T}) where {T <: GradientTracer}
+    if size(A, 2) != length(B)
+        throw(DimensionMismatch("arguments must have compatible dimensions"))
+    end
+    tA = map(first_order_or, eachrow(A))
+    tB = first_order_or(B)
+    t = second_order_or.(tA, Ref(tB))
+    return t
+end
+
 ## Division
+function LinearAlgebra.:\(A::AbstractMatrix{T}, B::AbstractMatrix) where {T <: AbstractTracer}
+    if size(A, 1) != size(B, 1)
+        throw(DimensionMismatch("arguments must have the same number of rows"))
+    end
+    t = second_order_or(A)
+    return Fill(t, size(A, 2), size(B, 2))
+end
+function LinearAlgebra.:\(A::AbstractMatrix{T}, B::AbstractVector) where {T <: AbstractTracer}
+    if size(A, 1) != size(B, 1)
+        throw(DimensionMismatch("arguments must have the same number of rows"))
+    end
+    t = second_order_or(A)
+    return Fill(t, size(A, 2))
+end
+
+function LinearAlgebra.:\(A::AbstractMatrix, B::AbstractMatrix{T}) where {T <: AbstractTracer}
+    if size(A, 1) != size(B, 1)
+        throw(DimensionMismatch("arguments must have the same number of rows"))
+    end
+    t = second_order_or(B)
+    return Fill(t, size(A, 2), size(B, 2))
+end
+function LinearAlgebra.:\(A::AbstractMatrix, B::AbstractVector{T}) where {T <: AbstractTracer}
+    if size(A, 1) != size(B, 1)
+        throw(DimensionMismatch("arguments must have the same number of rows"))
+    end
+    t = second_order_or(B)
+    return Fill(t, size(A, 2))
+end
+
 function LinearAlgebra.:\(
-    A::AbstractMatrix{T}, B::AbstractVecOrMat
-) where {T<:AbstractTracer}
-    Ainv = LinearAlgebra.pinv(A)
-    return Ainv * B
+        A::AbstractMatrix{T}, B::AbstractMatrix{T}
+    ) where {T <: AbstractTracer}
+    if size(A, 1) != size(B, 1)
+        throw(DimensionMismatch("arguments must have the same number of rows"))
+    end
+    tA = second_order_or(A)
+    tB = second_order_or(B)
+    t = second_order_or(tA, tB)
+    return Fill(t, size(A, 2), size(B, 2))
+end
+function LinearAlgebra.:\(
+        A::AbstractMatrix{T}, B::AbstractVector{T}
+    ) where {T <: AbstractTracer}
+    if size(A, 1) != size(B, 1)
+        throw(DimensionMismatch("arguments must have the same number of rows"))
+    end
+    tA = second_order_or(A)
+    tB = second_order_or(B)
+    t = second_order_or(tA, tB)
+    return Fill(t, size(A, 2))
 end
 
 ## Exponential
-function Base.exp(A::AbstractMatrix{T}) where {T<:AbstractTracer}
+function Base.exp(A::AbstractMatrix{T}) where {T <: AbstractTracer}
     LinearAlgebra.checksquare(A)
     n = size(A, 1)
     t = second_order_or(A)
@@ -131,7 +197,7 @@ function Base.exp(A::AbstractMatrix{T}) where {T<:AbstractTracer}
 end
 
 ## Matrix power
-function LinearAlgebra.:^(A::AbstractMatrix{T}, p::Integer) where {T<:AbstractTracer}
+function LinearAlgebra.:^(A::AbstractMatrix{T}, p::Integer) where {T <: AbstractTracer}
     LinearAlgebra.checksquare(A)
     n = size(A, 1)
     if iszero(p)
@@ -142,21 +208,21 @@ function LinearAlgebra.:^(A::AbstractMatrix{T}, p::Integer) where {T<:AbstractTr
     end
 end
 
-function Base.literal_pow(::typeof(^), D::Diagonal{T}, ::Val{0}) where {T<:AbstractTracer}
+function Base.literal_pow(::typeof(^), D::Diagonal{T}, ::Val{0}) where {T <: AbstractTracer}
     ts = similar(D.diag)
     ts .= myempty(T)
     return Diagonal(ts)
 end
 
 ## clamp!
-Base.clamp!(A::AbstractArray{T}, lo, hi) where {T<:AbstractTracer} = A
-function Base.clamp!(A::AbstractArray{T}, lo::T, hi) where {T<:AbstractTracer}
+Base.clamp!(A::AbstractArray{T}, lo, hi) where {T <: AbstractTracer} = A
+function Base.clamp!(A::AbstractArray{T}, lo::T, hi) where {T <: AbstractTracer}
     return first_order_or.(A, lo)
 end
-function Base.clamp!(A::AbstractArray{T}, lo, hi::T) where {T<:AbstractTracer}
+function Base.clamp!(A::AbstractArray{T}, lo, hi::T) where {T <: AbstractTracer}
     return first_order_or.(A, hi)
 end
-function Base.clamp!(A::AbstractArray{T}, lo::T, hi::T) where {T<:AbstractTracer}
+function Base.clamp!(A::AbstractArray{T}, lo::T, hi::T) where {T <: AbstractTracer}
     return first_order_or.(A, first_order_or(lo, hi))
 end
 
@@ -169,23 +235,44 @@ end
 
 # The following three methods are a temporary fix for issue #108.
 # TODO: instead overload `lu` on AbstractMatrix of Duals.
-function LinearAlgebra.det(A::AbstractMatrix{D}) where {D<:Dual}
+function LinearAlgebra.det(A::AbstractMatrix{D}) where {D <: Dual}
     primals, tracers = split_dual_array(A)
     p = LinearAlgebra.logdet(primals)
     t = LinearAlgebra.logdet(tracers)
     return D(p, t)
 end
-function LinearAlgebra.logdet(A::AbstractMatrix{D}) where {D<:Dual}
+function LinearAlgebra.logdet(A::AbstractMatrix{D}) where {D <: Dual}
     primals, tracers = split_dual_array(A)
     p = LinearAlgebra.logdet(primals)
     t = LinearAlgebra.logdet(tracers)
     return D(p, t)
 end
-function LinearAlgebra.logabsdet(A::AbstractMatrix{D}) where {D<:Dual}
+function LinearAlgebra.logabsdet(A::AbstractMatrix{D}) where {D <: Dual}
     primals, tracers = split_dual_array(A)
     p1, p2 = LinearAlgebra.logabsdet(primals)
     t1, t2 = LinearAlgebra.logabsdet(tracers)
     return (D(p1, t1), D(p2, t2))
+end
+function LinearAlgebra.:\(A::AbstractMatrix{<:Dual}, B::AbstractVector)
+    primals, tracers = split_dual_array(A)
+    p = primals \ B
+    t = tracers \ B
+    return Dual.(p, t)
+end
+function LinearAlgebra.:\(A::AbstractMatrix, B::AbstractVector{D}) where {D <: Dual}
+    primals, tracers = split_dual_array(B)
+    p = A \ primals
+    t = A \ tracers
+    return Dual.(p, t)
+end
+function LinearAlgebra.:\(
+        A::AbstractMatrix{D1}, B::AbstractVector{D2}
+    ) where {D1 <: Dual, D2 <: Dual}
+    A_primals, A_tracers = split_dual_array(A)
+    B_primals, B_tracers = split_dual_array(B)
+    p = A_primals \ B_primals
+    t = A_tracers \ B_tracers
+    return Dual.(p, t)
 end
 
 #==============#
@@ -193,7 +280,7 @@ end
 #==============#
 
 # Helper function needed in SparseArrays's sparsematrix, sparsevector and higherorderfns.
-# On Tracers, `iszero` and `!iszero` don't return a boolean, 
+# On Tracers, `iszero` and `!iszero` don't return a boolean,
 # but we need a function that does to handle the structure of the array.
 
 SparseArrays._iszero(t::AbstractTracer) = isemptytracer(t)

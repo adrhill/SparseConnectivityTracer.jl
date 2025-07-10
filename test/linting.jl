@@ -1,7 +1,6 @@
 using SparseConnectivityTracer
 using Test
 
-using JuliaFormatter: JuliaFormatter
 using Aqua: Aqua
 using JET: JET
 using ExplicitImports: ExplicitImports
@@ -12,24 +11,24 @@ using NaNMath: NaNMath
 using NNlib: NNlib
 using SpecialFunctions: SpecialFunctions
 
-@testset "Code formatting" begin
-    @info "...with JuliaFormatter.jl"
-    @test JuliaFormatter.format(SparseConnectivityTracer; verbose=false, overwrite=false)
-end
-
 @testset "Aqua tests" begin
     @info "...with Aqua.jl"
     Aqua.test_all(
         SparseConnectivityTracer;
-        ambiguities=false,
-        deps_compat=(check_extras=false,),
-        persistent_tasks=false,
+        ambiguities = false,
+        deps_compat = (check_extras = false,),
+        persistent_tasks = false,
     )
 end
 
-@testset "JET tests" begin
-    @info "...with JET.jl"
-    JET.test_package(SparseConnectivityTracer; target_defined_modules=true)
+if VERSION < v"1.12"
+    # JET v0.9  is compatible with Julia <1.12
+    # JET v0.10 is compatible with Julia ≥1.12
+    # TODO: Update when 1.12 releases
+    @testset "JET tests" begin
+        @info "...with JET.jl"
+        JET.test_package(SparseConnectivityTracer; target_defined_modules = true)
+    end
 end
 
 @testset "ExplicitImports tests" begin
@@ -41,7 +40,7 @@ end
     @testset "Improper explicit imports" begin
         @test ExplicitImports.check_no_stale_explicit_imports(
             SparseConnectivityTracer;
-            ignore=(
+            ignore = (
                 # Used in code generation, which ExplicitImports doesn't pick up
                 :AbstractTracer,
                 :AkimaInterpolation,

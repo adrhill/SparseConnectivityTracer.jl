@@ -1,7 +1,13 @@
 import SparseConnectivityTracer as SCT
 using SparseConnectivityTracer
 using SparseConnectivityTracer:
-    GradientTracer, IndexSetGradientPattern, isemptytracer, MissingPrimalError
+    GradientTracer,
+    Dual,
+    IndexSetGradientPattern,
+    isemptytracer,
+    MissingPrimalError,
+    split_dual_array,
+    tracer
 using Test
 
 using LinearAlgebra: Symmetric, Diagonal, diagind
@@ -11,7 +17,7 @@ using LinearAlgebra: inv, pinv, dot
 using SparseArrays: sparse, spdiagm
 
 S = BitSet
-P = IndexSetGradientPattern{Int,S}
+P = IndexSetGradientPattern{Int, S}
 TG = GradientTracer{P}
 
 # Utilities for quick testing
@@ -31,7 +37,7 @@ function sameidx(s1::AbstractSet, s2::AbstractSet)
     end
 end
 
-function sameidx(t1::T, t2::T) where {T<:GradientTracer}
+function sameidx(t1::T, t2::T) where {T <: GradientTracer}
     return sameidx(SCT.gradient(t1), SCT.gradient(t2))
 end
 sameidx(t::GradientTracer, s::AbstractSet) = sameidx(SCT.gradient(t), s)
@@ -89,7 +95,7 @@ testJ1(f, A) = @testset "Jacobian" begin
     @test allone(Jsum(f, A))
 end
 function testJ1(f, A::Diagonal)
-    @testset "Jacobian" begin
+    return @testset "Jacobian" begin
         jac = Jsum(f, A)
         di = diagind(A)
         for (i, x) in enumerate(jac)
@@ -113,7 +119,7 @@ testH1(f, A) = @testset "Hessian" begin
     @test allone(Hsum(f, A))
 end
 function testH1(f, A::Diagonal)
-    @testset "Hessian" begin
+    return @testset "Hessian" begin
         hess = Hsum(f, A)
         di = diagind(A)
 
@@ -389,17 +395,197 @@ end
     @test sameidx(out[2, 2], [4, 5, 6])
 end
 
+@testset "Matrix multiplication" begin
+    t1 = idx2tracer([1])
+    t2 = idx2tracer([2])
+    t3 = idx2tracer([3])
+    t4 = idx2tracer([4])
+    t5 = idx2tracer([5])
+    t6 = idx2tracer([6])
+    t7 = idx2tracer([7])
+    t8 = idx2tracer([8])
+    t9 = idx2tracer([9])
+
+    A_t = [
+        t1 t2
+        t3 t4
+        t5 t6
+    ]
+    A_p = rand(3, 2)
+
+    x_t = [t7, t8]
+    y_t = [t7, t9]
+
+    x_p = rand(2)
+    y_p = rand(2)
+
+    @testset "Global" begin
+        b_pp = A_p * x_p
+        @testset "Tracer-Primal" begin
+            b_tp = A_t * x_p
+            @test size(b_tp) == size(b_pp)
+            @test all(
+                map(
+                    sameidx,
+                    b_tp,
+                    [
+                        t1 + t2
+                        t3 + t4
+                        t5 + t6
+                    ],
+                )
+            )
+            B_tp = A_t * hcat(x_p, y_p)
+            @test size(B_tp) == (3, 2)
+            @test all(
+                map(
+                    sameidx,
+                    B_tp,
+                    [
+                        (t1 + t2)       (t1 + t2)
+                        (t3 + t4)       (t3 + t4)
+                        (t5 + t6)       (t5 + t6)
+                    ],
+                )
+            )
+            @test_throws DimensionMismatch A_t * vcat(x_p, x_p)
+            @test_throws DimensionMismatch A_t * hcat(x_p[1:1], x_p[1:1])
+        end
+        @testset "Primal-Tracer" begin
+            b_pt = A_p * x_t
+            @test size(b_pt) == size(b_pp)
+            @test all(
+                map(
+                    sameidx,
+                    b_pt,
+                    [
+                        t7 + t8
+                        t7 + t8
+                        t7 + t8
+                    ],
+                )
+            )
+            B_pt = A_p * hcat(x_t, y_t)
+            @test size(B_pt) == (3, 2)
+            @test all(
+                map(
+                    sameidx,
+                    B_pt,
+                    [
+                        (t7 + t8)         (t7 + t9)
+                        (t7 + t8)         (t7 + t9)
+                        (t7 + t8)         (t7 + t9)
+                    ],
+                )
+            )
+            @test_throws DimensionMismatch A_p * vcat(x_t, x_t)
+            @test_throws DimensionMismatch A_p * hcat(x_t[1:1], x_t[1:1])
+        end
+        @testset "Tracer-Tracer" begin
+            b_tt = A_t * x_t
+            @test size(b_tt) == size(b_pp)
+            @test all(
+                map(
+                    sameidx,
+                    b_tt,
+                    [
+                        t1 + t2 + t7 + t8
+                        t3 + t4 + t7 + t8
+                        t5 + t6 + t7 + t8
+                    ],
+                )
+            )
+            B_tt = A_t * hcat(x_t, y_t)
+            @test size(B_tt) == (3, 2)
+            @test all(
+                map(
+                    sameidx,
+                    B_tt,
+                    [
+                        (t1 + t2 + t7 + t8)           (t1 + t2 + t7 + t9)
+                        (t3 + t4 + t7 + t8)           (t3 + t4 + t7 + t9)
+                        (t5 + t6 + t7 + t8)           (t5 + t6 + t7 + t9)
+                    ],
+                ),
+            )
+            @test_throws DimensionMismatch A_t * vcat(x_t, x_t)
+            @test_throws DimensionMismatch A_t * hcat(x_t[1:1], x_t[1:1])
+        end
+    end
+end
+
 @testset "Matrix division" begin
     t1 = idx2tracer([1, 3, 4])
     t2 = idx2tracer([2, 4])
     t3 = idx2tracer([8, 9])
     t4 = idx2tracer([8, 9])
-    A = [t1 t2; t3 t4]
-    s_out = idx2set([1, 2, 3, 4, 8, 9])
+    A_t = [t1 t2; t3 t4]
+    A_p = rand(2, 2)
 
-    x = rand(2)
-    b = A \ x
-    @test all(t -> sameidx(t, s_out), b)
+    t5 = idx2tracer([6])
+    t6 = idx2tracer([5, 7])
+    x_t = [t5; t6]
+    x_p = rand(2)
+
+    set_tp = set_A = idx2set([1, 2, 3, 4, 8, 9])
+    set_pt = set_x = idx2set([5, 6, 7])
+    set_tt = union(set_tp, set_pt)
+
+    @testset "Global" begin
+        b_pp = A_p \ x_p
+        @testset "Tracer-Primal" begin
+            b_tp = A_t \ x_p
+            @test size(b_tp) == size(b_pp)
+            @test all(t -> sameidx(t, set_tp), b_tp)
+        end
+        @testset "Primal-Tracer" begin
+            b_pt = A_p \ x_t
+            @test size(b_pt) == size(b_pp)
+            @test all(t -> sameidx(t, set_pt), b_pt)
+        end
+        @testset "Tracer-Tracer" begin
+            b_tt = A_t \ x_t
+            @test size(b_tt) == size(b_pp)
+            @test all(t -> sameidx(t, set_tt), b_tt)
+        end
+    end
+    @testset "Local" begin
+        @testset "$P" for P in (Float32, BigFloat)
+            # https://github.com/adrhill/SparseConnectivityTracer.jl/issues/235
+
+            A_p = rand(P, 2, 2)
+            A_d = Dual.(A_p, A_t)
+            @test size(A_d) == size(A_p)
+
+            x_p = rand(P, 2)
+            x_d = Dual.(x_p, x_t)
+            @test size(x_d) == size(x_p)
+
+            b_pp = A_p \ x_p
+
+            @testset "Dual-Primal" begin
+                b_dp = A_d \ x_p
+                primals_dp, _ = split_dual_array(b_dp)
+                @test size(b_dp) == size(b_pp)
+                @test primals_dp == b_pp
+                @test all(d -> sameidx(tracer(d), set_tp), b_dp)
+            end
+            @testset "Primal-Dual" begin
+                b_pd = A_p \ x_d
+                primals_pd, _ = split_dual_array(b_pd)
+                @test size(b_pd) == size(b_pp)
+                @test primals_pd == b_pp
+                @test all(d -> sameidx(tracer(d), set_pt), b_pd)
+            end
+            @testset "Dual-Dual" begin
+                b_dd = A_d \ x_d
+                primals_dd, _ = split_dual_array(b_dd)
+                @test size(b_dd) == size(b_pp)
+                @test primals_dd == b_pp
+                @test all(d -> sameidx(tracer(d), set_tt), b_dd)
+            end
+        end
+    end
 end
 
 @testset "Dot" begin

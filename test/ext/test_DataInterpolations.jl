@@ -28,15 +28,17 @@ ddu = -sin.(t)
 # Test definitions #
 #==================#
 
-struct InterpolationTest{N,I<:AbstractInterpolation} # N = output dim. of interpolation
+struct InterpolationTest{N, I <: AbstractInterpolation} # N = output dim. of interpolation
     interp::I
     is_der1_zero::Bool
     is_der2_zero::Bool
 end
 function InterpolationTest(
-    interp::I; is_der1_zero=false, is_der2_zero=false
-) where {T,N,I<:AbstractInterpolation{T,N}}
-    return InterpolationTest{only(N),I}(interp, is_der1_zero, is_der2_zero)
+        interp::I; is_der1_zero = false, is_der2_zero = false
+    ) where {T, I <: AbstractInterpolation{T}}
+    sz = output_size(interp)
+    N = isempty(sz) ? 1 : only(sz)
+    return InterpolationTest{N, I}(interp, is_der1_zero, is_der2_zero)
 end
 testname(t::InterpolationTest{N}) where {N} = "$N-dim $(typeof(t.interp))"
 
@@ -45,7 +47,7 @@ testname(t::InterpolationTest{N}) where {N} = "$N-dim $(typeof(t.interp))"
 #================#
 
 function test_jacobian(t::InterpolationTest)
-    @testset "Jacobian" begin
+    return @testset "Jacobian" begin
         for input in test_inputs
             test_jacobian(t, input)
         end
@@ -56,7 +58,7 @@ function test_jacobian(t::InterpolationTest{N}, input::Real) where {N}
     N_OUT = N * N_IN
     Jref = t.is_der1_zero ? zeros(N, N_IN) : ones(N, N_IN)
 
-    @testset "input type $(typeof(input)): $N_IN inputs, $N states, $N_OUT outputs" begin
+    return @testset "input type $(typeof(input)): $N_IN inputs, $N states, $N_OUT outputs" begin
         @testset "Global Jacobian sparsity" begin
             J = jacobian_sparsity(t.interp, input, TracerSparsityDetector())
             @test J ≈ Jref
@@ -73,7 +75,7 @@ function test_jacobian(t::InterpolationTest{1}, input::AbstractVector)
     N_OUT = N * N_IN
     Jref = t.is_der1_zero ? zeros(N_IN, N_IN) : I(N_IN)
 
-    @testset "input type $(typeof(input)): $N_IN inputs, $N states, $N_OUT outputs" begin
+    return @testset "input type $(typeof(input)): $N_IN inputs, $N states, $N_OUT outputs" begin
         @testset "Global Jacobian sparsity" begin
             J = jacobian_sparsity(x -> vec(t.interp(x)), input, TracerSparsityDetector())
             @test J ≈ Jref
@@ -100,7 +102,7 @@ function test_jacobian(t::InterpolationTest{N}, input::AbstractVector) where {N}
         end
     end
 
-    @testset "input type $(typeof(input)): $N_IN inputs, $N states, $N_OUT outputs" begin
+    return @testset "input type $(typeof(input)): $N_IN inputs, $N states, $N_OUT outputs" begin
         @testset "Global Jacobian sparsity" begin
             J = jacobian_sparsity(x -> vec(t.interp(x)), input, TracerSparsityDetector())
             @test J ≈ Jref
@@ -119,7 +121,7 @@ end
 #===============#
 
 function test_hessian(t::InterpolationTest)
-    @testset "Hessian" begin
+    return @testset "Hessian" begin
         for input in test_inputs
             test_hessian(t, input)
         end
@@ -131,7 +133,7 @@ function test_hessian(t::InterpolationTest{1}, input::Real)
     N_OUT = N * N_IN
     Href = t.is_der2_zero ? zeros(N_IN, N_IN) : ones(N_IN, N_IN)
 
-    @testset "input type $(typeof(input)): $N_IN inputs, $N states, $N_OUT outputs" begin
+    return @testset "input type $(typeof(input)): $N_IN inputs, $N states, $N_OUT outputs" begin
         @testset "Global Hessian sparsity" begin
             H = hessian_sparsity(t.interp, input, TracerSparsityDetector())
             @test H ≈ Href
@@ -147,7 +149,7 @@ function test_hessian(t::InterpolationTest{N}, input::Real) where {N} #  N ≠ 1
     N_OUT = N * N_IN
     Href = t.is_der2_zero ? zeros(N_IN, N_IN) : ones(N_IN, N_IN)
 
-    @testset "input type $(typeof(input)): $N_IN inputs, $N states, $N_OUT outputs" begin
+    return @testset "input type $(typeof(input)): $N_IN inputs, $N states, $N_OUT outputs" begin
         @testset "Global Hessian sparsity" begin
             H = hessian_sparsity(x -> sum(t.interp(x)), input, TracerSparsityDetector())
             @test H ≈ Href
@@ -166,7 +168,7 @@ function test_hessian(t::InterpolationTest{1}, input::AbstractVector)
     N_OUT = N * N_IN
     Href = t.is_der2_zero ? zeros(N_IN, N_IN) : I(N_IN)
 
-    @testset "input type $(typeof(input)): $N_IN inputs, $N states, $N_OUT outputs" begin
+    return @testset "input type $(typeof(input)): $N_IN inputs, $N states, $N_OUT outputs" begin
         @testset "Global Hessian sparsity" begin
             H = hessian_sparsity(x -> sum(t.interp(x)), input, TracerSparsityDetector())
             @test H ≈ Href
@@ -184,7 +186,7 @@ function test_hessian(t::InterpolationTest{N}, input::AbstractVector) where {N} 
     N_OUT = N * N_IN
     Href = t.is_der2_zero ? zeros(N_IN, N_IN) : I(N_IN)
 
-    @testset "input type $(typeof(input)): $N_IN inputs, $N states, $N_OUT outputs" begin
+    return @testset "input type $(typeof(input)): $N_IN inputs, $N states, $N_OUT outputs" begin
         @testset "Global Hessian sparsity" begin
             H = hessian_sparsity(x -> sum(t.interp(x)), input, TracerSparsityDetector())
             @test H ≈ Href
@@ -199,7 +201,7 @@ function test_hessian(t::InterpolationTest{N}, input::AbstractVector) where {N} 
 end
 
 function test_output(t::InterpolationTest)
-    @testset "Output sizes and values" begin
+    return @testset "Output sizes and values" begin
         @testset "input type: $(typeof(input))" for input in test_inputs
             out_ref = t.interp(input)
             s_ref = size(out_ref)
@@ -211,9 +213,9 @@ function test_output(t::InterpolationTest)
                 @test s_tracer == s_ref
             end
             @testset "$T" for T in (
-                Dual{eltype(input),DEFAULT_GRADIENT_TRACER},
-                Dual{eltype(input),DEFAULT_HESSIAN_TRACER},
-            )
+                    Dual{eltype(input), DEFAULT_GRADIENT_TRACER},
+                    Dual{eltype(input), DEFAULT_HESSIAN_TRACER},
+                )
                 t_dual = trace_input(T, input)
                 out_dual = t.interp(t_dual)
                 s_dual = size(out_dual)
@@ -230,21 +232,21 @@ end
 
 @testset "1D Interpolations" begin
     @testset "$(testname(t))" for t in (
-        InterpolationTest(
-            ConstantInterpolation(u, t); is_der1_zero=true, is_der2_zero=true
-        ),
-        InterpolationTest(LinearInterpolation(u, t); is_der2_zero=true),
-        InterpolationTest(QuadraticInterpolation(u, t)),
-        InterpolationTest(LagrangeInterpolation(u, t)),
-        InterpolationTest(AkimaInterpolation(u, t)),
-        InterpolationTest(QuadraticSpline(u, t)),
-        InterpolationTest(CubicSpline(u, t)),
-        InterpolationTest(BSplineInterpolation(u, t, 3, :ArcLen, :Average)),
-        InterpolationTest(BSplineApprox(u, t, 3, 4, :ArcLen, :Average)),
-        InterpolationTest(PCHIPInterpolation(u, t)),
-        InterpolationTest(CubicHermiteSpline(du, u, t)),
-        InterpolationTest(QuinticHermiteSpline(ddu, du, u, t)),
-    )
+            InterpolationTest(
+                ConstantInterpolation(u, t); is_der1_zero = true, is_der2_zero = true
+            ),
+            InterpolationTest(LinearInterpolation(u, t); is_der2_zero = true),
+            InterpolationTest(QuadraticInterpolation(u, t)),
+            InterpolationTest(LagrangeInterpolation(u, t)),
+            InterpolationTest(AkimaInterpolation(u, t)),
+            InterpolationTest(QuadraticSpline(u, t)),
+            InterpolationTest(CubicSpline(u, t)),
+            InterpolationTest(BSplineInterpolation(u, t, 3, :ArcLen, :Average)),
+            InterpolationTest(BSplineApprox(u, t, 3, 4, :ArcLen, :Average)),
+            InterpolationTest(PCHIPInterpolation(u, t)),
+            InterpolationTest(CubicHermiteSpline(du, u, t)),
+            InterpolationTest(QuinticHermiteSpline(ddu, du, u, t)),
+        )
         test_jacobian(t)
         test_hessian(t)
         test_output(t)
@@ -257,20 +259,20 @@ for N in (2, 5)
 
     @testset "$(N)D Interpolations" begin
         @testset "$(testname(t))" for t in (
-            InterpolationTest(
-                ConstantInterpolation(um, t); is_der1_zero=true, is_der2_zero=true
-            ),
-            InterpolationTest(LinearInterpolation(um, t); is_der2_zero=true),
-            InterpolationTest(QuadraticInterpolation(um, t)),
-            InterpolationTest(LagrangeInterpolation(um, t)),
-            ## The following interpolations appear to not be supported on N dimensions as of DataInterpolations v6.2.0:
-            # InterpolationTest(AkimaInterpolation(um, t)),
-            # InterpolationTest(BSplineApprox(um, t, 3, 4, :ArcLen, :Average)),
-            # InterpolationTest(QuadraticSpline(um, t)),
-            # InterpolationTest(CubicSpline(um, t)),
-            # InterpolationTest(BSplineInterpolation(um, t, 3, :ArcLen, :Average)),
-            # InterpolationTest(PCHIPInterpolation(um, t)),
-        )
+                InterpolationTest(
+                    ConstantInterpolation(um, t); is_der1_zero = true, is_der2_zero = true
+                ),
+                InterpolationTest(LinearInterpolation(um, t); is_der2_zero = true),
+                InterpolationTest(QuadraticInterpolation(um, t)),
+                InterpolationTest(LagrangeInterpolation(um, t)),
+                ## The following interpolations appear to not be supported on N dimensions as of DataInterpolations v6.2.0:
+                # InterpolationTest(AkimaInterpolation(um, t)),
+                # InterpolationTest(BSplineApprox(um, t, 3, 4, :ArcLen, :Average)),
+                # InterpolationTest(QuadraticSpline(um, t)),
+                # InterpolationTest(CubicSpline(um, t)),
+                # InterpolationTest(BSplineInterpolation(um, t, 3, :ArcLen, :Average)),
+                # InterpolationTest(PCHIPInterpolation(um, t)),
+            )
             test_jacobian(t)
             test_hessian(t)
             test_output(t)
