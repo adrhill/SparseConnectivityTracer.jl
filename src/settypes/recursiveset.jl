@@ -4,11 +4,11 @@
 Lazy union of sets.
 """
 mutable struct RecursiveSet{T} <: AbstractSet{T}
-    s::Union{Nothing,Set{T}}
-    child1::Union{Nothing,RecursiveSet{T}}
-    child2::Union{Nothing,RecursiveSet{T}}
+    s::Union{Nothing, Set{T}}
+    child1::Union{Nothing, RecursiveSet{T}}
+    child2::Union{Nothing, RecursiveSet{T}}
 
-    function RecursiveSet{T}(s::Union{AbstractSet,AbstractVector}) where {T}
+    function RecursiveSet{T}(s::Union{AbstractSet, AbstractVector}) where {T}
         return new{T}(Set{T}(s), nothing, nothing)
     end
 
@@ -31,18 +31,18 @@ function print_recursiveset(io::IO, rs::RecursiveSet{T}; offset) where {T}
     else
         print(io, "RecursiveSet{$T} with two children:")
         print(io, "\n  ", " "^offset, "1: ")
-        print_recursiveset(io, rs.child1; offset=offset + 2)
+        print_recursiveset(io, rs.child1; offset = offset + 2)
         print(io, "\n  ", " "^offset, "2: ")
-        print_recursiveset(io, rs.child2; offset=offset + 2)
+        print_recursiveset(io, rs.child2; offset = offset + 2)
     end
 end
 
 function Base.show(io::IO, rs::RecursiveSet)
-    return print_recursiveset(io, rs; offset=0)
+    return print_recursiveset(io, rs; offset = 0)
 end
 
 function Base.show(io::IO, ::MIME"text/plain", rs::RecursiveSet)
-    return print_recursiveset(io, rs; offset=0)
+    return print_recursiveset(io, rs; offset = 0)
 end
 
 Base.eltype(::Type{RecursiveSet{T}}) where {T} = T
@@ -92,7 +92,7 @@ Base.iterate(rs::RecursiveSet, i::Integer) = iterate(collect(rs), i)
 
 function product(a::RecursiveSet{T}, b::RecursiveSet{T}) where {T}
     # TODO: slow
-    return RecursiveSet{Tuple{T,T}}(
+    return RecursiveSet{Tuple{T, T}}(
         vec(collect((i, j) for i in collect(a), j in collect(b) if i <= j))
     )
 end

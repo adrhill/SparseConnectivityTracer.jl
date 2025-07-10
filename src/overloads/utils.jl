@@ -1,7 +1,6 @@
-
 # Tracer unions #
 
-#===============##===============#
+#===============# #===============#
 
 # Tracer unions #
 
@@ -16,14 +15,14 @@ This is functionally equivalent to:
 reduce(+, tracers)
 ```
 """
-function first_order_or(ts::AbstractArray{T}) where {T<:AbstractTracer}
+function first_order_or(ts::AbstractArray{T}) where {T <: AbstractTracer}
     # TODO: improve performance
-    return reduce(first_order_or, ts; init=myempty(T))
+    return reduce(first_order_or, ts; init = myempty(T))
 end
-function first_order_or(a::T, b::T) where {T<:GradientTracer}
+function first_order_or(a::T, b::T) where {T <: GradientTracer}
     return gradient_tracer_2_to_1(a, b, false, false)
 end
-function first_order_or(a::T, b::T) where {T<:HessianTracer}
+function first_order_or(a::T, b::T) where {T <: HessianTracer}
     return hessian_tracer_2_to_1(a, b, false, true, false, true, true)
 end
 
@@ -38,17 +37,17 @@ This is functionally equivalent to:
 reduce(^, tracers)
 ```
 """
-function second_order_or(ts::AbstractArray{T}) where {T<:AbstractTracer}
+function second_order_or(ts::AbstractArray{T}) where {T <: AbstractTracer}
     # TODO: improve performance
-    return reduce(second_order_or, ts; init=myempty(T))
+    return reduce(second_order_or, ts; init = myempty(T))
 end
 
-function second_order_or(a::T, b::T) where {T<:GradientTracer}
+function second_order_or(a::T, b::T) where {T <: GradientTracer}
     return gradient_tracer_2_to_1(a, b, false, false)
 end
-function second_order_or(a::T, b::T) where {T<:HessianTracer}
+function second_order_or(a::T, b::T) where {T <: HessianTracer}
     return hessian_tracer_2_to_1(a, b, false, false, false, false, false)
-end#=================##=================#
+end #=================# #=================#
 
 # Code generation #
 
@@ -70,11 +69,11 @@ end
 # Allow all `generate_code_*` functions to be called on several operators at once
 for d in dims
     for f in (
-        Symbol("generate_code_", d),
-        Symbol("generate_code_gradient_", d),
-        Symbol("generate_code_hessian_", d),
-    )
-        @eval function $f(M::Symbol, ops::Union{AbstractVector,Tuple})
+            Symbol("generate_code_", d),
+            Symbol("generate_code_gradient_", d),
+            Symbol("generate_code_hessian_", d),
+        )
+        @eval function $f(M::Symbol, ops::Union{AbstractVector, Tuple})
             exprs = [$f(M, op) for op in ops]
             return Expr(:block, exprs...)
         end
@@ -87,7 +86,7 @@ function generate_code_2_to_1_typed(M::Symbol, f::Function, Z::Type)
     expr_h = generate_code_hessian_2_to_1_typed(M, f, Z)
     return Expr(:block, expr_g, expr_h)
 end
-function generate_code_2_to_1_typed(M::Symbol, ops::Union{AbstractVector,Tuple}, Z::Type)
+function generate_code_2_to_1_typed(M::Symbol, ops::Union{AbstractVector, Tuple}, Z::Type)
     exprs = [generate_code_2_to_1_typed(M, op, Z) for op in ops]
     return Expr(:block, exprs...)
 end

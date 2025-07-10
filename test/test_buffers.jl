@@ -10,15 +10,15 @@ include("tracers_definitions.jl")
     x = rand(P, 3, 2)
     @testset "$GP" for GP in GRADIENT_PATTERNS
         T = GradientTracer{GP}
-        D = Dual{P,T}
+        D = Dual{P, T}
         @testset "Global" begin
-            detector = TracerSparsityDetector(; gradient_tracer_type=T)
+            detector = TracerSparsityDetector(; gradient_tracer_type = T)
             buff = jacobian_buffer(x, detector)
             @test size(buff) == (3, 2)
             @test eltype(buff) == T
         end
         @testset "Local" begin
-            detector = TracerLocalSparsityDetector(; gradient_tracer_type=T)
+            detector = TracerLocalSparsityDetector(; gradient_tracer_type = T)
             buff = jacobian_buffer(x, detector)
             @test size(buff) == (3, 2)
             @test eltype(buff) == D
@@ -31,15 +31,15 @@ end
     x = rand(P, 3, 2)
     @testset "$HP" for HP in HESSIAN_PATTERNS
         T = HessianTracer{HP}
-        D = Dual{P,T}
+        D = Dual{P, T}
         @testset "Global" begin
-            detector = TracerSparsityDetector(; hessian_tracer_type=T)
+            detector = TracerSparsityDetector(; hessian_tracer_type = T)
             buff = hessian_buffer(x, detector)
             @test size(buff) == (3, 2)
             @test eltype(buff) == T
         end
         @testset "Local" begin
-            detector = TracerLocalSparsityDetector(; hessian_tracer_type=T)
+            detector = TracerLocalSparsityDetector(; hessian_tracer_type = T)
             buff = hessian_buffer(x, detector)
             @test size(buff) == (3, 2)
             @test eltype(buff) == D

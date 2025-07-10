@@ -4,12 +4,12 @@ using Test
 
 @testset "SortedVector merging" begin
     @testset "$T - ($k1, $k2)" for T in (Int32, Int64),
-        k1 in (0, 10, 100, 1000),
-        k2 in (0, 10, 100, 1000)
+            k1 in (0, 10, 100, 1000),
+            k2 in (0, 10, 100, 1000)
 
         @test all(1:100) do _
-            x = SortedVector{T}(rand(T(1):T(1000), k1); sorted=false)
-            y = SortedVector{T}(sort(rand(T(1):T(1000), k2)); sorted=true)
+            x = SortedVector{T}(rand(T(1):T(1000), k1); sorted = false)
+            y = SortedVector{T}(sort(rand(T(1):T(1000), k2)); sorted = true)
             z = union(x, y)
             eltype(z) == T || return false
             issorted(z.data) || return false

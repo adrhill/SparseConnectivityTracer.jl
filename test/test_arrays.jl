@@ -17,7 +17,7 @@ using LinearAlgebra: inv, pinv, dot
 using SparseArrays: sparse, spdiagm
 
 S = BitSet
-P = IndexSetGradientPattern{Int,S}
+P = IndexSetGradientPattern{Int, S}
 TG = GradientTracer{P}
 
 # Utilities for quick testing
@@ -37,11 +37,11 @@ function sameidx(s1::AbstractSet, s2::AbstractSet)
     end
 end
 
-function sameidx(t1::T, t2::T) where {T<:GradientTracer}
+function sameidx(t1::T, t2::T) where {T <: GradientTracer}
     return sameidx(SCT.gradient(t1), SCT.gradient(t2))
 end
 sameidx(t::GradientTracer, s::AbstractSet) = sameidx(SCT.gradient(t), s)
-sameidx(t::GradientTracer, i) = sameidx(t, idx2set(i))#=========================##=========================#
+sameidx(t::GradientTracer, i) = sameidx(t, idx2set(i)) #=========================# #=========================#
 
 # Weird function wrappers #
 
@@ -71,7 +71,7 @@ opnorminf(A) = opnorm(A, Inf)
 logabsdet_first(A) = first(logabsdet(A))
 logabsdet_last(A) = last(logabsdet(A))
 pow0(A) = A^0
-pow3(A) = A^3#===================##===================#
+pow3(A) = A^3 #===================# #===================#
 
 # Testing utilities #
 
@@ -130,7 +130,7 @@ function testH1(f, A::Diagonal)
             end
         end
     end
-end#===================##===================#
+end #===================# #===================#
 
 # Arrays to test on #
 
@@ -146,7 +146,7 @@ NONDIAG_SQUARE_MATRICES = (mat33, sym33)
 DIAG_MATRICES = (dia33,)
 DIAG_SQUARE_MATRICES = (dia33,)
 
-arrayname(A) = "$(typeof(A)) $(size(A))"#=================##=================#
+arrayname(A) = "$(typeof(A)) $(size(A))" #=================# #=================#
 
 # TEST START HERE #
 
@@ -416,15 +416,17 @@ end
         @testset "Tracer-Primal" begin
             b_tp = A_t * x_p
             @test size(b_tp) == size(b_pp)
-            @test all(map(
-                sameidx,
-                b_tp,
-                [
-                    t1 + t2
-                    t3 + t4
-                    t5 + t6
-                ],
-            ))
+            @test all(
+                map(
+                    sameidx,
+                    b_tp,
+                    [
+                        t1 + t2
+                        t3 + t4
+                        t5 + t6
+                    ],
+                )
+            )
             B_tp = A_t * hcat(x_p, y_p)
             @test size(B_tp) == (3, 2)
             @test all(
@@ -444,15 +446,17 @@ end
         @testset "Primal-Tracer" begin
             b_pt = A_p * x_t
             @test size(b_pt) == size(b_pp)
-            @test all(map(
-                sameidx,
-                b_pt,
-                [
-                    t7 + t8
-                    t7 + t8
-                    t7 + t8
-                ],
-            ))
+            @test all(
+                map(
+                    sameidx,
+                    b_pt,
+                    [
+                        t7 + t8
+                        t7 + t8
+                        t7 + t8
+                    ],
+                )
+            )
             B_pt = A_p * hcat(x_t, y_t)
             @test size(B_pt) == (3, 2)
             @test all(
