@@ -26,7 +26,7 @@ function (ah::ArrowHead)(x::AbstractVector)
     K = ah.K
     N = length(x)
     return sum(1:N) do i
-        s1 = sum(x[i + j] for j in 1:K if (i + j) in eachindex(x); init=zero(eltype(x)))
+        s1 = sum(x[i + j] for j in 1:K if (i + j) in eachindex(x); init = zero(eltype(x)))
         s2 = sum((x[i] + x[j])^2 for j in 1:K)
         return cos(s1) + s2
     end
@@ -37,15 +37,15 @@ function hessbench_arrowhead(detector)
     # Commented-out cases (N, K) are included in the JuMP paper linked above,
     # but excluded from to accelerate the benchmark suite.
     for (N, K) in [
-        ## Table 1
-        (200, 16),
-        # (400, 16),
-        # (800, 16),
-        ## Table 2
-        (3200, 2),
-        # (3200, 4),
-        # (3200, 8),
-    ]
+            ## Table 1
+            (200, 16),
+            # (400, 16),
+            # (800, 16),
+            ## Table 2
+            (3200, 2),
+            # (3200, 4),
+            # (3200, 8),
+        ]
         x = rand(N)
         f = ArrowHead(K)
         suite["N=$N, K=$K"] = @benchmarkable hessian_sparsity($f, $x, $detector)
@@ -75,15 +75,15 @@ function hessbench_randomsparsity(detector)
     # Commented-out cases (N, K) are included in the JuMP paper linked above,
     # but excluded from to accelerate the benchmark suite.
     for (N, K) in [
-        ## Table 3
-        (400, 2),
-        # (400, 4),
-        # (400, 8),
-        ## Table 4
-        (100, 32),
-        # (200, 32),
-        # (400, 32),
-    ]
+            ## Table 3
+            (400, 2),
+            # (400, 4),
+            # (400, 8),
+            ## Table 4
+            (100, 32),
+            # (200, 32),
+            # (400, 32),
+        ]
         x = rand(N)
         f = RandomSparsity(N, K)
         suite["N=$N, K=$K"] = @benchmarkable hessian_sparsity($f, $x, $detector)

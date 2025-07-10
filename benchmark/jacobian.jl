@@ -17,11 +17,11 @@ end
 
 ## Iterated sparse mul
 
-struct IteratedSparseMul{M<:AbstractMatrix}
+struct IteratedSparseMul{M <: AbstractMatrix}
     As::Vector{M}
 end
 
-function IteratedSparseMul(; n::Integer, p::Real=0.1, depth::Integer=5)
+function IteratedSparseMul(; n::Integer, p::Real = 0.1, depth::Integer = 5)
     As = [sprand(MersenneTwister(123 + i), n, n, p) for i in 1:depth]
     return IteratedSparseMul(As)
 end
@@ -60,7 +60,7 @@ function jacbench_brusselator(detector)
         prob = ODEProblem(brusselator_2d_loop!, x, (0.0, 1.0), f!.params)
         function brusselator_ode_solve(x)
             return solve(
-                ODEProblem(brusselator_2d_loop!, x, (0.0, 1.0), f!.params), solver; dt=0.5
+                ODEProblem(brusselator_2d_loop!, x, (0.0, 1.0), f!.params), solver; dt = 0.5
             ).u[end]
         end
         suite["ODE"]["N=$N"] = @benchmarkable jacobian_sparsity(
