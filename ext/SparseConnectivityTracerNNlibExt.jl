@@ -31,7 +31,7 @@ using NNlib:
 
 ## 1-to-1
 
-# ops_1_to_1_s: 
+# ops_1_to_1_s:
 # x -> f  != 0
 # ∂f/∂x   != 0
 # ∂²f/∂x² != 0

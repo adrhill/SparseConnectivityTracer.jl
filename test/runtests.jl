@@ -1,17 +1,17 @@
 using Pkg
 Pkg.develop(;
-    path=joinpath(@__DIR__, "..", "benchmark", "SparseConnectivityTracerBenchmarks")
+    path = joinpath(@__DIR__, "..", "benchmark", "SparseConnectivityTracerBenchmarks")
 )
 
 using SparseConnectivityTracer
 using Documenter: Documenter, DocMeta
-using Test
+using Test, LinearAlgebra
 
 DocMeta.setdocmeta!(
     SparseConnectivityTracer,
     :DocTestSetup,
     :(using SparseConnectivityTracer);
-    recursive=true,
+    recursive = true,
 )
 
 GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")

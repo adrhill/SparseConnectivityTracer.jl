@@ -15,11 +15,11 @@ function test_brusselator(detector::AbstractSparsityDetector)
     y = similar(x)
 
     J = ADTypes.jacobian_sparsity(f!, y, x, detector)
-    @test_reference "references/pattern/jacobian/Brusselator.txt" BitMatrix(J)
+    return @test_reference "references/pattern/jacobian/Brusselator.txt" BitMatrix(J)
 end
 
 @testset "$T" for T in GRADIENT_TRACERS
-    detector = TracerSparsityDetector(; gradient_tracer_type=T)
+    detector = TracerSparsityDetector(; gradient_tracer_type = T)
     test_brusselator(detector)
     yield()
 end
