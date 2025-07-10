@@ -9,6 +9,7 @@ using FillArrays: Fill # from FillArrays.jl
 import DataInterpolations: AbstractInterpolation
 import DataInterpolations:
     LinearInterpolation,
+    SmoothedLinearInterpolation,
     QuadraticInterpolation,
     LagrangeInterpolation,
     AkimaInterpolation,
@@ -74,6 +75,7 @@ end
 for (I, is_der1_zero, is_der2_zero) in (
     (:ConstantInterpolation, true, true),
     (:LinearInterpolation, false, true),
+    (:SmoothedLinearInterpolation, false, false),
     (:QuadraticInterpolation, false, false),
     (:LagrangeInterpolation, false, false),
     (:AkimaInterpolation, false, false),
