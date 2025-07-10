@@ -8,32 +8,32 @@ function Base.ifelse(::AbstractTracer, x, y)
 end
 
 ## output union on scalar outputs
-function output_union(tx::T, ty::T) where {T <: GradientTracer}
+function output_union(tx::T, ty::T) where {T<:GradientTracer}
     return T(output_union(pattern(tx), pattern(ty))) # return tracer
 end
-function output_union(px::P, py::P) where {P <: IndexSetGradientPattern}
+function output_union(px::P, py::P) where {P<:IndexSetGradientPattern}
     return P(union(gradient(px), gradient(py))) # return pattern
 end
 
-function output_union(tx::T, ty::T) where {T <: HessianTracer}
+function output_union(tx::T, ty::T) where {T<:HessianTracer}
     return T(output_union(pattern(tx), pattern(ty))) # return tracer
 end
-function output_union(px::P, py::P) where {P <: AbstractHessianPattern}
+function output_union(px::P, py::P) where {P<:AbstractHessianPattern}
     return output_union(px, py, shared(P)) # return pattern
 end
-function output_union(px::P, py::P, ::Shared) where {P <: AbstractHessianPattern}
+function output_union(px::P, py::P, ::Shared) where {P<:AbstractHessianPattern}
     g_out = union(gradient(px), gradient(py))
     hx, hy = hessian(px), hessian(py)
     hx !== hy && error("Expected shared Hessians, got $hx, $hy.")
     return P(g_out, hx) # return pattern
 end
 
-function output_union(px::P, py::P, ::NotShared) where {P <: IndexSetHessianPattern}
+function output_union(px::P, py::P, ::NotShared) where {P<:IndexSetHessianPattern}
     g_out = union(gradient(px), gradient(py))
     h_out = union(hessian(px), hessian(py))
     return P(g_out, h_out) # return pattern
 end
-function output_union(px::P, py::P, ::NotShared) where {P <: DictHessianPattern}
+function output_union(px::P, py::P, ::NotShared) where {P<:DictHessianPattern}
     g_out = union(gradient(px), gradient(py))
     h_out = myunion!(deepcopy(hessian(px)), hessian(py))
     return P(g_out, h_out) # return pattern
@@ -44,12 +44,12 @@ output_union(x, ty::AbstractTracer) = ty
 
 ## output union on AbstractArray outputs
 # TODO: add test
-function output_union(tx::AbstractArray{T}, ty::AbstractArray{T}) where {T <: AbstractTracer}
+function output_union(tx::AbstractArray{T}, ty::AbstractArray{T}) where {T<:AbstractTracer}
     return output_union.(tx, ty)
 end
-function output_union(tx::AbstractArray{T}, y::AbstractArray) where {T <: AbstractTracer}
+function output_union(tx::AbstractArray{T}, y::AbstractArray) where {T<:AbstractTracer}
     return tx
 end
-function output_union(x::AbstractArray, ty::AbstractArray{T}) where {T <: AbstractTracer}
+function output_union(x::AbstractArray, ty::AbstractArray{T}) where {T<:AbstractTracer}
     return ty
 end

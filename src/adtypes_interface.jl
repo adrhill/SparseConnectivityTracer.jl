@@ -1,9 +1,10 @@
+
 #= This file implements the ADTypes interface for `AbstractSparsityDetector`s =#
 
-const DEFAULT_GRADIENT_PATTERN = IndexSetGradientPattern{Int, BitSet}
+const DEFAULT_GRADIENT_PATTERN = IndexSetGradientPattern{Int,BitSet}
 const DEFAULT_GRADIENT_TRACER = GradientTracer{DEFAULT_GRADIENT_PATTERN}
 
-const DEFAULT_HESSIAN_PATTERN = DictHessianPattern{Int, BitSet, Dict{Int, BitSet}, NotShared}
+const DEFAULT_HESSIAN_PATTERN = DictHessianPattern{Int,BitSet,Dict{Int,BitSet},NotShared}
 const DEFAULT_HESSIAN_TRACER = HessianTracer{DEFAULT_HESSIAN_PATTERN}
 
 """
@@ -38,29 +39,29 @@ julia> hessian_sparsity(f, rand(4), detector)
  ⋅  ⋅  ⋅  1
 ```
 """
-struct TracerSparsityDetector{TG <: GradientTracer, TH <: HessianTracer} <:
-    ADTypes.AbstractSparsityDetector end
+struct TracerSparsityDetector{TG<:GradientTracer,TH<:HessianTracer} <:
+       ADTypes.AbstractSparsityDetector end
 function TracerSparsityDetector(
-        ::Type{TG}, ::Type{TH}
-    ) where {TG <: GradientTracer, TH <: HessianTracer}
-    return TracerSparsityDetector{TG, TH}()
+    ::Type{TG}, ::Type{TH}
+) where {TG<:GradientTracer,TH<:HessianTracer}
+    return TracerSparsityDetector{TG,TH}()
 end
 function TracerSparsityDetector(;
-        gradient_tracer_type::Type{TG} = DEFAULT_GRADIENT_TRACER,
-        hessian_tracer_type::Type{TH} = DEFAULT_HESSIAN_TRACER,
-    ) where {TG <: GradientTracer, TH <: HessianTracer}
+    gradient_tracer_type::Type{TG}=DEFAULT_GRADIENT_TRACER,
+    hessian_tracer_type::Type{TH}=DEFAULT_HESSIAN_TRACER,
+) where {TG<:GradientTracer,TH<:HessianTracer}
     return TracerSparsityDetector(gradient_tracer_type, hessian_tracer_type)
 end
 
-function ADTypes.jacobian_sparsity(f, x, ::TracerSparsityDetector{TG, TH}) where {TG, TH}
+function ADTypes.jacobian_sparsity(f, x, ::TracerSparsityDetector{TG,TH}) where {TG,TH}
     return _jacobian_sparsity(f, x, TG)
 end
 
-function ADTypes.jacobian_sparsity(f!, y, x, ::TracerSparsityDetector{TG, TH}) where {TG, TH}
+function ADTypes.jacobian_sparsity(f!, y, x, ::TracerSparsityDetector{TG,TH}) where {TG,TH}
     return _jacobian_sparsity(f!, y, x, TG)
 end
 
-function ADTypes.hessian_sparsity(f, x, ::TracerSparsityDetector{TG, TH}) where {TG, TH}
+function ADTypes.hessian_sparsity(f, x, ::TracerSparsityDetector{TG,TH}) where {TG,TH}
     return _hessian_sparsity(f, x, TH)
 end
 
@@ -131,37 +132,37 @@ julia> hessian_sparsity(f, [1.0, 2.0, 3.0, 4.0], TracerLocalSparsityDetector())
  ⋅  ⋅  ⋅  1
 ```
 """
-struct TracerLocalSparsityDetector{TG <: GradientTracer, TH <: HessianTracer} <:
-    ADTypes.AbstractSparsityDetector end
+struct TracerLocalSparsityDetector{TG<:GradientTracer,TH<:HessianTracer} <:
+       ADTypes.AbstractSparsityDetector end
 function TracerLocalSparsityDetector(
-        ::Type{TG}, ::Type{TH}
-    ) where {TG <: GradientTracer, TH <: HessianTracer}
-    return TracerLocalSparsityDetector{TG, TH}()
+    ::Type{TG}, ::Type{TH}
+) where {TG<:GradientTracer,TH<:HessianTracer}
+    return TracerLocalSparsityDetector{TG,TH}()
 end
 function TracerLocalSparsityDetector(;
-        gradient_tracer_type::Type{TG} = DEFAULT_GRADIENT_TRACER,
-        hessian_tracer_type::Type{TH} = DEFAULT_HESSIAN_TRACER,
-    ) where {TG <: GradientTracer, TH <: HessianTracer}
+    gradient_tracer_type::Type{TG}=DEFAULT_GRADIENT_TRACER,
+    hessian_tracer_type::Type{TH}=DEFAULT_HESSIAN_TRACER,
+) where {TG<:GradientTracer,TH<:HessianTracer}
     return TracerLocalSparsityDetector(gradient_tracer_type, hessian_tracer_type)
 end
 
-function ADTypes.jacobian_sparsity(f, x, ::TracerLocalSparsityDetector{TG, TH}) where {TG, TH}
+function ADTypes.jacobian_sparsity(f, x, ::TracerLocalSparsityDetector{TG,TH}) where {TG,TH}
     return _local_jacobian_sparsity(f, x, TG)
 end
 
 function ADTypes.jacobian_sparsity(
-        f!, y, x, ::TracerLocalSparsityDetector{TG, TH}
-    ) where {TG, TH}
+    f!, y, x, ::TracerLocalSparsityDetector{TG,TH}
+) where {TG,TH}
     return _local_jacobian_sparsity(f!, y, x, TG)
 end
 
-function ADTypes.hessian_sparsity(f, x, ::TracerLocalSparsityDetector{TG, TH}) where {TG, TH}
+function ADTypes.hessian_sparsity(f, x, ::TracerLocalSparsityDetector{TG,TH}) where {TG,TH}
     return _local_hessian_sparsity(f, x, TH)
 end
 
 ## Pretty printing
 for detector in (:TracerSparsityDetector, :TracerLocalSparsityDetector)
-    @eval function Base.show(io::IO, d::$detector{TG, TH}) where {TG, TH}
+    @eval function Base.show(io::IO, d::$detector{TG,TH}) where {TG,TH}
         if TG == DEFAULT_GRADIENT_TRACER && TH == DEFAULT_HESSIAN_TRACER
             print(io, $detector, "()")
         else
@@ -180,7 +181,7 @@ Act like `eltype(x)` but return the matching number type used inside Jacobian sp
 """
 jacobian_eltype(x, ::TracerSparsityDetector{TG}) where {TG} = TG
 function jacobian_eltype(x, ::TracerLocalSparsityDetector{TG}) where {TG}
-    return Dual{eltype(x), TG}
+    return Dual{eltype(x),TG}
 end
 
 """
@@ -188,9 +189,9 @@ end
 
 Act like `eltype(x)` but return the matching number type used inside Hessian sparsity detection.
 """
-hessian_eltype(x, ::TracerSparsityDetector{TG, TH}) where {TG, TH} = TH
-function hessian_eltype(x, ::TracerLocalSparsityDetector{TG, TH}) where {TG, TH}
-    return Dual{eltype(x), TH}
+hessian_eltype(x, ::TracerSparsityDetector{TG,TH}) where {TG,TH} = TH
+function hessian_eltype(x, ::TracerLocalSparsityDetector{TG,TH}) where {TG,TH}
+    return Dual{eltype(x),TH}
 end
 
 """
@@ -200,8 +201,8 @@ Allocate a buffer similiar to `x` with the required tracer type for Jacobian spa
 Thin wrapper around `similar` that doesn't expose internal types.
 """
 function jacobian_buffer(
-        x, detector::Union{TracerSparsityDetector, TracerLocalSparsityDetector}
-    )
+    x, detector::Union{TracerSparsityDetector,TracerLocalSparsityDetector}
+)
     return similar(x, jacobian_eltype(x, detector))
 end
 
@@ -212,7 +213,7 @@ Allocate a buffer similiar to `x` with the required tracer type for Hessian spar
 Thin wrapper around `similar` that doesn't expose internal types.
 """
 function hessian_buffer(
-        x, detector::Union{TracerSparsityDetector, TracerLocalSparsityDetector}
-    )
+    x, detector::Union{TracerSparsityDetector,TracerLocalSparsityDetector}
+)
     return similar(x, hessian_eltype(x, detector))
 end

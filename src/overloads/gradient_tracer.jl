@@ -2,7 +2,7 @@ SCT = SparseConnectivityTracer
 
 ## 1-to-1
 
-function gradient_tracer_1_to_1(t::T, is_der1_zero::Bool) where {T <: GradientTracer}
+function gradient_tracer_1_to_1(t::T, is_der1_zero::Bool) where {T<:GradientTracer}
     if is_der1_zero && !isemptytracer(t)
         return myempty(T)
     else
@@ -12,8 +12,8 @@ end
 
 # This is only required because it is called by HessianTracer with IndexSetHessianPattern
 function gradient_tracer_1_to_1_inner(
-        s::S, is_der1_zero::Bool
-    ) where {S <: AbstractSet{<:Integer}}
+    s::S, is_der1_zero::Bool
+) where {S<:AbstractSet{<:Integer}}
     if is_der1_zero
         return myempty(S)
     else
@@ -33,14 +33,14 @@ function generate_code_gradient_1_to_1(M::Symbol, f::Function)
 
     expr_dual = if is_der1_zero_g
         quote
-            function $M.$fname(d::D) where {P, T <: $SCT.GradientTracer, D <: $SCT.Dual{P, T}}
+            function $M.$fname(d::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
                 x = $SCT.primal(d)
                 return $M.$fname(x)
             end
         end
     else
         quote
-            function $M.$fname(d::D) where {P, T <: $SCT.GradientTracer, D <: $SCT.Dual{P, T}}
+            function $M.$fname(d::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
                 x = $SCT.primal(d)
                 p_out = $M.$fname(x)
 
@@ -57,8 +57,8 @@ end
 ## 2-to-1
 
 function gradient_tracer_2_to_1(
-        tx::T, ty::T, is_der1_arg1_zero::Bool, is_der1_arg2_zero::Bool
-    ) where {T <: GradientTracer}
+    tx::T, ty::T, is_der1_arg1_zero::Bool, is_der1_arg2_zero::Bool
+) where {T<:GradientTracer}
     # TODO: add tests for isempty
     if tx.isempty && ty.isempty
         return tx # empty tracer
@@ -75,8 +75,8 @@ function gradient_tracer_2_to_1(
 end
 
 function gradient_tracer_2_to_1_inner(
-        px::P, py::P, is_der1_arg1_zero::Bool, is_der1_arg2_zero::Bool
-    ) where {P <: IndexSetGradientPattern}
+    px::P, py::P, is_der1_arg1_zero::Bool, is_der1_arg2_zero::Bool
+) where {P<:IndexSetGradientPattern}
     return P(
         gradient_tracer_2_to_1_inner(
             gradient(px), gradient(py), is_der1_arg1_zero, is_der1_arg2_zero
@@ -87,8 +87,8 @@ end
 # This is only required because it is called by HessianTracer with IndexSetHessianPattern
 # Otherwise, we would just have the method on IndexSetGradientPattern above.
 function gradient_tracer_2_to_1_inner(
-        sx::S, sy::S, is_der1_arg1_zero::Bool, is_der1_arg2_zero::Bool
-    ) where {S <: AbstractSet{<:Integer}}
+    sx::S, sy::S, is_der1_arg1_zero::Bool, is_der1_arg2_zero::Bool
+) where {S<:AbstractSet{<:Integer}}
     if is_der1_arg1_zero && is_der1_arg2_zero
         return myempty(S)
     elseif !is_der1_arg1_zero && is_der1_arg2_zero
@@ -106,7 +106,7 @@ function generate_code_gradient_2_to_1(M::Symbol, f::Function)
     is_der1_arg2_zero_g = is_der1_arg2_zero_global(f)
 
     expr_tracer_tracer = quote
-        function $M.$fname(tx::T, ty::T) where {T <: $SCT.GradientTracer}
+        function $M.$fname(tx::T, ty::T) where {T<:$SCT.GradientTracer}
             return @noinline $SCT.gradient_tracer_2_to_1(
                 tx, ty, $is_der1_arg1_zero_g, $is_der1_arg2_zero_g
             )
@@ -115,7 +115,7 @@ function generate_code_gradient_2_to_1(M::Symbol, f::Function)
 
     expr_dual_dual = if is_der1_arg1_zero_g && is_der1_arg2_zero_g
         quote
-            function $M.$fname(dx::D, dy::D) where {P, T <: $SCT.GradientTracer, D <: $SCT.Dual{P, T}}
+            function $M.$fname(dx::D, dy::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
                 x = $SCT.primal(dx)
                 y = $SCT.primal(dy)
                 return $M.$fname(x, y)
@@ -123,7 +123,7 @@ function generate_code_gradient_2_to_1(M::Symbol, f::Function)
         end
     else
         quote
-            function $M.$fname(dx::D, dy::D) where {P, T <: $SCT.GradientTracer, D <: $SCT.Dual{P, T}}
+            function $M.$fname(dx::D, dy::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
                 x = $SCT.primal(dx)
                 y = $SCT.primal(dy)
                 p_out = $M.$fname(x, y)
@@ -145,10 +145,10 @@ function generate_code_gradient_2_to_1(M::Symbol, f::Function)
 end
 
 function generate_code_gradient_2_to_1_typed(
-        M::Symbol,   # Symbol indicating Module of f, usually `:Base`
-        f::Function, # function to overload
-        Z::Type,     # external non-tracer-type to overload on
-    )
+    M::Symbol,   # Symbol indicating Module of f, usually `:Base`
+    f::Function, # function to overload
+    Z::Type,     # external non-tracer-type to overload on
+)
     fname = nameof(f)
     is_der1_arg1_zero_g = is_der1_arg1_zero_global(f)
     is_der1_arg2_zero_g = is_der1_arg2_zero_global(f)
@@ -166,14 +166,14 @@ function generate_code_gradient_2_to_1_typed(
 
     expr_dual_type = if is_der1_arg1_zero_g
         quote
-            function $M.$fname(dx::D, y::$Z) where {P, T <: $SCT.GradientTracer, D <: $SCT.Dual{P, T}}
+            function $M.$fname(dx::D, y::$Z) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
                 x = $SCT.primal(dx)
                 return $M.$fname(x, y)
             end
         end
     else
         quote
-            function $M.$fname(dx::D, y::$Z) where {P, T <: $SCT.GradientTracer, D <: $SCT.Dual{P, T}}
+            function $M.$fname(dx::D, y::$Z) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
                 x = $SCT.primal(dx)
                 p_out = $M.$fname(x, y)
 
@@ -186,14 +186,14 @@ function generate_code_gradient_2_to_1_typed(
     end
     expr_type_dual = if is_der1_arg2_zero_g
         quote
-            function $M.$fname(x::$Z, dy::D) where {P, T <: $SCT.GradientTracer, D <: $SCT.Dual{P, T}}
+            function $M.$fname(x::$Z, dy::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
                 y = $SCT.primal(dy)
                 return $M.$fname(x, y)
             end
         end
     else
         quote
-            function $M.$fname(x::$Z, dy::D) where {P, T <: $SCT.GradientTracer, D <: $SCT.Dual{P, T}}
+            function $M.$fname(x::$Z, dy::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
                 y = $SCT.primal(dy)
                 p_out = $M.$fname(x, y)
 
@@ -210,8 +210,8 @@ end
 ## 1-to-2
 
 function gradient_tracer_1_to_2(
-        t::T, is_der1_out1_zero::Bool, is_der1_out2_zero::Bool
-    ) where {T <: GradientTracer}
+    t::T, is_der1_out1_zero::Bool, is_der1_out2_zero::Bool
+) where {T<:GradientTracer}
     if isemptytracer(t) # TODO: add test
         return (t, t)
     else
@@ -236,14 +236,14 @@ function generate_code_gradient_1_to_2(M::Symbol, f::Function)
 
     expr_dual = if is_der1_out1_zero_g && is_der1_out2_zero_g
         quote
-            function $M.$fname(d::D) where {P, T <: $SCT.GradientTracer, D <: $SCT.Dual{P, T}}
+            function $M.$fname(d::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
                 x = $SCT.primal(d)
                 return $M.$fname(x)
             end
         end
     else
         quote
-            function $M.$fname(d::D) where {P, T <: $SCT.GradientTracer, D <: $SCT.Dual{P, T}}
+            function $M.$fname(d::D) where {P,T<:$SCT.GradientTracer,D<:$SCT.Dual{P,T}}
                 x = $SCT.primal(d)
                 p_out1, p_out2 = $M.$fname(x)
 

@@ -9,8 +9,8 @@ using SparseConnectivityTracerBenchmarks.Optimization:
     optimization_problem_names
 
 function compare_patterns(
-        truth::AbstractMatrix{<:Real}; sct::AbstractMatrix{Bool}, jump::AbstractMatrix{Bool}
-    )
+    truth::AbstractMatrix{<:Real}; sct::AbstractMatrix{Bool}, jump::AbstractMatrix{Bool}
+)
     difference = jump - sct
     if nnz(difference) > 0
         # test that all pattern differences are local zeros in the ground truth
@@ -51,7 +51,7 @@ hess_inconsistencies = []
             @test jac_sparsity_sct == jac_sparsity_jump
         else
             @test_broken jac_sparsity_sct == jac_sparsity_jump
-            message = compare_patterns(jac; sct = jac_sparsity_sct, jump = jac_sparsity_jump)
+            message = compare_patterns(jac; sct=jac_sparsity_sct, jump=jac_sparsity_jump)
             @warn "Inconsistency for Jacobian of $name: $message"
             push!(jac_inconsistencies, (name, message))
         end
@@ -62,7 +62,7 @@ hess_inconsistencies = []
             @test hess_sparsity_sct == hess_sparsity_jump
         else
             @test_broken hess_sparsity_sct == hess_sparsity_jump
-            message = compare_patterns(hess; sct = hess_sparsity_sct, jump = hess_sparsity_jump)
+            message = compare_patterns(hess; sct=hess_sparsity_sct, jump=hess_sparsity_jump)
             @warn "Inconsistency for Hessian of $name: $message"
             push!(hess_inconsistencies, (name, message))
         end

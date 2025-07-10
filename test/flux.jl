@@ -66,13 +66,13 @@ end
 
 @testset "Global" begin
     @testset "$T" for T in GRADIENT_TRACERS
-        detector = TracerSparsityDetector(; gradient_tracer_type = T)
+        detector = TracerSparsityDetector(; gradient_tracer_type=T)
         test_flux_conv(detector)
     end
 end
 @testset "Local" begin
     @testset "$T" for T in GRADIENT_TRACERS
-        detector = TracerLocalSparsityDetector(; gradient_tracer_type = T)
+        detector = TracerLocalSparsityDetector(; gradient_tracer_type=T)
         test_flux_conv(detector)
         test_flux_conv_local(detector)
     end
