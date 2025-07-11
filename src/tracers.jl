@@ -14,6 +14,28 @@ Note that [`Dual`](@ref) is not an `AbstractTracer`.
 """
 abstract type AbstractTracer <: Real end
 
+"""
+    gradient(pattern::AbstractTracer)
+    
+Return a representation of non-zero values ``∇f(x)_{i} ≠ 0`` in the gradient.
+"""
+gradient
+
+"""
+    hessian(pattern::HessianTracer)
+    
+Return a representation of non-zero values ``∇²f(x)_{ij} ≠ 0`` in the Hessian.
+"""
+hessian
+
+"""
+    myempty(T)
+    myempty(tracer::AbstractTracer)
+    
+Constructor for an empty tracer or pattern of type `T` representing a new number (usually an empty pattern).
+"""
+myempty
+
 #================#
 # GradientTracer #
 #================#

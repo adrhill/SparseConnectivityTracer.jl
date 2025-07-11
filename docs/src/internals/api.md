@@ -30,5 +30,4 @@ SparseConnectivityTracer.shared
 SparseConnectivityTracer.gradient
 SparseConnectivityTracer.hessian
 SparseConnectivityTracer.myempty
-SparseConnectivityTracer.create_patterns
 ```
