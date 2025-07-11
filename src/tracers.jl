@@ -65,8 +65,8 @@ If `NotShared()`, patterns **can** share memory and operators are **prohibited**
 ## Note
 In practice, memory sharing is limited to second-order information in `HessianTracer`.
 """
-shared(::P) where {P <: AbstractPattern} = shared(P)
-shared(::Type{P}) where {P <: AbstractPattern} = NotShared()
+shared(::T) where {T <: HessianTracer} = shared(T)
+shared(::Type{HessianTracer{I, G, H, S}}) where {I, G, H, S} = S()
 
 abstract type SharingBehavior end
 struct Shared <: SharingBehavior end
@@ -74,6 +74,7 @@ struct NotShared <: SharingBehavior end
 
 isshared(::Shared) = true
 isshared(::NotShared) = false
+isshared(t) = isshared(shared(t)) 
 
 """
 $(TYPEDEF)
@@ -102,13 +103,10 @@ HessianTracer{P}(::Real) where {P} = myempty(HessianTracer{P})
 HessianTracer{P}(t::HessianTracer{P}) where {P} = t
 
 isemptytracer(t::HessianTracer) = t.isempty
-pattern(t::HessianTracer) = t.pattern
 gradient(t::HessianTracer) = t.gradient
 hessian(t::HessianTracer) = t.hessian
 
-shared(::Type{HessianTracer{I, G, H, S}}) where {I, G, H, S} = shared(S)
-
-myempty(::Type{HessianTracer{I, G, H}}) where {I, G, H} = HessianTracer{P}(myempty(G), myempty(H), true)
+myempty(::Type{HessianTracer{I, G, H, S}}) where {I, G, H, S} = HessianTracer{I, G, H, S}(myempty(G), myempty(H), true)
 
 function create_tracers(
         ::Type{T}, xs, is

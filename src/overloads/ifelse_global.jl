@@ -12,9 +12,7 @@ function output_union(tx::T, ty::T) where {T <: GradientTracer}
     return T(union(gradient(tx), gradient(ty))) # return tracer
 end
 
-function output_union(tx::T, ty::T) where {T <: HessianTracer}
-    return T(output_union(pattern(tx), pattern(ty), shared(T))) # return tracer
-end
+output_union(tx::T, ty::T) where {T <: HessianTracer} = output_union(tx, ty, shared(T))
 function output_union(tx::T, ty::T, ::Shared) where {T <: HessianTracer}
     g_out = union(gradient(tx), gradient(ty))
     hx, hy = hessian(tx), hessian(ty)

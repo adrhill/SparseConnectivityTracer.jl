@@ -30,7 +30,7 @@ function hessian_tracer_1_to_1_inner(
         # such that ∂f/∂x == 0 and ∂²f/∂x² != 0.
         union_product!(myempty(h), g, g)
     else # !is_der1_zero && !is_der2_zero,  𝟙[∇²γ] = 𝟙[∇²α] ∨ (𝟙[∇α] ∨ 𝟙[∇α]ᵀ)
-        union_product!(coty(h), g, g)
+        union_product!(copy(h), g, g)
     end
     return T(g_out, h_out) # return pattern
 end
@@ -116,7 +116,7 @@ function hessian_tracer_2_to_1(
             is_der1_arg2_zero,
             is_der2_arg2_zero,
             is_der_cross_zero,
-            shared(P),
+            shared(T),
         )
     end
 end
