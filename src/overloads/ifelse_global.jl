@@ -9,34 +9,28 @@ end
 
 ## output union on scalar outputs
 function output_union(tx::T, ty::T) where {T <: GradientTracer}
-    return T(output_union(pattern(tx), pattern(ty))) # return tracer
-end
-function output_union(px::P, py::P) where {P <: IndexSetGradientPattern}
-    return P(union(gradient(px), gradient(py))) # return pattern
+    return T(union(gradient(tx), gradient(ty))) # return tracer
 end
 
 function output_union(tx::T, ty::T) where {T <: HessianTracer}
-    return T(output_union(pattern(tx), pattern(ty))) # return tracer
+    return T(output_union(pattern(tx), pattern(ty), shared(T))) # return tracer
 end
-function output_union(px::P, py::P) where {P <: AbstractHessianPattern}
-    return output_union(px, py, shared(P)) # return pattern
-end
-function output_union(px::P, py::P, ::Shared) where {P <: AbstractHessianPattern}
-    g_out = union(gradient(px), gradient(py))
-    hx, hy = hessian(px), hessian(py)
+function output_union(tx::T, ty::T, ::Shared) where {T <: HessianTracer}
+    g_out = union(gradient(tx), gradient(ty))
+    hx, hy = hessian(tx), hessian(ty)
     hx !== hy && error("Expected shared Hessians, got $hx, $hy.")
-    return P(g_out, hx) # return pattern
+    return T(g_out, hx) # return pattern
 end
 
-function output_union(px::P, py::P, ::NotShared) where {P <: IndexSetHessianPattern}
-    g_out = union(gradient(px), gradient(py))
-    h_out = union(hessian(px), hessian(py))
-    return P(g_out, h_out) # return pattern
+function output_union(tx::T, ty::T, ::NotShared) where {I <: Integer, G <: AbstractSet{I}, H <: AbstractSet{Tuple{I, I}}, T<:HessianTracer{I,G,H}}
+    g_out = union(gradient(tx), gradient(ty))
+    h_out = union(hessian(tx), hessian(ty))
+    return T(g_out, h_out) # return pattern
 end
-function output_union(px::P, py::P, ::NotShared) where {P <: DictHessianPattern}
-    g_out = union(gradient(px), gradient(py))
-    h_out = myunion!(deepcopy(hessian(px)), hessian(py))
-    return P(g_out, h_out) # return pattern
+function output_union(tx::T, ty::T, ::NotShared) where {I <: Integer, G <: AbstractSet{I}, H <: AbstractDict{I, G}, T<:HessianTracer{I,G,H}}
+    g_out = union(gradient(tx), gradient(ty))
+    h_out = myunion!(deepcopy(hessian(tx)), hessian(ty))
+    return T(g_out, h_out) # return pattern
 end
 
 output_union(tx::AbstractTracer, y) = tx
