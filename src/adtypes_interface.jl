@@ -43,6 +43,8 @@ function TracerSparsityDetector(
     ) where {TG <: GradientTracer, TH <: HessianTracer}
     return TracerSparsityDetector{TG, TH}()
 end
+
+# Convenience constructor: Only specify one tracer type, fall back to default for other
 function TracerSparsityDetector(::Type{TG}) where {TG <: GradientTracer}
     return TracerSparsityDetector{TG, DEFAULT_HESSIAN_TRACER}()
 end
@@ -50,15 +52,15 @@ function TracerSparsityDetector(::Type{TH}) where {TH <: HessianTracer}
     return TracerSparsityDetector{DEFAULT_GRADIENT_TRACER, TH}()
 end
 
+# Convenience constructor: Only provide index set types
 function TracerSparsityDetector(;
         gradient_type::Type{G} = DEFAULT_SET_TYPE,
-        hessian_type::Type{H} = Dict{eltype(DEFAULT_SET_TYPE), DEFAULT_SET_TYPE},
+        hessian_type::Type{H} = Dict{eltype(gradient_type), gradient_type},
         shared_hessian::Type{S} = NotShared,
-    ) where {
-        I <: Integer, G <: AbstractSet{I}, H <: Union{AbstractDict{I, G}, AbstractSet{Tuple{I, I}}}, S <: SharingBehavior,
-    }
-    TG = GradientTracer{I, G}
-    TH = HessianTracer{I, G, H, S}
+    ) where {G, H, S}
+    IG = eltype(G)
+    TG = GradientTracer{IG, G}
+    TH = HessianTracer{IG, G, H, S}
     return TracerSparsityDetector(TG, TH)
 end
 
@@ -148,6 +150,8 @@ function TracerLocalSparsityDetector(
     ) where {TG <: GradientTracer, TH <: HessianTracer}
     return TracerLocalSparsityDetector{TG, TH}()
 end
+
+# Convenience constructor: Only specify one tracer type, fall back to default for other
 function TracerLocalSparsityDetector(::Type{TG}) where {TG <: GradientTracer}
     return TracerLocalSparsityDetector{TG, DEFAULT_HESSIAN_TRACER}()
 end
@@ -155,15 +159,15 @@ function TracerLocalSparsityDetector(::Type{TH}) where {TH <: HessianTracer}
     return TracerLocalSparsityDetector{DEFAULT_GRADIENT_TRACER, TH}()
 end
 
+# Convenience constructor: Only provide index set types
 function TracerLocalSparsityDetector(;
         gradient_type::Type{G} = DEFAULT_SET_TYPE,
-        hessian_type::Type{H} = Dict{eltype(DEFAULT_SET_TYPE), DEFAULT_SET_TYPE},
+        hessian_type::Type{H} = Dict{eltype(gradient_type), gradient_type},
         shared_hessian::Type{S} = NotShared,
-    ) where {
-        I <: Integer, G <: AbstractSet{I}, H <: Union{AbstractDict{I, G}, AbstractSet{Tuple{I, I}}}, S <: SharingBehavior,
-    }
-    TG = GradientTracer{I, G}
-    TH = HessianTracer{I, G, H, S}
+    ) where {G, H, S}
+    IG = eltype(G)
+    TG = GradientTracer{IG, G}
+    TH = HessianTracer{IG, G, H, S}
     return TracerLocalSparsityDetector(TG, TH)
 end
 

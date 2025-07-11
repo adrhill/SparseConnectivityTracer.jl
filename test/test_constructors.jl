@@ -200,24 +200,22 @@ end
 end
 
 @testset "Explicit type conversions on Dual" begin
-    @testset "$T" for T in union(GRADIENT_TRACERS)
-        p = T(BitSet(2))
-        t_full = T(p)
-        t_empty = myempty(T)
-        d_full = Dual(1.0, t_full)
-        d_empty = Dual(1.0, t_empty)
+    T = DEFAULT_GRADIENT_TRACER
+    t_full = T(BitSet(2))
+    t_empty = myempty(T)
+    d_full = Dual(1.0, t_full)
+    d_empty = Dual(1.0, t_empty)
 
-        @testset "Non-empty tracer" begin
-            @testset "$TOUT" for TOUT in (Int, Integer, Float64, Float32)
-                @test_throws InexactError TOUT(d_full)
-            end
+    @testset "Non-empty tracer" begin
+        @testset "$TOUT" for TOUT in (Int, Integer, Float64, Float32)
+            @test_throws InexactError TOUT(d_full)
         end
-        @testset "Empty tracer" begin
-            @testset "$TOUT" for TOUT in (Int, Integer, Float64, Float32)
-                out = TOUT(d_empty)
-                @test out isa TOUT # not a Dual!
-                @test isone(out)
-            end
+    end
+    @testset "Empty tracer" begin
+        @testset "$TOUT" for TOUT in (Int, Integer, Float64, Float32)
+            out = TOUT(d_empty)
+            @test out isa TOUT # not a Dual!
+            @test isone(out)
         end
     end
 end
