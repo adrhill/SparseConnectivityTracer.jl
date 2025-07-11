@@ -54,27 +54,9 @@ end
 # HessianTracer #
 #===============#
 
-"""
-    shared(pattern)
-
-Indicates whether patterns **always** share memory and whether operators are **allowed** to mutate their `AbstractTracer` arguments.
-Returns either the `Shared()` or `NotShared()` trait.
-
-If `NotShared()`, patterns **can** share memory and operators are **prohibited** from mutating `AbstractTracer` arguments.
-
-## Note
-In practice, memory sharing is limited to second-order information in `HessianTracer`.
-"""
-shared(::T) where {T <: HessianTracer} = shared(T)
-shared(::Type{HessianTracer{I, G, H, S}}) where {I, G, H, S} = S()
-
 abstract type SharingBehavior end
 struct Shared <: SharingBehavior end
 struct NotShared <: SharingBehavior end
-
-isshared(::Shared) = true
-isshared(::NotShared) = false
-isshared(t) = isshared(shared(t))
 
 """
 $(TYPEDEF)
@@ -117,6 +99,24 @@ function create_tracers(
     # since mutation is prohibited when `isshared` is false.
     return T.(gradients, Ref(hessian))
 end
+
+"""
+    shared(pattern)
+
+Indicates whether patterns **always** share memory and whether operators are **allowed** to mutate their `AbstractTracer` arguments.
+Returns either the `Shared()` or `NotShared()` trait.
+
+If `NotShared()`, patterns **can** share memory and operators are **prohibited** from mutating `AbstractTracer` arguments.
+
+## Note
+In practice, memory sharing is limited to second-order information in `HessianTracer`.
+"""
+shared(::T) where {T <: HessianTracer} = shared(T)
+shared(::Type{HessianTracer{I, G, H, S}}) where {I, G, H, S} = S()
+
+isshared(::Shared) = true
+isshared(::NotShared) = false
+isshared(t) = isshared(shared(t))
 
 #================================#
 # Dual numbers for local tracing #
