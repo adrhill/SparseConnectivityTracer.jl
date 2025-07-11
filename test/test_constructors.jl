@@ -202,9 +202,6 @@ end
 
 @testset "Explicit type conversions on Dual" begin
     @testset "$T" for T in union(GRADIENT_TRACERS, HESSIAN_TRACERS)
-        P = IndexSetGradientPattern{Int, BitSet}
-        T = GradientTracer{P}
-
         p = P(BitSet(2))
         t_full = T(p)
         t_empty = myempty(T)
