@@ -54,13 +54,13 @@ end
 
 # Convenience constructor: Only provide index set types
 function TracerSparsityDetector(;
-        gradient_type::Type{G} = DEFAULT_SET_TYPE,
-        hessian_type::Type{H} = Dict{eltype(gradient_type), gradient_type},
+        gradient_pattern_type::Type{G} = DEFAULT_SET_TYPE,
+        hessian_pattern_type::Type{H} = Dict{eltype(gradient_pattern_type), gradient_pattern_type},
         shared_hessian::Type{S} = NotShared,
     ) where {G, H, S}
-    IG = eltype(G)
-    TG = GradientTracer{IG, G}
-    TH = HessianTracer{IG, G, H, S}
+    I = eltype(G)
+    TG = GradientTracer{I, G}
+    TH = HessianTracer{I, G, H, S}
     return TracerSparsityDetector(TG, TH)
 end
 
@@ -161,13 +161,13 @@ end
 
 # Convenience constructor: Only provide index set types
 function TracerLocalSparsityDetector(;
-        gradient_type::Type{G} = DEFAULT_SET_TYPE,
-        hessian_type::Type{H} = Dict{eltype(gradient_type), gradient_type},
+        gradient_pattern_type::Type{G} = DEFAULT_SET_TYPE,
+        hessian_pattern_type::Type{H} = Dict{eltype(gradient_pattern_type), gradient_pattern_type},
         shared_hessian::Type{S} = NotShared,
     ) where {G, H, S}
-    IG = eltype(G)
-    TG = GradientTracer{IG, G}
-    TH = HessianTracer{IG, G, H, S}
+    I = eltype(G)
+    TG = GradientTracer{I, G}
+    TH = HessianTracer{I, G, H, S}
     return TracerLocalSparsityDetector(TG, TH)
 end
 
