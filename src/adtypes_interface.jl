@@ -1,8 +1,32 @@
 #= This file implements the ADTypes interface for `AbstractSparsityDetector`s =#
-
 const DEFAULT_SET_TYPE = BitSet
-const DEFAULT_GRADIENT_TRACER = GradientTracer{eltype(DEFAULT_SET_TYPE), DEFAULT_SET_TYPE}
-const DEFAULT_HESSIAN_TRACER = HessianTracer{eltype(DEFAULT_SET_TYPE), DEFAULT_SET_TYPE, Dict{eltype(DEFAULT_SET_TYPE), DEFAULT_SET_TYPE}, NotShared}
+const DEFAULT_DICT_TYPE = Dict{eltype(DEFAULT_SET_TYPE), DEFAULT_SET_TYPE}
+const DEFAULT_SHARED_TYPE = NotShared
+
+function gradient_tracer_type(
+        ::Type{G} = DEFAULT_SET_TYPE
+    ) where {G <: AbstractSet}
+    I = eltype(G)
+    return GradientTracer{I, G}
+end
+
+function hessian_tracer_type(
+        ::Type{H} = DEFAULT_DICT_TYPE, ::Type{S} = DEFAULT_SHARED_TYPE
+    ) where {H <: AbstractDict, S <: SharingBehavior}
+    I = keytype(H)
+    G = valtype(H)
+    return HessianTracer{I, G, H, S}
+end
+
+function hessian_tracer_type(
+        ::Type{H}, ::Type{S} = DEFAULT_SHARED_TYPE
+    ) where {I, H <: Set{Tuple{I, I}}, S <: SharingBehavior}
+    G = Set{I}
+    return HessianTracer{I, G, H, S}
+end
+
+const DEFAULT_GRADIENT_TRACER = gradient_tracer_type()
+const DEFAULT_HESSIAN_TRACER = hessian_tracer_type()
 
 """
     TracerSparsityDetector <: ADTypes.AbstractSparsityDetector
@@ -124,12 +148,11 @@ for D in (:TracerSparsityDetector, :TracerLocalSparsityDetector)
     # Convenience constructor: Only provide pattern types
     @eval function ($D)(;
             gradient_pattern_type::Type{G} = DEFAULT_SET_TYPE,
-            hessian_pattern_type::Type{H} = Dict{eltype(gradient_pattern_type), gradient_pattern_type},
-            shared_hessian::Type{S} = NotShared,
+            hessian_pattern_type::Type{H} = DEFAULT_DICT_TYPE,
+            shared_hessian::Type{S} = DEFAULT_SHARED_TYPE,
         ) where {G, H, S}
-        I = eltype(G)
-        TG = GradientTracer{I, G}
-        TH = HessianTracer{I, G, H, S}
+        TG = gradient_tracer_type(G)
+        TH = hessian_tracer_type(H, S)
         return ($D)(TG, TH)
     end
 
