@@ -78,13 +78,6 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
                     include("ext/test_$ext.jl")
                 end
             end
-            # Some extensions are only loaded in newer Julia releases
-            for ext in (:DataInterpolations,)
-                @testset "$ext" begin
-                    @info "...$ext"
-                    include("ext/test_$ext.jl")
-                end
-            end
         end
     end
 

@@ -6,7 +6,6 @@ using JET: JET
 using ExplicitImports: ExplicitImports
 
 # Load package extensions so they get tested by ExplicitImports.jl
-using DataInterpolations: DataInterpolations
 using NaNMath: NaNMath
 using NNlib: NNlib
 using SpecialFunctions: SpecialFunctions
