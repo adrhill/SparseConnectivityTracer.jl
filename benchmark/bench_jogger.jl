@@ -3,7 +3,7 @@ Pkg.develop(; path = joinpath(@__DIR__, "SparseConnectivityTracerBenchmarks"))
 
 using BenchmarkTools
 using SparseConnectivityTracer
-using SparseConnectivityTracer: HessianTracer, DictHessianPattern, Shared
+using SparseConnectivityTracer: HessianTracer, Shared
 
 include("jacobian.jl")
 include("hessian.jl")

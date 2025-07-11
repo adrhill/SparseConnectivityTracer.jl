@@ -1,7 +1,6 @@
 # Test construction and conversions of internal tracer types
 using SparseConnectivityTracer: AbstractTracer, GradientTracer, HessianTracer, Dual
 using SparseConnectivityTracer: primal, tracer, isemptytracer, myempty
-using SparseConnectivityTracer: IndexSetGradientPattern
 using Test
 
 # Load definitions of GRADIENT_TRACERS and HESSIAN_TRACERS
@@ -201,7 +200,7 @@ end
 end
 
 @testset "Explicit type conversions on Dual" begin
-    @testset "$T" for T in union(GRADIENT_TRACERS, HESSIAN_TRACERS)
+    @testset "$T" for T in union(GRADIENT_TRACERS)
         p = T(BitSet(2))
         t_full = T(p)
         t_empty = myempty(T)

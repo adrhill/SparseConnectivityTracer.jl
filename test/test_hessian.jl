@@ -417,7 +417,7 @@ end
     end
 end
 
-@testset "Shared IndexSetHessianPattern - same objects" begin
+@testset "Shared HessianTracer - shared `hessian` fields" begin
     @testset "$T" for T in HESSIAN_TRACERS_SHARED
 
         function multi_output_for_shared_test(x::AbstractArray)

@@ -10,7 +10,7 @@ function gradient_tracer_1_to_1(t::T, is_der1_zero::Bool) where {T <: GradientTr
     end
 end
 
-# This is only required because it is called by HessianTracer with IndexSetHessianPattern
+# This is only required because it is called by HessianTracer
 function gradient_tracer_1_to_1_inner(
         s::S, is_der1_zero::Bool
     ) where {S <: AbstractSet{<:Integer}}
@@ -74,8 +74,8 @@ function gradient_tracer_2_to_1(
     end
 end
 
-# This is only required because it is called by HessianTracer with IndexSetHessianPattern
-# Otherwise, we would just have the method on IndexSetGradientPattern above.
+# This is only required because it is called by HessianTracer overloads.
+# Otherwise, we would just have the method above.
 function gradient_tracer_2_to_1_inner(
         sx::S, sy::S, is_der1_arg1_zero::Bool, is_der1_arg2_zero::Bool
     ) where {S <: AbstractSet{<:Integer}}

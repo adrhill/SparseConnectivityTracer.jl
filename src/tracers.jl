@@ -81,8 +81,8 @@ struct HessianTracer{
     end
 end
 
-HessianTracer{P}(::Real) where {P} = myempty(HessianTracer{P})
-HessianTracer{P}(t::HessianTracer{P}) where {P} = t
+HessianTracer{I, G, H, S}(::Real) where {I, G, H, S} = myempty(HessianTracer{I, G, H, S})
+HessianTracer{I, G, H, S}(t::HessianTracer{I, G, H, S}) where {I, G, H, S} = t
 
 isemptytracer(t::HessianTracer) = t.isempty
 gradient(t::HessianTracer) = t.gradient
