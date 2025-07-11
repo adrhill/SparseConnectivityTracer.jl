@@ -4,7 +4,7 @@ using SparseConnectivityTracer: primal, tracer, isemptytracer, myempty
 using SparseConnectivityTracer: IndexSetGradientPattern
 using Test
 
-# Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
+# Load definitions of GRADIENT_TRACERS and HESSIAN_TRACERS
 include("tracers_definitions.jl")
 
 # Pretty-printing of Dual tracers
@@ -202,7 +202,7 @@ end
 
 @testset "Explicit type conversions on Dual" begin
     @testset "$T" for T in union(GRADIENT_TRACERS, HESSIAN_TRACERS)
-        p = P(BitSet(2))
+        p = T(BitSet(2))
         t_full = T(p)
         t_empty = myempty(T)
         d_full = Dual(1.0, t_full)

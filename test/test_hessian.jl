@@ -5,7 +5,7 @@ using LinearAlgebra: I, dot
 using Test
 using Random: rand, GLOBAL_RNG
 
-# Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
+# Load definitions of GRADIENT_TRACERS and HESSIAN_TRACERS
 include("tracers_definitions.jl")
 REAL_TYPES = (Float64, Int, Bool, UInt8, Float16, Rational{Int})
 
