@@ -15,13 +15,11 @@ REAL_TYPES = (Float64, Int, Bool, UInt8, Float16, Rational{Int})
 detector = TracerSparsityDetector()
 J(f, x) = jacobian_sparsity(f, x, detector)
 J(f!, y, x) = jacobian_sparsity(f!, y, x, detector)
-P = first(GRADIENT_PATTERNS)
-T = GradientTracer{P}
+T = DEFAULT_GRADIENT_TRACER
 
 @testset "Jacobian Global" begin
-    @testset "$P" for P in GRADIENT_PATTERNS
-        T = GradientTracer{P}
-        detector = TracerSparsityDetector(; gradient_tracer_type = T)
+    @testset "$T" for T in GRADIENT_TRACERS
+        detector = TracerSparsityDetector(T)
         J(f, x) = jacobian_sparsity(f, x, detector)
         J(f!, y, x) = jacobian_sparsity(f!, y, x, detector)
 
@@ -182,9 +180,8 @@ T = GradientTracer{P}
 end
 
 @testset "Jacobian Local" begin
-    @testset "$P" for P in GRADIENT_PATTERNS
-        T = GradientTracer{P}
-        detector = TracerLocalSparsityDetector(; gradient_tracer_type = T)
+    @testset "$T" for T in GRADIENT_TRACERS
+        detector = TracerLocalSparsityDetector(T)
         J(f, x) = jacobian_sparsity(f, x, detector)
         J(f!, y, x) = jacobian_sparsity(f!, y, x, detector)
 

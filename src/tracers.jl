@@ -32,7 +32,7 @@ struct GradientTracer{I <: Integer, G <: AbstractSet{I}} <: AbstractTracer
     "Indicator whether gradient in tracer contains only zeros."
     isempty::Bool
 
-    function GradientTracer{I, G}(gradient::I, isempty::Bool = false) where {I, G}
+    function GradientTracer{I, G}(gradient::G, isempty::Bool = false) where {I, G}
         return new{I, G}(gradient, isempty)
     end
 end
