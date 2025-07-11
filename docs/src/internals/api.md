@@ -18,27 +18,6 @@ SparseConnectivityTracer.HessianTracer
 SparseConnectivityTracer.Dual
 ```
 
-## Patterns
-
-```@docs
-SparseConnectivityTracer.AbstractPattern
-```
-
-### Gradient Patterns
-
-```@docs
-SparseConnectivityTracer.AbstractGradientPattern
-SparseConnectivityTracer.IndexSetGradientPattern
-```
-
-### Hessian Patterns
-
-```@docs
-SparseConnectivityTracer.AbstractHessianPattern
-SparseConnectivityTracer.IndexSetHessianPattern
-SparseConnectivityTracer.DictHessianPattern
-```
-
 ### Traits
 
 ```@docs
@@ -51,5 +30,4 @@ SparseConnectivityTracer.shared
 SparseConnectivityTracer.gradient
 SparseConnectivityTracer.hessian
 SparseConnectivityTracer.myempty
-SparseConnectivityTracer.create_patterns
 ```

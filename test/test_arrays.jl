@@ -3,7 +3,6 @@ using SparseConnectivityTracer
 using SparseConnectivityTracer:
     GradientTracer,
     Dual,
-    IndexSetGradientPattern,
     isemptytracer,
     MissingPrimalError,
     split_dual_array,
@@ -17,13 +16,12 @@ using LinearAlgebra: inv, pinv, dot
 using SparseArrays: sparse, spdiagm
 
 S = BitSet
-P = IndexSetGradientPattern{Int, S}
-TG = GradientTracer{P}
+TG = GradientTracer{eltype(S), S}
 
 # Utilities for quick testing
 idx2set(is) = S(is)
 idx2set(r::AbstractRange) = idx2set(collect(r))
-idx2tracer(is) = TG(P(idx2set(is)))
+idx2tracer(is) = TG(idx2set(is))
 
 function sameidx(s1::AbstractSet, s2::AbstractSet)
     same = s1 == s2

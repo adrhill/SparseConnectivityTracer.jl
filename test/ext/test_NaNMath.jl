@@ -2,7 +2,7 @@ using SparseConnectivityTracer
 using NaNMath
 using Test
 
-# Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
+# Load definitions of GRADIENT_TRACERS and HESSIAN_TRACERS
 include("../tracers_definitions.jl")
 
 nan_1_to_1 = (

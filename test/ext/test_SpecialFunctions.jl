@@ -2,7 +2,7 @@ using SparseConnectivityTracer
 using SpecialFunctions: erf, beta
 using Test
 
-# Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
+# Load definitions of GRADIENT_TRACERS and HESSIAN_TRACERS
 include("../tracers_definitions.jl")
 
 @testset "Jacobian Global" begin
