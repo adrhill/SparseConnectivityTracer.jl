@@ -74,7 +74,7 @@ struct NotShared <: SharingBehavior end
 
 isshared(::Shared) = true
 isshared(::NotShared) = false
-isshared(t) = isshared(shared(t)) 
+isshared(t) = isshared(shared(t))
 
 """
 $(TYPEDEF)
