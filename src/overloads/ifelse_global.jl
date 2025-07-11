@@ -22,12 +22,12 @@ function output_union(tx::T, ty::T, ::Shared) where {T <: HessianTracer}
     return T(g_out, hx) # return pattern
 end
 
-function output_union(tx::T, ty::T, ::NotShared) where {I <: Integer, G <: AbstractSet{I}, H <: AbstractSet{Tuple{I, I}}, T<:HessianTracer{I,G,H}}
+function output_union(tx::T, ty::T, ::NotShared) where {I <: Integer, G <: AbstractSet{I}, H <: AbstractSet{Tuple{I, I}}, T <: HessianTracer{I, G, H}}
     g_out = union(gradient(tx), gradient(ty))
     h_out = union(hessian(tx), hessian(ty))
     return T(g_out, h_out) # return pattern
 end
-function output_union(tx::T, ty::T, ::NotShared) where {I <: Integer, G <: AbstractSet{I}, H <: AbstractDict{I, G}, T<:HessianTracer{I,G,H}}
+function output_union(tx::T, ty::T, ::NotShared) where {I <: Integer, G <: AbstractSet{I}, H <: AbstractDict{I, G}, T <: HessianTracer{I, G, H}}
     g_out = union(gradient(tx), gradient(ty))
     h_out = myunion!(deepcopy(hessian(tx)), hessian(ty))
     return T(g_out, h_out) # return pattern

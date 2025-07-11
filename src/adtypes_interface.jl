@@ -1,10 +1,6 @@
 #= This file implements the ADTypes interface for `AbstractSparsityDetector`s =#
 
-const DEFAULT_GRADIENT_PATTERN = IndexSetGradientPattern{Int, BitSet}
-const DEFAULT_GRADIENT_TRACER = GradientTracer{DEFAULT_GRADIENT_PATTERN}
-
-const DEFAULT_HESSIAN_PATTERN = DictHessianPattern{Int, BitSet, Dict{Int, BitSet}, NotShared}
-const DEFAULT_HESSIAN_TRACER = HessianTracer{DEFAULT_HESSIAN_PATTERN}
+const DEFAULT_SET_TYPE = BitSet
 
 """
     TracerSparsityDetector <: ADTypes.AbstractSparsityDetector
@@ -40,16 +36,17 @@ julia> hessian_sparsity(f, rand(4), detector)
 """
 struct TracerSparsityDetector{TG <: GradientTracer, TH <: HessianTracer} <:
     ADTypes.AbstractSparsityDetector end
-function TracerSparsityDetector(
-        ::Type{TG}, ::Type{TH}
-    ) where {TG <: GradientTracer, TH <: HessianTracer}
-    return TracerSparsityDetector{TG, TH}()
-end
+
 function TracerSparsityDetector(;
-        gradient_tracer_type::Type{TG} = DEFAULT_GRADIENT_TRACER,
-        hessian_tracer_type::Type{TH} = DEFAULT_HESSIAN_TRACER,
-    ) where {TG <: GradientTracer, TH <: HessianTracer}
-    return TracerSparsityDetector(gradient_tracer_type, hessian_tracer_type)
+        gradient_type::Type{G} = DEFAULT_SET_TYPE,
+        hessian_type::Type{H} = Dict{eltype(DEFAULT_SET_TYPE), DEFAULT_SET_TYPE},
+        shared::Type{S} = NotShared,
+    ) where {
+        I <: Integer, G <: AbstractSet{I}, H <: Union{AbstractDict{I, G}, AbstractSet{Tuple{I, I}}}, S <: SharingBehavior,
+    }
+    TG = GradientTracer{I, G}
+    TH = HessianTracer{I, G, H, S}
+    return TracerSparsityDetector{TG, TH}()
 end
 
 function ADTypes.jacobian_sparsity(f, x, ::TracerSparsityDetector{TG, TH}) where {TG, TH}
