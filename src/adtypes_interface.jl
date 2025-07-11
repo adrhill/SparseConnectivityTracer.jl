@@ -3,6 +3,7 @@ const DEFAULT_SET_TYPE = BitSet
 const DEFAULT_DICT_TYPE = Dict{eltype(DEFAULT_SET_TYPE), DEFAULT_SET_TYPE}
 const DEFAULT_SHARED_TYPE = NotShared
 
+# TODO: document
 function gradient_tracer_type(
         ::Type{G} = DEFAULT_SET_TYPE
     ) where {G <: AbstractSet}
@@ -10,6 +11,7 @@ function gradient_tracer_type(
     return GradientTracer{I, G}
 end
 
+# TODO: document
 function hessian_tracer_type(
         ::Type{H} = DEFAULT_DICT_TYPE, ::Type{S} = DEFAULT_SHARED_TYPE
     ) where {H <: AbstractDict, S <: SharingBehavior}
@@ -146,6 +148,7 @@ for D in (:TracerSparsityDetector, :TracerLocalSparsityDetector)
     @eval ($D)(::Type{TH}) where {TH <: HessianTracer} = ($D){DEFAULT_GRADIENT_TRACER, TH}()
 
     # Convenience constructor: Only provide pattern types
+    # TODO: document
     @eval function ($D)(;
             gradient_pattern_type::Type{G} = DEFAULT_SET_TYPE,
             hessian_pattern_type::Type{H} = DEFAULT_DICT_TYPE,
