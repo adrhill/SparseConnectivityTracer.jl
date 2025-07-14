@@ -156,14 +156,14 @@ In fact, the functions `jacobian_sparsity` and `hessian_sparsity` are re-exporte
 If you use SparseConnectivityTracer in your research, please cite our preprint [*Sparser, Better, Faster, Stronger: Efficient Automatic Differentiation for Sparse Jacobians and Hessians*](https://arxiv.org/abs/2501.17737):
 
 ```bibtex
-@misc{hill2025sparserbetterfasterstronger,
-      title={Sparser, Better, Faster, Stronger: Efficient Automatic Differentiation for Sparse Jacobians and Hessians}, 
-      author={Adrian Hill and Guillaume Dalle},
-      year={2025},
-      eprint={2501.17737},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG},
-      url={https://arxiv.org/abs/2501.17737}, 
+@article{hill2025sparser,
+  title={Sparser, Better, Faster, Stronger: Sparsity Detection for Efficient Automatic Differentiation},
+  author={Adrian Hill and Guillaume Dalle},
+  journal={Transactions on Machine Learning Research},
+  issn={2835-8856},
+  year={2025},
+  url={https://openreview.net/forum?id=GtXSN52nIW},
+  note={}
 }
 ```
 
