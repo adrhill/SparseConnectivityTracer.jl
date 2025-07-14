@@ -66,6 +66,13 @@ julia> jacobian_sparsity(layer, x, detector)
 ⎣⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠛⢿⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣷⣄⎦
 ```
 
+By default, `BitSet` is used for internal sparsity pattern representations.
+For very large inputs, it might be more efficient to set the type to `Set{UInt}`:
+
+```julia-repl
+julia> detector = TracerSparsityDetector(; gradient_pattern_type=Set{UInt})
+```
+
 ### Hessian
 
 For scalar functions `y = f(x)`, the sparsity pattern of the Hessian of $f$ can be obtained
@@ -93,6 +100,14 @@ julia> hessian_sparsity(g, x, detector)
  ⋅  1  ⋅  ⋅  ⋅
  ⋅  ⋅  ⋅  1  ⋅
  ⋅  1  ⋅  ⋅  1
+```
+
+
+By default, a dictionaries of `BitSet` are used for internal sparsity pattern representations.
+For very large inputs, it might be more efficient to set the type to `Dict{UInt, Set{UInt}}`:
+
+```julia-repl
+julia> detector = TracerSparsityDetector(; hessian_pattern_type=Dict{UInt, Set{UInt}})
 ```
 
 For more detailed examples, take a look at the [documentation](https://adrianhill.de/SparseConnectivityTracer.jl/stable).
