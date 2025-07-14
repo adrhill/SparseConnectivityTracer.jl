@@ -47,7 +47,7 @@ function hessian_tracers_to_matrix(xt::AbstractArray{T}, yt::T) where {T <: Hess
             push!(I, i)
             push!(J, j)
             push!(V, true)
-            # TODO: return `Symmetric` instead on next breaking release
+            # Write twice instead of returning `Symmetric`
             push!(I, j)
             push!(J, i)
             push!(V, true)
