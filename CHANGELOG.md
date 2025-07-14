@@ -4,8 +4,8 @@
 
 This release is only breaking for users who touched unexported internals.
 
-* ![BREAKING][badge-breaking] Refactor internal types ([#254]).
-* ![Feature][badge-feature] Select internal data structures for sparsity pattern representations via `TracerSparsityDetector` and `TracerLocalSparsityDetector` keyword arguments `gradient_pattern_type` and `hessian_pattern_type` ([#254]).
+* ![BREAKING][badge-breaking] Refactor internal types ([#254])
+* ![Feature][badge-feature] Select internal data structures for sparsity pattern representations via the `TracerSparsityDetector` and `TracerLocalSparsityDetector` keyword arguments `gradient_pattern_type` and `hessian_pattern_type`. Refer to the new doc page on "Performance" for more information. ([#254])
 * ![Deprecation][badge-deprecation] Move DataInterpolations.jl extension out of SCT ([#255])
 
 ## Version `v0.6.21`
