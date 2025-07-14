@@ -36,7 +36,7 @@ const DOC_KWARGS = """# Keyword arguments
   Defaults to `$DEFAULT_SET_TYPE`.
 - `hessian_pattern_type::Type`: 
   Data structure used for bookkeeping of Hessian sparsity patters, used in `hessian_sparsity`.
-  Supports concrete subtypes of `AbstractDict{I, AbstractSet{I}}` or `AbstractSet{Tuple{I, I}}}`, where `I <: Integer`.
+  Supports concrete subtypes of `AbstractDict{I, AbstractSet{I}}` or `AbstractSet{Tuple{I, I}}`, where `I <: Integer`.
   Defaults to `$DEFAULT_DICT_TYPE`.
 - `shared_hessian_pattern::Bool`: 
   Indicate whether second-order information in Hessian sparsity patterns **always** shares memory and whether operators are **allowed** to mutate `HessianTracers`.
