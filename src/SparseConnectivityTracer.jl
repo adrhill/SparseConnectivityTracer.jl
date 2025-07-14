@@ -14,7 +14,7 @@ using DocStringExtensions: DocStringExtensions, TYPEDEF, TYPEDFIELDS
 include("settypes/recursiveset.jl")
 include("settypes/sortedvector.jl")
 
-include("patterns.jl")
+include("set_operations.jl")
 include("tracers.jl")
 include("exceptions.jl")
 include("operators.jl")
@@ -36,6 +36,7 @@ include("adtypes_interface.jl")
 
 export TracerSparsityDetector
 export TracerLocalSparsityDetector
+
 # Reexport ADTypes interface
 export jacobian_sparsity, hessian_sparsity
 

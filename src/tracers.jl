@@ -12,7 +12,29 @@ AbstractTracer
 
 Note that [`Dual`](@ref) is not an `AbstractTracer`.
 """
-abstract type AbstractTracer{P <: AbstractPattern} <: Real end
+abstract type AbstractTracer <: Real end
+
+"""
+    gradient(pattern::AbstractTracer)
+    
+Return a representation of non-zero values ``∇f(x)_{i} ≠ 0`` in the gradient.
+"""
+gradient
+
+"""
+    hessian(pattern::HessianTracer)
+    
+Return a representation of non-zero values ``∇²f(x)_{ij} ≠ 0`` in the Hessian.
+"""
+hessian
+
+"""
+    myempty(T)
+    myempty(tracer::AbstractTracer)
+    
+Constructor for an empty tracer or pattern of type `T` representing a new number (usually an empty pattern).
+"""
+myempty
 
 #================#
 # GradientTracer #
@@ -26,27 +48,47 @@ $(TYPEDEF)
 ## Fields
 $(TYPEDFIELDS)
 """
-struct GradientTracer{P <: AbstractGradientPattern} <: AbstractTracer{P}
-    "Sparse representation of non-zero entries in the gradient."
-    pattern::P
+struct GradientTracer{I <: Integer, G <: AbstractSet{I}} <: AbstractTracer
+    "Set of indices ``i`` of non-zero values ``∇f(x)_i ≠ 0`` in the gradient."
+    gradient::G
     "Indicator whether gradient in tracer contains only zeros."
     isempty::Bool
 
-    function GradientTracer{P}(gradient::P, isempty::Bool = false) where {P}
-        return new{P}(gradient, isempty)
+    function GradientTracer{I, G}(gradient::G, isempty::Bool = false) where {I, G}
+        return new{I, G}(gradient, isempty)
     end
 end
 
-GradientTracer{P}(::Real) where {P} = myempty(GradientTracer{P})
-GradientTracer{P}(t::GradientTracer{P}) where {P} = t
+GradientTracer{I, G}(::Real) where {I, G} = myempty(GradientTracer{I, G})
+GradientTracer{I, G}(t::GradientTracer{I, G}) where {I, G} = t
 
 isemptytracer(t::GradientTracer) = t.isempty
-pattern(t::GradientTracer) = t.pattern
-gradient(t::GradientTracer) = gradient(pattern(t))
+gradient(t::GradientTracer) = t.gradient
+
+myempty(::Type{GradientTracer{I, G}}) where {I, G} = GradientTracer{I, G}(myempty(G), true)
+
+function create_tracers(::Type{T}, xs, is) where {I, G, T <: GradientTracer{I, G}}
+    gradients = map(Base.Fix1(seed, G), is)
+    return T.(gradients)
+end
 
 #===============#
 # HessianTracer #
 #===============#
+
+abstract type SharingBehavior end
+
+"""
+Indicates that patterns **always** share memory and that operators are **allowed** to mutate their `HessianTracer` arguments.
+In practice, memory sharing is limited to second-order information in `HessianTracer`.
+"""
+struct Shared <: SharingBehavior end
+
+"""
+Indicates that patterns **can** share memory and operators are **prohibited** from mutating `HessianTracer` arguments.
+In practice, memory sharing is limited to second-order information in `HessianTracer`.
+"""
+struct NotShared <: SharingBehavior end
 
 """
 $(TYPEDEF)
@@ -56,24 +98,57 @@ $(TYPEDEF)
 ## Fields
 $(TYPEDFIELDS)
 """
-struct HessianTracer{P <: AbstractHessianPattern} <: AbstractTracer{P}
-    "Sparse representation of non-zero entries in the gradient and the Hessian."
-    pattern::P
+struct HessianTracer{
+        I <: Integer, G <: AbstractSet{I}, H <: Union{AbstractDict{I, G}, AbstractSet{Tuple{I, I}}}, S <: SharingBehavior,
+    } <: AbstractTracer
+    "Set of indices ``i`` of non-zero values ``∇f(x)_i ≠ 0`` in the gradient."
+    gradient::G
+    "Set of index-tuples ``(i, j)`` of non-zero values ``∇²f(x)_{ij} ≠ 0`` in the Hessian."
+    hessian::H
     "Indicator whether gradient and Hessian in tracer both contain only zeros."
     isempty::Bool
 
-    function HessianTracer{P}(pattern::P, isempty::Bool = false) where {P}
-        return new{P}(pattern, isempty)
+    function HessianTracer{I, G, H, S}(gradient::G, hessian::H, isempty::Bool = false) where {I, G, H, S}
+        return new{I, G, H, S}(gradient, hessian, isempty)
     end
 end
 
-HessianTracer{P}(::Real) where {P} = myempty(HessianTracer{P})
-HessianTracer{P}(t::HessianTracer{P}) where {P} = t
+HessianTracer{I, G, H, S}(::Real) where {I, G, H, S} = myempty(HessianTracer{I, G, H, S})
+HessianTracer{I, G, H, S}(t::HessianTracer{I, G, H, S}) where {I, G, H, S} = t
 
 isemptytracer(t::HessianTracer) = t.isempty
-pattern(t::HessianTracer) = t.pattern
-gradient(t::HessianTracer) = gradient(pattern(t))
-hessian(t::HessianTracer) = hessian(pattern(t))
+gradient(t::HessianTracer) = t.gradient
+hessian(t::HessianTracer) = t.hessian
+
+myempty(::Type{HessianTracer{I, G, H, S}}) where {I, G, H, S} = HessianTracer{I, G, H, S}(myempty(G), myempty(H), true)
+
+function create_tracers(
+        ::Type{T}, xs, is
+    ) where {I, G, H, S, T <: HessianTracer{I, G, H, S}}
+    gradients = map(Base.Fix1(seed, G), is)
+    hessian = myempty(H)
+    # Even if `NotShared`, sharing a single reference to `hessian` is allowed upon initialization,
+    # since mutation is prohibited when `isshared` is false.
+    return T.(gradients, Ref(hessian))
+end
+
+"""
+    shared(pattern)
+
+Indicates whether patterns **always** share memory and whether operators are **allowed** to mutate their `HessianTracer` arguments.
+Returns either the `Shared()` or `NotShared()` trait.
+
+If `NotShared()`, patterns **can** share memory and operators are **prohibited** from mutating `HessianTracer` arguments.
+
+## Note
+In practice, memory sharing is limited to second-order information in `HessianTracer`.
+"""
+shared(::T) where {T <: HessianTracer} = shared(T)
+shared(::Type{HessianTracer{I, G, H, S}}) where {I, G, H, S} = S()
+
+isshared(::Shared) = true
+isshared(::NotShared) = false
+isshared(t) = isshared(shared(t))
 
 #================================#
 # Dual numbers for local tracing #
@@ -118,10 +193,6 @@ end
 # Utilities #
 #===========#
 
-shared(::Type{T}) where {P, T <: HessianTracer{P}} = shared(P)
-
-myempty(::Type{GradientTracer{P}}) where {P} = GradientTracer{P}(myempty(P), true)
-myempty(::Type{HessianTracer{P}}) where {P} = HessianTracer{P}(myempty(P), true)
 
 """
     create_tracers(T, xs, indices)
@@ -129,12 +200,7 @@ myempty(::Type{HessianTracer{P}}) where {P} = HessianTracer{P}(myempty(P), true)
 Convenience constructor for [`GradientTracer`](@ref), [`HessianTracer`](@ref) and [`Dual`](@ref) 
 from multiple inputs `xs` and their indices `is`.
 """
-function create_tracers(
-        ::Type{T}, xs::AbstractArray{<:Real, N}, indices::AbstractArray{<:Integer, N}
-    ) where {P <: AbstractPattern, T <: AbstractTracer{P}, N}
-    patterns = create_patterns(P, xs, indices)
-    return T.(patterns)
-end
+
 
 function create_tracers(
         ::Type{D}, xs::AbstractArray{<:Real, N}, indices::AbstractArray{<:Integer, N}
