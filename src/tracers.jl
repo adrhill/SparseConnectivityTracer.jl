@@ -77,7 +77,17 @@ end
 #===============#
 
 abstract type SharingBehavior end
+
+"""
+Indicates that patterns **always** share memory and that operators are **allowed** to mutate their `HessianTracer` arguments.
+In practice, memory sharing is limited to second-order information in `HessianTracer`.
+"""
 struct Shared <: SharingBehavior end
+
+"""
+Indicates that patterns **can** share memory and operators are **prohibited** from mutating `HessianTracer` arguments.
+In practice, memory sharing is limited to second-order information in `HessianTracer`.
+"""
 struct NotShared <: SharingBehavior end
 
 """
@@ -125,10 +135,10 @@ end
 """
     shared(pattern)
 
-Indicates whether patterns **always** share memory and whether operators are **allowed** to mutate their `AbstractTracer` arguments.
+Indicates whether patterns **always** share memory and whether operators are **allowed** to mutate their `HessianTracer` arguments.
 Returns either the `Shared()` or `NotShared()` trait.
 
-If `NotShared()`, patterns **can** share memory and operators are **prohibited** from mutating `AbstractTracer` arguments.
+If `NotShared()`, patterns **can** share memory and operators are **prohibited** from mutating `HessianTracer` arguments.
 
 ## Note
 In practice, memory sharing is limited to second-order information in `HessianTracer`.
