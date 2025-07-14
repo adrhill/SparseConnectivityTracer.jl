@@ -30,15 +30,17 @@ const DEFAULT_HESSIAN_TRACER = hessian_tracer_type()
 
 
 const DOC_KWARGS = """# Keyword arguments
-- `gradient_pattern_type::Type`: Data structure used for bookkeeping of gradient sparsity patters, used in `jacobian_sparsity`.
+- `gradient_pattern_type::Type`: 
+  Data structure used for bookkeeping of gradient sparsity patters, used in `jacobian_sparsity`.
   Supports concrete subtypes of `AbstactSet{<:Integer}`.
   Defaults to `$DEFAULT_SET_TYPE`.
-- `hessian_pattern_type::Type`: Data structure used for bookkeeping of Hessian sparsity patters, used in `hessian_sparsity`.
+- `hessian_pattern_type::Type`: 
+  Data structure used for bookkeeping of Hessian sparsity patters, used in `hessian_sparsity`.
   Supports concrete subtypes of `AbstractDict{I, AbstractSet{I}}` or `AbstractSet{Tuple{I, I}}}`, where `I <: Integer`.
   Defaults to `$DEFAULT_DICT_TYPE`.
-- `shared_hessian_pattern::Type`: Indicate whether second-order information in Hessian sparsity patterns **always** shares memory and whether operators are **allowed** to mutate `HessianTracers`.
-  Supports [`Shared`](@ref) and [`NotShared`](@ref).
-  Defaults to `$DEFAULT_SHARED_TYPE`.
+- `shared_hessian_pattern::Bool`: 
+  Indicate whether second-order information in Hessian sparsity patterns **always** shares memory and whether operators are **allowed** to mutate `HessianTracers`.
+  Defaults to `false`.
 
 If support for further pattern representations is needed, please open a feature request:
 https://github.com/adrhill/SparseConnectivityTracer.jl/issues
@@ -139,8 +141,9 @@ for D in (:TracerSparsityDetector, :TracerLocalSparsityDetector)
     @eval function ($D)(;
             gradient_pattern_type::Type{G} = DEFAULT_SET_TYPE,
             hessian_pattern_type::Type{H} = DEFAULT_DICT_TYPE,
-            shared_hessian_pattern::Type{S} = DEFAULT_SHARED_TYPE,
-        ) where {G, H, S}
+            shared_hessian_pattern::Bool = false,
+        ) where {G, H}
+        S = shared_hessian_pattern ? Shared : NotShared
         TG = gradient_tracer_type(G)
         TH = hessian_tracer_type(H, S)
         return ($D)(TG, TH)

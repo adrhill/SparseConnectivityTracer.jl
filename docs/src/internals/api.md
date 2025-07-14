@@ -21,8 +21,8 @@ SparseConnectivityTracer.Dual
 ### Traits
 
 ```@docs
-NotShared
-Shared
+SparseConnectivityTracer.NotShared
+SparseConnectivityTracer.Shared
 SparseConnectivityTracer.shared
 ```
 

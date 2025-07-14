@@ -37,8 +37,6 @@ include("adtypes_interface.jl")
 export TracerSparsityDetector
 export TracerLocalSparsityDetector
 
-export Shared, NotShared
-
 # Reexport ADTypes interface
 export jacobian_sparsity, hessian_sparsity
 
