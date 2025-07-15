@@ -5,7 +5,7 @@ using Test
 using Random: rand, GLOBAL_RNG
 using LinearAlgebra: I, det, dot, logdet
 
-# Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
+# Load definitions of GRADIENT_TRACERS and HESSIAN_TRACERS
 include("tracers_definitions.jl")
 
 REAL_TYPES = (Float64, Int, Bool, UInt8, Float16, Rational{Int})
@@ -15,13 +15,11 @@ REAL_TYPES = (Float64, Int, Bool, UInt8, Float16, Rational{Int})
 detector = TracerSparsityDetector()
 J(f, x) = jacobian_sparsity(f, x, detector)
 J(f!, y, x) = jacobian_sparsity(f!, y, x, detector)
-P = first(GRADIENT_PATTERNS)
-T = GradientTracer{P}
+T = DEFAULT_GRADIENT_TRACER
 
 @testset "Jacobian Global" begin
-    @testset "$P" for P in GRADIENT_PATTERNS
-        T = GradientTracer{P}
-        detector = TracerSparsityDetector(; gradient_tracer_type = T)
+    @testset "$T" for T in GRADIENT_TRACERS
+        detector = TracerSparsityDetector(T)
         J(f, x) = jacobian_sparsity(f, x, detector)
         J(f!, y, x) = jacobian_sparsity(f!, y, x, detector)
 
@@ -169,11 +167,12 @@ T = GradientTracer{P}
             ]
         end
 
-        @testset "Multiplication by zero" begin
+        # NOTE: If these tests fail, changes might be breaking on stateful code (see PR #248).
+        @testset "Ignore multiplication by zero" begin
             f1(x) = [0 * x[1]]
-            @test J(f1, [1.0]) == [0;;]
-            f2(x) = Matrix(I(length(x))) * x
-            @test J(f2, ones(10)) == I(10)
+            @test J(f1, [1.0]) == [1;;]
+            f2(x) = [x[1] * 0]
+            @test J(f2, [1.0]) == [1;;]
         end
 
         yield()
@@ -181,9 +180,8 @@ T = GradientTracer{P}
 end
 
 @testset "Jacobian Local" begin
-    @testset "$P" for P in GRADIENT_PATTERNS
-        T = GradientTracer{P}
-        detector = TracerLocalSparsityDetector(; gradient_tracer_type = T)
+    @testset "$T" for T in GRADIENT_TRACERS
+        detector = TracerLocalSparsityDetector(T)
         J(f, x) = jacobian_sparsity(f, x, detector)
         J(f!, y, x) = jacobian_sparsity(f!, y, x, detector)
 

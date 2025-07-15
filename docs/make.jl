@@ -25,7 +25,7 @@ makedocs(;
     pages = [
         "Getting Started" => "index.md",
         "User Documentation" =>
-            ["user/global_vs_local.md", "user/limitations.md", "user/api.md"],
+            ["user/global_vs_local.md", "user/performance.md", "user/limitations.md", "user/api.md"],
         "Developer Documentation" => [
             "internals/how_it_works.md",
             "internals/adding_overloads.md",

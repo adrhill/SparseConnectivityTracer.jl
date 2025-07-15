@@ -3,7 +3,7 @@ Pkg.develop(; path = joinpath(@__DIR__, "SparseConnectivityTracerBenchmarks"))
 
 using BenchmarkTools
 using SparseConnectivityTracer
-using SparseConnectivityTracer: HessianTracer, DictHessianPattern, Shared
+using SparseConnectivityTracer: HessianTracer, Shared
 
 include("jacobian.jl")
 include("hessian.jl")
@@ -18,11 +18,10 @@ suite["Hessian"]["Global"] = hessbench(TracerSparsityDetector())
 suite["Hessian"]["Local"] = hessbench(TracerLocalSparsityDetector())
 
 # Shared tracers
-P = DictHessianPattern{Int, BitSet, Dict{Int, BitSet}, Shared}
-H = HessianTracer{P}
+TH = HessianTracer{Int, BitSet, Dict{Int, BitSet}, Shared}
 suite["Hessian"]["Global shared"] = hessbench(
-    TracerSparsityDetector(; hessian_tracer_type = H)
+    TracerSparsityDetector(TH)
 )
 suite["Hessian"]["Local shared"] = hessbench(
-    TracerLocalSparsityDetector(; hessian_tracer_type = H)
+    TracerLocalSparsityDetector(TH)
 )

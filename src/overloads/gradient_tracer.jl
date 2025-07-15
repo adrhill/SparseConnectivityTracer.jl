@@ -10,7 +10,7 @@ function gradient_tracer_1_to_1(t::T, is_der1_zero::Bool) where {T <: GradientTr
     end
 end
 
-# This is only required because it is called by HessianTracer with IndexSetHessianPattern
+# This is only required because it is called by HessianTracer
 function gradient_tracer_1_to_1_inner(
         s::S, is_der1_zero::Bool
     ) where {S <: AbstractSet{<:Integer}}
@@ -68,24 +68,14 @@ function gradient_tracer_2_to_1(
         return gradient_tracer_1_to_1(ty, is_der1_arg2_zero)
     else
         g_out = gradient_tracer_2_to_1_inner(
-            pattern(tx), pattern(ty), is_der1_arg1_zero, is_der1_arg2_zero
+            gradient(tx), gradient(ty), is_der1_arg1_zero, is_der1_arg2_zero
         )
         return T(g_out) # return tracer
     end
 end
 
-function gradient_tracer_2_to_1_inner(
-        px::P, py::P, is_der1_arg1_zero::Bool, is_der1_arg2_zero::Bool
-    ) where {P <: IndexSetGradientPattern}
-    return P(
-        gradient_tracer_2_to_1_inner(
-            gradient(px), gradient(py), is_der1_arg1_zero, is_der1_arg2_zero
-        ),
-    ) # return pattern
-end
-
-# This is only required because it is called by HessianTracer with IndexSetHessianPattern
-# Otherwise, we would just have the method on IndexSetGradientPattern above.
+# This is only required because it is called by HessianTracer overloads.
+# Otherwise, we would just have the method above.
 function gradient_tracer_2_to_1_inner(
         sx::S, sy::S, is_der1_arg1_zero::Bool, is_der1_arg2_zero::Bool
     ) where {S <: AbstractSet{<:Integer}}
@@ -153,31 +143,14 @@ function generate_code_gradient_2_to_1_typed(
     is_der1_arg1_zero_g = is_der1_arg1_zero_global(f)
     is_der1_arg2_zero_g = is_der1_arg2_zero_global(f)
 
-    if f === Base.:*  # TODO: generalize to other cases (#244)
-        expr_tracer_type = quote
-            function $M.$fname(tx::$SCT.GradientTracer, y::$Z)
-                is_der1_arg1_zero_g_tweaked = iszero(y)
-                return @noinline $SCT.gradient_tracer_1_to_1(
-                    tx, is_der1_arg1_zero_g_tweaked
-                )
-            end
+    expr_tracer_type = quote
+        function $M.$fname(tx::$SCT.GradientTracer, y::$Z)
+            return @noinline $SCT.gradient_tracer_1_to_1(tx, $is_der1_arg1_zero_g)
         end
-        expr_type_tracer = quote
-            function $M.$fname(x::$Z, ty::$SCT.GradientTracer)
-                is_der1_arg2_zero_tweaked = iszero(x)
-                return @noinline $SCT.gradient_tracer_1_to_1(ty, is_der1_arg2_zero_tweaked)
-            end
-        end
-    else
-        expr_tracer_type = quote
-            function $M.$fname(tx::$SCT.GradientTracer, ::$Z)
-                return @noinline $SCT.gradient_tracer_1_to_1(tx, $is_der1_arg1_zero_g)
-            end
-        end
-        expr_type_tracer = quote
-            function $M.$fname(::$Z, ty::$SCT.GradientTracer)
-                return @noinline $SCT.gradient_tracer_1_to_1(ty, $is_der1_arg2_zero_g)
-            end
+    end
+    expr_type_tracer = quote
+        function $M.$fname(x::$Z, ty::$SCT.GradientTracer)
+            return @noinline $SCT.gradient_tracer_1_to_1(ty, $is_der1_arg2_zero_g)
         end
     end
 

@@ -1,11 +1,11 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer: Dual, HessianTracer, MissingPrimalError
-using SparseConnectivityTracer: create_tracers, pattern, shared
+using SparseConnectivityTracer: create_tracers, hessian, isshared
 using LinearAlgebra: I, dot
 using Test
 using Random: rand, GLOBAL_RNG
 
-# Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
+# Load definitions of GRADIENT_TRACERS and HESSIAN_TRACERS
 include("tracers_definitions.jl")
 REAL_TYPES = (Float64, Int, Bool, UInt8, Float16, Rational{Int})
 
@@ -14,14 +14,12 @@ REAL_TYPES = (Float64, Int, Bool, UInt8, Float16, Rational{Int})
 detector = TracerSparsityDetector()
 H(f, x) = hessian_sparsity(f, x, detector)
 
-P = first(HESSIAN_PATTERNS)
-T = HessianTracer{P}
+T = DEFAULT_HESSIAN_TRACER
 D = Dual{Int, T}
 
 @testset "Global Hessian" begin
-    @testset "$P" for P in HESSIAN_PATTERNS
-        T = HessianTracer{P}
-        detector = TracerSparsityDetector(; hessian_tracer_type = T)
+    @testset "$T" for T in HESSIAN_TRACERS
+        detector = TracerSparsityDetector(T)
         H(f, x) = hessian_sparsity(f, x, detector)
 
         @testset "Trivial examples" begin
@@ -157,7 +155,7 @@ D = Dual{Int, T}
 
         @testset "Zero derivatives" begin
             h = H(x -> copysign(x[1] * x[2], x[3] * x[4]), rand(4))
-            if Bool(shared(T))
+            if isshared(T)
                 @test h == [
                     0 1 0 0
                     1 0 0 0
@@ -174,7 +172,7 @@ D = Dual{Int, T}
             end
 
             h = H(x -> div(x[1] * x[2], x[3] * x[4]), rand(4))
-            if Bool(shared(T))
+            if isshared(T)
                 @test Matrix(h) == [
                     0 1 0 0
                     1 0 0 0
@@ -198,7 +196,7 @@ D = Dual{Int, T}
             end
             h = H(dead_end, rand(4))
 
-            if Bool(shared(T))
+            if isshared(T)
                 @test h == [
                     0  1  0  0
                     1  0  0  0
@@ -269,13 +267,12 @@ D = Dual{Int, T}
             @test_throws TypeError H(x -> x[1] > x[2] ? x[1]^x[2] : x[3] * x[4], rand(4))
         end
 
-        @testset "Multiplication by zero" begin
-            if !Bool(shared(T))
-                f1(x) = 0 * x[1]^2
-                @test H(f1, [1.0]) == [0;;]
-                f2(x) = dot(x, Matrix(I(length(x))), x)
-                @test H(f2, ones(10)) == I(10)
-            end
+        # NOTE: If these tests fail, changes might be breaking on stateful code (see PR #248).
+        @testset "Ignore multiplication by zero" begin
+            f1(x) = 0 * x[1]^2
+            @test H(f1, [1.0]) == [1;;]
+            f2(x) = x[1]^2 * 0
+            @test H(f2, [1.0]) == [1;;]
         end
 
         yield()
@@ -283,9 +280,8 @@ D = Dual{Int, T}
 end
 
 @testset "Local Hessian" begin
-    @testset "$P" for P in HESSIAN_PATTERNS
-        T = HessianTracer{P}
-        detector = TracerLocalSparsityDetector(; hessian_tracer_type = T)
+    @testset "$T" for T in HESSIAN_TRACERS
+        detector = TracerLocalSparsityDetector(T)
         H(f, x) = hessian_sparsity(f, x, detector)
 
         @testset "Trivial examples" begin
@@ -308,7 +304,7 @@ end
 
             f2(x) = ifelse(x[2] < x[3], x[1] * x[2], x[3] * x[4])
             h = H(f2, [1 2 3 4])
-            if Bool(shared(T))
+            if isshared(T)
                 @test h == [
                     0  1  0  0
                     1  0  0  0
@@ -325,7 +321,7 @@ end
             end
 
             h = H(f2, [1 3 2 4])
-            if Bool(shared(T))
+            if isshared(T)
                 @test h == [
                     0  1  0  0
                     1  0  0  0
@@ -348,7 +344,7 @@ end
                 return x[3] * x[4]
             end
             h = H(dead_end, rand(4))
-            if Bool(shared(T))
+            if isshared(T)
                 @test h == [
                     0  1  0  0
                     1  0  0  0
@@ -421,9 +417,8 @@ end
     end
 end
 
-@testset "Shared IndexSetHessianPattern - same objects" begin
-    @testset "$P" for P in HESSIAN_PATTERNS_SHARED
-        T = HessianTracer{P}
+@testset "Shared HessianTracer - shared `hessian` fields" begin
+    @testset "$T" for T in HESSIAN_TRACERS_SHARED
 
         function multi_output_for_shared_test(x::AbstractArray)
             z = ones(eltype(x), size(x))
@@ -439,8 +434,8 @@ end
         xt = create_tracers(T, x, eachindex(x))
         yt = multi_output_for_shared_test(xt)
 
-        @test pattern(yt[1]).hessian === pattern(yt[2]).hessian
-        @test pattern(yt[1]).hessian === pattern(yt[3]).hessian
-        @test_broken pattern(yt[1]).hessian === pattern(yt[4]).hessian
+        @test hessian(yt[1]) === hessian(yt[2])
+        @test hessian(yt[1]) === hessian(yt[3])
+        @test_broken hessian(yt[1]) === hessian(yt[4])
     end
 end

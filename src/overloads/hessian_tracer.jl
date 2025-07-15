@@ -5,24 +5,19 @@ SCT = SparseConnectivityTracer
 # 𝟙[∇γ]  = 𝟙[∂φ]⋅𝟙[∇α]
 # 𝟙[∇²γ] = 𝟙[∂φ]⋅𝟙[∇²α] ∨ 𝟙[∂²φ]⋅(𝟙[∇α] ∨ 𝟙[∇α]ᵀ)
 
-function hessian_tracer_1_to_1(
-        t::T, is_der1_zero::Bool, is_der2_zero::Bool
-    ) where {P <: AbstractHessianPattern, T <: HessianTracer{P}}
+function hessian_tracer_1_to_1(t::T, is_der1_zero::Bool, is_der2_zero::Bool) where {T <: HessianTracer}
     if isemptytracer(t) # TODO: add test
         return t
     else
-        p_out = hessian_tracer_1_to_1_inner(
-            pattern(t), is_der1_zero, is_der2_zero, shared(P)
-        )
-        return T(p_out) # return tracer
+        return hessian_tracer_1_to_1_inner(t, is_der1_zero, is_der2_zero, shared(T))
     end
 end
 
 function hessian_tracer_1_to_1_inner(
-        p::P, is_der1_zero::Bool, is_der2_zero::Bool, ::NotShared
-    ) where {P <: AbstractHessianPattern}
-    g = gradient(p)
-    h = hessian(p)
+        t::T, is_der1_zero::Bool, is_der2_zero::Bool, ::NotShared
+    ) where {T <: HessianTracer}
+    g = gradient(t)
+    h = hessian(t)
 
     g_out = gradient_tracer_1_to_1_inner(g, is_der1_zero) # 𝟙[∇γ] = 𝟙[∂φ]⋅𝟙[∇α]
     h_out = if is_der1_zero && is_der2_zero # 𝟙[∇²γ] = 0
@@ -37,24 +32,24 @@ function hessian_tracer_1_to_1_inner(
     else # !is_der1_zero && !is_der2_zero,  𝟙[∇²γ] = 𝟙[∇²α] ∨ (𝟙[∇α] ∨ 𝟙[∇α]ᵀ)
         union_product!(copy(h), g, g)
     end
-    return P(g_out, h_out) # return pattern
+    return T(g_out, h_out) # return pattern
 end
 
 # NOTE: mutates argument p and should arguably be called `hessian_tracer_1_to_1_inner!`
 function hessian_tracer_1_to_1_inner(
-        p::P, is_der1_zero::Bool, is_der2_zero::Bool, ::Shared
-    ) where {P <: AbstractHessianPattern}
-    g = gradient(p)
+        t::T, is_der1_zero::Bool, is_der2_zero::Bool, ::Shared
+    ) where {T <: HessianTracer}
+    g = gradient(t)
     g_out = gradient_tracer_1_to_1_inner(g, is_der1_zero)
 
     # shared Hessian patterns can't remove second-order information, only add to it.
-    h = hessian(p)
+    h = hessian(t)
     h_out = if is_der2_zero  # 𝟙[∇²γ] = 𝟙[∂φ]⋅𝟙[∇²α]
         h
     else # 𝟙[∇²γ] = 𝟙[∇²α] ∨ (𝟙[∇α] ∨ 𝟙[∇α]ᵀ)
         union_product!(h, g, g)
     end
-    return P(g_out, h_out) # return pattern
+    return T(g_out, h_out) # return pattern
 end
 
 function generate_code_hessian_1_to_1(M::Symbol, f::Function)
@@ -104,7 +99,7 @@ function hessian_tracer_2_to_1(
         is_der1_arg2_zero::Bool,
         is_der2_arg2_zero::Bool,
         is_der_cross_zero::Bool,
-    ) where {P <: AbstractHessianPattern, T <: HessianTracer{P}}
+    ) where {T <: HessianTracer}
     # TODO: add tests for isempty
     if tx.isempty && ty.isempty
         return tx # empty tracer
@@ -113,32 +108,31 @@ function hessian_tracer_2_to_1(
     elseif tx.isempty
         return hessian_tracer_1_to_1(ty, is_der1_arg2_zero, is_der2_arg2_zero)
     else
-        p_out = hessian_tracer_2_to_1_inner(
-            pattern(tx),
-            pattern(ty),
+        return hessian_tracer_2_to_1_inner(
+            tx,
+            ty,
             is_der1_arg1_zero,
             is_der2_arg1_zero,
             is_der1_arg2_zero,
             is_der2_arg2_zero,
             is_der_cross_zero,
-            shared(P),
+            shared(T),
         )
-        return T(p_out) # return tracer
     end
 end
 
 function hessian_tracer_2_to_1_inner(
-        px::P,
-        py::P,
+        tx::T,
+        ty::T,
         is_der1_arg1_zero::Bool,
         is_der2_arg1_zero::Bool,
         is_der1_arg2_zero::Bool,
         is_der2_arg2_zero::Bool,
         is_der_cross_zero::Bool,
         ::NotShared,
-    ) where {P <: AbstractHessianPattern}
-    gx, hx = gradient(px), hessian(px)
-    gy, hy = gradient(py), hessian(py)
+    ) where {T <: HessianTracer}
+    gx, hx = gradient(tx), hessian(tx)
+    gy, hy = gradient(ty), hessian(ty)
     g_out = gradient_tracer_2_to_1_inner(gx, gy, is_der1_arg1_zero, is_der1_arg2_zero)
     h_out = myempty(hx)
     !is_der1_arg1_zero && myunion!(h_out, hx)  # hessian alpha
@@ -147,22 +141,22 @@ function hessian_tracer_2_to_1_inner(
     !is_der2_arg2_zero && union_product!(h_out, gy, gy)  # product beta
     !is_der_cross_zero && union_product!(h_out, gx, gy)  # cross product 1
     !is_der_cross_zero && union_product!(h_out, gy, gx)  # cross product 2
-    return P(g_out, h_out) # return pattern
+    return T(g_out, h_out) # return pattern
 end
 
-# NOTE: mutates arguments px and py and should arguably be called `hessian_tracer_1_to_1_inner!`
+# NOTE: mutates arguments tx and ty and should arguably be called `hessian_tracer_1_to_1_inner!`
 function hessian_tracer_2_to_1_inner(
-        px::P,
-        py::P,
+        tx::T,
+        ty::T,
         is_der1_arg1_zero::Bool,
         is_der2_arg1_zero::Bool,
         is_der1_arg2_zero::Bool,
         is_der2_arg2_zero::Bool,
         is_der_cross_zero::Bool,
         ::Shared,
-    ) where {P <: AbstractHessianPattern}
-    gx, hx = gradient(px), hessian(px)
-    gy, hy = gradient(py), hessian(py)
+    ) where {T <: HessianTracer}
+    gx, hx = gradient(tx), hessian(tx)
+    gy, hy = gradient(ty), hessian(ty)
 
     hx !== hy && error("Expected shared Hessians, got $hx, $hy.")
     h_out = hx # union of hx and hy can be skipped since they are the same object
@@ -172,7 +166,7 @@ function hessian_tracer_2_to_1_inner(
     !is_der2_arg2_zero && union_product!(h_out, gy, gy)  # product beta
     !is_der_cross_zero && union_product!(h_out, gx, gy)  # cross product 1
     !is_der_cross_zero && union_product!(h_out, gy, gx)  # cross product 2
-    return P(g_out, h_out) # return pattern
+    return T(g_out, h_out) # return pattern
 end
 
 function generate_code_hessian_2_to_1(
@@ -261,39 +255,21 @@ function generate_code_hessian_2_to_1_typed(
     is_der1_arg2_zero_g = is_der1_arg2_zero_global(f)
     is_der2_arg2_zero_g = is_der2_arg2_zero_global(f)
 
-    if f === Base.:*  # TODO: generalize to other cases (#244)
-        expr_tracer_type = quote
-            function $M.$fname(tx::$SCT.HessianTracer, y::$Z)
-                is_der1_arg1_zero_g_tweaked = iszero(y)
-                return @noinline $SCT.hessian_tracer_1_to_1(
-                    tx, is_der1_arg1_zero_g_tweaked, true
-                )
-            end
-        end
-        expr_type_tracer = quote
-            function $M.$fname(x::$Z, ty::$SCT.HessianTracer)
-                is_der1_arg2_zero_g_tweaked = iszero(x)
-                return @noinline $SCT.hessian_tracer_1_to_1(
-                    ty, is_der1_arg2_zero_g_tweaked, true
-                )
-            end
-        end
-    else
-        expr_tracer_type = quote
-            function $M.$fname(tx::$SCT.HessianTracer, y::$Z)
-                return @noinline $SCT.hessian_tracer_1_to_1(
-                    tx, $is_der1_arg1_zero_g, $is_der2_arg1_zero_g
-                )
-            end
-        end
-        expr_type_tracer = quote
-            function $M.$fname(x::$Z, ty::$SCT.HessianTracer)
-                return @noinline $SCT.hessian_tracer_1_to_1(
-                    ty, $is_der1_arg2_zero_g, $is_der2_arg2_zero_g
-                )
-            end
+    expr_tracer_type = quote
+        function $M.$fname(tx::$SCT.HessianTracer, y::$Z)
+            return @noinline $SCT.hessian_tracer_1_to_1(
+                tx, $is_der1_arg1_zero_g, $is_der2_arg1_zero_g
+            )
         end
     end
+    expr_type_tracer = quote
+        function $M.$fname(x::$Z, ty::$SCT.HessianTracer)
+            return @noinline $SCT.hessian_tracer_1_to_1(
+                ty, $is_der1_arg2_zero_g, $is_der2_arg2_zero_g
+            )
+        end
+    end
+
 
     expr_dual_type = if is_der1_arg1_zero_g && is_der2_arg1_zero_g
         quote

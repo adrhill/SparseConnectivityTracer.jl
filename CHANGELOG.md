@@ -1,7 +1,22 @@
 # SparseConnectivityTracer.jl
 
+## Version `v1.0.0`
+
+This release is only breaking for users who touched unexported internals.
+
+* ![BREAKING][badge-breaking] Refactor internal types ([#254])
+* ![Feature][badge-feature] Select internal data structures for sparsity pattern representations via the `TracerSparsityDetector` and `TracerLocalSparsityDetector` keyword arguments `gradient_pattern_type` and `hessian_pattern_type`. Refer to the new doc page on "Performance" for more information. ([#254], [#256])
+* ![Deprecation][badge-deprecation] Move DataInterpolations.jl extension out of SCT ([#255])
+
+## Version `v0.6.21`
+* ![Documentation][badge-docs] Document limitations on stateful code ([#249])
+
+## Version `v0.6.20`
+* ![Bugfix][badge-bugfix] Revert PR [#243] due to concerns of non-spare patterns ([#248])
+
 ## Version `v0.6.19`
 * ![Enhancement][badge-enhancement] Stop tracing through multiplication by zero ([#243])
+* ![Maintenance][badge-maintenance] Update code style and formatter to Runic.jl
 
 ## Version `v0.6.18`
 * ![Maintenance][badge-maintenance] DataInterpolations `v8` compatiblity ([#234])
@@ -121,6 +136,11 @@
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#256]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/256
+[#255]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/255
+[#254]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/254
+[#249]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/249
+[#248]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/248
 [#243]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/243
 [#239]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/239
 [#236]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/236

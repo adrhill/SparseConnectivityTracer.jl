@@ -66,6 +66,13 @@ julia> jacobian_sparsity(layer, x, detector)
 ⎣⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠛⢿⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣷⣄⎦
 ```
 
+By default, `BitSet` is used for internal sparsity pattern representations.
+For very large inputs, it might be more efficient to set the type to `Set{UInt}`:
+
+```julia-repl
+julia> detector = TracerSparsityDetector(; gradient_pattern_type=Set{UInt})
+```
+
 ### Hessian
 
 For scalar functions `y = f(x)`, the sparsity pattern of the Hessian of $f$ can be obtained
@@ -95,7 +102,15 @@ julia> hessian_sparsity(g, x, detector)
  ⋅  1  ⋅  ⋅  1
 ```
 
-For more detailed examples, take a look at the [documentation](https://adrianhill.de/SparseConnectivityTracer.jl/dev).
+
+By default, a dictionaries of `BitSet` are used for internal sparsity pattern representations.
+For very large inputs, it might be more efficient to set the type to `Dict{UInt, Set{UInt}}`:
+
+```julia-repl
+julia> detector = TracerSparsityDetector(; hessian_pattern_type=Dict{UInt, Set{UInt}})
+```
+
+For more detailed examples, take a look at the [documentation](https://adrianhill.de/SparseConnectivityTracer.jl/stable).
 
 ### Local tracing
 
@@ -141,14 +156,14 @@ In fact, the functions `jacobian_sparsity` and `hessian_sparsity` are re-exporte
 If you use SparseConnectivityTracer in your research, please cite our preprint [*Sparser, Better, Faster, Stronger: Efficient Automatic Differentiation for Sparse Jacobians and Hessians*](https://arxiv.org/abs/2501.17737):
 
 ```bibtex
-@misc{hill2025sparserbetterfasterstronger,
-      title={Sparser, Better, Faster, Stronger: Efficient Automatic Differentiation for Sparse Jacobians and Hessians}, 
-      author={Adrian Hill and Guillaume Dalle},
-      year={2025},
-      eprint={2501.17737},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG},
-      url={https://arxiv.org/abs/2501.17737}, 
+@article{hill2025sparser,
+  title={Sparser, Better, Faster, Stronger: Sparsity Detection for Efficient Automatic Differentiation},
+  author={Adrian Hill and Guillaume Dalle},
+  journal={Transactions on Machine Learning Research},
+  issn={2835-8856},
+  year={2025},
+  url={https://openreview.net/forum?id=GtXSN52nIW},
+  note={}
 }
 ```
 

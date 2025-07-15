@@ -1,10 +1,9 @@
 # Test construction and conversions of internal tracer types
 using SparseConnectivityTracer: AbstractTracer, GradientTracer, HessianTracer, Dual
 using SparseConnectivityTracer: primal, tracer, isemptytracer, myempty
-using SparseConnectivityTracer: IndexSetGradientPattern
 using Test
 
-# Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
+# Load definitions of GRADIENT_TRACERS and HESSIAN_TRACERS
 include("tracers_definitions.jl")
 
 # Pretty-printing of Dual tracers
@@ -201,27 +200,22 @@ end
 end
 
 @testset "Explicit type conversions on Dual" begin
-    @testset "$T" for T in union(GRADIENT_TRACERS, HESSIAN_TRACERS)
-        P = IndexSetGradientPattern{Int, BitSet}
-        T = GradientTracer{P}
+    T = DEFAULT_GRADIENT_TRACER
+    t_full = T(BitSet(2))
+    t_empty = myempty(T)
+    d_full = Dual(1.0, t_full)
+    d_empty = Dual(1.0, t_empty)
 
-        p = P(BitSet(2))
-        t_full = T(p)
-        t_empty = myempty(T)
-        d_full = Dual(1.0, t_full)
-        d_empty = Dual(1.0, t_empty)
-
-        @testset "Non-empty tracer" begin
-            @testset "$TOUT" for TOUT in (Int, Integer, Float64, Float32)
-                @test_throws InexactError TOUT(d_full)
-            end
+    @testset "Non-empty tracer" begin
+        @testset "$TOUT" for TOUT in (Int, Integer, Float64, Float32)
+            @test_throws InexactError TOUT(d_full)
         end
-        @testset "Empty tracer" begin
-            @testset "$TOUT" for TOUT in (Int, Integer, Float64, Float32)
-                out = TOUT(d_empty)
-                @test out isa TOUT # not a Dual!
-                @test isone(out)
-            end
+    end
+    @testset "Empty tracer" begin
+        @testset "$TOUT" for TOUT in (Int, Integer, Float64, Float32)
+            out = TOUT(d_empty)
+            @test out isa TOUT # not a Dual!
+            @test isone(out)
         end
     end
 end

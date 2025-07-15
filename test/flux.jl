@@ -5,7 +5,7 @@ using ReferenceTests
 using SparseConnectivityTracer
 using Test
 
-# Load definitions of GRADIENT_TRACERS, GRADIENT_PATTERNS, HESSIAN_TRACERS and HESSIAN_PATTERNS
+# Load definitions of GRADIENT_TRACERS and HESSIAN_TRACERS
 include("tracers_definitions.jl")
 
 const INPUT_FLUX = reshape(
@@ -66,13 +66,13 @@ end
 
 @testset "Global" begin
     @testset "$T" for T in GRADIENT_TRACERS
-        detector = TracerSparsityDetector(; gradient_tracer_type = T)
+        detector = TracerSparsityDetector(T)
         test_flux_conv(detector)
     end
 end
 @testset "Local" begin
     @testset "$T" for T in GRADIENT_TRACERS
-        detector = TracerLocalSparsityDetector(; gradient_tracer_type = T)
+        detector = TracerLocalSparsityDetector(T)
         test_flux_conv(detector)
         test_flux_conv_local(detector)
     end

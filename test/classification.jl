@@ -32,9 +32,9 @@ using NNlib: NNlib
 using LogExpFunctions: LogExpFunctions
 using NaNMath: NaNMath
 using Test
-using ForwardDiff: derivative, gradient, hessian
+using ForwardDiff: ForwardDiff
 
-second_derivative(f, x) = derivative(_x -> derivative(f, _x), x)
+second_derivative(f, x) = ForwardDiff.derivative(_x -> ForwardDiff.derivative(f, _x), x)
 
 DEFAULT_ATOL = 1.0e-8
 DEFAULT_TRIALS = 20
@@ -63,7 +63,7 @@ correct_classification_1_to_1(op::typeof(!), x; atol) = true
 
 ## Derivatives and special cases
 
-both_derivatives_1_to_1(op, x) = derivative(op, x), second_derivative(op, x)
+both_derivatives_1_to_1(op, x) = ForwardDiff.derivative(op, x), second_derivative(op, x)
 
 function both_derivatives_1_to_1(::Union{typeof(big), typeof(widen)}, x)
     return both_derivatives_1_to_1(identity, x)
@@ -75,7 +75,7 @@ function both_derivatives_1_to_1(
 end
 
 function both_derivatives_2_to_1(op, x, y)
-    return gradient(Base.splat(op), [x, y]), hessian(Base.splat(op), [x, y])
+    return ForwardDiff.gradient(Base.splat(op), [x, y]), ForwardDiff.hessian(Base.splat(op), [x, y])
 end
 
 function both_derivatives_1_to_2(op, x)
@@ -83,7 +83,7 @@ function both_derivatives_1_to_2(op, x)
         y = op(x)
         return [y[1], y[2]]
     end
-    return derivative(op_vec, x), second_derivative(op_vec, x)
+    return ForwardDiff.derivative(op_vec, x), second_derivative(op_vec, x)
 end
 
 ## 1-to-1
