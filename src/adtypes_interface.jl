@@ -31,11 +31,11 @@ const DEFAULT_HESSIAN_TRACER = hessian_tracer_type()
 
 const DOC_KWARGS = """# Keyword arguments
 - `gradient_pattern_type::Type`: 
-  Data structure used for bookkeeping of gradient sparsity patters, used in `jacobian_sparsity`.
+  Data structure used for bookkeeping of gradient sparsity patterns, used in `jacobian_sparsity`.
   Supports concrete subtypes of `AbstactSet{<:Integer}`.
   Defaults to `$DEFAULT_SET_TYPE`.
 - `hessian_pattern_type::Type`: 
-  Data structure used for bookkeeping of Hessian sparsity patters, used in `hessian_sparsity`.
+  Data structure used for bookkeeping of Hessian sparsity patterns, used in `hessian_sparsity`.
   Supports concrete subtypes of `AbstractDict{I, AbstractSet{I}}` or `AbstractSet{Tuple{I, I}}`, where `I <: Integer`.
   Defaults to `$DEFAULT_DICT_TYPE`.
 - `shared_hessian_pattern::Bool`: 
