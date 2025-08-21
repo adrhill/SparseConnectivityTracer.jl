@@ -1,4 +1,4 @@
-# Special overloads for Dual numbers
+# GradientTracer & HessianTracer
 for fn in (
         :iseven,
         :isfinite,
@@ -9,11 +9,21 @@ for fn in (
         :isnothing,
         :isodd,
         :isone,
-        :isreal,
         :iszero,
     )
-    @eval Base.$fn(d::D) where {D <: Dual} = $fn(primal(d))
-    @eval function Base.$fn(t::T) where {T <: AbstractTracer}
-        throw(MissingPrimalError($fn, t))
-    end
+    @eval Base.$fn(t::AbstractTracer) = throw(MissingPrimalError($fn, t))
+end
+
+# Dual
+for fn in (
+        :iseven,
+        :isfinite,
+        :isinf,
+        :isinteger,
+        :isnan,
+        :isodd,
+        :isone,
+        :iszero,
+    )
+    @eval Base.$fn(d::Dual) = $fn(primal(d))
 end
