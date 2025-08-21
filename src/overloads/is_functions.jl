@@ -3,6 +3,7 @@ for fn in (
         :iseven,
         :isfinite,
         :isinf,
+        :isreal,
         :isinteger,
         :ismissing,
         :isnan,
