@@ -1,9 +1,10 @@
 # SparseConnectivityTracer.jl
 
+## Version `v1.0.1`
+* ![Bugfix][badge-bugfix] Fix invalidations on `ismissing` and `isnothing` ([#259])
+
 ## Version `v1.0.0`
-
 This release is only breaking for users who touched unexported internals.
-
 * ![BREAKING][badge-breaking] Refactor internal types ([#254])
 * ![Feature][badge-feature] Select internal data structures for sparsity pattern representations via the `TracerSparsityDetector` and `TracerLocalSparsityDetector` keyword arguments `gradient_pattern_type` and `hessian_pattern_type`. Refer to the new doc page on "Performance" for more information. ([#254], [#256])
 * ![Deprecation][badge-deprecation] Move DataInterpolations.jl extension out of SCT ([#255])
@@ -136,6 +137,7 @@ This release is only breaking for users who touched unexported internals.
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#259]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/259
 [#256]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/256
 [#255]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/255
 [#254]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/254
