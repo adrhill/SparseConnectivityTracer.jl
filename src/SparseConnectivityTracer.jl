@@ -26,7 +26,7 @@ include("overloads/utils.jl")
 include("overloads/special_cases.jl")
 include("overloads/three_arg.jl")
 include("overloads/ifelse_global.jl")
-include("overloads/dual.jl")
+include("overloads/is_functions.jl")
 include("overloads/arrays.jl")
 include("overloads/ambiguities.jl")
 
