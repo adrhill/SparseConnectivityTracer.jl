@@ -1,5 +1,8 @@
 # SparseConnectivityTracer.jl
 
+## Version `v1.0.2-DEV`
+* ![Maintenance][badge-maintenance] Run CI tests on Julia 1.12, update JET ([#246])
+
 ## Version `v1.0.1`
 * ![Bugfix][badge-bugfix] Fix invalidations on `ismissing` and `isnothing` ([#259])
 
@@ -143,6 +146,7 @@ This release is only breaking for users who touched unexported internals.
 [#254]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/254
 [#249]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/249
 [#248]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/248
+[#246]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/246
 [#243]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/243
 [#239]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/239
 [#236]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/236

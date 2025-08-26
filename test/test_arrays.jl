@@ -203,7 +203,10 @@ arrayname(A) = "$(typeof(A)) $(size(A))"
         testJ1(opnorm1, A)
         testH0(opnorm1, A)
     end
-    @testset "opnorm(A, 2) $(arrayname(A))" for A in ALL_MATRICES
+    @testset "opnorm(A, 2) $(arrayname(A))" for A in NONDIAG_MATRICES
+        # On diagonal matrices, opnorm(A, 2) returns the highest diagonal entry
+        # since the spectral norm is equal to the largest singular value of A.
+        # For diagonal matrices, the Hessian pattern is therefore "empty".
         testJ1(opnorm2, A)
         testH1(opnorm2, A)
     end
