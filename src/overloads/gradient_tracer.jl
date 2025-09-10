@@ -91,9 +91,6 @@ function gradient_tracer_2_to_1_inner(
 end
 
 function generate_code_gradient_2_to_1(M::Symbol, f::Function)
-    if (M === :Base) && ((f === >) || (f === >=))
-        return quote end  # do not add methods to `>` or to `>=`
-    end
     fname = nameof(f)
     is_der1_arg1_zero_g = is_der1_arg1_zero_global(f)
     is_der1_arg2_zero_g = is_der1_arg2_zero_global(f)

@@ -359,7 +359,7 @@ ops_2_to_1_zzz = (
     # division
     div, fld, fld1, cld, 
     # comparisons
-    isequal, isapprox, isless, ==, <, >, <=, >=,
+    isequal, isapprox, isless, ==, <, <=,
 )
 for op in ops_2_to_1_zzz
     T = typeof(op)
