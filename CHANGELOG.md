@@ -1,6 +1,9 @@
 # SparseConnectivityTracer.jl
 
-## Version `v1.0.2-DEV`
+## Version `v1.0.2`
+* ![Bugfix][badge-bugfix] Avoid invalidations on `>`, `>=` by falling back to `<`, `<=` (#261)
+ ([#259])
+* ![Maintenance][badge-maintenance] Test invalidations in CI ([#264])
 * ![Maintenance][badge-maintenance] Run CI tests on Julia 1.12, update JET ([#246])
 
 ## Version `v1.0.1`
@@ -140,6 +143,8 @@ This release is only breaking for users who touched unexported internals.
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#264]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/264
+[#261]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/261
 [#259]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/259
 [#256]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/256
 [#255]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/255
