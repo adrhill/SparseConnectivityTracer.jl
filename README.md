@@ -38,34 +38,6 @@ julia> jacobian_sparsity(f, x, detector)
  ⋅  ⋅  1
 ```
 
-As a larger example, let's compute the sparsity pattern from a convolutional layer from [Flux.jl](https://github.com/FluxML/Flux.jl):
-
-```julia-repl
-julia> using SparseConnectivityTracer, Flux
-
-julia> detector = TracerSparsityDetector();
-
-julia> x = rand(28, 28, 3, 1);
-
-julia> layer = Conv((3, 3), 3 => 2);
-
-julia> jacobian_sparsity(layer, x, detector)
-1352×2352 SparseArrays.SparseMatrixCSC{Bool, Int64} with 36504 stored entries:
-⎡⠙⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠻⣷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⎤
-⎢⠀⠀⠙⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣷⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⎥
-⎢⠀⠀⠀⠀⠙⢿⣦⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⎥
-⎢⠀⠀⠀⠀⠀⠀⠙⠻⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣦⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣦⡀⠀⠀⠀⠀⠀⎥
-⎢⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠻⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣦⣀⠀⠀⠀⎥
-⎢⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠻⣷⣄⠀⎥
-⎢⢤⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠛⠛⢦⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠛⠳⣤⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠛⠓⎥
-⎢⠀⠙⢿⣦⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⎥
-⎢⠀⠀⠀⠉⠻⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣦⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⎥
-⎢⠀⠀⠀⠀⠀⠈⠻⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠻⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣦⣄⠀⠀⠀⠀⠀⠀⎥
-⎢⠀⠀⠀⠀⠀⠀⠀⠈⠻⣷⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠻⣷⣄⠀⠀⠀⠀⎥
-⎢⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠛⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣷⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣷⣄⠀⠀⎥
-⎣⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠛⢿⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣷⣄⎦
-```
-
 By default, `BitSet` is used for internal sparsity pattern representations.
 For very large inputs, it might be more efficient to set the type to `Set{UInt}`:
 
@@ -75,35 +47,23 @@ julia> detector = TracerSparsityDetector(; gradient_pattern_type=Set{UInt})
 
 ### Hessian
 
-For scalar functions `y = f(x)`, the sparsity pattern of the Hessian of $f$ can be obtained
-by computing a single forward-pass through `f`:
+For scalar functions `y = f(x)`, the sparsity pattern of the Hessian can be obtained
+by computing a single forward-pass through the function:
 
 ```julia-repl
-julia> x = rand(5);
+julia> x = rand(4);
 
-julia> f(x) = x[1] + x[2]*x[3] + 1/x[4] + 1*x[5];
+julia> f(x) = x[1] + x[2]*x[3] + 1/x[4];
 
 julia> hessian_sparsity(f, x, detector)
-5×5 SparseArrays.SparseMatrixCSC{Bool, Int64} with 3 stored entries:
- ⋅  ⋅  ⋅  ⋅  ⋅
- ⋅  ⋅  1  ⋅  ⋅
- ⋅  1  ⋅  ⋅  ⋅
- ⋅  ⋅  ⋅  1  ⋅
- ⋅  ⋅  ⋅  ⋅  ⋅
-
-julia> g(x) = f(x) + x[2]^x[5];
-
-julia> hessian_sparsity(g, x, detector)
-5×5 SparseArrays.SparseMatrixCSC{Bool, Int64} with 7 stored entries:
- ⋅  ⋅  ⋅  ⋅  ⋅
- ⋅  1  1  ⋅  1
- ⋅  1  ⋅  ⋅  ⋅
- ⋅  ⋅  ⋅  1  ⋅
- ⋅  1  ⋅  ⋅  1
+4×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 3 stored entries:
+ ⋅  ⋅  ⋅  ⋅
+ ⋅  ⋅  1  ⋅
+ ⋅  1  ⋅  ⋅
+ ⋅  ⋅  ⋅  1
 ```
 
-
-By default, a dictionaries of `BitSet` are used for internal sparsity pattern representations.
+By default, dictionaries of `BitSet`s are used for internal sparsity pattern representations.
 For very large inputs, it might be more efficient to set the type to `Dict{UInt, Set{UInt}}`:
 
 ```julia-repl
@@ -114,10 +74,9 @@ For more detailed examples, take a look at the [documentation](https://adrianhil
 
 ### Local tracing
 
-`TracerSparsityDetector` returns conservative sparsity patterns over the entire input domain of `x`. 
+`TracerSparsityDetector` returns conservative "global" sparsity patterns over the entire input domain of `x`. 
 It is not compatible with functions that require information about the primal values of a computation (e.g. `iszero`, `>`, `==`).
-
-To compute a less conservative sparsity pattern at an input point `x`, use `TracerLocalSparsityDetector` instead.
+To compute a less conservative Jacobian or Hessian sparsity pattern at an input point `x`, use `TracerLocalSparsityDetector` instead.
 Note that patterns computed with `TracerLocalSparsityDetector` depend on the input `x` and have to be recomputed when `x` changes:
 
 ```julia-repl
@@ -125,22 +84,18 @@ julia> using SparseConnectivityTracer
 
 julia> detector = TracerLocalSparsityDetector();
 
-julia> f(x) = ifelse(x[2] < x[3], x[1] ^ x[2], x[3] * x[4]);
+julia> f(x) = x[1] > x[2] ? x[1] : x[2];
 
-julia> hessian_sparsity(f, [1 2 3 4], detector)
-4×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 4 stored entries:
- 1  1  ⋅  ⋅
- 1  1  ⋅  ⋅
- ⋅  ⋅  ⋅  ⋅
- ⋅  ⋅  ⋅  ⋅
+julia> jacobian_sparsity(f, [1 2], detector)
+1×2 SparseArrays.SparseMatrixCSC{Bool, Int64} with 1 stored entry:
+ ⋅  1
 
-julia> hessian_sparsity(f, [1 3 2 4], detector)
-4×4 SparseArrays.SparseMatrixCSC{Bool, Int64} with 2 stored entries:
- ⋅  ⋅  ⋅  ⋅
- ⋅  ⋅  ⋅  ⋅
- ⋅  ⋅  ⋅  1
- ⋅  ⋅  1  ⋅
+julia> jacobian_sparsity(f, [2 1], detector)
+1×2 SparseArrays.SparseMatrixCSC{Bool, Int64} with 1 stored entry:
+ 1  ⋅
 ```
+
+Take a look at the documentation for [more information on global and local patterns](https://adrianhill.de/SparseConnectivityTracer.jl/stable/user/global_vs_local/).
 
 ## ADTypes.jl compatibility
 SparseConnectivityTracer uses [ADTypes.jl](https://github.com/SciML/ADTypes.jl)'s interface for [sparsity detection](https://sciml.github.io/ADTypes.jl/stable/#Sparsity-detector),
