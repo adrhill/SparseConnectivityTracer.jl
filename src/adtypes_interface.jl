@@ -82,7 +82,7 @@ julia> hessian_sparsity(f, rand(4), detector)
 
 ## References
 
-- A. Hill and G. Dalle (2025). [*"Sparser, Better, Faster, Stronger: Sparsity Detection for Efficient Automatic Differentiation"*](https://openreview.net/pdf?id=GtXSN52nIW)
+- A. Hill and G. Dalle (2025). [*"Sparser, Better, Faster, Stronger: Sparsity Detection for Efficient Automatic Differentiation"*](https://openreview.net/forum?id=GtXSN52nIW)
 - A. Hill, G. Dalle, A. Montoison (2025). [*"An Illustrated Guide to Automatic Sparse Differentiation"*](https://iclr-blogposts.github.io/2025/blog/sparse-autodiff/)
 """
 struct TracerSparsityDetector{TG <: GradientTracer, TH <: HessianTracer} <:
@@ -129,7 +129,7 @@ julia> jacobian_sparsity(f, [1, 1], detector)
 
 ## References
 
-- A. Hill and G. Dalle (2025). [*"Sparser, Better, Faster, Stronger: Sparsity Detection for Efficient Automatic Differentiation"*](https://openreview.net/pdf?id=GtXSN52nIW)
+- A. Hill and G. Dalle (2025). [*"Sparser, Better, Faster, Stronger: Sparsity Detection for Efficient Automatic Differentiation"*](https://openreview.net/forum?id=GtXSN52nIW)
 - A. Hill, G. Dalle, A. Montoison (2025). [*"An Illustrated Guide to Automatic Sparse Differentiation"*](https://iclr-blogposts.github.io/2025/blog/sparse-autodiff/)
 """
 struct TracerLocalSparsityDetector{TG <: GradientTracer, TH <: HessianTracer} <:

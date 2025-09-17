@@ -1,8 +1,8 @@
 # [How SparseConnectivityTracer works](@id how-sct-works)
 
 !!! tip "Read the paper"
-    Please read our preprint describing SparseConnectivityTracer:
-    [*Sparser, Better, Faster, Stronger: Efficient Automatic Differentiation for Sparse Jacobians and Hessians*](https://arxiv.org/abs/2501.17737).
+    Please read our TMLR paper describing SparseConnectivityTracer:
+    [*Sparser, Better, Faster, Stronger: Efficient Automatic Differentiation for Sparse Jacobians and Hessians*](https://openreview.net/forum?id=GtXSN52nIW).
 
 !!! danger "Internals may change"
     The developer documentation might refer to internals which can change without warning in a future release of SparseConnectivityTracer.
