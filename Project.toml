@@ -1,7 +1,7 @@
 name = "SparseConnectivityTracer"
 uuid = "9f842d2f-2579-4b1d-911e-f412cf18a3f5"
 authors = ["Adrian Hill <gh@adrianhill.de>"]
-version = "1.0.3-DEV"
+version = "1.1.0-DEV"
 
 [deps]
 ADTypes = "47edcb42-4c32-4615-8424-f2b9edc5f35b"
@@ -12,12 +12,14 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [weakdeps]
+ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 LogExpFunctions = "2ab3a3ac-af41-5b50-aa03-7779005ae688"
 NNlib = "872c559c-99b0-510c-b3b7-b6c96a88d5cd"
 NaNMath = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 
 [extensions]
+SparseConnectivityTracerChainRulesCoreExt = "ChainRulesCore"
 SparseConnectivityTracerLogExpFunctionsExt = "LogExpFunctions"
 SparseConnectivityTracerNNlibExt = "NNlib"
 SparseConnectivityTracerNaNMathExt = "NaNMath"
@@ -25,6 +27,7 @@ SparseConnectivityTracerSpecialFunctionsExt = "SpecialFunctions"
 
 [compat]
 ADTypes = "1"
+ChainRulesCore = "1.7"
 DocStringExtensions = "0.9"
 FillArrays = "1"
 LinearAlgebra = "<0.0.1, 1"
