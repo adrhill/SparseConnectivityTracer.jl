@@ -237,8 +237,8 @@ end
 # TODO: instead overload `lu` on AbstractMatrix of Duals.
 function LinearAlgebra.det(A::AbstractMatrix{D}) where {D <: Dual}
     primals, tracers = split_dual_array(A)
-    p = LinearAlgebra.logdet(primals)
-    t = LinearAlgebra.logdet(tracers)
+    p = LinearAlgebra.det(primals)
+    t = LinearAlgebra.det(tracers)
     return D(p, t)
 end
 function LinearAlgebra.logdet(A::AbstractMatrix{D}) where {D <: Dual}
