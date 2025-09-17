@@ -235,23 +235,23 @@ end
 
 # The following three methods are a temporary fix for issue #108.
 # TODO: instead overload `lu` on AbstractMatrix of Duals.
-function LinearAlgebra.det(A::AbstractMatrix{D}) where {D <: Dual}
+function LinearAlgebra.det(A::AbstractMatrix{<:Dual})
+    primals, tracers = split_dual_array(A)
+    p = LinearAlgebra.det(primals)
+    t = LinearAlgebra.det(tracers)
+    return Dual(p, t)
+end
+function LinearAlgebra.logdet(A::AbstractMatrix{<:Dual})
     primals, tracers = split_dual_array(A)
     p = LinearAlgebra.logdet(primals)
     t = LinearAlgebra.logdet(tracers)
-    return D(p, t)
+    return Dual(p, t)
 end
-function LinearAlgebra.logdet(A::AbstractMatrix{D}) where {D <: Dual}
-    primals, tracers = split_dual_array(A)
-    p = LinearAlgebra.logdet(primals)
-    t = LinearAlgebra.logdet(tracers)
-    return D(p, t)
-end
-function LinearAlgebra.logabsdet(A::AbstractMatrix{D}) where {D <: Dual}
+function LinearAlgebra.logabsdet(A::AbstractMatrix{<:Dual})
     primals, tracers = split_dual_array(A)
     p1, p2 = LinearAlgebra.logabsdet(primals)
     t1, t2 = LinearAlgebra.logabsdet(tracers)
-    return (D(p1, t1), D(p2, t2))
+    return (Dual(p1, t1), Dual(p2, t2))
 end
 function LinearAlgebra.:\(A::AbstractMatrix{<:Dual}, B::AbstractVector)
     primals, tracers = split_dual_array(A)

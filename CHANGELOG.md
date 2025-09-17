@@ -2,6 +2,7 @@
 
 ## Version `v1.1.0`
 * ![Feature][badge-feature] Add ChainRulesCore extension, support `ignore_derivatives` ([#267])
+* ![Bugfix][badge-bugfix] Fix `det` on matrix of `Dual`s ([#268])
 * ![Documentation][badge-docs] Minor updates to documentation ([0ce0650], [#266])
 
 ## Version `v1.0.2`
@@ -147,6 +148,7 @@ This release is only breaking for users who touched unexported internals.
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#268]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/268
 [#267]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/267
 [#266]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/266
 [#264]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/264
