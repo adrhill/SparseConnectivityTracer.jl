@@ -1,5 +1,8 @@
 # SparseConnectivityTracer.jl
 
+## Version `v1.0.3`
+* ![Documentation][badge-docs] Minor updates to documentation
+
 ## Version `v1.0.2`
 * ![Bugfix][badge-bugfix] Avoid invalidations on `>`, `>=` by falling back to `<`, `<=` (#261)
  ([#259])
