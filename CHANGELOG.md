@@ -1,5 +1,8 @@
 # SparseConnectivityTracer.jl
 
+## Version `v1.0.3`
+* ![Documentation][badge-docs] Minor updates to documentation ([0ce0650], [#266])
+
 ## Version `v1.0.2`
 * ![Bugfix][badge-bugfix] Avoid invalidations on `>`, `>=` by falling back to `<`, `<=` (#261)
  ([#259])
@@ -143,6 +146,7 @@ This release is only breaking for users who touched unexported internals.
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#266]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/266
 [#264]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/264
 [#261]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/261
 [#259]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/259
@@ -213,6 +217,7 @@ This release is only breaking for users who touched unexported internals.
 [#126]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/126
 [#119]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/119
 
+[0ce0650]: https://github.com/adrhill/SparseConnectivityTracer.jl/commit/0ce0650
 <!--
 # Badges
 ![BREAKING][badge-breaking]
