@@ -18,7 +18,10 @@ jobs:
     if: contains(github.event.pull_request.labels.*.name, 'run benchmark')
     steps:
       - uses: actions/checkout@v5
-      - uses: julia-actions/setup-julia@latest
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: 'lts'
+          arch: x64
       - name: Cache artifacts
         uses: actions/cache@v4
         env:

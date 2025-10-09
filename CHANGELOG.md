@@ -1,5 +1,8 @@
 # SparseConnectivityTracer.jl
 
+## Version `v1.1.1`
+* ![Bugfix][badge-bugfix] Fix type conversions of primal value in `Dual` ([#271])
+
 ## Version `v1.1.0`
 * ![Feature][badge-feature] Add ChainRulesCore extension, support `ignore_derivatives` ([#267])
 * ![Bugfix][badge-bugfix] Fix `det` on matrix of `Dual`s ([#268])
@@ -148,6 +151,7 @@ This release is only breaking for users who touched unexported internals.
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#271]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/271
 [#268]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/268
 [#267]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/267
 [#266]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/266
