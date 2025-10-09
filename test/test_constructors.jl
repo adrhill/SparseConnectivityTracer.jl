@@ -218,4 +218,14 @@ end
             @test isone(out)
         end
     end
+    @testset "Conversions of Reals to Dual" begin
+        @testset "$P_out" for P_out in (Float16, Float64, Float32)
+            @testset "$P_in" for P_in in (Int, Float64, Float32)
+                x = oneunit(P_in)
+                D = Dual{P_out, T}
+                d = convert(D, x)
+                @test primal(d) isa P_out
+            end
+        end
+    end
 end
