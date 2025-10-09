@@ -7,10 +7,10 @@
 | Downloads     | [![Downloads](https://img.shields.io/badge/dynamic/json?url=http%3A%2F%2Fjuliapkgstats.com%2Fapi%2Fv1%2Fmonthly_downloads%2FSparseConnectivityTracer&query=total_requests&suffix=%2Fmonth&label=Downloads)](http://juliapkgstats.com/pkg/SparseConnectivityTracer) [![Dependents](https://juliahub.com/docs/General/SparseConnectivityTracer/stable/deps.svg)](https://juliahub.com/ui/Packages/General/SparseConnectivityTracer?t=2) |
 | Citation      | [![arXiv DOI](https://img.shields.io/badge/DOI-10.48550/arXiv.2501.17737-red)](https://arxiv.org/abs/2501.17737) [![Zenodo DOI](https://zenodo.org/badge/778978853.svg)](https://zenodo.org/doi/10.5281/zenodo.13138554) |
 
-Fast Jacobian and Hessian sparsity detection via operator-overloading.
+Fast Jacobian and Hessian sparsity pattern detection via operator-overloading.
 
 > [!TIP]
-> If you want to use [automatic sparse differentiation](https://iclr-blogposts.github.io/2025/blog/sparse-autodiff/) to compute sparse Jacobians or Hessians with SparseConnectivityTracer, 
+> If you want to use [automatic sparse differentiation](https://iclr-blogposts.github.io/2025/blog/sparse-autodiff/) to compute sparse Jacobians or Hessians with SparseConnectivityTracer (instead of just sparsity patterns), 
 > refer to the [DifferentiationInterface.jl documentation](https://juliadiff.org/DifferentiationInterface.jl/DifferentiationInterface/stable/tutorials/advanced/#Sparsity).
 
 ## Installation 
