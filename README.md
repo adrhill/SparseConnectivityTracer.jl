@@ -9,6 +9,10 @@
 
 Fast Jacobian and Hessian sparsity detection via operator-overloading.
 
+> [!TIP]
+> If you want to use [automatic sparse differentiation](https://iclr-blogposts.github.io/2025/blog/sparse-autodiff/) to compute sparse Jacobians or Hessians with SparseConnectivityTracer, 
+> check out the [DifferentiationInterface.jl docs](https://juliadiff.org/DifferentiationInterface.jl/DifferentiationInterface/stable/tutorials/advanced/#Sparsity).
+
 ## Installation 
 To install this package, open the Julia REPL and run 
 
