@@ -28,10 +28,10 @@ end
 
 Base.convert(::Type{D}, x::Real) where {P, T, D <: Dual{P, T}} = D(convert(P, x), myempty(T))
 Base.convert(::Type{D}, d::D) where {D <: Dual} = d
-Base.convert(::Type{N}, d::D) where {N <: Real, P, T, D <: Dual{P, T}} = Dual{N,T}(convert(N, primal(d)), tracer(d))
+Base.convert(::Type{N}, d::D) where {N <: Real, P, T, D <: Dual{P, T}} = Dual{N, T}(convert(N, primal(d)), tracer(d))
 
 function Base.convert(::Type{Dual{P1, T}}, d::Dual{P2, T}) where {P1, P2, T}
-    return Dual{P1,T}(convert(P1, primal(d)), tracer(d))
+    return Dual{P1, T}(convert(P1, primal(d)), tracer(d))
 end
 
 ##==========================#
