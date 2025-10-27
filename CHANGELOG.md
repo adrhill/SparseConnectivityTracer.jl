@@ -1,5 +1,8 @@
 # SparseConnectivityTracer.jl
 
+## Version `v1.1.2`
+* ![Bugfix][badge-bugfix] Return `Dual` on `float`, `widen`, `big` ([#279])
+
 ## Version `v1.1.1`
 * ![Bugfix][badge-bugfix] Fix type conversions of primal value in `Dual` ([#271])
 
@@ -151,6 +154,7 @@ This release is only breaking for users who touched unexported internals.
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#279]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/279
 [#271]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/271
 [#268]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/268
 [#267]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/267

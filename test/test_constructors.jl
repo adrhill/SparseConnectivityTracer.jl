@@ -48,7 +48,7 @@ end
 function test_type_conversion_functions(::Type{D}, f::Function) where {P, T, D <: Dual{P, T}}
     return @testset "Primal type $P_IN" for P_IN in (Int, Float32, Irrational)
         P_OUT = f(P_IN)
-        @test f(Dual{P_IN, T}) == P_OUT  # NOTE: this tests Dual{P_IN,T}, not Dual{P,T}
+        @test f(Dual{P_IN, T}) == Dual{P_OUT, T}
     end
 end
 

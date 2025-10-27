@@ -52,7 +52,7 @@ end
 
 for f in (:big, :widen, :float)
     @eval Base.$f(::Type{T}) where {T <: AbstractTracer} = T
-    @eval Base.$f(::Type{D}) where {P, T, D <: Dual{P, T}} = $f(P) # only return primal type
+    @eval Base.$f(::Type{D}) where {P, T, D <: Dual{P, T}} = Dual{$f(P), T}
 end
 
 ##============================#
