@@ -1,5 +1,8 @@
 # SparseConnectivityTracer.jl
 
+## Version `v1.1.3` 
+* Remove superflous overloads on `identity` and invalidations caused by them ([#280])
+
 ## Version `v1.1.2`
 * ![Bugfix][badge-bugfix] Return `Dual` on `float`, `widen`, `big` ([#279])
 
@@ -154,6 +157,7 @@ This release is only breaking for users who touched unexported internals.
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#280]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/280
 [#279]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/279
 [#271]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/271
 [#268]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/268

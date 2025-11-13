@@ -60,7 +60,6 @@ end
 # ∂²f/∂x² == 0
 ops_1_to_1_f = (
     +, -,
-    identity,
     abs, hypot,
     # angles
     deg2rad, rad2deg, mod2pi,
