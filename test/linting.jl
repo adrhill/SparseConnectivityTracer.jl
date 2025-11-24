@@ -16,8 +16,7 @@ using SpecialFunctions: SpecialFunctions
     Aqua.test_all(
         SparseConnectivityTracer;
         ambiguities = false,
-        deps_compat = (check_extras = false,),
-        persistent_tasks = false,
+        undocumented_names = true,
     )
 end
 
