@@ -35,22 +35,7 @@ end
     end
     @testset "Improper explicit imports" begin
         @test ExplicitImports.check_no_stale_explicit_imports(
-            SparseConnectivityTracer;
-            ignore = (
-                # Used in code generation, which ExplicitImports doesn't pick up
-                :AbstractTracer,
-                :AkimaInterpolation,
-                :BSplineApprox,
-                :BSplineInterpolation,
-                :ConstantInterpolation,
-                :CubicHermiteSpline,
-                :CubicSpline,
-                :LagrangeInterpolation,
-                :LinearInterpolation,
-                :QuadraticInterpolation,
-                :QuadraticSpline,
-                :QuinticHermiteSpline,
-            ),
+            SparseConnectivityTracer
         ) === nothing
         @test ExplicitImports.check_all_explicit_imports_via_owners(
             SparseConnectivityTracer
