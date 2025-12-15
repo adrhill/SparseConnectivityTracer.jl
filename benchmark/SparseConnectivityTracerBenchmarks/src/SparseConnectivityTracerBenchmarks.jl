@@ -19,7 +19,7 @@ module Optimization
     using SparseArrays
 
     include("nlpmodels.jl")
-    export optimization_problem_names
+    export OPTIMIZATION_PROBLEM_NAMES
     export compute_jac_sparsity_sct, compute_hess_sparsity_sct
     export compute_jac_and_hess_sparsity_sct, compute_jac_and_hess_sparsity_and_value_jump
 end

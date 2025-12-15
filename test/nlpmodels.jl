@@ -6,7 +6,7 @@ using Test
 using SparseConnectivityTracerBenchmarks.Optimization:
     compute_jac_and_hess_sparsity_sct,
     compute_jac_and_hess_sparsity_and_value_jump,
-    optimization_problem_names
+    OPTIMIZATION_PROBLEM_NAMES
 
 function compare_patterns(
         truth::AbstractMatrix{<:Real}; sct::AbstractMatrix{Bool}, jump::AbstractMatrix{Bool}
@@ -38,7 +38,7 @@ Please look at the warnings displayed at the end.
 jac_inconsistencies = []
 hess_inconsistencies = []
 
-@testset "$name" for name in optimization_problem_names()
+@testset "$name" for name in OPTIMIZATION_PROBLEM_NAMES
     @info "$(now()) - $name"
 
     (jac_sparsity_sct, hess_sparsity_sct) = compute_jac_and_hess_sparsity_sct(name)
