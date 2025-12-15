@@ -7,7 +7,6 @@ using SparseConnectivityTracer: HessianTracer, Shared
 
 include("jacobian.jl")
 include("hessian.jl")
-include("nlpmodels.jl")
 
 suite = BenchmarkGroup()
 suite["OptimizationProblems"] = optbench([:britgas])
