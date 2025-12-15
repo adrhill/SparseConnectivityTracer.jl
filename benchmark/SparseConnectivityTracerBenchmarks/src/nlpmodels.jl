@@ -15,7 +15,7 @@ Package ecosystem overview: https://jso.dev/ecosystems/models/
   - OptimizationProblems.ADNLPProblems: spits out `ADNLPModel`
   - OptimizationProblems.PureJuMP: spits out `JuMP.Model`
 =#
- 
+
 # Obtained from `Symbol.(OptimizationProblems.meta[!, :name])`
 const OPTIMIZATION_PROBLEM_NAMES = [
     :AMPGO02,
