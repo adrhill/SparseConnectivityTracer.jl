@@ -9,7 +9,6 @@ include("jacobian.jl")
 include("hessian.jl")
 
 suite = BenchmarkGroup()
-suite["OptimizationProblems"] = optbench([:britgas])
 
 suite["Jacobian"]["Global"] = jacbench(TracerSparsityDetector())
 suite["Jacobian"]["Local"] = jacbench(TracerLocalSparsityDetector())
