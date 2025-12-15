@@ -28,16 +28,6 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
             Documenter.doctest(SparseConnectivityTracer)
         end
     end
-    if GROUP in ("Core", "All")
-        @testset verbose = true "Set types" begin
-            @testset "Correctness" begin
-                include("settypes/correctness.jl")
-            end
-            @testset "SortedVector" begin
-                include("settypes/sortedvector.jl")
-            end
-        end
-    end
 
     if GROUP in ("Core", "All")
         @info "Testing operator classification..."
