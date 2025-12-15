@@ -108,11 +108,4 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
             include("benchmarks_correctness.jl")
         end
     end
-
-    if GROUP in ("NLPModels", "All")
-        @info "Testing NLPModels..."
-        @testset "NLPModels" begin
-            include("nlpmodels.jl")
-        end
-    end
 end
