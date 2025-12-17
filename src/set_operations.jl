@@ -47,16 +47,6 @@ function union_product!(
     return hessian
 end
 
-# Some custom set types don't support `push!`
-for S in (:SortedVector, :RecursiveSet)
-    @eval function union_product!(
-            hessian::$S{Tuple{I, I}}, gradient_x::$S{I}, gradient_y::$S{I}
-        ) where {I <: Integer}
-        hxy = product(gradient_x, gradient_y)
-        return union!(hessian, hxy)
-    end
-end
-
 function union_product!(
         hessian::AbstractDict{I, S}, gradient_x::S, gradient_y::S
     ) where {I <: Integer, S <: AbstractSet{I}}
