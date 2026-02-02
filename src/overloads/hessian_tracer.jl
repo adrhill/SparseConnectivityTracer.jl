@@ -64,7 +64,7 @@ function generate_code_hessian_1_to_1(M::Symbol, f::Function)
         end
     end
 
-    expr_dual = if is_der1_zero_g && is_der1_zero_g
+    expr_dual = if is_der1_zero_g && is_der2_zero_g
         quote
             function $M.$fname(d::D) where {P, T <: $SCT.HessianTracer, D <: $SCT.Dual{P, T}}
                 x = $SCT.primal(d)
@@ -374,12 +374,13 @@ function generate_code_hessian_1_to_2(M::Symbol, f::Function)
                 x = $SCT.primal(d)
                 p_out1, p_out2 = $M.$fname(x)
 
+                t = $SCT.tracer(d)
                 is_der1_out1_zero = $SCT.is_der1_out1_zero_local($M.$fname, x)
                 is_der2_out1_zero = $SCT.is_der2_out1_zero_local($M.$fname, x)
                 is_der1_out2_zero = $SCT.is_der1_out2_zero_local($M.$fname, x)
                 is_der2_out2_zero = $SCT.is_der2_out2_zero_local($M.$fname, x)
                 t_out1, t_out2 = @noinline $SCT.hessian_tracer_1_to_2(
-                    d,
+                    t,
                     is_der1_out1_zero,
                     is_der2_out1_zero,
                     is_der1_out2_zero,
