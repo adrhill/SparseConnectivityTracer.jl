@@ -439,7 +439,7 @@ end
 
             @testset "$f" for f in (sincos, sincosd, sincospi)
                 result = f(d)
-                @test result isa Tuple{<:Dual,<:Dual}
+                @test result isa Tuple{<:Dual, <:Dual}
 
                 # Check primal values are correct
                 expected_primals = f(primal(d))
