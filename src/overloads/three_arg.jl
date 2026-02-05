@@ -10,3 +10,6 @@ Base.clamp(t::T, lo, hi::T) where {T <: AbstractTracer} = first_order_or(t, hi)
 function Base.clamp(t::T, lo::T, hi::T) where {T <: AbstractTracer}
     return first_order_or(t, first_order_or(lo, hi))
 end
+
+# For `fma(x, y, z)`, just fall back on `x * y + z`.
+Base.fma(x::T, y::T, z::T) where {T <: Union{AbstractTracer, Dual}} = x * y + z

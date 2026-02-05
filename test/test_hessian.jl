@@ -76,6 +76,13 @@ D = Dual{Int, T}
             @test H(x -> x[1] * clamp(x[1], x[2], x[3]), rand(3)) == [1 1 1; 1 0 0; 1 0 0]
             @test H(x -> x[2] * clamp(x[1], x[2], x[3]), rand(3)) == [0 1 0; 1 1 1; 0 1 0]
             @test H(x -> x[3] * clamp(x[1], x[2], x[3]), rand(3)) == [0 0 1; 0 0 1; 1 1 1]
+
+            @test H(x -> fma(x, 1.0, 1.0), rand()) == [0;;]
+            @test H(x -> fma(1.0, x, 1.0), rand()) == [0;;]
+            @test H(x -> fma(1.0, 1.0, x), rand()) == [0;;]
+            @test H(x -> fma(x[1], x[2], 1.0), rand(2)) == [0 1; 1 0]
+            @test H(x -> fma(x[1], 1.0, x[2]), rand(2)) == [0 0; 0 0]
+            @test H(x -> fma(x[1], x[2], x[3]), rand(3)) == [0 1 0; 1 0 0; 0 0 0]
         end
 
         @testset "Random" begin
