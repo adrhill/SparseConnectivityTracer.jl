@@ -1,6 +1,6 @@
 using SparseConnectivityTracer
 using SparseConnectivityTracer: Dual, HessianTracer, MissingPrimalError
-using SparseConnectivityTracer: create_tracers, hessian, isshared
+using SparseConnectivityTracer: create_tracers, hessian, isshared, primal, tracer
 using LinearAlgebra: I, dot
 using Test
 using Random: rand, GLOBAL_RNG
@@ -418,6 +418,44 @@ end
             @test H(x -> rand(typeof(x)), 1) ≈ [0;;]
             @test H(x -> rand(GLOBAL_RNG, typeof(x)), 1) ≈ [0;;]
         end
+
+        @testset "Zero-derivative functions" begin
+            x = [1.5]
+            ts = create_tracers(T, x, eachindex(x))
+            d = Dual(x[1], ts[1])
+
+            @testset "$f" for f in (round, floor, ceil, trunc, sign)
+                result = f(d)
+                # Z-type functions should return plain primal (fast path)
+                @test !(result isa Dual)
+                @test result == f(primal(d))
+            end
+        end
+
+        @testset "1-to-2 functions" begin
+            x = [0.5]
+            ts = create_tracers(T, x, eachindex(x))
+            d = Dual(x[1], ts[1])
+
+            @testset "$f" for f in (sincos, sincosd, sincospi)
+                result = f(d)
+                @test result isa Tuple{<:Dual, <:Dual}
+
+                # Check primal values are correct
+                expected_primals = f(primal(d))
+                @test primal(result[1]) == expected_primals[1]
+                @test primal(result[2]) == expected_primals[2]
+
+                # Check tracers are HessianTracers (not Duals - Bug 2 caused this)
+                @test tracer(result[1]) isa T
+                @test tracer(result[2]) isa T
+
+                # Check sparsity patterns for each output
+                @test H(x -> f(x)[1], 0.5) == [1;;]
+                @test H(x -> f(x)[2], 0.5) == [1;;]
+            end
+        end
+
         yield()
     end
 end
