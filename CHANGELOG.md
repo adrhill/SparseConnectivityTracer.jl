@@ -1,7 +1,13 @@
 # SparseConnectivityTracer.jl
 
+## Version `v1.2.0`
+* ![Feature][badge-feature] Add support for `fma` ([#289])
+* ![Bugfix][badge-bugfix] Fix bugs in Hessian code generation ([#290])
+* ![Documentation][badge-docs] Rephrase "Don't overload manually" ([#285])
+* ![Maintenance][badge-maintenance] Remove unused custom set types ([#287])
+
 ## Version `v1.1.3` 
-* Remove superflous overloads on `identity` and invalidations caused by them ([#280])
+* ![Bugfix][badge-bugfix] Remove superflous overloads on `identity` and invalidations caused by them ([#280])
 
 ## Version `v1.1.2`
 * ![Bugfix][badge-bugfix] Return `Dual` on `float`, `widen`, `big` ([#279])
@@ -157,6 +163,11 @@ This release is only breaking for users who touched unexported internals.
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#290]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/290
+[#289]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/289
+[#287]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/287
+[#285]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/285
+[#282]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/282
 [#280]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/280
 [#279]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/279
 [#271]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/271
