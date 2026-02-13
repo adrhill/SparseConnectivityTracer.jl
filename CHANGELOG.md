@@ -1,5 +1,8 @@
 # SparseConnectivityTracer.jl
 
+## Version `v1.2.1`
+* ![Bugfix][badge-bugfix] Fix `NaNMath.pow` method ambiguity ([#292])
+
 ## Version `v1.2.0`
 * ![Feature][badge-feature] Add support for `fma` ([#289])
 * ![Bugfix][badge-bugfix] Fix bugs in Hessian code generation ([#290])
@@ -163,6 +166,7 @@ This release is only breaking for users who touched unexported internals.
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#292]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/292
 [#290]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/290
 [#289]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/289
 [#287]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/287
