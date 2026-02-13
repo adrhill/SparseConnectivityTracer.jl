@@ -32,6 +32,7 @@ nan_1_to_1 = (
     end
     @testset "2-to-1 functions" begin
         @test J(x -> NaNMath.pow(x[1], x[2]), rand(3)) == [1 1 0]
+        @test J(x -> NaNMath.pow(x[1], 2), rand(3)) == [1 0 0]  # Issue #291
         @test J(x -> NaNMath.max(x[1], x[2]), rand(3)) == [1 1 0]
         @test J(x -> NaNMath.min(x[1], x[2]), rand(3)) == [1 1 0]
     end
@@ -60,6 +61,7 @@ end
     end
     @testset "2-to-1 functions" begin
         @test H(x -> NaNMath.pow(x[1], x[2]), rand(3)) == [1 1 0; 1 1 0; 0 0 0]
+        @test H(x -> NaNMath.pow(x[1], 2), rand(3)) == [1 0 0; 0 0 0; 0 0 0]  # Issue #291
         @test H(x -> NaNMath.max(x[1], x[2]), rand(3)) == zeros(Bool, 3, 3)
         @test H(x -> NaNMath.min(x[1], x[2]), rand(3)) == zeros(Bool, 3, 3)
     end
