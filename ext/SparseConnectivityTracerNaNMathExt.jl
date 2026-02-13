@@ -81,6 +81,9 @@ ops_2_to_1 = union(ops_2_to_1_ssc, ops_2_to_1_ffz)
 eval(SCT.generate_code_1_to_1(:NaNMath, ops_1_to_1))
 eval(SCT.generate_code_2_to_1(:NaNMath, ops_2_to_1))
 
+## Special overloads to avoid ambiguity errors
+eval(SCT.generate_code_2_to_1_typed(:NaNMath, NaNMath.pow, Integer))
+
 ## List operators for later testing
 SCT.test_operators_1_to_1(::Val{:NaNMath}) = ops_1_to_1
 SCT.test_operators_2_to_1(::Val{:NaNMath}) = ops_2_to_1
