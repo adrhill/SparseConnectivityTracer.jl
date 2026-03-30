@@ -9,7 +9,7 @@ using JLArrays
     @test SCT.bitwidth(UInt32) == 32
     @test SCT.bitwidth(UInt64) == 64
 
-    S = FixedSizeBitSet{UInt16,3}
+    S = FixedSizeBitSet{UInt16, 3}
     @test_throws ArgumentError S(0)
     @test collect(S(1)) == [1]
     @test collect(S(10)) == [10]
@@ -27,7 +27,7 @@ end
 @testset "Jacobian sparsity" begin
     detector_ref = TracerSparsityDetector()
     @testset for (I, N) in Iterators.product(Type[UInt8, UInt16, UInt32, UInt64], [2, 5, 8])
-        detector = TracerSparsityDetector(; gradient_pattern_type=FixedSizeBitSet{I,N})
+        detector = TracerSparsityDetector(; gradient_pattern_type = FixedSizeBitSet{I, N})
         for x in (rand(4), rand(40), rand(400))
             @test jacobian_sparsity(diff, x, detector) ==
                 jacobian_sparsity(diff, x, detector_ref)
@@ -38,7 +38,7 @@ end;
 @testset "GPU compat" begin
     x = jl(rand(3))
     @test_throws ArgumentError jacobian_sparsity(diff, x, TracerSparsityDetector())
-    detector = TracerSparsityDetector(; gradient_pattern_type=FixedSizeBitSet{UInt8,1})
+    detector = TracerSparsityDetector(; gradient_pattern_type = FixedSizeBitSet{UInt8, 1})
     @test jacobian_sparsity(diff, x, detector) ==
         jacobian_sparsity(diff, Vector(x), TracerSparsityDetector())
 end
