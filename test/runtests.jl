@@ -1,6 +1,6 @@
 using Pkg
 Pkg.develop(;
-    path = joinpath(@__DIR__, "..", "benchmark", "SparseConnectivityTracerBenchmarks")
+    path=joinpath(@__DIR__, "..", "benchmark", "SparseConnectivityTracerBenchmarks")
 )
 
 using SparseConnectivityTracer
@@ -11,7 +11,7 @@ DocMeta.setdocmeta!(
     SparseConnectivityTracer,
     :DocTestSetup,
     :(using SparseConnectivityTracer);
-    recursive = true,
+    recursive=true,
 )
 
 GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
@@ -54,6 +54,9 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
             @testset "Array overloads" begin
                 include("test_arrays.jl")
             end
+            @testset "Set operations" begin
+                include("set_operations.jl")
+            end
             @testset "ComponentArrays" begin
                 include("componentarrays.jl")
             end
@@ -62,7 +65,8 @@ GROUP = get(ENV, "JULIA_SCT_TEST_GROUP", "Core")
     if GROUP in ("Core", "All")
         @info "Testing package extensions..."
         @testset verbose = true "Package extensions" begin
-            for ext in (:LogExpFunctions, :NaNMath, :NNlib, :SpecialFunctions, :ChainRulesCore)
+            for ext in
+                (:LogExpFunctions, :NaNMath, :NNlib, :SpecialFunctions, :ChainRulesCore)
                 @testset "$ext" begin
                     @info "...$ext"
                     include("ext/test_$ext.jl")
