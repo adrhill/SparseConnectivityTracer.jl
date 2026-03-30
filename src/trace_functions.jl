@@ -138,7 +138,7 @@ end
 
 # Compute the sparsity pattern of the Hessian of a scalar function `y = f(x)`.
 function _hessian_sparsity(f, x, ::Type{T} = DEFAULT_HESSIAN_TRACER) where {T <: HessianTracer}
-    xt, yt = trace_function(T, f, x)
+    xt, yt = trace_function(T, f, x, 1, length(x))
     return hessian_tracers_to_matrix(to_array(xt), yt)
 end
 
@@ -147,6 +147,6 @@ function _local_hessian_sparsity(
         f, x, ::Type{T} = DEFAULT_HESSIAN_TRACER
     ) where {T <: HessianTracer}
     D = Dual{eltype(x), T}
-    xt, yt = trace_function(D, f, x)
+    xt, yt = trace_function(D, f, x, 1, length(x))
     return hessian_tracers_to_matrix(to_array(xt), yt)
 end
