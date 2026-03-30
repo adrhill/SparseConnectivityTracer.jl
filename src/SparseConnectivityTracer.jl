@@ -7,9 +7,12 @@ using Random: AbstractRNG, SamplerType
 
 using LinearAlgebra: LinearAlgebra, Symmetric
 using LinearAlgebra: Diagonal, diag, diagind
-using FillArrays: Fill
 
+using Adapt: adapt
+using ChunkSplitters: index_chunks
 using DocStringExtensions: DocStringExtensions, TYPEDEF, TYPEDFIELDS
+using FillArrays: Fill
+using KernelAbstractions: CPU
 
 include("set_operations.jl")
 include("tracers.jl")
@@ -39,5 +42,7 @@ export jacobian_sparsity, hessian_sparsity
 
 export jacobian_eltype, hessian_eltype
 export jacobian_buffer, hessian_buffer
+
+export FixedSizeBitSet
 
 end # module

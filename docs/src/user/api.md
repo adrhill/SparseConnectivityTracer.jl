@@ -24,6 +24,11 @@ To compute **local** sparsity patterns of `f(x)` at a specific input `x`, use
 TracerLocalSparsityDetector
 ```
 
+If you need to perform sparsity detection on GPU, you will need to select the following set type:
+```@docs
+FixedSizeBitSet
+```
+
 ## Memory allocation
 
 For developers requiring the allocation of output buffers that support our tracers, we additionally provide
