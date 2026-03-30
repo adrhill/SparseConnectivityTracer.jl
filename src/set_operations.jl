@@ -7,7 +7,7 @@ myempty(::Type{D}) where {D <: AbstractDict} = D()
 seed(::Type{S}, i::Integer; offset::Integer = 0) where {S <: AbstractSet} = S(i)
 seed(::Type{S}; offset::Integer = 0) where {S <: AbstractSet} = S()
 
-chunks(::Type{<:AbstractSet{I}}, x::AbstractArray) where {I} = (I(1):I(length(x)),) # 1 chunk
+chunks(::Type{<:AbstractSet{I}}, x) where {I} = (I(1):I(length(x)),) # 1 chunk
 
 myunion!(a::S, b::S) where {S <: AbstractSet} = union!(a, b)
 function myunion!(a::D, b::D) where {I <: Integer, S <: AbstractSet{I}, D <: AbstractDict{I, S}}
