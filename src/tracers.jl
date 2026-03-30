@@ -237,5 +237,5 @@ end
 # Chunking #
 #==========#
 
-chunks(::Type{GradientTracer{I, G}}, x::AbstractArray) where {I, G} = chunks(G, x)
-chunks(::Type{Dual{P, T}}, x::AbstractArray) where {P, T} = chunks(T, x)
+chunks(::Type{GradientTracer{I, G}}, x) where {I, G} = chunks(G, x)
+chunks(::Type{Dual{P, T}}, x) where {P, T} = chunks(T, x)

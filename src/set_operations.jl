@@ -153,7 +153,7 @@ function Base.iterate(s::FixedSizeBitSet{I, N}, args::Vararg{Any, A}) where {I, 
     return iterate(indices, args...)
 end
 
-function chunks(::Type{FixedSizeBitSet{I, N}}, x::AbstractArray) where {I, N}
+function chunks(::Type{FixedSizeBitSet{I, N}}, x) where {I, N}
     B = bitwidth(I)
     return collect(index_chunks(1:length(x); size = B * N))
 end
