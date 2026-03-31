@@ -82,6 +82,8 @@ end
 to_array(x::Real) = [x]
 to_array(x::AbstractArray) = x
 
+mapmax(A, B) = map(max, A, B)
+
 #==========#
 # Jacobian #
 #==========#
@@ -90,7 +92,7 @@ to_array(x::AbstractArray) = x
 function _jacobian_sparsity(
         f, x, ::Type{T} = DEFAULT_GRADIENT_TRACER
     ) where {T <: GradientTracer}
-    return mapreduce(max, chunks(T, x)) do interval
+    return mapreduce(mapmax, chunks(T, x)) do interval
         i, j = first(interval), last(interval)
         xt, yt = trace_function(T, f, x, i, j)
         return jacobian_tracers_to_matrix(to_array(xt), to_array(yt))
@@ -101,7 +103,7 @@ end
 function _jacobian_sparsity(
         f!, y, x, ::Type{T} = DEFAULT_GRADIENT_TRACER
     ) where {T <: GradientTracer}
-    return mapreduce(max, chunks(T, x)) do interval
+    return mapreduce(mapmax, chunks(T, x)) do interval
         i, j = first(interval), last(interval)
         xt, yt = trace_function(T, f!, y, x, i, j)
         return jacobian_tracers_to_matrix(to_array(xt), to_array(yt))
@@ -113,7 +115,7 @@ function _local_jacobian_sparsity(
         f, x, ::Type{T} = DEFAULT_GRADIENT_TRACER
     ) where {T <: GradientTracer}
     D = Dual{eltype(x), T}
-    return mapreduce(max, chunks(D, x)) do interval
+    return mapreduce(mapmax, chunks(D, x)) do interval
         i, j = first(interval), last(interval)
         xt, yt = trace_function(D, f, x, i, j)
         return jacobian_tracers_to_matrix(to_array(xt), to_array(yt))
@@ -125,7 +127,7 @@ function _local_jacobian_sparsity(
         f!, y, x, ::Type{T} = DEFAULT_GRADIENT_TRACER
     ) where {T <: GradientTracer}
     D = Dual{eltype(x), T}
-    return mapreduce(max, chunks(D, x)) do interval
+    return mapreduce(mapmax, chunks(D, x)) do interval
         i, j = first(interval), last(interval)
         xt, yt = trace_function(D, f!, y, x, i, j)
         return jacobian_tracers_to_matrix(to_array(xt), to_array(yt))
