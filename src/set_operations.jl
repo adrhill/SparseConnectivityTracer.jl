@@ -91,17 +91,18 @@ struct FixedSizeBitSet{I <: Unsigned, N} <: AbstractSet{Int}
 
     function FixedSizeBitSet{I, N}(
             buckets::NTuple{N, I} = ntuple(Returns(zero(I)), Val(N)); offset::Integer = 0
-        ) where {I <: Integer, N}
+        ) where {I <: Unsigned, N}
         return new{I, N}(buckets, offset)
     end
 
-    function FixedSizeBitSet{I, N}(k::Integer; offset::Integer = 0) where {I <: Integer, N}
+    function FixedSizeBitSet{I, N}(k::Integer; offset::Integer = 0) where {I <: Unsigned, N}
         l = k - offset
         B = bitwidth(I)
         if 1 <= l <= N * B
             q, r = (l - 1) ÷ B + 1, (l - 1) % B + 1
             buckets = ntuple(Val(N)) do b
-                ifelse(b == q, I(2)^(B - r), zero(I))
+                # 2^(B-r) has a single 1 as its r-th leftmost bit
+                ifelse(b == q, one(I) << (B - r), zero(I))
             end
         else
             throw(
@@ -155,5 +156,5 @@ end
 
 function chunks(::Type{FixedSizeBitSet{I, N}}, x) where {I, N}
     B = bitwidth(I)
-    return collect(index_chunks(1:length(x); size = B * N))
+    return index_chunks(1:length(x); size = B * N)
 end

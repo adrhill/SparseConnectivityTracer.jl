@@ -421,7 +421,7 @@ end
 
         @testset "Zero-derivative functions" begin
             x = [1.5]
-            ts = create_tracers(T, x, eachindex(x))
+            ts = create_tracers(T, x, eachindex(x), 1, length(x))
             d = Dual(x[1], ts[1])
 
             @testset "$f" for f in (round, floor, ceil, trunc, sign)
@@ -434,7 +434,7 @@ end
 
         @testset "1-to-2 functions" begin
             x = [0.5]
-            ts = create_tracers(T, x, eachindex(x))
+            ts = create_tracers(T, x, eachindex(x), 1, length(x))
             d = Dual(x[1], ts[1])
 
             @testset "$f" for f in (sincos, sincosd, sincospi)
@@ -474,7 +474,7 @@ end
         end
 
         x = rand(2)
-        xt = create_tracers(T, x, eachindex(x))
+        xt = create_tracers(T, x, eachindex(x), 1, length(x))
         yt = multi_output_for_shared_test(xt)
 
         @test hessian(yt[1]) === hessian(yt[2])

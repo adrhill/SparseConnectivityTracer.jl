@@ -217,15 +217,15 @@ end
 #===========#
 
 """
-    create_tracers(T, xs, indices)
+    create_tracers(T, xs, indices, i,)
 
 Convenience constructor for [`GradientTracer`](@ref), [`HessianTracer`](@ref) and [`Dual`](@ref) 
-from multiple inputs `xs` and their indices `is`.
+from multiple inputs `xs` and their indices `indices`.
 """
 function create_tracers(
         ::Type{D},
         xs::AbstractArray{<:Real, N},
-        indices::AbstractArray{<:Union{Integer, Nothing}, N},
+        indices::AbstractArray{<:Integer, N},
         i::Integer,
         j::Integer,
     ) where {P, T, D <: Dual{P, T}, N}
