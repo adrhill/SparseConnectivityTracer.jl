@@ -1,5 +1,4 @@
 using SparseConnectivityTracer
-using SparseConnectivityTracer: FixedSizeBitSet
 import SparseConnectivityTracer as SCT
 using Test
 using JLArrays
