@@ -5,6 +5,8 @@ using SparseConnectivityTracer: Shared, NotShared
 GRADIENT_TRACERS = (
     GradientTracer{Int, BitSet},
     GradientTracer{Int, Set{Int}},
+    GradientTracer{Int, FixedSizeBitSet{UInt8, 1}},
+    GradientTracer{Int, FixedSizeBitSet{UInt16, 3}},
 )
 
 HESSIAN_TRACERS_SHARED = (

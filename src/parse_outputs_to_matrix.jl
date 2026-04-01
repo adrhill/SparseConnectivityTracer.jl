@@ -14,7 +14,7 @@ function jacobian_tracers_to_matrix(
     I = Int[] # row indices
     J = Int[] # column indices
     V = Bool[]   # values
-    for (i, y) in enumerate(yt)
+    for (i, y) in enumerate(adapt(CPU(), yt))
         if y isa T && !isemptytracer(y)
             for j in gradient(y)
                 push!(I, i)
@@ -43,7 +43,7 @@ function hessian_tracers_to_matrix(xt::AbstractArray{T}, yt::T) where {T <: Hess
     V = Bool[]   # values
 
     if !isemptytracer(yt)
-        for (i, j) in tuple_set(hessian(yt))
+        for (i, j) in tuple_set(hessian(adapt(CPU(), yt)))
             push!(I, i)
             push!(J, j)
             push!(V, true)

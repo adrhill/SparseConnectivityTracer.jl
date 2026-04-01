@@ -67,8 +67,18 @@ gradient(t::GradientTracer) = t.gradient
 
 myempty(::Type{GradientTracer{I, G}}) where {I, G} = GradientTracer{I, G}(myempty(G), true)
 
-function create_tracers(::Type{T}, xs, is) where {I, G, T <: GradientTracer{I, G}}
-    gradients = map(Base.Fix1(seed, G), is)
+function create_tracers(
+        ::Type{T}, xs, inds, i::Integer, j::Integer
+    ) where {I, G, T <: GradientTracer{I, G}}
+    offset = i - 1
+    gradients = map(inds) do k
+        if i <= k <= j
+            s = seed(G, k; offset)
+        else
+            s = seed(G; offset)
+        end
+        return s
+    end
     return T.(gradients)
 end
 
@@ -99,7 +109,10 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 struct HessianTracer{
-        I <: Integer, G <: AbstractSet{I}, H <: Union{AbstractDict{I, G}, AbstractSet{Tuple{I, I}}}, S <: SharingBehavior,
+        I <: Integer,
+        G <: AbstractSet{I},
+        H <: Union{AbstractDict{I, G}, AbstractSet{Tuple{I, I}}},
+        S <: SharingBehavior,
     } <: AbstractTracer
     "Set of indices ``i`` of non-zero values ``∇f(x)_i ≠ 0`` in the gradient."
     gradient::G
@@ -108,7 +121,9 @@ struct HessianTracer{
     "Indicator whether gradient and Hessian in tracer both contain only zeros."
     isempty::Bool
 
-    function HessianTracer{I, G, H, S}(gradient::G, hessian::H, isempty::Bool = false) where {I, G, H, S}
+    function HessianTracer{I, G, H, S}(
+            gradient::G, hessian::H, isempty::Bool = false
+        ) where {I, G, H, S}
         return new{I, G, H, S}(gradient, hessian, isempty)
     end
 end
@@ -120,12 +135,20 @@ isemptytracer(t::HessianTracer) = t.isempty
 gradient(t::HessianTracer) = t.gradient
 hessian(t::HessianTracer) = t.hessian
 
-myempty(::Type{HessianTracer{I, G, H, S}}) where {I, G, H, S} = HessianTracer{I, G, H, S}(myempty(G), myempty(H), true)
+function myempty(::Type{HessianTracer{I, G, H, S}}) where {I, G, H, S}
+    return HessianTracer{I, G, H, S}(myempty(G), myempty(H), true)
+end
 
 function create_tracers(
-        ::Type{T}, xs, is
+        ::Type{T}, xs, inds, i::Integer, j::Integer
     ) where {I, G, H, S, T <: HessianTracer{I, G, H, S}}
-    gradients = map(Base.Fix1(seed, G), is)
+    gradients = map(inds) do k
+        if i <= k <= j
+            return seed(G, k; offset = i - 1)
+        else
+            return seed(G; offset = i - 1)
+        end
+    end
     hessian = myempty(H)
     # Even if `NotShared`, sharing a single reference to `hessian` is allowed upon initialization,
     # since mutation is prohibited when `isshared` is false.
@@ -193,18 +216,26 @@ end
 # Utilities #
 #===========#
 
-
 """
-    create_tracers(T, xs, indices)
+    create_tracers(T, xs, indices, i,)
 
 Convenience constructor for [`GradientTracer`](@ref), [`HessianTracer`](@ref) and [`Dual`](@ref) 
-from multiple inputs `xs` and their indices `is`.
+from multiple inputs `xs` and their indices `indices`.
 """
-
-
 function create_tracers(
-        ::Type{D}, xs::AbstractArray{<:Real, N}, indices::AbstractArray{<:Integer, N}
+        ::Type{D},
+        xs::AbstractArray{<:Real, N},
+        indices::AbstractArray{<:Integer, N},
+        i::Integer,
+        j::Integer,
     ) where {P, T, D <: Dual{P, T}, N}
-    tracers = create_tracers(T, xs, indices)
+    tracers = create_tracers(T, xs, indices, i, j)
     return D.(xs, tracers)
 end
+
+#==========#
+# Chunking #
+#==========#
+
+chunks(::Type{GradientTracer{I, G}}, x) where {I, G} = chunks(G, x)
+chunks(::Type{Dual{P, T}}, x) where {P, T} = chunks(T, x)

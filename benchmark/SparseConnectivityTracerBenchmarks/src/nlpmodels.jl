@@ -434,23 +434,27 @@ function mylagrangian(nlp::AbstractNLPModel, x::AbstractVector)
     return L
 end
 
-function compute_jac_sparsity_sct(nlp::AbstractNLPModel)
+function compute_jac_sparsity_sct(
+        nlp::AbstractNLPModel; detector = TracerSparsityDetector()
+    )
     c = Base.Fix1(myconstraints, nlp)
     x0 = nlp.meta.x0
-    jac_sparsity = ADTypes.jacobian_sparsity(c, x0, TracerSparsityDetector())
+    jac_sparsity = ADTypes.jacobian_sparsity(c, x0, detector)
     return jac_sparsity
 end
 
-function compute_hess_sparsity_sct(nlp::AbstractNLPModel)
+function compute_hess_sparsity_sct(
+        nlp::AbstractNLPModel; detector = TracerSparsityDetector()
+    )
     L = Base.Fix1(mylagrangian, nlp)
     x0 = nlp.meta.x0
-    hess_sparsity = ADTypes.hessian_sparsity(L, x0, TracerSparsityDetector())
+    hess_sparsity = ADTypes.hessian_sparsity(L, x0, detector)
     return hess_sparsity
 end
 
-function compute_jac_and_hess_sparsity_sct(name::Symbol)
+function compute_jac_and_hess_sparsity_sct(name::Symbol; detector = TracerSparsityDetector())
     nlp = OptimizationProblems.ADNLPProblems.eval(name)()
-    return compute_jac_sparsity_sct(nlp), compute_hess_sparsity_sct(nlp)
+    return compute_jac_sparsity_sct(nlp; detector), compute_hess_sparsity_sct(nlp; detector)
 end
 
 ## Generic
