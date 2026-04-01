@@ -38,10 +38,22 @@ Please look at the warnings displayed at the end.
 jac_inconsistencies = []
 hess_inconsistencies = []
 
-@testset "$name" for name in OPTIMIZATION_PROBLEM_NAMES
+@testset "$name - $detector" for (name, detector) in collect(
+        Iterators.product(
+            OPTIMIZATION_PROBLEM_NAMES,
+            [
+                TracerSparsityDetector(),
+                # alternative options
+                TracerSparsityDetector(;
+                    gradient_pattern_type = FixedSizeBitSet{UInt8, 2},
+                    shared_hessian_pattern = true
+                ),
+            ]
+        )
+    )
     @info "$(now()) - $name"
 
-    (jac_sparsity_sct, hess_sparsity_sct) = compute_jac_and_hess_sparsity_sct(name)
+    (jac_sparsity_sct, hess_sparsity_sct) = compute_jac_and_hess_sparsity_sct(name; detector)
     ((jac_sparsity_jump, jac), (hess_sparsity_jump, hess)) = compute_jac_and_hess_sparsity_and_value_jump(
         name
     )
