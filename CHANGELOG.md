@@ -1,6 +1,6 @@
 # SparseConnectivityTracer.jl
 
-## Unreleased
+## Version `v1.2.2`
 * ![Feature][badge-feature] Add support for `cholesky` ([#322])
 
 ## Version `v1.2.1`
