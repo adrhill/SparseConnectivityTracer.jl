@@ -1,5 +1,8 @@
 # SparseConnectivityTracer.jl
 
+## Unreleased
+* ![Feature][badge-feature] Add support for `cholesky` ([#322])
+
 ## Version `v1.2.1`
 * ![Bugfix][badge-bugfix] Fix `NaNMath.pow` method ambiguity ([#292])
 
@@ -166,6 +169,7 @@ This release is only breaking for users who touched unexported internals.
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#322]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/322
 [#292]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/292
 [#290]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/290
 [#289]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/289

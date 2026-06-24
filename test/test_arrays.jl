@@ -12,6 +12,7 @@ using Test
 using LinearAlgebra: Symmetric, Diagonal, diagind
 using LinearAlgebra: det, logdet, logabsdet, norm, opnorm
 using LinearAlgebra: eigen, eigmax, eigmin
+using LinearAlgebra: cholesky, NoPivot, RowMaximum
 using LinearAlgebra: inv, pinv, dot
 using SparseArrays: sparse, spdiagm
 
@@ -695,6 +696,21 @@ end
     @test size(vectors) == (2, 2)
     @test all(t -> sameidx(t, s_out), values)
     @test all(t -> sameidx(t, s_out), vectors)
+end
+
+@testset "Cholesky" begin
+    t1 = idx2tracer([1, 3, 4])
+    t2 = idx2tracer([2, 4])
+    t3 = idx2tracer([8, 9])
+    t4 = idx2tracer([8, 9])
+    A = [t1 t2; t3 t4]
+    s_out = idx2set([1, 2, 3, 4, 8, 9])
+    @testset "$pivot" for pivot in (NoPivot(), RowMaximum())
+        factors = cholesky(A, pivot).factors
+        @test size(factors) == (2, 2)
+        @test all(t -> sameidx(t, s_out), factors)
+    end
+    @test all(t -> sameidx(t, s_out), cholesky(A).factors)
 end
 
 @testset "SparseMatrixCSC construction" begin

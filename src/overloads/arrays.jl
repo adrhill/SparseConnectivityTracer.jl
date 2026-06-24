@@ -72,6 +72,31 @@ function LinearAlgebra.eigen(
     return LinearAlgebra.Eigen(values, vectors)
 end
 
+## Cholesky
+# A generic `cholesky` compares matrix entries (pivoting / positive-definiteness), which on tracers
+# return a tracer rather than a `Bool`. Like `eigen`, return a conservative all-depends factor.
+function LinearAlgebra.cholesky(
+        A::AbstractMatrix{T},
+        ::LinearAlgebra.NoPivot = LinearAlgebra.NoPivot();
+        check::Bool = true,
+    ) where {T <: AbstractTracer}
+    LinearAlgebra.checksquare(A)
+    n = size(A, 1)
+    t = second_order_or(A)
+    return LinearAlgebra.Cholesky(Fill(t, n, n), 'U', 0)
+end
+function LinearAlgebra.cholesky(
+        A::AbstractMatrix{T},
+        ::LinearAlgebra.RowMaximum;
+        tol::Real = 0.0,
+        check::Bool = true,
+    ) where {T <: AbstractTracer}
+    LinearAlgebra.checksquare(A)
+    n = size(A, 1)
+    t = second_order_or(A)
+    return LinearAlgebra.CholeskyPivoted(Fill(t, n, n), 'U', 1:n, n, tol, 0)
+end
+
 ## Inverse
 function Base.inv(A::StridedMatrix{T}) where {T <: AbstractTracer}
     LinearAlgebra.checksquare(A)
