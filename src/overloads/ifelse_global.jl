@@ -33,6 +33,7 @@ end
 
 output_union(tx::AbstractTracer, y) = tx
 output_union(x, ty::AbstractTracer) = ty
+output_union(x, y) = x # neither branch is a tracer, so the result carries no dependency
 
 ## output union on AbstractArray outputs
 # TODO: add test

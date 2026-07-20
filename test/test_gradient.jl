@@ -128,6 +128,7 @@ T = DEFAULT_GRADIENT_TRACER
                 [1 1 1 1]
             @test J(x -> ifelse(x[2] < x[3], x[1] + x[2], 1.0), [1 2 3 4]) == [1 1 0 0]
             @test J(x -> ifelse(x[2] < x[3], 1.0, x[3] * x[4]), [1 2 3 4]) == [0 0 1 1]
+            @test J(x -> ifelse(x[2] < x[3], 1.0, 0.0) * x[1], [1 2 3 4]) == [1 0 0 0]
 
             function f_ampgo07(x)
                 return (x[1] <= 0) * convert(eltype(x), Inf) +
