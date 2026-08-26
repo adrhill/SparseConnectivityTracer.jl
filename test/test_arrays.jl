@@ -9,6 +9,7 @@ using SparseConnectivityTracer:
     tracer
 using Test
 
+using FillArrays: Fill
 using LinearAlgebra: Symmetric, Diagonal, diagind
 using LinearAlgebra: det, logdet, logabsdet, norm, opnorm
 using LinearAlgebra: eigen, eigmax, eigmin
@@ -359,6 +360,91 @@ end
     @testset "`SparseMatrixCSC` (3×4)" begin
         testJ1(SparsifyInput(pinv), rand(3, 4))
         testH1(SparsifyInput(pinv), rand(3, 4))
+    end
+end
+
+@testset "Fill reductions" begin
+    J(f, x) = jacobian_sparsity(f, x, detector)
+    H(f, x) = hessian_sparsity(f, x, detector)
+    x = rand(2)
+
+    @testset "sum" begin
+        @test J(x -> sum(Fill(x[1] + x[2], 3)), x) == [1 1]
+        # Summation is linear: the pattern of the fill value is preserved exactly
+        @test H(x -> sum(Fill(x[1] + x[2], 3)), x) == [0 0; 0 0]
+        @test H(x -> sum(Fill(x[1] * x[2], 3)), x) == [0 1; 1 0]
+        # Reductions along `dims` preserve the pattern
+        # (that they return another `Fill` is tested in "Fill representation is preserved")
+        @test J(x -> sum(sum(Fill(x[1] + x[2], 3, 4); dims = 2)), x) == [1 1]
+        # Empty sums have no dependencies
+        @test J(x -> sum(Fill(x[1] + x[2], 0)), x) == [0 0]
+        @test H(x -> sum(Fill(x[1] * x[2], 0)), x) == [0 0; 0 0]
+    end
+
+    @testset "prod" begin
+        @test J(x -> prod(Fill(x[1] + x[2], 3)), x) == [1 1]
+        # Products create second-order self-interactions...
+        @test H(x -> prod(Fill(x[1] + x[2], 3)), x) == [1 1; 1 1]
+        # ...except on a single element, which is returned exactly
+        @test H(x -> prod(Fill(x[1] + x[2], 1)), x) == [0 0; 0 0]
+        @test H(x -> prod(Fill(x[1] * x[2], 1)), x) == [0 1; 1 0]
+        # Reductions along `dims` reduce over the lengths of these dimensions
+        @test H(x -> sum(prod(Fill(x[1] + x[2], 3, 4); dims = 1)), x) == [1 1; 1 1]
+        @test H(x -> sum(prod(Fill(x[1] + x[2], 3, 4); dims = 3)), x) == [0 0; 0 0]
+        # Empty products have no dependencies
+        @test J(x -> prod(Fill(x[1] + x[2], 0)), x) == [0 0]
+    end
+
+    @testset "Fill representation is preserved" begin
+        t = idx2tracer([1, 2])
+        A = Fill(t, 3, 4)
+
+        @test sum(A) isa TG
+        @test sameidx(sum(A), [1, 2])
+        @test sameidx(prod(A), [1, 2])
+
+        # Explicit `dims = :` behaves like the default: a scalar tracer, not a `Fill`,
+        # with the same output dimensionality as reductions of regular arrays
+        @test sum(A; dims = :) isa TG
+        @test prod(A; dims = :) isa TG
+        @test ndims(sum(A; dims = :)) == ndims(sum(ones(3, 4); dims = :))
+        @test ndims(prod(A; dims = :)) == ndims(prod(ones(3, 4); dims = :))
+
+        S = sum(A; dims = 2)
+        @test S isa Fill
+        @test size(S) == (3, 1)
+        @test sameidx(S[1, 1], [1, 2])
+
+        P = prod(A; dims = 1)
+        @test P isa Fill
+        @test size(P) == (1, 4)
+        @test sameidx(P[1, 1], [1, 2])
+
+        # Tuple and vector `dims`
+        for dims in ((1, 2), [1, 2])
+            S12 = sum(A; dims = dims)
+            @test S12 isa Fill
+            @test size(S12) == (1, 1)
+            @test sameidx(S12[1, 1], [1, 2])
+
+            P12 = prod(A; dims = dims)
+            @test P12 isa Fill
+            @test size(P12) == (1, 1)
+        end
+
+        # `dims` beyond `ndims(A)` reduce over a single element, so the tracer is exact
+        S3 = sum(A; dims = 3)
+        @test S3 isa Fill
+        @test size(S3) == (3, 4)
+        @test sameidx(S3[1, 1], [1, 2])
+
+        P3 = prod(A; dims = 3)
+        @test P3 isa Fill
+        @test size(P3) == (3, 4)
+        @test sameidx(P3[1, 1], [1, 2])
+
+        @test isemptytracer(sum(Fill(t, 0)))
+        @test isemptytracer(prod(Fill(t, 0)))
     end
 end
 

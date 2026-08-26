@@ -7,7 +7,7 @@ using Random: AbstractRNG, SamplerType
 
 using LinearAlgebra: LinearAlgebra, Symmetric
 using LinearAlgebra: Diagonal, diag, diagind
-using FillArrays: Fill
+using FillArrays: Fill, AbstractFill, getindex_value
 
 using DocStringExtensions: DocStringExtensions, TYPEDEF, TYPEDFIELDS
 
@@ -25,6 +25,7 @@ include("overloads/three_arg.jl")
 include("overloads/ifelse_global.jl")
 include("overloads/is_functions.jl")
 include("overloads/arrays.jl")
+include("overloads/fillarrays.jl")
 include("overloads/ambiguities.jl")
 
 include("trace_functions.jl")

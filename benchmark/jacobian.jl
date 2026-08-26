@@ -4,7 +4,8 @@ using SparseConnectivityTracerBenchmarks.ODE: Brusselator!, brusselator_2d_loop!
 
 using Random: MersenneTwister
 using SparseArrays: sprand
-using SimpleDiffEq: ODEProblem, solve, SimpleEuler
+using CommonSolve: solve
+using SimpleDiffEq: ODEProblem, SimpleEuler
 using Flux: Conv
 
 function jacbench(detector)
