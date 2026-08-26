@@ -1,5 +1,8 @@
 # SparseConnectivityTracer.jl
 
+## Version `v1.2.3`
+* ![Maintenance][badge-maintenance] Allow LogExpFunctions.jl 1.x
+
 ## Version `v1.2.2`
 * ![Feature][badge-feature] Add support for `cholesky` ([#322])
 
