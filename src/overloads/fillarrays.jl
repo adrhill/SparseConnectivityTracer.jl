@@ -19,19 +19,20 @@ function Base.sum(A::AbstractFill{T}; dims = :) where {T <: AbstractTracer}
 end
 
 ## Product
-# `second_order_or` on `GradientTracer`s degrades to the plain union,
-# so a single method is exact for both tracer types.
-function prod_of_fill(t::T, n::Integer) where {T <: AbstractTracer}
-    n == 0 && return myempty(T) # empty product is `one(T)`: no dependencies
-    n == 1 && return t
-    return second_order_or(t, t) # all self-interactions appear after one application
-end
-
+# Only three cases matter for the product over a (sub-)`Fill`:
+# an empty product is `one(T)` and has no dependencies,
+# a single-element product is the fill value itself,
+# and everything else contains all self-interactions after one `second_order_or`
+# (which on `GradientTracer`s degrades to the plain union, so this is exact for both tracer types).
 function Base.prod(A::AbstractFill{T}; dims = :) where {T <: AbstractTracer}
-    dims isa Colon && return prod_of_fill(getindex_value(A), length(A))
-    # `reduced_indices` validates `dims` and collapses exactly the reduced axes to length 1,
-    # so comparing against the original axes recovers the number of elements per output slice.
+    t = getindex_value(A)
+    if dims isa Colon
+        isempty(A) && return myempty(T)
+        length(A) == 1 && return t
+        return second_order_or(t, t)
+    end
     ri = Base.reduced_indices(axes(A), dims)
-    n = prod(map((ax, rax) -> ax == rax ? 1 : length(ax), axes(A), ri))
-    return Fill(prod_of_fill(getindex_value(A), n), ri)
+    isempty(A) && return Fill(myempty(T), ri) # a slice (or the output itself) is empty
+    length(A) == prod(length, ri) && return Fill(t, ri) # one element per output slice
+    return Fill(second_order_or(t, t), ri)
 end

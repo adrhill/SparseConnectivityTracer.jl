@@ -403,9 +403,12 @@ end
         @test sameidx(sum(A), [1, 2])
         @test sameidx(prod(A), [1, 2])
 
-        # Explicit `dims = :` behaves like the default: a scalar tracer, not a `Fill`
+        # Explicit `dims = :` behaves like the default: a scalar tracer, not a `Fill`,
+        # with the same output dimensionality as reductions of regular arrays
         @test sum(A; dims = :) isa TG
         @test prod(A; dims = :) isa TG
+        @test ndims(sum(A; dims = :)) == ndims(sum(ones(3, 4); dims = :))
+        @test ndims(prod(A; dims = :)) == ndims(prod(ones(3, 4); dims = :))
 
         S = sum(A; dims = 2)
         @test S isa Fill
