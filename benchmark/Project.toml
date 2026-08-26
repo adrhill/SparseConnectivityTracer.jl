@@ -2,6 +2,7 @@
 ADNLPModels = "54578032-b7ea-4c30-94aa-7cbd1cce6c9a"
 ADTypes = "47edcb42-4c32-4615-8424-f2b9edc5f35b"
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+CommonSolve = "38540f10-b2f7-11e9-35d8-d573e4eb0ff2"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
