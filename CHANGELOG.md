@@ -1,6 +1,7 @@
 # SparseConnectivityTracer.jl
 
 ## Version `v1.2.3`
+* ![Bugfix][badge-bugfix] Fix `MissingPrimalError` in reductions of tracer `Fill`s with FillArrays.jl 1.17 ([#328])
 * ![Maintenance][badge-maintenance] Allow LogExpFunctions.jl 1.x ([#327])
 
 ## Version `v1.2.2`
@@ -172,6 +173,7 @@ This release is only breaking for users who touched unexported internals.
 [badge-maintenance]: https://img.shields.io/badge/maintenance-gray.svg
 [badge-docs]: https://img.shields.io/badge/docs-orange.svg
 
+[#328]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/328
 [#327]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/327
 [#322]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/322
 [#292]: https://github.com/adrhill/SparseConnectivityTracer.jl/pull/292
